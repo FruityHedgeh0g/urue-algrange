@@ -1,4 +1,4 @@
-package org.acme;
+package fr.fruityhedgeh0g;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 

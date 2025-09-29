@@ -1,4 +1,4 @@
-package org.acme;
+package fr.fruityhedgeh0g;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
