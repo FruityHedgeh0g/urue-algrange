@@ -1,0 +1,102 @@
+.container {
+    position: relative;
+    display: inline-block;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid currentColor;
+    background: transparent;
+    cursor: pointer;
+}
+
+.icon {
+    position: relative;
+    width: 20px;
+    height: 14px;
+}
+
+.icon::before,
+.icon::after,
+.icon {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 20px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.icon {
+    top: 6px;
+}
+
+.icon::before {
+    top: -6px;
+}
+
+.icon::after {
+    top: 6px;
+}
+
+.open {
+    background: transparent;
+}
+
+.open::before {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.open {
+    opacity: 0;
+}
+
+.open::after {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+.label {
+    font-size: 14px;
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    background: white;
+    z-index: 1000;
+}
+
+.menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
