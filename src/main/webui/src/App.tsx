@@ -9,7 +9,7 @@ function App() {
         <>
             <Navbar />
             <main style={{ padding: 24 }}>
-                <h1>Démo ClickableBoutton</h1>
+                <h1>Démo ClickableButton</h1>
 
                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                     <ClickableButton
@@ -31,8 +31,6 @@ function App() {
                         disabled
                     />
                 </div>
-
-                <p style={{ marginTop: 16 }}>Compteur: {count}</p>
             </main>
         </>
     );

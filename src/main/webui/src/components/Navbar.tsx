@@ -1,52 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Navbar.css";
+import { DropdownMenu } from "./DropdownMenu";
 
-interface DropdownItem {
-  label: string;
-  href?: string;
-  onClick?: () => void;
-}
-
-interface DropdownMenuProps {
-  label: string;
-  items: DropdownItem[];
-}
-
-const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, items }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="nav-dropdown" onMouseLeave={() => setOpen(false)}>
-      <button
-        className="nav-btn"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        onMouseEnter={() => setOpen(true)}
-      >
-        {label}
-        <span className="caret" aria-hidden>▾</span>
-      </button>
-      {open && (
-        <ul className="dropdown-menu" role="menu">
-          {items.map((item, idx) => (
-            <li key={idx} role="none">
-              {item.href ? (
-                <a className="dropdown-item" role="menuitem" href={item.href} onClick={item.onClick}>
-                  {item.label}
-                </a>
-              ) : (
-                <button className="dropdown-item" role="menuitem" onClick={item.onClick}>
-                  {item.label}
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-};
 
 const THEME_KEY = "urue-theme";
 
@@ -98,10 +53,6 @@ const Navbar: React.FC = () => {
   return (
     <header className="navbar">
       <div className="nav-left">
-        <a className="logo" href="#" aria-label="Home">
-          LOGO
-        </a>
-
         <nav className="nav-links" aria-label="Primary">
           <DropdownMenu
             label="Services"
@@ -127,6 +78,12 @@ const Navbar: React.FC = () => {
             ]}
           />
         </nav>
+      </div>
+
+      <div className="nav-center">
+        <a className="logo-image" href="#" aria-label="Accueil">
+          <img src={`logo_asso_transparent.png`} alt="Une Rose Un Espoir - Algrange" />
+        </a>
       </div>
 
       <div className="nav-right" aria-label="Actions">

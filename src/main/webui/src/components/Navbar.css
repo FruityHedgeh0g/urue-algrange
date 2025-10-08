@@ -4,10 +4,9 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  position: sticky;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   padding: 12px 20px;
   background: var(--color-surface);
@@ -53,63 +52,14 @@
   gap: 6px;
 }
 
-.nav-btn{
-  appearance: none;
-  background: transparent;
-  border: none;
-  color: var(--color-text);
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-}
 
-.nav-btn:hover{
-  background: var(--color-hover);
-}
 
-.nav-btn:focus-visible{
-  box-shadow: var(--focus-ring);
-}
 
-.caret{ opacity: 0.6; }
 
-.nav-dropdown{ position: relative; }
 
-.dropdown-menu{
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  min-width: 220px;
-  background: var(--color-surface-elev);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
-  border-radius: var(--radius);
-  padding: 6px;
-}
-
-.dropdown-item{
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  color: var(--color-text);
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  display: block;
-  text-decoration: none;
-}
-
-.dropdown-item:hover{
-  background: var(--color-hover);
-}
 
 .nav-right{
-  margin-left: auto;
+  justify-self: end;
 }
 
 .login-btn{
@@ -151,3 +101,27 @@
 .theme-toggle:hover{ background: var(--color-hover); }
 .theme-toggle:focus-visible{ box-shadow: var(--focus-ring); }
 .theme-toggle .icon{ font-size: 16px; line-height: 1; }
+
+
+/* Centered logo container */
+.nav-center{ justify-self: center; }
+
+.logo-image{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-elev);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+.logo-image img{
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+  display: block;
+}
