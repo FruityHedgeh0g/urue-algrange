@@ -1,5 +1,5 @@
 import React from "react";
-import "./ClickableBoutton.css";
+import "./ClickableButton.css";
 
 export interface ClickableBouttonProps {
     /** Texte du bouton */
