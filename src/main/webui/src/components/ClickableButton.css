@@ -1,24 +1,29 @@
+/* Primary button, aligned with global Blue/Red/White theme */
 .cb-button {
     display: inline-flex;
     align-items: center;
-    border: 1px solid #d0d7de;
-    background: #f6f8fa;
-    color: #0f172a;
+    border: 1px solid var(--color-primary-dark);
+    background: var(--color-primary);
+    color: var(--color-white);
     font-weight: 600;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 10px 14px;
     cursor: pointer;
-    transition: transform 0.02s ease-in-out, background 0.15s ease, border-color 0.15s ease;
+    transition: transform 0.02s ease-in-out, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     user-select: none;
 }
 
 .cb-button:hover:not(:disabled) {
-    background: #eef2f7;
-    border-color: #c3cbd5;
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-dark);
 }
 
 .cb-button:active:not(:disabled) {
     transform: translateY(1px);
+}
+
+.cb-button:focus-visible{
+    box-shadow: var(--focus-ring);
 }
 
 .cb-button:disabled {
