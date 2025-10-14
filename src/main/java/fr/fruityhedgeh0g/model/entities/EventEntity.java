@@ -2,7 +2,9 @@ package fr.fruityhedgeh0g.model.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -12,6 +14,8 @@ import java.util.UUID;
 @Table(name = "events")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class EventEntity {
 
     @Id

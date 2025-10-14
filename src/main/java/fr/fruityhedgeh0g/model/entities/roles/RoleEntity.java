@@ -2,7 +2,9 @@ package fr.fruityhedgeh0g.model.entities.roles;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -12,6 +14,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "role_type")
+@Getter
+@Setter
 public abstract class RoleEntity {
 //
     @Id
