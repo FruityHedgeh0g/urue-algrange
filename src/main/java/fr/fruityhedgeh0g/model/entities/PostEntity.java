@@ -1,15 +1,13 @@
 package fr.fruityhedgeh0g.model.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Entity
+@Table(name = "posts")
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostEntity {
