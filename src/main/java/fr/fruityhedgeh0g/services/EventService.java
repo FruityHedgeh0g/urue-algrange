@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 @ApplicationScoped
 public class EventService {
 
-    @Inject EventRepository eventRepository;
+    @Inject
+    EventRepository eventRepository;
 
-    @Inject EventMapper eventMapper;
+    @Inject
+    EventMapper eventMapper;
 }

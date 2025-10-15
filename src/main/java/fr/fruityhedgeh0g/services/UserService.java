@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 @ApplicationScoped
 public class UserService {
 
-    @Inject UserRepository userRepository;
+    @Inject
+    UserRepository userRepository;
 
-    @Inject UserMapper userMapper;
+    @Inject
+    UserMapper userMapper;
 }
