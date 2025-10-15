@@ -10,10 +10,6 @@ import java.util.Optional;
 @ApplicationScoped
 public class FeatureRepository implements PanacheRepository<FeatureEntity> {
 
-    public List<FeatureEntity> findAllFeatures() {
-        return listAll();
-    }
-
     public Optional<FeatureEntity> findByName(String name) {
         return Optional.ofNullable(find("name", name).firstResult());
     }

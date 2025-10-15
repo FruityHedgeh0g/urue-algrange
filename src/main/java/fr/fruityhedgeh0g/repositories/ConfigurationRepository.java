@@ -15,10 +15,6 @@ public class ConfigurationRepository implements PanacheRepository<ConfigurationE
         return Optional.ofNullable(find("name", name).firstResult());
     }
 
-    public List<ConfigurationEntity> findAllConfigurations() {
-        return listAll();
-    }
-
     public int updateConfiguration(ConfigurationEntity entity) {
         return update("value = :value where name = :name", Parameters
                 .with("value", entity.getValue())
