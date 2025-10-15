@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.model.entities;
 
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +14,8 @@ import java.util.UUID;
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class UserEntity {
 
     @Id
