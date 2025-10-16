@@ -11,6 +11,7 @@ import java.util.Optional;
 public class FeatureRepository implements PanacheRepository<FeatureEntity> {
 
     public Optional<FeatureEntity> findByName(String name) {
-        return Optional.ofNullable(find("name", name).firstResult());
+        return Optional.ofNullable(find("name", name)
+                .firstResult());
     }
 }

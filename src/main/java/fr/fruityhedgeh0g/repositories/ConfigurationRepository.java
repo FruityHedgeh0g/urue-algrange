@@ -12,7 +12,8 @@ import java.util.Optional;
 public class ConfigurationRepository implements PanacheRepository<ConfigurationEntity> {
 
     public Optional<ConfigurationEntity> findConfigurationByName(String name) {
-        return Optional.ofNullable(find("name", name).firstResult());
+        return Optional.ofNullable(find("name", name)
+                .firstResult());
     }
 
     public int updateConfiguration(ConfigurationEntity entity) {

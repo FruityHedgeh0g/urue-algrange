@@ -19,9 +19,6 @@ import java.util.UUID;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Getter
-    @Setter
     private UUID userId;
 
     //private Set<RoleEntity> accreditations;
