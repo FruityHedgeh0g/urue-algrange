@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import java.util.Set;
 
-@Mapper(componentModel = "cdi")
+@Mapper(componentModel = "jakarta-cdi")
 public interface UserMapper {
 
     @Mapping(target = "organizedEvents", ignore = true)

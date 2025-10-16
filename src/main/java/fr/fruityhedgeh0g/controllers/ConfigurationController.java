@@ -25,8 +25,7 @@ public class ConfigurationController {
     @GET
     @Path("/all")
     public List<ConfigurationDto> getAllConfigurations(){
-        List<ConfigurationDto> configurations = configurationService.getAllConfigurations()
+        return configurationService.getAllConfigurations()
                 .getOrElseThrow(e -> new RuntimeException(e));
-        return configurations;
     }
 }

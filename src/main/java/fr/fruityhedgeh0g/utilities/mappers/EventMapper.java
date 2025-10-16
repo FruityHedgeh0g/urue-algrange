@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "cdi", uses = UserMapper.class)
+@Mapper(componentModel = "jakarta-cdi", uses = UserMapper.class)
 public interface EventMapper {
 
     EventEntity toEntity(EventDto dto);
