@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.model.entities.roles;
 
+import fr.fruityhedgeh0g.model.entities.AuditTemplate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @DiscriminatorColumn(name = "role_type")
 @Getter
 @Setter
-public abstract class RoleEntity {
+public abstract class RoleEntity extends AuditTemplate {
 //
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

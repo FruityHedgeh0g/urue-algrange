@@ -16,12 +16,17 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserEntity {
+public class UserEntity extends AuditTemplate{
 
     @Id
     private UUID userId;
 
     //private Set<RoleEntity> accreditations;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private GroupEntity group;
+
 
     @ManyToMany(mappedBy = "organizers")
     private Set<EventEntity> organizedEvents;

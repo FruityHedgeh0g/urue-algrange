@@ -1,11 +1,11 @@
 package fr.fruityhedgeh0g.model.dtos;
 
-import fr.fruityhedgeh0g.model.entities.EventEntity;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,13 +14,31 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UserDto {
 
+    @JsonView(System.class)
     private UUID userId;
 
-    //private Set<RoleEntity> accreditations;
+    @JsonView(System.class)
+    private LocalDateTime createdAt;
 
+    @JsonView(System.class)
+    private LocalDateTime updatedAt;
+
+    @JsonView(System.class)
+    private UUID updatedBy;
+
+    @JsonView(Basic.class)
+    private GroupDto group;
+
+    @JsonView(Full.class)
     private Set<EventDto> organizedEvents;
 
+    @JsonView(Full.class)
     private Set<EventDto> participatedEvents;
 
+    @JsonView(Full.class)
     private Set<EventDto> createdEvents;
+
+    public interface System{}
+    public interface Basic extends System{}
+    public interface Full extends Basic{}
 }

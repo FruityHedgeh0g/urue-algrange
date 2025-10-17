@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -14,9 +15,19 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class SectorEntity {
+public class SectorEntity extends AuditTemplate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID sectorId;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    @OneToMany(mappedBy = "sector")
+    private Set<GroupEntity> groups;
+
 }

@@ -13,7 +13,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/users")
-@Authenticated
+//@Authenticated
 public class UserController {
 
     @Inject

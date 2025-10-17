@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.model.entities.configurations;
 
+import fr.fruityhedgeh0g.model.entities.AuditTemplate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

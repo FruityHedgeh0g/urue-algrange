@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class EventEntity {
+public class EventEntity extends AuditTemplate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,6 +24,9 @@ public class EventEntity {
 
     @Column(name = "status")
     private String status;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "description")
     private String description;
@@ -50,16 +53,14 @@ public class EventEntity {
     private String country;
 
     @Column(name = "postal_code")
-    private int postalCode;
+    private String postalCode;
 
     @Column(name = "address_complement")
     private String addressComplement;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "serie_id")
+    private SerieEntity serie;
 
     @ManyToMany
     @JoinTable(name = "event_participants", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))

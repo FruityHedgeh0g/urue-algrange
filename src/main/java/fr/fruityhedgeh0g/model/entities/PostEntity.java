@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -14,9 +15,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class PostEntity {
+public class PostEntity extends AuditTemplate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID postId;
+
 }

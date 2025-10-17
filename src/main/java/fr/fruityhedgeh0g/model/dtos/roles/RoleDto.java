@@ -1,8 +1,8 @@
-package fr.fruityhedgeh0g.model.dtos.configurations;
+package fr.fruityhedgeh0g.model.dtos.roles;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import fr.fruityhedgeh0g.model.dtos.EventDto;
 import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.dtos.medias.MediaDto;
 import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,9 +14,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ConfigurationDto {
+public class RoleDto {
     @JsonView(System.class)
-    private UUID id;
+    private UUID roleId;
 
     @JsonView(System.class)
     private LocalDateTime createdAt;
@@ -27,9 +27,11 @@ public class ConfigurationDto {
     @JsonView(System.class)
     private UUID updatedBy;
 
+    @JsonView(Basic.class)
     private String name;
 
-    private String value;
+    @JsonView(Basic.class)
+    private String description;
 
     public interface System{}
     public interface Basic extends System {}

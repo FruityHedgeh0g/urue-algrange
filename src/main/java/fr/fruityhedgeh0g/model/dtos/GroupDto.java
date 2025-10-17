@@ -1,22 +1,27 @@
-package fr.fruityhedgeh0g.model.dtos.configurations;
+package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.dtos.medias.MediaDto;
+import fr.fruityhedgeh0g.model.entities.SectorEntity;
+import fr.fruityhedgeh0g.model.entities.UserEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class ConfigurationDto {
+public class GroupDto {
+
     @JsonView(System.class)
-    private UUID id;
+    private UUID groupId;
 
     @JsonView(System.class)
     private LocalDateTime createdAt;
@@ -27,9 +32,17 @@ public class ConfigurationDto {
     @JsonView(System.class)
     private UUID updatedBy;
 
+    @JsonView(Basic.class)
     private String name;
 
-    private String value;
+    @JsonView(Basic.class)
+    private String description;
+
+    @JsonView(Full.class)
+    private Set<UserEntity> members;
+
+    @JsonView(Full.class)
+    private SectorEntity sector;
 
     public interface System{}
     public interface Basic extends System {}

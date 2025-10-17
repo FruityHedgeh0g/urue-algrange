@@ -1,9 +1,6 @@
-package fr.fruityhedgeh0g.model.dtos.configurations;
+package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.dtos.medias.MediaDto;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,9 +11,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ConfigurationDto {
+public class PostDto {
+
     @JsonView(System.class)
-    private UUID id;
+    private UUID postId;
 
     @JsonView(System.class)
     private LocalDateTime createdAt;
@@ -26,10 +24,6 @@ public class ConfigurationDto {
 
     @JsonView(System.class)
     private UUID updatedBy;
-
-    private String name;
-
-    private String value;
 
     public interface System{}
     public interface Basic extends System {}

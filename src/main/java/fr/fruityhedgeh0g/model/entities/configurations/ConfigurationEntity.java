@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.model.entities.configurations;
 
+import fr.fruityhedgeh0g.model.entities.AuditTemplate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -15,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ConfigurationEntity {
+public class ConfigurationEntity extends AuditTemplate {
 
     @Id
     @Column(name = "name")
