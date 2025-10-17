@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.model.entities;
 
+import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,9 @@ public class UserEntity extends AuditTemplate{
     @Id
     private UUID userId;
 
-    //private Set<RoleEntity> accreditations;
+    @ManyToMany
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<RoleEntity> accreditations;
 
     @ManyToOne
     @JoinColumn(name = "group_id")

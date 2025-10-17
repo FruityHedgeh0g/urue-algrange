@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SerieDto {
 
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private UUID serieId;
 
     @JsonView(System.class)
@@ -38,7 +38,8 @@ public class SerieDto {
     @JsonView(Full.class)
     private Set<EventEntity> events;
 
-    public interface System{}
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 }

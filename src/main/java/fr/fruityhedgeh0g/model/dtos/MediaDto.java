@@ -1,8 +1,6 @@
-package fr.fruityhedgeh0g.model.dtos.medias;
+package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.dtos.roles.RoleDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class MediaDto {
 
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private UUID mediaId;
 
     @JsonView(System.class)
@@ -27,7 +25,8 @@ public class MediaDto {
     @JsonView(System.class)
     private UUID updatedBy;
 
-    public interface System{}
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 }

@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UserDto {
 
-    @JsonView(System.class)
+    @JsonView({Identifier.class, EventDto.Full.class, GroupDto.Full.class})
     private UUID userId;
 
     @JsonView(System.class)
@@ -38,7 +39,11 @@ public class UserDto {
     @JsonView(Full.class)
     private Set<EventDto> createdEvents;
 
-    public interface System{}
+    @JsonView(Basic.class)
+    private Set<RoleDto> accreditations;
+
+    public interface Identifier{}
+    public interface System extends Identifier{}
     public interface Basic extends System{}
     public interface Full extends Basic{}
 }

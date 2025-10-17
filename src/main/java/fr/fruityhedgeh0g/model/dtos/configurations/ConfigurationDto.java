@@ -2,8 +2,6 @@ package fr.fruityhedgeh0g.model.dtos.configurations;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.dtos.medias.MediaDto;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +13,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class ConfigurationDto {
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private UUID id;
 
     @JsonView(System.class)
@@ -31,7 +29,8 @@ public class ConfigurationDto {
 
     private String value;
 
-    public interface System{}
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 }

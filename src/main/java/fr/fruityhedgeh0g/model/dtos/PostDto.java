@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class PostDto {
 
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private UUID postId;
 
     @JsonView(System.class)
@@ -25,7 +25,8 @@ public class PostDto {
     @JsonView(System.class)
     private UUID updatedBy;
 
-    public interface System{}
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 }

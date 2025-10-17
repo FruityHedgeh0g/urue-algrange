@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class GroupDto {
 
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private UUID groupId;
 
     @JsonView(System.class)
@@ -44,7 +44,8 @@ public class GroupDto {
     @JsonView(Full.class)
     private SectorEntity sector;
 
-    public interface System{}
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 }

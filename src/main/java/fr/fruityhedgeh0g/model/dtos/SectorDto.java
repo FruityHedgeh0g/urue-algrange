@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SectorDto {
 
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private UUID sectorId;
 
     @JsonView(System.class)
@@ -38,7 +38,8 @@ public class SectorDto {
     @JsonView(Full.class)
     private Set<GroupEntity> groups;
 
-    public interface System{}
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 }

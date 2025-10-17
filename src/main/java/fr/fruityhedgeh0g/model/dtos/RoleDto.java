@@ -1,14 +1,15 @@
-package fr.fruityhedgeh0g.model.dtos.roles;
+package fr.fruityhedgeh0g.model.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.EventDto;
-import fr.fruityhedgeh0g.model.dtos.UserDto;
-import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import fr.fruityhedgeh0g.model.entities.UserEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -18,7 +19,7 @@ public class RoleDto {
     @JsonView(System.class)
     private UUID roleId;
 
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private LocalDateTime createdAt;
 
     @JsonView(System.class)
@@ -33,7 +34,14 @@ public class RoleDto {
     @JsonView(Basic.class)
     private String description;
 
-    public interface System{}
+    @JsonView(System.class)
+    private String roleType;
+
+    @JsonView(Full.class)
+    private Set<UserDto> users;
+
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 }

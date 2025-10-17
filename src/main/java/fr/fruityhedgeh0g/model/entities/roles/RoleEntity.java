@@ -1,12 +1,14 @@
 package fr.fruityhedgeh0g.model.entities.roles;
 
 import fr.fruityhedgeh0g.model.entities.AuditTemplate;
+import fr.fruityhedgeh0g.model.entities.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -28,4 +30,10 @@ public abstract class RoleEntity extends AuditTemplate {
 
     @Column
     private String description;
+
+    @Column(name = "role_type")
+    private String roleType;
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<UserEntity> users;
 }

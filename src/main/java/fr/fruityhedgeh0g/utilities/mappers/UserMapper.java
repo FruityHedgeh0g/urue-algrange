@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import java.util.Set;
 
-@Mapper(componentModel = "jakarta-cdi")
+@Mapper(componentModel = "jakarta-cdi", uses = RoleMapper.class)
 public interface UserMapper {
 
     @Mapping(target = "organizedEvents", ignore = true)

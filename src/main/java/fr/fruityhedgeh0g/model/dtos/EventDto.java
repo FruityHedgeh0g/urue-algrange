@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class EventDto {
 
-    @JsonView(System.class)
+    @JsonView(Identifier.class)
     private UUID eventId;
 
     @JsonView(System.class)
@@ -77,7 +77,8 @@ public class EventDto {
     @JsonView(Full.class)
     private UserEntity creator;
 
-    public interface System{}
+    public interface Identifier{}
+    public interface System extends Identifier {}
     public interface Basic extends System {}
     public interface Full extends Basic {}
 
