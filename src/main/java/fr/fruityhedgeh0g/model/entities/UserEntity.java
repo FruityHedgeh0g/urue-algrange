@@ -24,7 +24,7 @@ public class UserEntity extends AuditTemplate{
 
     @ManyToMany
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<RoleEntity> accreditations;
+    private Set<RoleEntity> roles;
 
     @ManyToOne
     @JoinColumn(name = "group_id")

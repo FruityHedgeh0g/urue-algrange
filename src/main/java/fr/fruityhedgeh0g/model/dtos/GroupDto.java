@@ -1,12 +1,10 @@
 package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.fruityhedgeh0g.model.entities.SectorEntity;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,33 +17,31 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class GroupDto {
-
-    @JsonView(Identifier.class)
+    @JsonView(Views.identityOnly.class)
     private UUID groupId;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private LocalDateTime createdAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private UUID updatedBy;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.minimal.class,Views.creation.class})
     private String name;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String description;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private Set<UserEntity> members;
 
-    @JsonView(Full.class)
+    @JsonView(Views.basic.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private SectorEntity sector;
 
-    public interface Identifier{}
-    public interface System extends Identifier {}
-    public interface Basic extends System {}
-    public interface Full extends Basic {}
+
 }

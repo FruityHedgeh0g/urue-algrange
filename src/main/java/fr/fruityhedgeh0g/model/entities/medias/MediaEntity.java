@@ -22,4 +22,5 @@ public abstract class MediaEntity extends AuditTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID mediaId;
+
 }

@@ -11,14 +11,14 @@ import java.util.Set;
 @Mapper(componentModel = "jakarta-cdi", uses = RoleMapper.class)
 public interface UserMapper {
 
-    @Mapping(target = "organizedEvents", ignore = true)
-    @Mapping(target = "participatedEvents", ignore = true)
-    @Mapping(target = "createdEvents", ignore = true)
+//    @Mapping(target = "organizedEvents", ignore = true)
+//    @Mapping(target = "participatedEvents", ignore = true)
+//    @Mapping(target = "createdEvents", ignore = true)
     UserEntity toEntity(UserDto dto);
 
-    @Mapping(target = "organizedEvents", ignore = true)
-    @Mapping(target = "participatedEvents", ignore = true)
-    @Mapping(target = "createdEvents", ignore = true)
+//    @Mapping(target = "organizedEvents", ignore = true)
+//    @Mapping(target = "participatedEvents", ignore = true)
+//    @Mapping(target = "createdEvents", ignore = true)
     UserDto toDto(UserEntity entity);
 
 }

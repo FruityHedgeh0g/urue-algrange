@@ -13,7 +13,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import java.util.List;
 
 @Path("/api/configurations")
-//@Authenticated
+@Authenticated
 public class ConfigurationController {
     @Inject
     SecurityIdentity identity;

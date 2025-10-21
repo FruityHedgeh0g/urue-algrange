@@ -25,14 +25,11 @@ public abstract class RoleEntity extends AuditTemplate {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID roleId;
 
-    @Column
+    @Column(name = "name")
     private String name;
 
-    @Column
+    @Column(name = "description")
     private String description;
-
-    @Column(name = "role_type")
-    private String roleType;
 
     @ManyToMany(mappedBy = "roles")
     private Set<UserEntity> users;

@@ -1,7 +1,8 @@
 package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,36 +15,36 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class UserDto {
-
-    @JsonView({Identifier.class, EventDto.Full.class, GroupDto.Full.class})
+    @JsonView({Views.identityOnly.class, Views.creation.class})
     private UUID userId;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private LocalDateTime createdAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private UUID updatedBy;
 
-    @JsonView(Basic.class)
+    @JsonView(Views.basic.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private GroupDto group;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private Set<EventDto> organizedEvents;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private Set<EventDto> participatedEvents;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private Set<EventDto> createdEvents;
 
-    @JsonView(Basic.class)
-    private Set<RoleDto> accreditations;
+    @JsonView(Views.minimal.class)
+    @JsonSerialize(using = ViewSerializers.class)
+    private Set<RoleDto> roles;
 
-    public interface Identifier{}
-    public interface System extends Identifier{}
-    public interface Basic extends System{}
-    public interface Full extends Basic{}
 }

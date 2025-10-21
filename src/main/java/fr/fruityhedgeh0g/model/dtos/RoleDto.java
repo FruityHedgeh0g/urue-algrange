@@ -1,9 +1,8 @@
 package fr.fruityhedgeh0g.model.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import fr.fruityhedgeh0g.model.entities.UserEntity;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,32 +15,30 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class RoleDto {
-    @JsonView(System.class)
+    @JsonView(Views.identityOnly.class)
     private UUID roleId;
 
-    @JsonView(Identifier.class)
+    @JsonView(Views.system.class)
     private LocalDateTime createdAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private UUID updatedBy;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.minimal.class,Views.creation.class})
     private String name;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String description;
 
-    @JsonView(System.class)
+    @JsonView({Views.system.class,Views.creation.class})
     private String roleType;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private Set<UserDto> users;
 
-    public interface Identifier{}
-    public interface System extends Identifier {}
-    public interface Basic extends System {}
-    public interface Full extends Basic {}
+
 }

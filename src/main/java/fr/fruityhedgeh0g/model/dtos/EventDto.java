@@ -1,9 +1,10 @@
 package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.fruityhedgeh0g.model.entities.SerieEntity;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
-import jakarta.persistence.*;
+import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,71 +17,70 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class EventDto {
-
-    @JsonView(Identifier.class)
+    @JsonView(Views.identityOnly.class)
     private UUID eventId;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private LocalDateTime createdAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(System.class)
+    @JsonView(Views.system.class)
     private UUID updatedBy;
 
-    @JsonView(Basic.class)
+    @JsonView(Views.minimal.class)
     private String status;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.minimal.class,Views.creation.class})
     private String name;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String description;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.minimal.class,Views.creation.class})
     private LocalDateTime startDateTime;
 
-    @JsonView(Basic.class)
+    @JsonView({Views.minimal.class,Views.creation.class})
     private LocalDateTime endDateTime;
 
-    @JsonView(Full.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String latitude;
 
-    @JsonView(Full.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String longitude;
 
-    @JsonView(Full.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String address;
 
-    @JsonView(Full.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String city;
 
-    @JsonView(Full.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String country;
 
-    @JsonView(Full.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String postalCode;
 
-    @JsonView(Full.class)
+    @JsonView({Views.basic.class,Views.creation.class})
     private String addressComplement;
 
-    @JsonView(Basic.class)
+    @JsonView(Views.basic.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private SerieEntity serie;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private Set<UserEntity> participants;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private Set<UserEntity> organizers;
 
-    @JsonView(Full.class)
+    @JsonView(Views.full.class)
+    @JsonSerialize(using = ViewSerializers.class)
     private UserEntity creator;
 
-    public interface Identifier{}
-    public interface System extends Identifier {}
-    public interface Basic extends System {}
-    public interface Full extends Basic {}
 
 
 }
