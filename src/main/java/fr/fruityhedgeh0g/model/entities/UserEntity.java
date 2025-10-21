@@ -20,6 +20,7 @@ import java.util.UUID;
 public class UserEntity extends AuditTemplate{
 
     @Id
+    @Column(name = "user_id")
     private UUID userId;
 
     @ManyToMany

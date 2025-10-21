@@ -19,6 +19,7 @@ import java.util.UUID;
 public class EventEntity extends AuditTemplate {
 
     @Id
+    @Column(name = "event_id")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID eventId;
 

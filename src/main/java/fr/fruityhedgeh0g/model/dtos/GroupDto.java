@@ -8,40 +8,40 @@ import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
 @Getter
-@Setter
-@NoArgsConstructor
+@Value
 public class GroupDto {
     @JsonView(Views.IdentityOnly.class)
-    private UUID groupId;
+    UUID groupId;
 
     @JsonView(Views.System.class)
-    private LocalDateTime createdAt;
+    LocalDateTime createdAt;
 
     @JsonView(Views.System.class)
-    private LocalDateTime updatedAt;
+    LocalDateTime updatedAt;
 
     @JsonView(Views.System.class)
-    private UUID updatedBy;
+    UUID updatedBy;
 
     @JsonView({Views.Minimal.class, Views.Creation.class})
-    private String name;
+    String name;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String description;
+    String description;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private Set<UserEntity> members;
+    Set<UserEntity> members;
 
     @JsonView(Views.Basic.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private SectorEntity sector;
+    SectorEntity sector;
 
 
 }

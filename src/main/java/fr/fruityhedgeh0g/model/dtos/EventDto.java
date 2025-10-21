@@ -8,78 +8,78 @@ import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
 @Getter
-@Setter
-@NoArgsConstructor
+@Value
 public class EventDto {
     @JsonView(Views.IdentityOnly.class)
-    private UUID eventId;
+    UUID eventId;
 
     @JsonView(Views.System.class)
-    private LocalDateTime createdAt;
+    LocalDateTime createdAt;
 
     @JsonView(Views.System.class)
-    private LocalDateTime updatedAt;
+    LocalDateTime updatedAt;
 
     @JsonView(Views.System.class)
-    private UUID updatedBy;
+    UUID updatedBy;
 
     @JsonView(Views.Minimal.class)
-    private String status;
+    String status;
 
     @JsonView({Views.Minimal.class, Views.Creation.class})
-    private String name;
+    String name;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String description;
+    String description;
 
     @JsonView({Views.Minimal.class, Views.Creation.class})
-    private LocalDateTime startDateTime;
+    LocalDateTime startDateTime;
 
     @JsonView({Views.Minimal.class, Views.Creation.class})
-    private LocalDateTime endDateTime;
+    LocalDateTime endDateTime;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String latitude;
+    String latitude;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String longitude;
+    String longitude;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String address;
+    String address;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String city;
+    String city;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String country;
+    String country;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String postalCode;
+    String postalCode;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
-    private String addressComplement;
+    String addressComplement;
 
     @JsonView(Views.Basic.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private SerieEntity serie;
+    SerieEntity serie;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private Set<UserEntity> participants;
+    Set<UserEntity> participants;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private Set<UserEntity> organizers;
+    Set<UserEntity> organizers;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private UserEntity creator;
+    UserEntity creator;
 
 
 

@@ -20,6 +20,7 @@ import java.util.UUID;
 public abstract class MediaEntity extends AuditTemplate {
 
     @Id
+    @Column(name = "media_id")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID mediaId;
 

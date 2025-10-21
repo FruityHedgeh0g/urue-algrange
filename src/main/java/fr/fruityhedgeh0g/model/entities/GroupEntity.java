@@ -19,6 +19,7 @@ import java.util.UUID;
 public class GroupEntity extends AuditTemplate {
 
     @Id
+    @Column(name = "group_id")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID groupId;
 

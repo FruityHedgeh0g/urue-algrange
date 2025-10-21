@@ -4,24 +4,24 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@Setter
-@NoArgsConstructor
+@Value
 public class PostDto {
     @JsonView(Views.IdentityOnly.class)
-    private UUID postId;
+    UUID postId;
 
     @JsonView(Views.System.class)
-    private LocalDateTime createdAt;
+    LocalDateTime createdAt;
 
     @JsonView(Views.System.class)
-    private LocalDateTime updatedAt;
+    LocalDateTime updatedAt;
 
     @JsonView(Views.System.class)
-    private UUID updatedBy;
+    UUID updatedBy;
 
 }

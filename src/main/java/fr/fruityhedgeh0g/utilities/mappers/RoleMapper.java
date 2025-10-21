@@ -11,9 +11,11 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "jakarta-cdi")
 public interface RoleMapper {
     @Named("organizationalRoleEntityToDto")
+    @Mapping(target = "roleType", constant = "ORGANIZATIONAL")
     RoleDto toDto(OrganizationalRoleEntity entity);
 
     @Named("legalRoleEntityToDto")
+    @Mapping(target = "roleType", constant = "LEGAL")
     RoleDto toDto(LegalRoleEntity entity);
 
     @Named("roleDtoToLegalRoleEntity")
@@ -26,11 +28,11 @@ public interface RoleMapper {
         RoleDto dto;
         if (entity instanceof OrganizationalRoleEntity){
             dto = toDto((OrganizationalRoleEntity) entity);
-            dto.setRoleType("ORGANIZATIONAL");
+            //dto.setRoleType("ORGANIZATIONAL");
             return dto;
         }else if (entity instanceof LegalRoleEntity){
             dto = toDto((LegalRoleEntity) entity);
-            dto.setRoleType("LEGAL");
+            //dto.setRoleType("LEGAL");
             return dto;
         }else throw new IllegalStateException("Unexpected value: " + entity.getClass());
     }

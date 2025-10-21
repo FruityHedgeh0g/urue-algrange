@@ -18,6 +18,7 @@ import java.util.UUID;
 public class SerieEntity extends AuditTemplate {
 
     @Id
+    @Column(name = "serie_id")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID serieId;
 

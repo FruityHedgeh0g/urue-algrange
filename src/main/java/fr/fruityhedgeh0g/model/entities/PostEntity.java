@@ -18,6 +18,7 @@ import java.util.UUID;
 public class PostEntity extends AuditTemplate {
 
     @Id
+    @Column(name = "post_id")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID postId;
 

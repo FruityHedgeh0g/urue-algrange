@@ -23,11 +23,11 @@ public interface MediaMapper {
         MediaDto dto;
         if (entity instanceof VideoEntity){
             dto = toDto((VideoEntity) entity);
-            dto.setMediaType("VIDEO");
+            //dto.setMediaType("VIDEO");
             return dto;
         } else if (entity instanceof PhotoEntity){
             dto = toDto((PhotoEntity) entity);
-            dto.setMediaType("PHOTO");
+            //dto.setMediaType("PHOTO");
             return dto;
         } else throw new IllegalStateException("Unexpected value: " + entity.getClass());
     }

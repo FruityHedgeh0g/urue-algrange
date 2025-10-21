@@ -6,45 +6,45 @@ import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
 @Getter
-@Setter
-@NoArgsConstructor
+@Value
 public class UserDto {
     @JsonView({Views.IdentityOnly.class, Views.Creation.class})
-    private UUID userId;
+   UUID userId;
 
     @JsonView(Views.System.class)
-    private LocalDateTime createdAt;
+    LocalDateTime createdAt;
 
     @JsonView(Views.System.class)
-    private LocalDateTime updatedAt;
+    LocalDateTime updatedAt;
 
     @JsonView(Views.System.class)
-    private UUID updatedBy;
+    UUID updatedBy;
 
     @JsonView(Views.Basic.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private GroupDto group;
+    GroupDto group;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private Set<EventDto> organizedEvents;
+    Set<EventDto> organizedEvents;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private Set<EventDto> participatedEvents;
+    Set<EventDto> participatedEvents;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private Set<EventDto> createdEvents;
+    Set<EventDto> createdEvents;
 
     @JsonView(Views.Minimal.class)
     @JsonSerialize(using = ViewSerializers.class)
-    private Set<RoleDto> roles;
+    Set<RoleDto> roles;
 
 }

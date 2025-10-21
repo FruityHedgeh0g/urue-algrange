@@ -5,28 +5,28 @@ import fr.fruityhedgeh0g.model.dtos.Views;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@Setter
-@NoArgsConstructor
+@Value
 public class ConfigurationDto {
 
     @JsonView(Views.System.class)
-    private LocalDateTime createdAt;
+    LocalDateTime createdAt;
 
     @JsonView(Views.System.class)
-    private LocalDateTime updatedAt;
+    LocalDateTime updatedAt;
 
     @JsonView(Views.System.class)
-    private UUID updatedBy;
+    UUID updatedBy;
 
     @JsonView(Views.IdentityOnly.class)
-    private String name;
+    String name;
 
     @JsonView(Views.System.class)
-    private String value;
+    String value;
 
 }
