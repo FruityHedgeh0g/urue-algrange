@@ -30,7 +30,7 @@ public class FeatureService {
     public Try<FeatureDto> getFeatureByName(@NotBlank String name) {
         Log.debug("Getting feature by name: " + name);
         return Try.of(() -> featureRepository
-                        .findByName(name)
+                        .findByIdOptional(name)
                         .orElseThrow(NoSuchElementException::new))
                 .map(featureMapper::toDto)
                 .onFailure(e -> {
@@ -51,5 +51,9 @@ public class FeatureService {
                 .map(featureMapper::toDto)
                 .toList())
                 .onFailure(e -> Log.error("Error getting all features", e));
+    }
+
+    public Try<FeatureDto> updateFeature(@NonNull FeatureDto dto) {
+        return null;
     }
 }

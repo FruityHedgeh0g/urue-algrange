@@ -12,16 +12,16 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class PostDto {
-    @JsonView(Views.identityOnly.class)
+    @JsonView(Views.IdentityOnly.class)
     private UUID postId;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime createdAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private UUID updatedBy;
 
 }

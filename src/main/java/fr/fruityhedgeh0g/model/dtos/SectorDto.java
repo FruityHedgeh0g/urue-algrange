@@ -16,25 +16,25 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class SectorDto {
-    @JsonView(Views.identityOnly.class)
+    @JsonView(Views.IdentityOnly.class)
     private UUID sectorId;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime createdAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private UUID updatedBy;
 
-    @JsonView({Views.minimal.class,Views.creation.class})
+    @JsonView({Views.Minimal.class, Views.Creation.class})
     private String name;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String description;
 
-    @JsonView(Views.full.class)
+    @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
     private Set<GroupEntity> groups;
 

@@ -17,67 +17,67 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class EventDto {
-    @JsonView(Views.identityOnly.class)
+    @JsonView(Views.IdentityOnly.class)
     private UUID eventId;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime createdAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private UUID updatedBy;
 
-    @JsonView(Views.minimal.class)
+    @JsonView(Views.Minimal.class)
     private String status;
 
-    @JsonView({Views.minimal.class,Views.creation.class})
+    @JsonView({Views.Minimal.class, Views.Creation.class})
     private String name;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String description;
 
-    @JsonView({Views.minimal.class,Views.creation.class})
+    @JsonView({Views.Minimal.class, Views.Creation.class})
     private LocalDateTime startDateTime;
 
-    @JsonView({Views.minimal.class,Views.creation.class})
+    @JsonView({Views.Minimal.class, Views.Creation.class})
     private LocalDateTime endDateTime;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String latitude;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String longitude;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String address;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String city;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String country;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String postalCode;
 
-    @JsonView({Views.basic.class,Views.creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     private String addressComplement;
 
-    @JsonView(Views.basic.class)
+    @JsonView(Views.Basic.class)
     @JsonSerialize(using = ViewSerializers.class)
     private SerieEntity serie;
 
-    @JsonView(Views.full.class)
+    @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
     private Set<UserEntity> participants;
 
-    @JsonView(Views.full.class)
+    @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
     private Set<UserEntity> organizers;
 
-    @JsonView(Views.full.class)
+    @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)
     private UserEntity creator;
 

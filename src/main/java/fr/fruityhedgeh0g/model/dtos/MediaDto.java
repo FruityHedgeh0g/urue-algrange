@@ -12,19 +12,19 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class MediaDto {
-    @JsonView(Views.identityOnly.class)
+    @JsonView(Views.IdentityOnly.class)
     private UUID mediaId;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime createdAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private LocalDateTime updatedAt;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private UUID updatedBy;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private String mediaType;
 
 

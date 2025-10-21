@@ -8,6 +8,8 @@ import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -23,10 +25,10 @@ public class ConfigurationService {
     @Inject
     ConfigurationMapper configurationMapper;
 
-    public Try<ConfigurationDto> getConfigurationByName(String name) {
+    public Try<ConfigurationDto> getConfigurationByName(@NotBlank String name) {
         Log.info("Getting configuration by name: " + name);
         return Try.of(() -> configurationRepository
-                .findConfigurationByName(name)
+                .findByIdOptional(name)
                 .orElseThrow(NoSuchElementException::new))
                 .map(configurationMapper::toDto)
                 .onFailure(e -> {
@@ -40,17 +42,18 @@ public class ConfigurationService {
 
     public Try<List<ConfigurationDto>> getAllConfigurations() {
         Log.info("Getting all configurations");
-        return Try.of(() ->configurationRepository.listAll()
+        return Try.of(() ->configurationRepository.findAll()
                 .stream()
                 .map(configurationMapper::toDto)
                 .toList())
                 .onFailure(e -> Log.error("Error getting all configurations", e));
     }
 
-    public boolean updateConfiguration(ConfigurationDto dto) {
+    public Try<ConfigurationDto> updateConfiguration(@NotNull ConfigurationDto dto) {
         Log.info("Updating configuration: " + dto.getName());
-        return Try.run(() -> configurationRepository.updateConfiguration(configurationMapper.toEntity(dto)))
-                .onFailure(e -> Log.error("Error updating configuration", e))
-                .isSuccess();
+//        return Try.run(() -> configurationRepository.updateConfiguration(configurationMapper.toEntity(dto)))
+//                .onFailure(e -> Log.error("Error updating configuration", e))
+//                .isSuccess();
+        return null;
     }
 }

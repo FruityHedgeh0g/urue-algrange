@@ -9,11 +9,17 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import lombok.AllArgsConstructor;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
 
 @Path("/api/features")
 public class FeatureController {
+    @Inject
+    SecurityIdentity identity;
+
+    @Inject
+    JsonWebToken token;
 
     @Inject
     FeatureService featureService;

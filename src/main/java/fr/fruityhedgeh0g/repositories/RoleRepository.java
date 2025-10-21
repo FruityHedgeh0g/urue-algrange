@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.repositories;
 
-import fr.fruityhedgeh0g.model.entities.EventEntity;
 import fr.fruityhedgeh0g.model.entities.configurations.ConfigurationEntity;
+import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -9,9 +9,5 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @ApplicationScoped
-public class EventRepository implements PanacheRepositoryBase<EventEntity, UUID> {
-
-//    public EventEntity findByName(String name) {
-//        return find("name", name).firstResult();
-//    }
+public class RoleRepository implements PanacheRepositoryBase<RoleEntity, UUID> {
 }

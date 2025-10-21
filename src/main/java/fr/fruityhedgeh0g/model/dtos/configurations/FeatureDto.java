@@ -10,12 +10,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class FeatureDto {
-    @JsonView(Views.identityOnly.class)
+    @JsonView(Views.IdentityOnly.class)
     private String name;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private String description;
 
-    @JsonView(Views.system.class)
+    @JsonView(Views.System.class)
     private boolean isActive;
 }

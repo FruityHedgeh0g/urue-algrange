@@ -11,10 +11,16 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 @Path("/users")
 //@Authenticated
 public class UserController {
+    @Inject
+    SecurityIdentity identity;
+
+    @Inject
+    JsonWebToken token;
 
     @Inject
     UserService userService;
