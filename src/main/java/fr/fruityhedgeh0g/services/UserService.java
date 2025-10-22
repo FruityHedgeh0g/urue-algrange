@@ -51,15 +51,15 @@ public class UserService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Try<UserDto> createUser(@NotNull UserDto userDto){
-        Log.debug("Creating user: " + userDto.getUserId());
-
         return Try.of(() -> {
             Log.debug("Searching for already existing user with id: " + userDto.getUserId());
             if (userRepository.findByIdOptional(userDto.getUserId()).isPresent()) {
                 throw new DuplicateEntityException();
             }
+
             Log.debug("Creating user: " + userDto.getUserId());
             userRepository.persist(userMapper.toEntity(userDto));
+
             Log.debug("User created, retrieving up-to-date user infos: " + userDto.getUserId());
             return userMapper.toDto(
                     userRepository

@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.MediaDto;
+import fr.fruityhedgeh0g.model.entities.medias.MediaEntity;
 import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.utilities.mappers.MediaMapper;
 import io.quarkus.logging.Log;
@@ -44,8 +46,20 @@ public class MediaService {
     }
 
     public Try<MediaDto> createMedia(@NotNull MediaDto mediaDto){
-        Log.info("Creating media: " + mediaDto.getMediaId());
-        return null;
+        return Try.of(() -> {
+            Log.debug("Creating media");
+            MediaEntity mediaEntity = mediaMapper.toEntity(mediaDto);
+            mediaRepository.persist(mediaEntity);
+
+            Log.debug("Media created, retrieving up-to-date media infos: " + mediaEntity.getMediaId());
+            return mediaMapper.toDto(
+                    mediaRepository
+                            .findByIdOptional(mediaEntity.getMediaId())
+                            .orElseThrow(NoSuchElementException::new)
+            );
+        }).onFailure(e -> {
+                Log.error("Error creating media", e);
+        });
     }
 
     public Try<MediaDto> updateMedia(@NotNull MediaDto mediaDto){

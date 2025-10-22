@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.PostDto;
+import fr.fruityhedgeh0g.model.entities.PostEntity;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;
 import io.quarkus.logging.Log;
@@ -49,8 +51,20 @@ public class PostService {
     }
 
     public Try<PostDto> createPost(@NotNull PostDto postDto) {
-        Log.debug("Creating post: " + postDto.getPostId());
-        return null;
+        return Try.of(() -> {
+            Log.debug("Creating post");
+            PostEntity postEntity = postMapper.toEntity(postDto);
+            postRepository.persist(postEntity);
+
+            Log.debug("Post created, retrieving up-to-date post infos: " + postEntity.getPostId());
+            return postMapper.toDto(
+                    postRepository
+                            .findByIdOptional(postEntity.getPostId())
+                            .orElseThrow(NoSuchElementException::new)
+            );
+        }).onFailure(e -> {
+            Log.error("Error creating post", e);
+        });
     }
 
     public Try<PostDto> updatePost(@NotNull PostDto postDto) {

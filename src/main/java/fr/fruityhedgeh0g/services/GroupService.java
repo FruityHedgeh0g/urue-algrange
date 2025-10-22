@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.GroupDto;
+import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import io.quarkus.logging.Log;
@@ -50,8 +52,29 @@ public class GroupService {
     }
 
     public Try<GroupDto> createGroup(@NotNull GroupDto groupDto){
-        Log.info("Creating group: " + groupDto.getGroupId());
-        return null;
+        return Try.of(() -> {
+            Log.debug("Searching for already existing group with name: " + groupDto.getName());
+            if (groupRepository.existsByName(groupDto.getName())) {
+                throw new DuplicateEntityException();
+            }
+
+            Log.debug("Creating user: " + groupDto.getGroupId());
+            GroupEntity groupEntity = groupMapper.toEntity(groupDto);
+            groupRepository.persist(groupEntity);
+
+            Log.debug("Group created, retrieving up-to-date group infos: " + groupEntity.getGroupId());
+            return groupMapper.toDto(
+                    groupRepository
+                            .findByIdOptional(groupEntity.getGroupId())
+                            .orElseThrow(NoSuchElementException::new)
+            );
+        }).onFailure(e -> {
+            if (e instanceof DuplicateEntityException) {
+                Log.warn("Group already exists: " + groupDto.getName());
+            }else {
+                Log.error("Error creating group with name: " + groupDto.getName(), e);
+            }
+        });
     }
 
     public Try<GroupDto> updateGroup(@NotNull GroupDto groupDto){

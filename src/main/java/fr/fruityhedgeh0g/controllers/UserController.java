@@ -16,7 +16,9 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
-@Path("/users")
+import java.util.List;
+
+@Path("/api/users")
 //@Authenticated
 public class UserController {
     @Inject
@@ -29,9 +31,10 @@ public class UserController {
     UserService userService;
 
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String hello() {
-        return "Hello from Quarkus REST";
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/get/all")
+    public @JsonView(Views.Minimal.class) List<UserDto> getAllUsers(){
+        return userService.getAllUsers().get();
     }
 
     @POST

@@ -1,5 +1,8 @@
 package fr.fruityhedgeh0g.controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import fr.fruityhedgeh0g.model.dtos.SeriesDto;
+import fr.fruityhedgeh0g.model.dtos.Views;
 import fr.fruityhedgeh0g.model.dtos.configurations.FeatureDto;
 import fr.fruityhedgeh0g.services.FeatureService;
 import io.quarkus.security.Authenticated;
@@ -8,6 +11,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -31,10 +36,10 @@ public class FeatureController {
                 .getOrElseThrow(e -> new RuntimeException(e));
     }
 
-    @Path("/all")
     @GET
-    public List<FeatureDto> getAllFeatures(){
-        return featureService.getAllFeatures()
-                .getOrElseThrow(e -> new RuntimeException(e));
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/get/all")
+    public @JsonView(Views.Minimal.class) List<FeatureDto> getAllFeatures(){
+        return featureService.getAllFeatures().get();
     }
 }

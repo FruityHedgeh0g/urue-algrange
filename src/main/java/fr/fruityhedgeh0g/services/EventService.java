@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.EventDto;
+import fr.fruityhedgeh0g.model.entities.EventEntity;
 import fr.fruityhedgeh0g.repositories.EventRepository;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.utilities.mappers.EventMapper;
@@ -51,8 +53,29 @@ public class EventService {
     }
 
     public Try<EventDto> createEvent(@NotNull EventDto eventDto){
-        Log.info("Creating event: " + eventDto.getEventId());
-        return null;
+        return Try.of(() -> {
+            Log.debug("Searching for already existing event with name: " + eventDto.getName());
+            if (eventRepository.existsByName(eventDto.getName())) {
+                throw new DuplicateEntityException();
+            }
+
+            Log.debug("Creating user: " + eventDto.getName());
+            EventEntity eventEntity = eventMapper.toEntity(eventDto);
+            eventRepository.persist(eventEntity);
+
+            Log.debug("Event created, retrieving up-to-date event infos: " + eventEntity.getEventId());
+            return eventMapper.toDto(
+                    eventRepository
+                            .findByIdOptional(eventEntity.getEventId())
+                            .orElseThrow(NoSuchElementException::new)
+            );
+        }).onFailure(e -> {
+            if (e instanceof DuplicateEntityException) {
+                Log.warn("Event already exists: " + eventDto.getName());
+            }else {
+                Log.error("Error creating event with name: " + eventDto.getName(), e);
+            }
+        });
     }
 
     public Try<EventDto> updateEvent(@NotNull EventDto eventDto){

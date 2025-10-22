@@ -1,9 +1,6 @@
 package fr.fruityhedgeh0g.repositories;
 
-import fr.fruityhedgeh0g.model.entities.EventEntity;
 import fr.fruityhedgeh0g.model.entities.SeriesEntity;
-import fr.fruityhedgeh0g.model.entities.configurations.ConfigurationEntity;
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -11,17 +8,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
-public class EventRepository implements PanacheRepositoryBase<EventEntity, UUID> {
-
-//    public EventEntity findByName(String name) {
-//        return find("name", name).firstResult();
-//    }
+public class SeriesRepository implements PanacheRepositoryBase<SeriesEntity, UUID> {
 
     public boolean existsByName(String name) {
         return count("name", name) > 0;
     }
 
-    public Optional<EventEntity> findByName(String name) {
+    public Optional<SeriesEntity> findByName(String name) {
         return Optional.ofNullable(find("name", name)
                 .firstResult());
     }

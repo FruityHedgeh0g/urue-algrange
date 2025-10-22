@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "jakarta-cdi")
 public interface SectorMapper {
 
-    SectorEntity toDto(SectorDto dto);
+    SectorEntity toEntity(SectorDto dto);
 
     SectorDto toDto(SectorEntity entity);
 }
