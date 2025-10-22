@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.fruityhedgeh0g.model.entities.EventEntity;
 import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.Value;
 
 import java.time.LocalDateTime;
@@ -15,7 +13,7 @@ import java.util.UUID;
 
 @Getter
 @Value
-public class SerieDto {
+public class SeriesDto {
     @JsonView(Views.IdentityOnly.class)
     UUID serieId;
 

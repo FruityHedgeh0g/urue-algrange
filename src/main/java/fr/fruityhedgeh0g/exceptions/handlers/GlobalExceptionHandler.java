@@ -1,7 +1,6 @@
-package fr.fruityhedgeh0g.exceptions.mappers;
+package fr.fruityhedgeh0g.exceptions.handlers;
 
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 

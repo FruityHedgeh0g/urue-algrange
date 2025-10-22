@@ -40,4 +40,5 @@ public class UserEntity extends AuditTemplate{
 
     @OneToMany(mappedBy = "creator")
     private Set<EventEntity> createdEvents;
+
 }

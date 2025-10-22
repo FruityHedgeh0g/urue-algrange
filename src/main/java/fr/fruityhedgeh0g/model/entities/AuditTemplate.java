@@ -1,7 +1,6 @@
 package fr.fruityhedgeh0g.model.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,4 +20,15 @@ public abstract class AuditTemplate {
 
     @Column(name = "updated_by")
     private UUID updatedBy;
+
+    @PrePersist
+    private void onCreation(){
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    private void onModification(){
+        this.updatedAt = LocalDateTime.now();
+    }
 }

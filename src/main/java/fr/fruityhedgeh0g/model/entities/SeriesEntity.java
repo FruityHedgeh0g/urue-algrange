@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class SerieEntity extends AuditTemplate {
+public class SeriesEntity extends AuditTemplate {
 
     @Id
     @Column(name = "serie_id")

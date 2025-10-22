@@ -2,12 +2,10 @@ package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import fr.fruityhedgeh0g.model.entities.SerieEntity;
+import fr.fruityhedgeh0g.model.entities.SeriesEntity;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
 import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.Value;
 
 import java.time.LocalDateTime;
@@ -67,7 +65,7 @@ public class EventDto {
 
     @JsonView(Views.Basic.class)
     @JsonSerialize(using = ViewSerializers.class)
-    SerieEntity serie;
+    SeriesEntity serie;
 
     @JsonView(Views.Full.class)
     @JsonSerialize(using = ViewSerializers.class)

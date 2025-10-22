@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.UserDto;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.UserRepository;
@@ -11,6 +12,7 @@ import io.vavr.control.Try;
 import io.vertx.ext.auth.impl.jose.JWT;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -18,6 +20,7 @@ import org.keycloak.representations.JsonWebToken;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -46,9 +49,30 @@ public class UserService {
                 });
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Try<UserDto> createUser(@NotNull UserDto userDto){
         Log.debug("Creating user: " + userDto.getUserId());
-        return null;
+
+        return Try.of(() -> {
+            Log.debug("Searching for already existing user with id: " + userDto.getUserId());
+            if (userRepository.findByIdOptional(userDto.getUserId()).isPresent()) {
+                throw new DuplicateEntityException();
+            }
+            Log.debug("Creating user: " + userDto.getUserId());
+            userRepository.persist(userMapper.toEntity(userDto));
+            Log.debug("User created, retrieving up-to-date user infos: " + userDto.getUserId());
+            return userMapper.toDto(
+                    userRepository
+                    .findByIdOptional(userDto.getUserId())
+                    .orElseThrow(NoSuchElementException::new)
+            );
+        }).onFailure(e -> {
+            if (e instanceof DuplicateEntityException) {
+                Log.warn("User already exists: " + userDto.getUserId());
+            }else {
+                Log.error("Error creating user with id: " + userDto.getUserId(), e);
+            }
+        });
     }
 
     public Try<UserDto> updateUser(@NotNull UserDto userDto){
