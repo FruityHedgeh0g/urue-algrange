@@ -60,6 +60,8 @@ public class SerieService {
 
     public void deleteSerie(@NotNull UUID serieId) {
         Log.info("Deleting series with id: " + serieId);
+        Try.run(() -> serieRepository.deleteById(serieId))
+                .onFailure(e -> Log.error("Error deleting series with id: " + serieId, e));
 
     }
 }

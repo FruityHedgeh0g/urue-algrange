@@ -58,6 +58,8 @@ public class UserService {
 
     public void deleteUser(@NotNull UUID userId){
         Log.debug("Deleting user with id: " + userId);
+        Try.run(() -> userRepository.deleteById(userId))
+                .onFailure(e -> Log.error("Error deleting user with id: " + userId, e));
 
     }
 

@@ -55,5 +55,7 @@ public class MediaService {
 
     public void deleteMedia(@NotNull UUID mediaId){
         Log.info("Deleting media with id: " + mediaId);
+        Try.of(() -> mediaRepository.deleteById(mediaId))
+                .onFailure(e -> Log.error("Error deleting media with id: " + mediaId, e));
     }
 }

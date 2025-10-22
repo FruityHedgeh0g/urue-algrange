@@ -61,7 +61,8 @@ public class GroupService {
 
     public void deleteGroup(@NotNull UUID groupId){
         Log.info("Deleting group with id: " + groupId);
-
+        Try.of(() -> groupRepository.deleteById(groupId))
+            .onFailure(e -> Log.error("Error deleting group with id: " + groupId, e));
     }
 
 

@@ -62,6 +62,7 @@ public class EventService {
 
     public void deleteEvent(@NotNull UUID eventId){
         Log.info("Deleting event with id: " + eventId);
-
+        Try.of(() -> eventRepository.deleteById(eventId))
+                .onFailure(e -> Log.error("Error deleting event with id: " + eventId, e));
     }
 }

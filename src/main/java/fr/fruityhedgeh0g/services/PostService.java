@@ -60,6 +60,7 @@ public class PostService {
 
     public void deletePost(@NotNull UUID postId) {
         Log.debug("Deleting post with id: " + postId);
-
+        Try.of(() -> postRepository.deleteById(postId))
+                .onFailure(e -> Log.error("Error deleting post with id: " + postId, e));
     }
 }

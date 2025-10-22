@@ -60,6 +60,7 @@ public class SectorService {
 
     public void deleteSector(@NotNull UUID sectorId) {
         Log.info("Deleting sector with id: " + sectorId);
-
+        Try.run(() -> sectorRepository.deleteById(sectorId))
+                .onFailure(e -> Log.error("Error deleting sector with id: " + sectorId, e));
     }
 }

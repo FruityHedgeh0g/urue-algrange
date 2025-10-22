@@ -55,6 +55,7 @@ public class RoleService {
 
     public void deleteRole(@NotNull UUID roleId) {
         Log.info("Deleting role with id: " + roleId);
-
+        Try.run(() -> roleRepository.deleteById(roleId))
+                .onFailure(e -> Log.error("Error deleting role with id: " + roleId, e));
     }
 }
