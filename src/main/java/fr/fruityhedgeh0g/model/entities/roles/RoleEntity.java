@@ -32,6 +32,6 @@ public abstract class RoleEntity extends AuditTemplate {
     @Column(name = "description")
     private String description;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<UserEntity> users;
+//    @ManyToMany(mappedBy = "roles")
+//    private Set<UserEntity> users;
 }

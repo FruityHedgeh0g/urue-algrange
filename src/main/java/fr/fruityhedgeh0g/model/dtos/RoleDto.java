@@ -36,9 +36,9 @@ public class RoleDto {
     @JsonView({Views.System.class, Views.Creation.class})
     String roleType;
 
-    @JsonView(Views.Full.class)
-    @JsonSerialize(using = ViewSerializers.class)
-    Set<UserDto> users;
+//    @JsonView(Views.Full.class)
+//    @JsonSerialize(using = ViewSerializers.class)
+//    Set<UserDto> users;
 
 
 }

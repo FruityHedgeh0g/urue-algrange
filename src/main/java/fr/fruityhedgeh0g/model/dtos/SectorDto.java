@@ -34,7 +34,7 @@ public class SectorDto {
     @JsonView({Views.Basic.class, Views.Creation.class})
     String description;
 
-    @JsonView(Views.Full.class)
+    @JsonView({Views.Full.class,Views.Creation.class})
     @JsonSerialize(using = ViewSerializers.class)
     Set<GroupEntity> groups;
 
