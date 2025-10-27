@@ -1,9 +1,6 @@
 package fr.fruityhedgeh0g.repositories;
 
 import fr.fruityhedgeh0g.model.entities.SectorEntity;
-import fr.fruityhedgeh0g.model.entities.SeriesEntity;
-import fr.fruityhedgeh0g.model.entities.configurations.ConfigurationEntity;
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 

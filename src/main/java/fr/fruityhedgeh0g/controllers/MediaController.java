@@ -2,7 +2,6 @@ package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.model.dtos.MediaDto;
-import fr.fruityhedgeh0g.model.dtos.SeriesDto;
 import fr.fruityhedgeh0g.model.dtos.Views;
 import fr.fruityhedgeh0g.services.MediaService;
 import io.quarkus.security.identity.SecurityIdentity;

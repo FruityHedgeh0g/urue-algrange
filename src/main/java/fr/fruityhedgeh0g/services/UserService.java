@@ -49,7 +49,6 @@ public class UserService {
                 });
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Try<UserDto> createUser(@NotNull UserDto userDto){
         return Try.of(() -> {
             Log.debug("Searching for already existing user with id: " + userDto.getUserId());

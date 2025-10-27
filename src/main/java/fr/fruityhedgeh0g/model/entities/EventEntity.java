@@ -59,10 +59,6 @@ public class EventEntity extends AuditTemplate {
     @Column(name = "address_complement")
     private String addressComplement;
 
-    @ManyToOne
-    @JoinColumn(name = "serie_id")
-    private SeriesEntity serie;
-
     @ManyToMany
     @JoinTable(name = "event_participants", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<UserEntity> participants;
