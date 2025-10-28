@@ -71,11 +71,13 @@ public class RoleService {
         });
     }
 
+    //TODO : Développer l'update
     public Try<RoleDto> updateRole(@NotNull RoleDto roleDto) {
         Log.info("Updating role: " + roleDto.getRoleId());
         return null;
     }
 
+    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     public void deleteRole(@NotNull UUID roleId) {
         Log.info("Deleting role with id: " + roleId);
         Try.run(() -> roleRepository.deleteById(roleId))

@@ -62,11 +62,13 @@ public class MediaService {
         });
     }
 
+    //TODO : Développer l'update
     public Try<MediaDto> updateMedia(@NotNull MediaDto mediaDto){
         Log.info("Updating media: " + mediaDto.getMediaId());
         return null;
     }
 
+    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     public void deleteMedia(@NotNull UUID mediaId){
         Log.info("Deleting media with id: " + mediaId);
         Try.of(() -> mediaRepository.deleteById(mediaId))

@@ -53,6 +53,7 @@ public class FeatureService {
                 .onFailure(e -> Log.error("Error getting all features", e));
     }
 
+    //TODO : Développer l'update
     public Try<FeatureDto> updateFeature(@NonNull FeatureDto dto) {
         return null;
     }

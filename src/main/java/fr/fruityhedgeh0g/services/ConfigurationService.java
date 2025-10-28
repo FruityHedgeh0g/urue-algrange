@@ -49,6 +49,7 @@ public class ConfigurationService {
                 .onFailure(e -> Log.error("Error getting all configurations", e));
     }
 
+    //TODO : Développer l'update
     public Try<ConfigurationDto> updateConfiguration(@NotNull ConfigurationDto dto) {
         Log.info("Updating configuration: " + dto.getName());
 //        return Try.run(() -> configurationRepository.updateConfiguration(configurationMapper.toEntity(dto)))

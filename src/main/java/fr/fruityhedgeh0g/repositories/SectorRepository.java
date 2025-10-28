@@ -17,4 +17,8 @@ public class SectorRepository implements PanacheRepositoryBase<SectorEntity, UUI
         return Optional.ofNullable(find("name", name)
                 .firstResult());
     }
+
+    public boolean existsById(UUID id) {
+        return Optional.ofNullable(findById(id));
+    }
 }

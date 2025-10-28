@@ -74,11 +74,13 @@ public class UserService {
         });
     }
 
+    //TODO : Développer l'update
     public Try<UserDto> updateUser(@NotNull UserDto userDto){
         Log.debug("Updating user: " + userDto.getUserId());
         return null;
     }
 
+    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     public void deleteUser(@NotNull UUID userId){
         Log.debug("Deleting user with id: " + userId);
         Try.run(() -> userRepository.deleteById(userId))

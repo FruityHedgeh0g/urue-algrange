@@ -78,11 +78,13 @@ public class EventService {
         });
     }
 
+    //TODO : Développer l'update
     public Try<EventDto> updateEvent(@NotNull EventDto eventDto){
         Log.info("Updating event: " + eventDto.getEventId());
         return null;
     }
 
+    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     public void deleteEvent(@NotNull UUID eventId){
         Log.info("Deleting event with id: " + eventId);
         Try.of(() -> eventRepository.deleteById(eventId))

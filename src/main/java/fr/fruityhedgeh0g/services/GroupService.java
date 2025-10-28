@@ -9,13 +9,16 @@ import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @ApplicationScoped
@@ -26,14 +29,15 @@ public class GroupService {
     @Inject
     GroupMapper groupMapper;
 
+    @Transactional
     public Try<List<GroupDto>> getAllGroups(){
         Log.info("Getting all groups");
         return Try.of(() -> groupRepository
                 .findAll()
-                .stream()
-                .map(groupMapper::toDto)
-                .toList())
-                .onFailure(e -> Log.error("Error getting all groups", e));
+                    .stream()
+                    .map(groupMapper::toDto)
+                    .toList())
+                    .onFailure(e -> Log.error("Error getting all groups", e));
     }
 
     public Try<GroupDto> getGroupById(@NotNull UUID groupId){
@@ -51,6 +55,19 @@ public class GroupService {
                 });
     }
 
+    public Try<Set<GroupDto>> getGroupsByIds(@NotNull Set<UUID> groupIds){
+      Log.info("Getting groups with ids: " + groupIds);
+
+      return Try.of(() -> groupRepository.findByIds(groupIds)
+              .stream()
+              .map(groupMapper::toDto)
+              .collect(Collectors.toSet()))
+              .onFailure(e -> {
+                  Log.error("Error getting groups with ids: " + groupIds, e);
+              });
+    };
+
+    @Transactional
     public Try<GroupDto> createGroup(@NotNull GroupDto groupDto){
         return Try.of(() -> {
             Log.debug("Searching for already existing group with name: " + groupDto.getName());
@@ -77,11 +94,13 @@ public class GroupService {
         });
     }
 
+    //TODO : Développer l'update
     public Try<GroupDto> updateGroup(@NotNull GroupDto groupDto){
         Log.info("Updating group: " + groupDto.getGroupId());
         return null;
     }
 
+    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     public void deleteGroup(@NotNull UUID groupId){
         Log.info("Deleting group with id: " + groupId);
         Try.of(() -> groupRepository.deleteById(groupId))

@@ -67,11 +67,13 @@ public class PostService {
         });
     }
 
+    //TODO : Développer l'update
     public Try<PostDto> updatePost(@NotNull PostDto postDto) {
         Log.debug("Updating post: " + postDto.getPostId());
         return null;
     }
 
+    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     public void deletePost(@NotNull UUID postId) {
         Log.debug("Deleting post with id: " + postId);
         Try.of(() -> postRepository.deleteById(postId))
