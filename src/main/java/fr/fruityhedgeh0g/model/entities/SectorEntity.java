@@ -31,4 +31,8 @@ public class SectorEntity extends AuditTemplate {
     @OneToMany(mappedBy = "sector")
     private Set<GroupEntity> groups;
 
+    public void addGroup(GroupEntity group) {
+        groups.add(group);
+        group.setSector(this);
+    }
 }

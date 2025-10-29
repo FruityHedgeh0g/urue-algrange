@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.repositories;
 
 import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
@@ -24,7 +25,11 @@ public class GroupRepository implements PanacheRepositoryBase<GroupEntity, UUID>
                 .firstResult());
     }
 
-    public List<GroupEntity> findByIds(Set<UUID> ids) {
-        return list("id in (?1)", ids);
+    public int update(GroupEntity entity){
+        return update("name = :name, description = :description, sector_id = :sectorId where group_id = :groupId", Parameters
+                .with("name", entity.getName())
+                .and("description", entity.getDescription())
+                .and("sector_id", entity.getSector())
+                .and("group_id", entity.getGroupId()));
     }
 }

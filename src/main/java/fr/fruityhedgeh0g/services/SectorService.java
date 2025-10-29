@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import fr.fruityhedgeh0g.model.entities.SectorEntity;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
+import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
@@ -30,6 +31,10 @@ public class SectorService {
 
     @Inject
     SectorMapper sectorMapper;
+
+    @Inject
+    GroupMapper groupMapper;
+
     @Inject
     GroupRepository groupRepository;
 
@@ -63,34 +68,27 @@ public class SectorService {
     public Try<SectorDto> createSector(@NotNull SectorDto sectorDto) {
         return Try.of(() -> {
             Log.debug("Searching for already existing sector with name: " + sectorDto.getName());
-            if (sectorRepository.existsByName(sectorDto.getName())) {
-                throw new DuplicateEntityException("A sector with name " + sectorDto.getName() + " already exists");
-            }
+            if (sectorRepository.existsByName(sectorDto.getName())) {throw new DuplicateEntityException("A sector with the same name already exists");}
+            if (sectorDto.getGroups().isEmpty()) {throw new IllegalArgumentException("A sector must contain at least one group at creation");}
 
-            if (sectorDto.getGroups().isEmpty()) {
-                throw new IllegalArgumentException("A sector must belong to at least one group");
-            }
-
-            Log.debug("Checking if all groups exist");
-            Set<GroupDto> groups = groupService.getGroupsByIds(
-                        sectorDto.getGroups()
-                            .stream().map(GroupEntity::getGroupId)
-                            .collect(Collectors.toSet())
-                    ).get();
-
-
-            if (groups.size() != sectorDto.getGroups().size()) throw new IllegalArgumentException("Some groups do not exist");
-
-            Log.debug("Checking if all groups belong to the same sector");
-            groups.forEach(group -> {
-                if (group.getSector() != null) {
-                    throw new IllegalArgumentException("A group can only belong to one sector. Group " + group.getGroupId() + " already belongs to a sector");
-                }
-            });
+            Log.debug("Checking if all groups exist and doesn't belong to another sector");
+            SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
+            sectorDto.getGroups()
+                    .stream()
+                    .map(grp -> groupService.getGroupById(grp.getGroupId()).getOrElseThrow(e -> new IllegalArgumentException("Group "+grp.getGroupId()+" does not exist")))
+                    .peek(grp -> {
+                        if (grp.getSector() != null) {
+                            throw new IllegalArgumentException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");
+                        }
+                    })
+                    .map(groupMapper::toEntity)
+                    .peek(sectorEntity::addGroup);
 
             Log.debug("Creating sector: " + sectorDto.getName());
-            SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
+
             sectorRepository.persist(sectorEntity);
+            groups.forEach(sectorEntity::addGroup);
+
 
             Log.debug("Sector created, retrieving up-to-date sector infos: " + sectorEntity.getSectorId());
             return sectorMapper.toDto(
@@ -108,18 +106,18 @@ public class SectorService {
     }
 
     @Transactional
-    public Try<SectorDto> assignGroup(@NotNull UUID sectorId, @NotNull UUID groupId) {
+    public Try<SectorDto> assignGroupToSector(@NotNull UUID sectorId, @NotNull UUID groupId) {
         return Try.of(()-> {
-            if (!sectorRepository.existsById(sectorId)) throw new NoSuchElementException("Sector not found");
+            SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
+                    .orElseThrow(() -> new NoSuchElementException("Sector not found"));
+            GroupEntity groupEntity = groupMapper.toEntity(groupService.getGroupById(groupId)
+                    .getOrElseThrow(e -> new NoSuchElementException("Group not found")));
 
-            GroupDto groupDto = groupService.getGroupById(groupId)
-                    .getOrElseThrow(e -> new NoSuchElementException("Group not found"));
+            if (groupEntity.getSector() != null) throw new IllegalArgumentException("Group already belongs to a sector");
 
-            if (groupDto.getSector() != null) throw new IllegalArgumentException("Group already belongs to a sector");
-
-            //todo : ajouter le modification du groupe pour ajout uuid secteur
-
-            return sectorMapper.toDto(sectorRepository.findByIdOptional(sectorId).get());
+            sectorEntity.addGroup(groupEntity);
+//            groupService.updateGroup(groupMapper.toDto(groupEntity));
+            return sectorMapper.toDto(sectorEntity);
         }).onFailure(e -> {
             if (e instanceof NoSuchElementException) {
                 Log.warn("Group not found: " + groupId);
