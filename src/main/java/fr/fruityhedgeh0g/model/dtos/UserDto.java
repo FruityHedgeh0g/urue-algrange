@@ -13,10 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 
 @Getter
-@Value
+@Setter
+@NoArgsConstructor
 public class UserDto {
-    @JsonView({Views.IdentityOnly.class, Views.Creation.class})
-   UUID userId;
+    @JsonView({Views.System.class,Views.Creation.class})
+    UUID userId;
 
     @JsonView(Views.System.class)
     LocalDateTime createdAt;
@@ -28,23 +29,20 @@ public class UserDto {
     UUID updatedBy;
 
     @JsonView(Views.Basic.class)
-    @JsonSerialize(using = ViewSerializers.class)
     GroupDto group;
 
-    @JsonView(Views.Full.class)
-    @JsonSerialize(using = ViewSerializers.class)
+    @JsonView(Views.Extended.class)
     Set<EventDto> organizedEvents;
 
-    @JsonView(Views.Full.class)
-    @JsonSerialize(using = ViewSerializers.class)
+    @JsonView(Views.Extended.class)
     Set<EventDto> participatedEvents;
 
-    @JsonView(Views.Full.class)
-    @JsonSerialize(using = ViewSerializers.class)
+    @JsonView(Views.Extended.class)
     Set<EventDto> createdEvents;
 
-    @JsonView(Views.Minimal.class)
-    @JsonSerialize(using = ViewSerializers.class)
+    @JsonView(Views.Basic.class)
     Set<RoleDto> roles;
 
 }
+
+

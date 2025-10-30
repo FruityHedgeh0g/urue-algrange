@@ -11,34 +11,34 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@Value
+@Setter
+@NoArgsConstructor
 public class MediaDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.System.class)
     UUID mediaId;
 
-    @JsonView({Views.System.class,Views.Minimal.class})
+    @JsonView({Views.System.class,Views.Basic.class})
     LocalDateTime createdAt;
 
-    @JsonView({Views.System.class,Views.Minimal.class})
+    @JsonView({Views.System.class,Views.Basic.class})
     LocalDateTime updatedAt;
 
-    @JsonView({Views.System.class,Views.Minimal.class})
+    @JsonView({Views.System.class,Views.Basic.class})
     UUID updatedBy;
 
-    @JsonView({Views.Minimal.class,Views.Creation.class})
+    @JsonView({Views.Basic.class,Views.Creation.class})
     String mediaType;
 
-    @JsonView({Views.Minimal.class,Views.Creation.class})
+    @JsonView({Views.Basic.class,Views.Creation.class})
     String fileKey;
 
-    @JsonView({Views.Minimal.class,Views.Creation.class})
+    @JsonView({Views.Basic.class,Views.Creation.class})
     String originalFilename;
 
-    @JsonView({Views.Minimal.class,Views.Creation.class})
+    @JsonView({Views.Basic.class,Views.Creation.class})
     String contentType;
 
     @JsonView({Views.Basic.class,Views.Creation.class})
     long fileSize;
-
 
 }

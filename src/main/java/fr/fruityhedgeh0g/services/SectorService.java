@@ -73,7 +73,7 @@ public class SectorService {
 
             Log.debug("Checking if all groups exist and doesn't belong to another sector");
             SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
-            sectorDto.getGroups()
+            Set<GroupEntity> groups = sectorDto.getGroups()
                     .stream()
                     .map(grp -> groupService.getGroupById(grp.getGroupId()).getOrElseThrow(e -> new IllegalArgumentException("Group "+grp.getGroupId()+" does not exist")))
                     .peek(grp -> {
@@ -82,20 +82,17 @@ public class SectorService {
                         }
                     })
                     .map(groupMapper::toEntity)
-                    .peek(sectorEntity::addGroup);
+                    .peek(sectorEntity::addGroup)
+                    .collect(Collectors.toSet());
 
             Log.debug("Creating sector: " + sectorDto.getName());
 
             sectorRepository.persist(sectorEntity);
-            groups.forEach(sectorEntity::addGroup);
+            //groups.forEach(sectorEntity::addGroup);
 
 
             Log.debug("Sector created, retrieving up-to-date sector infos: " + sectorEntity.getSectorId());
-            return sectorMapper.toDto(
-                    sectorRepository
-                            .findByIdOptional(sectorEntity.getSectorId())
-                            .orElseThrow(NoSuchElementException::new)
-            );
+            return sectorMapper.toDto(sectorEntity);
         }).onFailure(e -> {
             if (e instanceof DuplicateEntityException) {
                 Log.warn("Sector already exists: " + sectorDto.getName());

@@ -14,9 +14,10 @@ import java.util.Set;
 import java.util.UUID;
 
 @Getter
-@Value
+@Setter
+@NoArgsConstructor
 public class SectorDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.System.class)
     UUID sectorId;
 
     @JsonView(Views.System.class)
@@ -28,14 +29,14 @@ public class SectorDto {
     @JsonView(Views.System.class)
     UUID updatedBy;
 
-    @JsonView({Views.Minimal.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     String name;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
     String description;
 
-    @JsonView({Views.Full.class,Views.Creation.class})
-    @JsonSerialize(using = ViewSerializers.class)
+    @JsonView({Views.Extended.class,Views.Creation.class})
     Set<GroupDto> groups;
+
 
 }

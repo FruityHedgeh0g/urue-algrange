@@ -13,9 +13,10 @@ import java.util.Set;
 import java.util.UUID;
 
 @Getter
-@Value
+@Setter
+@NoArgsConstructor
 public class RoleDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.System.class)
     UUID roleId;
 
     @JsonView(Views.System.class)
@@ -27,7 +28,7 @@ public class RoleDto {
     @JsonView(Views.System.class)
     UUID updatedBy;
 
-    @JsonView({Views.Minimal.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     String name;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
@@ -39,6 +40,7 @@ public class RoleDto {
 //    @JsonView(Views.Full.class)
 //    @JsonSerialize(using = ViewSerializers.class)
 //    Set<UserDto> users;
+
 
 
 }

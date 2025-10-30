@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@Value
+@Setter
+@NoArgsConstructor
 public class ConfigurationDto {
 
     @JsonView(Views.System.class)
@@ -23,7 +24,7 @@ public class ConfigurationDto {
     @JsonView(Views.System.class)
     UUID updatedBy;
 
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.System.class)
     String name;
 
     @JsonView(Views.System.class)

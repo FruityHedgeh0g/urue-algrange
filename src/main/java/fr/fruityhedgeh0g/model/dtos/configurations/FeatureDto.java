@@ -8,9 +8,10 @@ import lombok.Setter;
 import lombok.Value;
 
 @Getter
-@Value
+@Setter
+@NoArgsConstructor
 public class FeatureDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.System.class)
     String name;
 
     @JsonView(Views.System.class)

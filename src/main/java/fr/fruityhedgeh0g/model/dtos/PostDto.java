@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
-@Value
+@Setter
+@NoArgsConstructor
 public class PostDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.System.class)
     UUID postId;
 
     @JsonView(Views.System.class)
@@ -28,13 +29,13 @@ public class PostDto {
     @JsonView(Views.System.class)
     UUID updatedBy;
 
-    @JsonView({Views.Minimal.class,Views.Creation.class})
+    @JsonView({Views.Basic.class,Views.Creation.class})
     String  title;
 
     @JsonView({Views.Basic.class,Views.Creation.class})
     String content;
 
-    @JsonView({Views.Full.class,Views.Creation.class})
+    @JsonView({Views.Extended.class,Views.Creation.class})
     MediaDto banner;
 
     @JsonView({Views.Basic.class,Views.Creation.class})
