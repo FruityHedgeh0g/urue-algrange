@@ -28,7 +28,7 @@ public class RoleController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<RoleDto> getAllRoles(){
+    public @JsonView(Views.Basic.class) List<RoleDto> getAllRoles(){
         return roleService.getAllRoles().get();
     }
 }

@@ -37,7 +37,7 @@ public class ConfigurationController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<ConfigurationDto> getAllConfigurations(){
+    public @JsonView(Views.Basic.class) List<ConfigurationDto> getAllConfigurations(){
         return configurationService.getAllConfigurations().get();
     }
 }

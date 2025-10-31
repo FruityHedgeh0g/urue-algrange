@@ -41,6 +41,4 @@ public class RoleDto {
 //    @JsonSerialize(using = ViewSerializers.class)
 //    Set<UserDto> users;
 
-
-
 }

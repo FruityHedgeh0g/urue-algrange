@@ -25,7 +25,7 @@ public class EventController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<EventDto> getAllEvents(){
+    public @JsonView(Views.Basic.class) List<EventDto> getAllEvents(){
         return eventService.getAllEvents().get();
     }
 
@@ -33,7 +33,7 @@ public class EventController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/add")
-    public @JsonView(Views.Full.class) EventDto addEvent( @JsonView(Views.Creation.class) EventDto eventDto){
+    public @JsonView(Views.Extended.class) EventDto addEvent( @JsonView(Views.Creation.class) EventDto eventDto){
         return eventService.createEvent(eventDto).get();
     }
 }

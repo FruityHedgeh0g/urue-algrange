@@ -36,7 +36,7 @@ public class FeatureController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<FeatureDto> getAllFeatures(){
+    public @JsonView(Views.Basic.class) List<FeatureDto> getAllFeatures(){
         return featureService.getAllFeatures().get();
     }
 }

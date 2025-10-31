@@ -36,7 +36,6 @@ public class SectorDto {
     String description;
 
     @JsonView({Views.Extended.class,Views.Creation.class})
-    Set<GroupDto> groups;
-
+    Set<GroupDto.Identity> groups;
 
 }
