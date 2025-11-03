@@ -13,6 +13,6 @@ public class ViewSerializers extends JsonSerializer<Object> {
         @Override
         public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writerWithView(Views.IdentityOnly.class).writeValue(jgen, value);
+            objectMapper.writerWithView(Views.IdentifierOnly.class).writeValue(jgen, value);
     }
 }

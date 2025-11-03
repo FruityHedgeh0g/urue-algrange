@@ -4,7 +4,7 @@ import fr.fruityhedgeh0g.model.dtos.SectorDto;
 import fr.fruityhedgeh0g.model.entities.SectorEntity;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "jakarta-cdi")
+@Mapper(componentModel = "jakarta-cdi",uses = UserMapper.class)
 public interface SectorMapper {
 
     SectorEntity toEntity(SectorDto dto);
