@@ -41,7 +41,7 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/add")
-    public @JsonView(Views.System.class) UserDto addUser( @JsonView(Views.Creation.class) UserDto userDto){
+    public @JsonView(Views.Basic.class) UserDto addUser( @JsonView(Views.Creation.class) UserDto userDto){
         return userService.createUser(userDto).get();
     }
 

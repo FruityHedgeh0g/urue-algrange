@@ -36,9 +36,9 @@ public class GroupDto {
     String description;
 
     @JsonView(Views.Extended.class)
-    Set<UUID> members;
+    Set<UserDto> members;
 
     @JsonView(Views.Basic.class)
-    UUID sector;
+    SectorDto sector;
 
 }

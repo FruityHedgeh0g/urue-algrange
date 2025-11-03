@@ -72,7 +72,7 @@ public class EventDto {
 
     @JsonView(Views.Extended.class)
     @JsonSerialize(using = ViewSerializers.class)
-    UserEntity creator;
+    UserDto creator;
 
 
 
