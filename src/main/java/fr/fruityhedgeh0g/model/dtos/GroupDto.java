@@ -17,17 +17,17 @@ import java.util.UUID;
 
 @Value
 public class GroupDto {
-    @JsonView(Views.System.class)
+    @JsonView(Views.IdentifierOnly.class)
     UUID groupId;
 
-    @JsonView(Views.System.class)
-    LocalDateTime createdAt;
-
-    @JsonView(Views.System.class)
-    LocalDateTime updatedAt;
-
-    @JsonView(Views.System.class)
-    UUID updatedBy;
+//    @JsonView(Views.System.class)
+//    LocalDateTime createdAt;
+//
+//    @JsonView(Views.System.class)
+//    LocalDateTime updatedAt;
+//
+//    @JsonView(Views.System.class)
+//    UUID updatedBy;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
     String name;

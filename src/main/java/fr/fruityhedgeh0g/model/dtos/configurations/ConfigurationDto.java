@@ -14,19 +14,19 @@ import java.util.UUID;
 @Value
 public class ConfigurationDto {
 
-    @JsonView(Views.System.class)
-    LocalDateTime createdAt;
+//    @JsonView(Views.System.class)
+//    LocalDateTime createdAt;
+//
+//    @JsonView(Views.System.class)
+//    LocalDateTime updatedAt;
+//
+//    @JsonView(Views.System.class)
+//    UUID updatedBy;
 
-    @JsonView(Views.System.class)
-    LocalDateTime updatedAt;
-
-    @JsonView(Views.System.class)
-    UUID updatedBy;
-
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.IdentifierOnly.class)
     String name;
 
-    @JsonView(Views.System.class)
+    @JsonView(Views.Basic.class)
     String value;
 
 }

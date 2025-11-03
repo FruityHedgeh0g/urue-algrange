@@ -10,12 +10,12 @@ import lombok.Value;
 
 @Value
 public class FeatureDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.IdentifierOnly.class)
     String name;
 
-    @JsonView(Views.System.class)
+    @JsonView(Views.Basic.class)
     String description;
 
-    @JsonView(Views.System.class)
+    @JsonView(Views.Basic.class)
     boolean isActive;
 }

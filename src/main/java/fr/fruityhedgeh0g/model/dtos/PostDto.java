@@ -16,28 +16,28 @@ import java.util.UUID;
 
 @Value
 public class PostDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.IdentifierOnly.class)
     UUID postId;
 
-    @JsonView(Views.System.class)
+    @JsonView(Views.Basic.class)
     LocalDateTime createdAt;
 
-    @JsonView(Views.System.class)
+    @JsonView(Views.Basic.class)
     LocalDateTime updatedAt;
 
-    @JsonView(Views.System.class)
-    UUID updatedBy;
+//    @JsonView(Views.System.class)
+//    UUID updatedBy;
 
-    @JsonView({Views.Minimal.class,Views.Creation.class})
+    @JsonView({Views.Basic.class,Views.Creation.class})
     String  title;
 
-    @JsonView({Views.Basic.class,Views.Creation.class})
+    @JsonView({Views.Extended.class,Views.Creation.class})
     String content;
 
-    @JsonView({Views.Full.class,Views.Creation.class})
+    @JsonView({Views.Extended.class,Views.Creation.class})
     MediaDto banner;
 
-    @JsonView({Views.Basic.class,Views.Creation.class})
+    @JsonView({Views.Extended.class,Views.Creation.class})
     List<MediaDto> attachments;
 
 }

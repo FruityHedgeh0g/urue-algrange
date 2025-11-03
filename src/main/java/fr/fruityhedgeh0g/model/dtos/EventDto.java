@@ -14,31 +14,31 @@ import java.util.UUID;
 
 @Value
 public class EventDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.IdentifierOnly.class)
     UUID eventId;
 
-    @JsonView(Views.System.class)
-    LocalDateTime createdAt;
+//    @JsonView(Views.System.class)
+//    LocalDateTime createdAt;
+//
+//    @JsonView(Views.System.class)
+//    LocalDateTime updatedAt;
+//
+//    @JsonView(Views.System.class)
+//    UUID updatedBy;
 
-    @JsonView(Views.System.class)
-    LocalDateTime updatedAt;
-
-    @JsonView(Views.System.class)
-    UUID updatedBy;
-
-    @JsonView(Views.Minimal.class)
+    @JsonView(Views.Basic.class)
     String status;
 
-    @JsonView({Views.Minimal.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     String name;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
     String description;
 
-    @JsonView({Views.Minimal.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     LocalDateTime startDateTime;
 
-    @JsonView({Views.Minimal.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     LocalDateTime endDateTime;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
@@ -62,15 +62,15 @@ public class EventDto {
     @JsonView({Views.Basic.class, Views.Creation.class})
     String addressComplement;
 
-    @JsonView(Views.Full.class)
+    @JsonView(Views.Extended.class)
     @JsonSerialize(using = ViewSerializers.class)
     Set<UserEntity> participants;
 
-    @JsonView(Views.Full.class)
+    @JsonView(Views.Extended.class)
     @JsonSerialize(using = ViewSerializers.class)
     Set<UserEntity> organizers;
 
-    @JsonView(Views.Full.class)
+    @JsonView(Views.Extended.class)
     @JsonSerialize(using = ViewSerializers.class)
     UserEntity creator;
 

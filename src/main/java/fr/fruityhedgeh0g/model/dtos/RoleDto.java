@@ -15,25 +15,25 @@ import java.util.UUID;
 
 @Value
 public class RoleDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.IdentifierOnly.class)
     UUID roleId;
 
-    @JsonView(Views.System.class)
-    LocalDateTime createdAt;
+//    @JsonView(Views.System.class)
+//    LocalDateTime createdAt;
+//
+//    @JsonView(Views.System.class)
+//    LocalDateTime updatedAt;
+//
+//    @JsonView(Views.System.class)
+//    UUID updatedBy;
 
-    @JsonView(Views.System.class)
-    LocalDateTime updatedAt;
-
-    @JsonView(Views.System.class)
-    UUID updatedBy;
-
-    @JsonView({Views.Minimal.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     String name;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
     String description;
 
-    @JsonView({Views.System.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     String roleType;
 
 //    @JsonView(Views.Full.class)
