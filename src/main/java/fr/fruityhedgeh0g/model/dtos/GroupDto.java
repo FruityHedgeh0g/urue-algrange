@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Value
 public class GroupDto {
-    @JsonView(Views.IdentityOnly.class)
+    @JsonView(Views.System.class)
     UUID groupId;
 
     @JsonView(Views.System.class)
@@ -29,19 +29,16 @@ public class GroupDto {
     @JsonView(Views.System.class)
     UUID updatedBy;
 
-    @JsonView({Views.Minimal.class, Views.Creation.class})
+    @JsonView({Views.Basic.class, Views.Creation.class})
     String name;
 
     @JsonView({Views.Basic.class, Views.Creation.class})
     String description;
 
-    @JsonView(Views.Full.class)
-    @JsonSerialize(using = ViewSerializers.class)
-    Set<UserEntity> members;
+    @JsonView(Views.Extended.class)
+    Set<UUID> members;
 
     @JsonView(Views.Basic.class)
-    @JsonSerialize(using = ViewSerializers.class)
-    SectorEntity sector;
-
+    UUID sector;
 
 }

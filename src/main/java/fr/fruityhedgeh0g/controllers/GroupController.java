@@ -27,7 +27,7 @@ public class GroupController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<GroupDto> getAllGroups(){
+    public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
         return groupService.getAllGroups().get();
     }
 
@@ -35,7 +35,7 @@ public class GroupController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/add")
-    public @JsonView(Views.Full.class) GroupDto addGroup(@JsonView(Views.Creation.class) GroupDto groupDto){
+    public @JsonView(Views.Extended.class) GroupDto addGroup(@JsonView(Views.Creation.class) GroupDto groupDto){
         return groupService.createGroup(groupDto).get();
     }
 }

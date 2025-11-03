@@ -33,7 +33,7 @@ public class UserController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<UserDto> getAllUsers(){
+    public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
         return userService.getAllUsers().get();
     }
 

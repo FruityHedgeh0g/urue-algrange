@@ -28,7 +28,7 @@ public class MediaController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<MediaDto> getAllMedias(){
+    public @JsonView(Views.Basic.class) List<MediaDto> getAllMedias(){
         return mediaService.getAllMedia().get();
     }
 }

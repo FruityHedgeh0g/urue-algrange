@@ -28,7 +28,7 @@ public class PostController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Minimal.class) List<PostDto> getAllPosts(){
+    public @JsonView(Views.Basic.class) List<PostDto> getAllPosts(){
         return postService.getAllPosts().get();
     }
 }

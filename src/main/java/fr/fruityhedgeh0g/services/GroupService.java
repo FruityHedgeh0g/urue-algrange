@@ -10,7 +10,6 @@ import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
@@ -55,18 +54,6 @@ public class GroupService {
                 });
     }
 
-    public Try<Set<GroupDto>> getGroupsByIds(@NotNull Set<UUID> groupIds){
-      Log.info("Getting groups with ids: " + groupIds);
-
-      return Try.of(() -> groupRepository.findByIds(groupIds)
-              .stream()
-              .map(groupMapper::toDto)
-              .collect(Collectors.toSet()))
-              .onFailure(e -> {
-                  Log.error("Error getting groups with ids: " + groupIds, e);
-              });
-    };
-
     @Transactional
     public Try<GroupDto> createGroup(@NotNull GroupDto groupDto){
         return Try.of(() -> {
@@ -94,10 +81,11 @@ public class GroupService {
         });
     }
 
-    //TODO : Développer l'update
-    public Try<GroupDto> updateGroup(@NotNull GroupDto groupDto){
-        Log.info("Updating group: " + groupDto.getGroupId());
-        return null;
+    public boolean updateGroup(@NotNull GroupDto groupDto){
+        Log.debug("Updating group: " + groupDto.getGroupId());
+        return Try.run(() -> groupRepository.update(groupMapper.toEntity(groupDto)))
+                .onFailure(e -> Log.error("Error updating group", e))
+                .isSuccess();
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
