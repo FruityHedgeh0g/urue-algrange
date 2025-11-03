@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
+
 @Value
 public class PostDto {
     @JsonView(Views.IdentityOnly.class)

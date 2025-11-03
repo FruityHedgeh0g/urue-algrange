@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter
+
 @Value
 public class SectorDto {
     @JsonView(Views.IdentityOnly.class)

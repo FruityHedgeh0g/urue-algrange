@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
 
-@Getter
+
 @Value
 public class FeatureDto {
     @JsonView(Views.IdentityOnly.class)

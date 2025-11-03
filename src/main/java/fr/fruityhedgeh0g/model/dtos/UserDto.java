@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter
 @Value
 public class UserDto {
     @JsonView({Views.IdentityOnly.class, Views.Creation.class})

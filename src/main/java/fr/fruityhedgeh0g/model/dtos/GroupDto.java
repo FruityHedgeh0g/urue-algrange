@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter
+
 @Value
 public class GroupDto {
     @JsonView(Views.IdentityOnly.class)

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter
+
 @Value
 public class RoleDto {
     @JsonView(Views.IdentityOnly.class)
