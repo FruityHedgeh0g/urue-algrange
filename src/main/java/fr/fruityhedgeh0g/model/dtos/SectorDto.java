@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Value
 public class SectorDto {
-    @JsonView(Views.IdentifierOnly.class)
+    @JsonView(GlobalViews.IdentifierOnly.class)
     UUID sectorId;
 
 //    @JsonView(Views.System.class)
@@ -28,14 +28,17 @@ public class SectorDto {
 //    @JsonView(Views.System.class)
 //    UUID updatedBy;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String name;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String description;
 
-    @JsonView({Views.Extended.class,Views.Creation.class})
+    @JsonView({Basic.class,Creation.class})
     @JsonSerialize(using = ViewSerializers.class)
     Set<GroupDto> groups;
+
+    public interface Creation {}
+    public interface Basic extends GlobalViews.IdentifierOnly {}
 
 }

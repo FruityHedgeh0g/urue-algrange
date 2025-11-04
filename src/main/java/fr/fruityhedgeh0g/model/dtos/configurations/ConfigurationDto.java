@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.model.dtos.configurations;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.Views;
+import fr.fruityhedgeh0g.model.dtos.GlobalViews;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,10 +23,11 @@ public class ConfigurationDto {
 //    @JsonView(Views.System.class)
 //    UUID updatedBy;
 
-    @JsonView(Views.IdentifierOnly.class)
+    @JsonView(GlobalViews.IdentifierOnly.class)
     String name;
 
-    @JsonView(Views.Basic.class)
+    @JsonView(Basic.class)
     String value;
 
+    public interface Basic extends GlobalViews.IdentifierOnly {}
 }

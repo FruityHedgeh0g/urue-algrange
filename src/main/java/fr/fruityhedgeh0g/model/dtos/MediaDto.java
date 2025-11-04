@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Value
 public class MediaDto {
-    @JsonView(Views.IdentifierOnly.class)
+    @JsonView(GlobalViews.IdentifierOnly.class)
     UUID mediaId;
 
 //    @JsonView({Views.System.class,Views.Minimal.class})
@@ -25,20 +25,21 @@ public class MediaDto {
 //    @JsonView({Views.System.class,Views.Minimal.class})
 //    UUID updatedBy;
 
-    @JsonView({Views.Basic.class,Views.Creation.class})
+    @JsonView({Basic.class,Creation.class})
     String mediaType;
 
-    @JsonView({Views.Basic.class,Views.Creation.class})
+    @JsonView({Basic.class,Creation.class})
     String fileKey;
 
-    @JsonView({Views.Basic.class,Views.Creation.class})
+    @JsonView({Basic.class,Creation.class})
     String originalFilename;
 
-    @JsonView({Views.Basic.class,Views.Creation.class})
+    @JsonView({Basic.class,Creation.class})
     String contentType;
 
-    @JsonView({Views.Basic.class,Views.Creation.class})
+    @JsonView({Basic.class,Creation.class})
     long fileSize;
 
-
+    public interface Creation {}
+    public interface Basic extends GlobalViews.IdentifierOnly {}
 }

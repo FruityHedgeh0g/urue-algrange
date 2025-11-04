@@ -1,7 +1,6 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.Views;
 import fr.fruityhedgeh0g.model.dtos.configurations.FeatureDto;
 import fr.fruityhedgeh0g.services.FeatureService;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -36,7 +35,7 @@ public class FeatureController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Basic.class) List<FeatureDto> getAllFeatures(){
+    public @JsonView(FeatureDto.Basic.class) List<FeatureDto> getAllFeatures(){
         return featureService.getAllFeatures().get();
     }
 }

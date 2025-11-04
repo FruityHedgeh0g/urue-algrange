@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Value
 public class EventDto {
-    @JsonView(Views.IdentifierOnly.class)
+    @JsonView(GlobalViews.IdentifierOnly.class)
     UUID eventId;
 
 //    @JsonView(Views.System.class)
@@ -26,55 +26,57 @@ public class EventDto {
 //    @JsonView(Views.System.class)
 //    UUID updatedBy;
 
-    @JsonView(Views.Basic.class)
+    @JsonView(Basic.class)
     String status;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String name;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String description;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     LocalDateTime startDateTime;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     LocalDateTime endDateTime;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String latitude;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String longitude;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String address;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String city;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String country;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String postalCode;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String addressComplement;
 
-    @JsonView(Views.Extended.class)
+    @JsonView(Extended.class)
     @JsonSerialize(using = ViewSerializers.class)
     Set<UserEntity> participants;
 
-    @JsonView(Views.Extended.class)
+    @JsonView(Extended.class)
     @JsonSerialize(using = ViewSerializers.class)
     Set<UserEntity> organizers;
 
-    @JsonView(Views.Extended.class)
+    @JsonView(Extended.class)
     @JsonSerialize(using = ViewSerializers.class)
     UserDto creator;
 
-
+    public interface Creation {}
+    public interface Basic extends GlobalViews.IdentifierOnly {}
+    public interface Extended extends Basic {}
 
 }
 

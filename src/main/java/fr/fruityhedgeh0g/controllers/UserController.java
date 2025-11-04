@@ -3,7 +3,6 @@ package fr.fruityhedgeh0g.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.util.ViewMatcher;
 import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.dtos.Views;
 import fr.fruityhedgeh0g.services.UserService;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.User;
@@ -33,7 +32,7 @@ public class UserController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
+    public @JsonView(UserDto.Basic.class) List<UserDto> getAllUsers(){
         return userService.getAllUsers().get();
     }
 
@@ -41,7 +40,7 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/add")
-    public @JsonView(Views.Basic.class) UserDto addUser( @JsonView(Views.Creation.class) UserDto userDto){
+    public @JsonView(UserDto.Basic.class) UserDto addUser( @JsonView(UserDto.Creation.class) UserDto userDto){
         return userService.createUser(userDto).get();
     }
 

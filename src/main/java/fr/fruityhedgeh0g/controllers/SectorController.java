@@ -3,7 +3,6 @@ package fr.fruityhedgeh0g.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.model.dtos.GroupDto;
 import fr.fruityhedgeh0g.model.dtos.SectorDto;
-import fr.fruityhedgeh0g.model.dtos.Views;
 import fr.fruityhedgeh0g.services.SectorService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -28,7 +27,7 @@ public class SectorController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Extended.class) List<SectorDto> getAllSectors(){
+    public @JsonView(SectorDto.Basic.class) List<SectorDto> getAllSectors(){
         return sectorService.getAllSectors().get();
     }
 
@@ -36,7 +35,7 @@ public class SectorController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/add")
-    public @JsonView(Views.Extended.class) SectorDto addSector(@JsonView(Views.Creation.class) SectorDto sectorDto){
+    public @JsonView(SectorDto.Basic.class) SectorDto addSector(@JsonView(SectorDto.Creation.class) SectorDto sectorDto){
         return sectorService.createSector(sectorDto).get();
     }
 
@@ -44,7 +43,7 @@ public class SectorController {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/sector/{sectorId}/assign/{groupId}")
-    public @JsonView(Views.Extended.class) GroupDto addGroupToSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
+    public @JsonView(GroupDto.Extended.class) GroupDto addGroupToSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
         return null;
     }
 }

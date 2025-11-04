@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Value
 public class GroupDto {
-    @JsonView(Views.IdentifierOnly.class)
+    @JsonView({GlobalViews.IdentifierOnly.class, SectorDto.Creation.class})
     UUID groupId;
 
 //    @JsonView(Views.System.class)
@@ -29,16 +29,19 @@ public class GroupDto {
 //    @JsonView(Views.System.class)
 //    UUID updatedBy;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String name;
 
-    @JsonView({Views.Basic.class, Views.Creation.class})
+    @JsonView({Basic.class, Creation.class})
     String description;
 
-    @JsonView(Views.Extended.class)
+    @JsonView(Extended.class)
     Set<UserDto> members;
 
-    @JsonView(Views.Basic.class)
+    @JsonView(Basic.class)
     SectorDto sector;
 
+    public interface Creation {}
+    public interface Basic extends GlobalViews.IdentifierOnly {}
+    public interface Extended extends Basic {}
 }

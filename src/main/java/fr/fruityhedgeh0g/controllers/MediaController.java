@@ -2,7 +2,6 @@ package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.model.dtos.MediaDto;
-import fr.fruityhedgeh0g.model.dtos.Views;
 import fr.fruityhedgeh0g.services.MediaService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -28,7 +27,7 @@ public class MediaController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(Views.Basic.class) List<MediaDto> getAllMedias(){
+    public @JsonView(MediaDto.Basic.class) List<MediaDto> getAllMedias(){
         return mediaService.getAllMedia().get();
     }
 }
