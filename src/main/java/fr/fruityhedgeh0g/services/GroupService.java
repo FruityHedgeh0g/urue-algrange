@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.experimental.PackagePrivate;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -39,12 +40,12 @@ public class GroupService {
                     .onFailure(e -> Log.error("Error getting all groups", e));
     }
 
-    public Try<GroupDto> getGroupById(@NotNull UUID groupId){
+    @PackagePrivate
+    Try<GroupEntity> getGroupEntityById(@NotNull UUID groupId){
         Log.info("Getting group with id: " + groupId);
         return Try.of(() -> groupRepository
                         .findByIdOptional(groupId)
                         .orElseThrow(NoSuchElementException::new))
-                .map(groupMapper::toDto)
                 .onFailure(e -> {
                     if (e instanceof NoSuchElementException) {
                         Log.warn("Group not found: " + groupId);
@@ -52,6 +53,10 @@ public class GroupService {
                         Log.error("Error getting group with id: " + groupId, e);
                     }
                 });
+    }
+
+    public Try<GroupDto> getGroupById(@NotNull UUID groupId){
+         return getGroupEntityById(groupId).map(groupMapper::toDto).onFailure(e -> Log.error("A mapping error occurred: " + groupId, e));
     }
 
     @Transactional

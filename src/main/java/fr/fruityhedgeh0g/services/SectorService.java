@@ -73,22 +73,20 @@ public class SectorService {
 
             Log.debug("Checking if all groups exist and doesn't belong to another sector");
             SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
-            Set<GroupEntity> groups = sectorDto.getGroups()
+            sectorEntity.setGroups(sectorEntity.getGroups()
                     .stream()
-                    .map(grp -> groupService.getGroupById(grp.getGroupId()).getOrElseThrow(e -> new IllegalArgumentException("Group "+grp.getGroupId()+" does not exist")))
+                    .map(grp -> groupService.getGroupEntityById(grp.getGroupId()).getOrElseThrow(e -> new IllegalArgumentException("Group "+grp.getGroupId()+" does not exist")))
                     .peek(grp -> {
                         if (grp.getSector() != null) {
                             throw new IllegalArgumentException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");
                         }
                     })
-                    .map(groupMapper::toEntity)
-                    .peek(sectorEntity::addGroup)
-                    .collect(Collectors.toSet());
+                    .peek(group -> group.setSector(sectorEntity))
+                    .collect(Collectors.toSet()));
 
             Log.debug("Creating sector: " + sectorDto.getName());
 
             sectorRepository.persist(sectorEntity);
-            //groups.forEach(sectorEntity::addGroup);
 
 
             Log.debug("Sector created, retrieving up-to-date sector infos: " + sectorEntity.getSectorId());
@@ -107,8 +105,8 @@ public class SectorService {
         return Try.of(()-> {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
                     .orElseThrow(() -> new NoSuchElementException("Sector not found"));
-            GroupEntity groupEntity = groupMapper.toEntity(groupService.getGroupById(groupId)
-                    .getOrElseThrow(e -> new NoSuchElementException("Group not found")));
+            GroupEntity groupEntity = groupService.getGroupEntityById(groupId)
+                    .getOrElseThrow(e -> new NoSuchElementException("Group not found"));
 
             if (groupEntity.getSector() != null) throw new IllegalArgumentException("Group already belongs to a sector");
 
