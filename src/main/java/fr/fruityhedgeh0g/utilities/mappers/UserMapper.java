@@ -1,18 +1,11 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import fr.fruityhedgeh0g.model.dtos.EventDto;
-import fr.fruityhedgeh0g.model.dtos.GroupDto;
 import fr.fruityhedgeh0g.model.dtos.UserDto;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
-import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
-
-import java.util.Set;
 
 @Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
 public interface UserMapper {

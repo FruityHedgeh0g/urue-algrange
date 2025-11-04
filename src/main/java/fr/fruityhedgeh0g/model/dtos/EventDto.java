@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
 import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
-import lombok.Getter;
 import lombok.Value;
 
 import java.time.LocalDateTime;

@@ -1,13 +1,8 @@
 package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import jakarta.persistence.Column;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.Value;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 

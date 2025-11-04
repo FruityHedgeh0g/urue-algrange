@@ -2,9 +2,6 @@ package fr.fruityhedgeh0g.model.dtos.configurations;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.model.dtos.GlobalViews;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.Value;
 
 

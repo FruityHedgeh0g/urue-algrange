@@ -2,14 +2,9 @@ package fr.fruityhedgeh0g.model.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import fr.fruityhedgeh0g.utilities.serializers.ViewSerializers;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.Value;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 

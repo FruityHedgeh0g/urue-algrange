@@ -10,7 +10,6 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
-import java.util.UUID;
 
 @Path("/api/groups")
 public class GroupController {
