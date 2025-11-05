@@ -1,7 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
-import fr.fruityhedgeh0g.model.dtos.GroupDto;
 import fr.fruityhedgeh0g.model.dtos.SectorDto;
 import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import fr.fruityhedgeh0g.model.entities.SectorEntity;
@@ -111,7 +110,6 @@ public class SectorService {
             if (groupEntity.getSector() != null) throw new IllegalArgumentException("Group already belongs to a sector");
 
             sectorEntity.addGroup(groupEntity);
-//            groupService.updateGroup(groupMapper.toDto(groupEntity));
             return sectorMapper.toDto(sectorEntity);
         }).onFailure(e -> {
             if (e instanceof NoSuchElementException) {
@@ -126,13 +124,24 @@ public class SectorService {
     //TODO : Développer l'update
     public Try<SectorDto> updateSector(@NotNull SectorDto sectorDto) {
         Log.info("Updating sector: " + sectorDto.getSectorId());
-        return null;
+        return Try.of(() -> {
+            SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorDto.getSectorId())
+                    .orElseThrow(() -> new NoSuchElementException("Sector not found"));
+
+            sectorEntity = sectorMapper.updateEntityFromDto(sectorEntity,sectorDto);
+
+            return sectorMapper.toDto(sectorRepository
+                    .findByIdOptional(sectorEntity.getSectorId())
+                    .orElseThrow(() -> new NoSuchElementException("Sector not found")));
+        }).onFailure(ex -> {
+            Log.error("Error updating sector with id: " + sectorDto.getSectorId(), ex);
+        });
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
-    public void deleteSector(@NotNull UUID sectorId) {
+    public boolean deleteSector(@NotNull UUID sectorId) {
         Log.info("Deleting sector with id: " + sectorId);
-        Try.run(() -> sectorRepository.deleteById(sectorId))
-                .onFailure(e -> Log.error("Error deleting sector with id: " + sectorId, e));
+        return Try.run(() -> sectorRepository.deleteById(sectorId))
+                .onFailure(e -> Log.error("Error deleting sector with id: " + sectorId, e)).isSuccess();
     }
 }

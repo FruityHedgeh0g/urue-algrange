@@ -29,11 +29,12 @@ public class SectorDto {
     @JsonView({Basic.class, Creation.class})
     String description;
 
-    @JsonView({Basic.class,Creation.class})
+    @JsonView({Extended.class,Creation.class})
     @JsonSerialize(using = ViewSerializers.class)
     Set<GroupDto> groups;
 
     public interface Creation {}
     public interface Basic extends GlobalViews.IdentifierOnly {}
+    public interface Extended extends Basic {}
 
 }

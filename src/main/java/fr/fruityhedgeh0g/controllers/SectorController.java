@@ -27,7 +27,7 @@ public class SectorController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/get/all")
-    public @JsonView(SectorDto.Basic.class) List<SectorDto> getAllSectors(){
+    public @JsonView(SectorDto.Extended.class) List<SectorDto> getAllSectors(){
         return sectorService.getAllSectors().get();
     }
 
@@ -35,15 +35,23 @@ public class SectorController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/add")
-    public @JsonView(SectorDto.Basic.class) SectorDto addSector(@JsonView(SectorDto.Creation.class) SectorDto sectorDto){
+    public @JsonView(SectorDto.Extended.class) SectorDto addSector(@JsonView(SectorDto.Creation.class) SectorDto sectorDto){
         return sectorService.createSector(sectorDto).get();
     }
 
     @PATCH
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/sector/{sectorId}/assign/{groupId}")
-    public @JsonView(GroupDto.Extended.class) GroupDto addGroupToSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
-        return null;
+    @Path("/{sectorId}/assign/{groupId}")
+    public @JsonView(SectorDto.Extended.class) SectorDto addGroupToSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
+        return sectorService.assignGroupToSector(sectorId,groupId).get();
+    }
+
+    @PATCH
+    @Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/update")
+    public @JsonView(SectorDto.Basic.class) SectorDto updateSector(@JsonView(SectorDto.Basic.class) SectorDto sectorDto) {
+        return sectorService.updateSector(sectorDto).get();
     }
 }
