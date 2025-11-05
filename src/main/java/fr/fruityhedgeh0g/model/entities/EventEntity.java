@@ -19,20 +19,20 @@ import java.util.UUID;
 public class EventEntity extends AuditTemplate {
 
     @Id
-    @Column(name = "event_id")
+    @Column(name = "event_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID eventId;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "startDateTime")
+    @Column(name = "startDateTime", nullable = false)
     private LocalDateTime startDateTime;
 
     @Column(name = "endDateTime")

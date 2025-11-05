@@ -54,4 +54,11 @@ public class SectorController {
     public @JsonView(SectorDto.Basic.class) SectorDto updateSector(@JsonView(SectorDto.Basic.class) SectorDto sectorDto) {
         return sectorService.updateSector(sectorDto).get();
     }
+
+    @DELETE
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Path("/remove/{sectorId}")
+    public void deleteSector(@PathParam("sectorId") UUID sectorId) {
+        sectorService.deleteSector(sectorId);
+    }
 }

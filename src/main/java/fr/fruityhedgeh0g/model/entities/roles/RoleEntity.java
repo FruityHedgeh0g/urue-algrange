@@ -22,11 +22,11 @@ import java.util.UUID;
 public abstract class RoleEntity extends AuditTemplate {
 //
     @Id
-    @Column(name = "role_id")
+    @Column(name = "role_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID roleId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "description")

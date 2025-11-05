@@ -12,10 +12,10 @@ import java.util.UUID;
 @MappedSuperclass
 public abstract class AuditTemplate {
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(name = "updated_by")

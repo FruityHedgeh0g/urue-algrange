@@ -19,11 +19,11 @@ import java.util.UUID;
 public class GroupEntity extends AuditTemplate {
 
     @Id
-    @Column(name = "group_id")
+    @Column(name = "group_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID groupId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "description")
@@ -35,5 +35,10 @@ public class GroupEntity extends AuditTemplate {
     @ManyToOne
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
+
+    @PreRemove
+    private void preRemove() {
+        members.forEach(member -> member.setGroup(null));
+    }
 
 }

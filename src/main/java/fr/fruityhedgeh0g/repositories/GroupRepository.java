@@ -5,10 +5,8 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GroupRepository implements PanacheRepositoryBase<GroupEntity, UUID> {
@@ -23,6 +21,10 @@ public class GroupRepository implements PanacheRepositoryBase<GroupEntity, UUID>
     public Optional<GroupEntity> findByName(String name) {
         return Optional.ofNullable(find("name", name)
                 .firstResult());
+    }
+
+    public Set<GroupEntity> findBySector(UUID sectorId){
+        return new HashSet<>(list("sector_id", sectorId));
     }
 
     public int update(GroupEntity entity){

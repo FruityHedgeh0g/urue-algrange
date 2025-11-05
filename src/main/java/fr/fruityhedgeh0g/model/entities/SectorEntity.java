@@ -18,11 +18,11 @@ import java.util.UUID;
 public class SectorEntity extends AuditTemplate {
 
     @Id
-    @Column(name = "sector_id")
+    @Column(name = "sector_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID sectorId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "description")
@@ -34,5 +34,10 @@ public class SectorEntity extends AuditTemplate {
     public void addGroup(GroupEntity group) {
         groups.add(group);
         group.setSector(this);
+    }
+
+    @PreRemove
+    private void preRemove() {
+        groups.forEach(group -> group.setSector(null));
     }
 }

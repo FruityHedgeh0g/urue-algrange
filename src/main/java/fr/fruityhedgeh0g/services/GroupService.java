@@ -59,6 +59,23 @@ public class GroupService {
          return getGroupEntityById(groupId).map(groupMapper::toDto).onFailure(e -> Log.error("A mapping error occurred: " + groupId, e));
     }
 
+    @PackagePrivate
+    Try<Set<GroupEntity>> getGroupsEntitiesBySectorId(@NotNull UUID sectorId){
+        Log.info("Getting all groups");
+        return Try.of(() -> groupRepository
+                        .findBySector(sectorId))
+                .onFailure(e -> Log.error("Error getting all groups", e));
+    }
+
+    public Try<Set<GroupDto>> getGroupsBySectorId(@NotNull UUID sectorId){
+        return getGroupsEntitiesBySectorId(sectorId)
+                .map(groupEntities -> groupEntities
+                        .stream()
+                        .map(groupMapper::toDto)
+                        .collect(Collectors.toSet()))
+                .onFailure(e -> Log.error("A mapping error occurred: " + sectorId, e));
+    }
+
     @Transactional
     public Try<GroupDto> createGroup(@NotNull GroupDto groupDto){
         return Try.of(() -> {

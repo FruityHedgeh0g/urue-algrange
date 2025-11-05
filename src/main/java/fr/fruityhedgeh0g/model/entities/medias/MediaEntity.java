@@ -22,17 +22,17 @@ import java.util.UUID;
 public abstract class MediaEntity extends AuditTemplate {
 
     @Id
-    @Column(name = "media_id")
+    @Column(name = "media_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID mediaId;
 
-    @Column(name = "file_key")
+    @Column(name = "file_key", nullable = false)
     private String fileKey;
 
-    @Column(name = "original_filename")
+    @Column(name = "original_filename", nullable = false)
     private String originalFilename;
 
-    @Column(name = "content_type")
+    @Column(name = "content_type", nullable = false)
     private String contentType;
 
     @Column(name = "file_size")

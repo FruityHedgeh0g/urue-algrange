@@ -20,14 +20,14 @@ import java.util.UUID;
 public class PostEntity extends AuditTemplate {
 
     @Id
-    @Column(name = "post_id")
+    @Column(name = "post_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID postId;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String  title;
 
-    @Column(name = "content")
+    @Column(name = "content", nullable = false)
     private String content;
 
     @OneToOne

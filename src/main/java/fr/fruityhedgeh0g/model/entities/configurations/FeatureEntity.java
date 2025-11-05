@@ -19,12 +19,12 @@ import lombok.Setter;
 public class FeatureEntity {
 
     @Id
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", nullable = false)
     private boolean isActive;
 }

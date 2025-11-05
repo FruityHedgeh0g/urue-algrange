@@ -16,7 +16,9 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -48,6 +50,7 @@ public class SectorService {
                 .onFailure(e -> Log.error("Error getting all sectors", e));
     }
 
+    @Transactional
     public Try<SectorDto> getSectorById(@NotNull UUID sectorId) {
         Log.info("Getting sector with id: " + sectorId);
         return Try.of(() -> sectorRepository
@@ -121,14 +124,14 @@ public class SectorService {
         );
     }
 
-    //TODO : Développer l'update
+    @Transactional
     public Try<SectorDto> updateSector(@NotNull SectorDto sectorDto) {
         Log.info("Updating sector: " + sectorDto.getSectorId());
         return Try.of(() -> {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorDto.getSectorId())
                     .orElseThrow(() -> new NoSuchElementException("Sector not found"));
 
-            sectorEntity = sectorMapper.updateEntityFromDto(sectorEntity,sectorDto);
+            sectorMapper.updateEntityFromDto(sectorEntity,sectorDto);
 
             return sectorMapper.toDto(sectorRepository
                     .findByIdOptional(sectorEntity.getSectorId())
@@ -138,10 +141,14 @@ public class SectorService {
         });
     }
 
-    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
+    @Transactional
     public boolean deleteSector(@NotNull UUID sectorId) {
         Log.info("Deleting sector with id: " + sectorId);
-        return Try.run(() -> sectorRepository.deleteById(sectorId))
-                .onFailure(e -> Log.error("Error deleting sector with id: " + sectorId, e)).isSuccess();
+        return Try.of(() -> sectorRepository.findByIdOptional(sectorId)
+                        .orElseThrow(() -> new NoSuchElementException("Sector not found")))
+                .peek(sector -> sectorRepository.delete(sector))
+                .onFailure(ex -> {
+                    Log.error("Error updating sector with id: " + sectorId, ex);
+                }).isSuccess();
     }
 }
