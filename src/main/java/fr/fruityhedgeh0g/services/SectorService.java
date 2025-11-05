@@ -106,7 +106,7 @@ public class SectorService {
     public Try<SectorDto> assignGroupToSector(@NotNull UUID sectorId, @NotNull UUID groupId) {
         return Try.of(()-> {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
-                    .orElseThrow(() -> new NoSuchElementException("Sector not found"));
+                    .orElseThrow(NoSuchElementException::new);
             GroupEntity groupEntity = groupService.getGroupEntityById(groupId)
                     .getOrElseThrow(e -> new NoSuchElementException("Group not found"));
 
@@ -118,18 +118,16 @@ public class SectorService {
             if (e instanceof NoSuchElementException) {
                 Log.warn("Group not found: " + groupId);
             }else {
-                Log.error("Error assigning group with id: " + groupId + " to sector with id: " + sectorId, e);
+                Log.error("Error assigning group to sector with id: " + sectorId, e);
             }
-                }
-        );
+        });
     }
 
     @Transactional
     public Try<SectorDto> updateSector(@NotNull SectorDto sectorDto) {
-        Log.info("Updating sector: " + sectorDto.getSectorId());
         return Try.of(() -> {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorDto.getSectorId())
-                    .orElseThrow(() -> new NoSuchElementException("Sector not found"));
+                    .orElseThrow(NoSuchElementException::new);
 
             sectorMapper.updateEntityFromDto(sectorEntity,sectorDto);
 
@@ -137,18 +135,25 @@ public class SectorService {
                     .findByIdOptional(sectorEntity.getSectorId())
                     .orElseThrow(() -> new NoSuchElementException("Sector not found")));
         }).onFailure(ex -> {
-            Log.error("Error updating sector with id: " + sectorDto.getSectorId(), ex);
+            if (ex instanceof NoSuchElementException) {
+                Log.warn("Sector not found: " + sectorDto.getSectorId());
+            }else {
+                Log.error("Error updating sector with id: " + sectorDto.getSectorId(), ex);
+            }
         });
     }
 
     @Transactional
-    public boolean deleteSector(@NotNull UUID sectorId) {
-        Log.info("Deleting sector with id: " + sectorId);
-        return Try.of(() -> sectorRepository.findByIdOptional(sectorId)
-                        .orElseThrow(() -> new NoSuchElementException("Sector not found")))
+    public void deleteSector(@NotNull UUID sectorId) {
+        Try.of(() -> sectorRepository.findByIdOptional(sectorId)
+                        .orElseThrow(NoSuchElementException::new))
                 .peek(sector -> sectorRepository.delete(sector))
                 .onFailure(ex -> {
-                    Log.error("Error updating sector with id: " + sectorId, ex);
-                }).isSuccess();
+                    if (ex instanceof NoSuchElementException) {
+                        Log.warn("Sector not found: " + sectorId);
+                    }else {
+                        Log.error("Error deleting sector with id: " + sectorId, ex);
+                    }
+                });
     }
 }

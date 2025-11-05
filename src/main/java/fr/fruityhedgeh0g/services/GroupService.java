@@ -79,16 +79,13 @@ public class GroupService {
     @Transactional
     public Try<GroupDto> createGroup(@NotNull GroupDto groupDto){
         return Try.of(() -> {
-            Log.debug("Searching for already existing group with name: " + groupDto.getName());
             if (groupRepository.existsByName(groupDto.getName())) {
                 throw new DuplicateEntityException();
             }
 
-            Log.debug("Creating user: " + groupDto.getGroupId());
             GroupEntity groupEntity = groupMapper.toEntity(groupDto);
             groupRepository.persist(groupEntity);
 
-            Log.debug("Group created, retrieving up-to-date group infos: " + groupEntity.getGroupId());
             return groupMapper.toDto(
                     groupRepository
                             .findByIdOptional(groupEntity.getGroupId())
@@ -103,18 +100,29 @@ public class GroupService {
         });
     }
 
-    public boolean updateGroup(@NotNull GroupDto groupDto){
+    @Transactional
+    public Try<GroupDto> updateGroup(@NotNull GroupDto groupDto){
         Log.debug("Updating group: " + groupDto.getGroupId());
-        return Try.run(() -> groupRepository.update(groupMapper.toEntity(groupDto)))
-                .onFailure(e -> Log.error("Error updating group", e))
-                .isSuccess();
+        return Try.of(() -> groupRepository.findByIdOptional(groupDto.getGroupId())
+                .orElseThrow(() -> new NoSuchElementException("Group not found")))
+                .map(group -> {
+                    groupMapper.updateEntityFromDto(group, groupDto);
+
+                    return groupRepository.findById(groupDto.getGroupId());
+                })
+                .map(groupMapper::toDto)
+                .onFailure(ex -> {
+                    Log.error("Error updating group with id: " + groupDto.getGroupId(), ex);
+                });
     }
 
-    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
-    public void deleteGroup(@NotNull UUID groupId){
+    public boolean deleteGroup(@NotNull UUID groupId){
         Log.info("Deleting group with id: " + groupId);
-        Try.of(() -> groupRepository.deleteById(groupId))
-            .onFailure(e -> Log.error("Error deleting group with id: " + groupId, e));
+        return Try.of(() -> groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new NoSuchElementException("Group not found")))
+                .peek(group -> groupRepository.delete(group))
+                .onFailure(e -> Log.error("Error deleting group with id: " + groupId, e))
+                .isSuccess();
     }
 
 
