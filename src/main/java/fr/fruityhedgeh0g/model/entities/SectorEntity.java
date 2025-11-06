@@ -36,6 +36,11 @@ public class SectorEntity extends AuditTemplate {
         group.setSector(this);
     }
 
+    public void removeGroup(GroupEntity group) {
+        groups.remove(group);
+        group.setSector(null);
+    }
+
     @PreRemove
     private void preRemove() {
         groups.forEach(group -> group.setSector(null));

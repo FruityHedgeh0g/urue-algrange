@@ -1,26 +1,17 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.logging.Log;
-import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.jwt.build.Jwt;
 import io.vavr.control.Try;
-import io.vertx.ext.auth.impl.jose.JWT;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.keycloak.representations.JsonWebToken;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -53,7 +44,7 @@ public class UserService {
         return Try.of(() -> {
             Log.debug("Searching for already existing user with id: " + userDto.getUserId());
             if (userRepository.findByIdOptional(userDto.getUserId()).isPresent()) {
-                throw new DuplicateEntityException();
+                throw new DuplicateDataException();
             }
 
             Log.debug("Creating user: " + userDto.getUserId());
@@ -66,7 +57,7 @@ public class UserService {
                     .orElseThrow(NoSuchElementException::new)
             );
         }).onFailure(e -> {
-            if (e instanceof DuplicateEntityException) {
+            if (e instanceof DuplicateDataException) {
                 Log.warn("User already exists: " + userDto.getUserId());
             }else {
                 Log.error("Error creating user with id: " + userDto.getUserId(), e);

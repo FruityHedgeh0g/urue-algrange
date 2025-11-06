@@ -48,6 +48,14 @@ public class SectorController {
     }
 
     @PATCH
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{sectorId}/unassign/{groupId}")
+    public @JsonView(SectorDto.Extended.class) SectorDto removeGroupFromSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
+        return sectorService.unassignGroupToSector(sectorId,groupId).get();
+    }
+
+    @PATCH
     @Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/update")

@@ -1,6 +1,5 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.PostDto;
 import fr.fruityhedgeh0g.model.entities.PostEntity;
 import fr.fruityhedgeh0g.repositories.PostRepository;

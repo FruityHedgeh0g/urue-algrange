@@ -1,6 +1,5 @@
 package fr.fruityhedgeh0g.exceptions.handlers;
 
-import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
@@ -16,7 +15,7 @@ public class GlobalExceptionHandler {
     }
 
     @ServerExceptionMapper
-    public RestResponse<String> mapDuplicateEntityException(DuplicateEntityException x) {
+    public RestResponse<String> mapDuplicateEntityException(DuplicateDataException x) {
         return RestResponse.status(Response.Status.CONFLICT);
     }
 

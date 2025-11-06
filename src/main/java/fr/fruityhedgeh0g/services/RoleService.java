@@ -1,6 +1,5 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.RoleDto;
 import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
@@ -49,7 +48,7 @@ public class RoleService {
         return Try.of(() -> {
             Log.debug("Searching for already existing role with name: " + roleDto.getName());
             if (roleRepository.existsByName(roleDto.getName())) {
-                throw new DuplicateEntityException();
+                throw new DuplicateDataException();
             }
 
             Log.debug("Creating role: " + roleDto.getName());
@@ -63,7 +62,7 @@ public class RoleService {
                             .orElseThrow(NoSuchElementException::new)
             );
         }).onFailure(e -> {
-            if (e instanceof DuplicateEntityException) {
+            if (e instanceof DuplicateDataException) {
                 Log.warn("Role already exists: " + roleDto.getName());
             }else {
                 Log.error("Error creating role with name: " + roleDto.getName(), e);

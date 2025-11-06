@@ -1,6 +1,5 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.MediaDto;
 import fr.fruityhedgeh0g.model.entities.medias.MediaEntity;
 import fr.fruityhedgeh0g.repositories.MediaRepository;

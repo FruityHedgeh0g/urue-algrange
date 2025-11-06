@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidInputException;
+import fr.fruityhedgeh0g.exceptions.ResourceNotFoundException;
 import fr.fruityhedgeh0g.model.dtos.SectorDto;
 import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import fr.fruityhedgeh0g.model.entities.SectorEntity;
@@ -18,6 +20,7 @@ import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -55,13 +58,13 @@ public class SectorService {
         Log.info("Getting sector with id: " + sectorId);
         return Try.of(() -> sectorRepository
                         .findByIdOptional(sectorId)
-                        .orElseThrow(NoSuchElementException::new))
+                        .orElseThrow(() -> new ResourceNotFoundException("Sector not found:" + sectorId)))
                 .map(sectorMapper::toDto)
-                .onFailure(e -> {
-                    if (e instanceof NoSuchElementException) {
-                        Log.warn("Sector not found: " + sectorId);
-                    }else {
-                        Log.error("Error getting sector with id: " + sectorId, e);
+                .onFailure(ex -> {
+                    if (Objects.requireNonNull(ex) instanceof NoSuchElementException e) {
+                        Log.warn(e.getMessage());
+                    } else {
+                        Log.error("Error getting sector with id: " + sectorId, ex);
                     }
                 });
     }
@@ -70,17 +73,17 @@ public class SectorService {
     public Try<SectorDto> createSector(@NotNull SectorDto sectorDto) {
         return Try.of(() -> {
             Log.debug("Searching for already existing sector with name: " + sectorDto.getName());
-            if (sectorRepository.existsByName(sectorDto.getName())) {throw new DuplicateEntityException("A sector with the same name already exists");}
-            if (sectorDto.getGroups().isEmpty()) {throw new IllegalArgumentException("A sector must contain at least one group at creation");}
+            if (sectorRepository.existsByName(sectorDto.getName())) {throw new DuplicateResourceException("A sector with the same name already exists");}
+            if (sectorDto.getGroups().isEmpty()) {throw new InvalidInputException("A sector must contain at least one group at creation");}
 
             Log.debug("Checking if all groups exist and doesn't belong to another sector");
             SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
             sectorEntity.setGroups(sectorEntity.getGroups()
                     .stream()
-                    .map(grp -> groupService.getGroupEntityById(grp.getGroupId()).getOrElseThrow(e -> new IllegalArgumentException("Group "+grp.getGroupId()+" does not exist")))
+                    .map(grp -> groupService.getGroupEntityById(grp.getGroupId()).getOrElseThrow(e -> new ResourceNotFoundException("Group "+grp.getGroupId()+" does not exist")))
                     .peek(grp -> {
                         if (grp.getSector() != null) {
-                            throw new IllegalArgumentException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");
+                            throw new DuplicateResourceException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");
                         }
                     })
                     .peek(group -> group.setSector(sectorEntity))
@@ -93,11 +96,11 @@ public class SectorService {
 
             Log.debug("Sector created, retrieving up-to-date sector infos: " + sectorEntity.getSectorId());
             return sectorMapper.toDto(sectorEntity);
-        }).onFailure(e -> {
-            if (e instanceof DuplicateEntityException) {
-                Log.warn("Sector already exists: " + sectorDto.getName());
-            }else {
-                Log.error("Error creating sector with name: " + sectorDto.getName(), e);
+        }).onFailure(ex -> {
+            switch (ex) {
+                case ResourceNotFoundException e -> Log.warn(e.getMessage());
+                case DuplicateResourceException e -> Log.warn(e.getMessage());
+                default -> Log.error("Error creating sector with name: " + sectorDto.getName(), ex);
             }
         });
     }
@@ -106,38 +109,56 @@ public class SectorService {
     public Try<SectorDto> assignGroupToSector(@NotNull UUID sectorId, @NotNull UUID groupId) {
         return Try.of(()-> {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
-                    .orElseThrow(NoSuchElementException::new);
+                    .orElseThrow(() -> new ResourceNotFoundException("Sector not found: " + sectorId));
             GroupEntity groupEntity = groupService.getGroupEntityById(groupId)
-                    .getOrElseThrow(e -> new NoSuchElementException("Group not found"));
+                    .getOrElseThrow(e -> new ResourceNotFoundException("Group not found: "+groupId));
 
-            if (groupEntity.getSector() != null) throw new IllegalArgumentException("Group already belongs to a sector");
+            if (groupEntity.getSector() != null) throw new DuplicateResourceException("Group already belongs to a sector");
 
             sectorEntity.addGroup(groupEntity);
             return sectorMapper.toDto(sectorEntity);
-        }).onFailure(e -> {
-            if (e instanceof NoSuchElementException) {
-                Log.warn("Group not found: " + groupId);
-            }else {
-                Log.error("Error assigning group to sector with id: " + sectorId, e);
+        }).onFailure(ex -> {
+            switch (ex) {
+                case ResourceNotFoundException e -> Log.warn(e.getMessage());
+                case DuplicateResourceException e -> Log.warn(e.getMessage());
+                default -> Log.error("Error assigning group to sector with id: " + sectorId, ex);
             }
         });
+    }
+
+    @Transactional
+    public Try<SectorDto> unassignGroupToSector(@NotNull UUID sectorId, @NotNull UUID groupId) {
+        return Try.of(() -> sectorRepository.findByIdOptional(sectorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sector not found:" + sectorId)))
+                .peek(sector -> {
+                    if (sector.getGroups().size() == 1) throw new InvalidInputException("Sector must contain at least one group");
+
+                    GroupEntity groupEntity = groupService.getGroupEntityById(groupId)
+                            .getOrElseThrow(e -> new ResourceNotFoundException("Group not found:" +groupId ));
+                    sector.removeGroup(groupEntity);
+                }).map(sectorMapper::toDto)
+                .onFailure(ex -> {
+                    switch (ex) {
+                        case ResourceNotFoundException e -> Log.warn(e.getMessage());
+                        case InvalidInputException e -> Log.warn(e.getMessage());
+                        default -> Log.error("Error unassigning group to sector with id: " + sectorId, ex);
+                    }
+                });
     }
 
     @Transactional
     public Try<SectorDto> updateSector(@NotNull SectorDto sectorDto) {
         return Try.of(() -> {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorDto.getSectorId())
-                    .orElseThrow(NoSuchElementException::new);
+                    .orElseThrow(() -> new ResourceNotFoundException("Sector not found:" + sectorDto.getSectorId()));
 
             sectorMapper.updateEntityFromDto(sectorEntity,sectorDto);
 
-            return sectorMapper.toDto(sectorRepository
-                    .findByIdOptional(sectorEntity.getSectorId())
-                    .orElseThrow(() -> new NoSuchElementException("Sector not found")));
+            return sectorMapper.toDto(sectorEntity);
         }).onFailure(ex -> {
-            if (ex instanceof NoSuchElementException) {
-                Log.warn("Sector not found: " + sectorDto.getSectorId());
-            }else {
+            if (Objects.requireNonNull(ex) instanceof ResourceNotFoundException e) {
+                Log.warn(e.getMessage());
+            } else {
                 Log.error("Error updating sector with id: " + sectorDto.getSectorId(), ex);
             }
         });
@@ -146,12 +167,12 @@ public class SectorService {
     @Transactional
     public void deleteSector(@NotNull UUID sectorId) {
         Try.of(() -> sectorRepository.findByIdOptional(sectorId)
-                        .orElseThrow(NoSuchElementException::new))
+                        .orElseThrow(() -> new ResourceNotFoundException("Sector not found:" + sectorId)))
                 .peek(sector -> sectorRepository.delete(sector))
                 .onFailure(ex -> {
-                    if (ex instanceof NoSuchElementException) {
-                        Log.warn("Sector not found: " + sectorId);
-                    }else {
+                    if (Objects.requireNonNull(ex) instanceof ResourceNotFoundException e) {
+                        Log.warn(e.getMessage());
+                    } else {
                         Log.error("Error deleting sector with id: " + sectorId, ex);
                     }
                 });

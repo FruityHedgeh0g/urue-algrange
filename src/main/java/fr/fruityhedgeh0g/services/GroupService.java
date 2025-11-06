@@ -1,6 +1,5 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.exceptions.DuplicateEntityException;
 import fr.fruityhedgeh0g.model.dtos.GroupDto;
 import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
@@ -80,7 +79,7 @@ public class GroupService {
     public Try<GroupDto> createGroup(@NotNull GroupDto groupDto){
         return Try.of(() -> {
             if (groupRepository.existsByName(groupDto.getName())) {
-                throw new DuplicateEntityException();
+                throw new DuplicateDataException();
             }
 
             GroupEntity groupEntity = groupMapper.toEntity(groupDto);
@@ -92,7 +91,7 @@ public class GroupService {
                             .orElseThrow(NoSuchElementException::new)
             );
         }).onFailure(e -> {
-            if (e instanceof DuplicateEntityException) {
+            if (e instanceof DuplicateDataException) {
                 Log.warn("Group already exists: " + groupDto.getName());
             }else {
                 Log.error("Error creating group with name: " + groupDto.getName(), e);
