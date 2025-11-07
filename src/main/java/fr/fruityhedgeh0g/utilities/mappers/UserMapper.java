@@ -2,10 +2,7 @@ package fr.fruityhedgeh0g.utilities.mappers;
 
 import fr.fruityhedgeh0g.model.dtos.UserDto;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
 public interface UserMapper {
@@ -43,4 +40,7 @@ public interface UserMapper {
             @Mapping(target = "createdEvents", ignore = true)
     })
     UserEntity toNestedEntity(UserDto dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    UserEntity updateEntityFromDto(@MappingTarget UserEntity userEntity, UserDto userDto);
 }

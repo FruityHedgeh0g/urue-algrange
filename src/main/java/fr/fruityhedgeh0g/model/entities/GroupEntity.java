@@ -36,6 +36,16 @@ public class GroupEntity extends AuditTemplate {
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
 
+    public void addMember(UserEntity member) {
+        members.add(member);
+        member.setGroup(this);
+    }
+
+    public void removeMember(UserEntity member) {
+        members.remove(member);
+        member.setGroup(null);
+    }
+
     @PreRemove
     private void preRemove() {
         members.forEach(member -> member.setGroup(null));

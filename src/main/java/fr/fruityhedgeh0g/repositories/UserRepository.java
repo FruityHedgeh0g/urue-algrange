@@ -13,6 +13,9 @@ import java.util.UUID;
 @ApplicationScoped
 public class UserRepository implements PanacheRepositoryBase<UserEntity, UUID> {
 
+    public boolean existsById(UUID userId){
+        return count("userId", userId) > 0;
+    }
 //    public Optional<UserEntity> findByName(String token) {
 //        return Optional.ofNullable(find("userId",token)
 //                .firstResult());

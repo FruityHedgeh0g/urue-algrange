@@ -36,12 +36,6 @@ public class SectorService {
     @Inject
     SectorMapper sectorMapper;
 
-    @Inject
-    GroupMapper groupMapper;
-
-    @Inject
-    GroupRepository groupRepository;
-
     @Transactional
     public Try<List<SectorDto>> getAllSectors() {
         Log.info("Getting all sectors");
@@ -78,16 +72,11 @@ public class SectorService {
 
             Log.debug("Checking if all groups exist and doesn't belong to another sector");
             SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
-            sectorEntity.setGroups(sectorEntity.getGroups()
-                    .stream()
-                    .map(grp -> groupService.getGroupEntityById(grp.getGroupId()).getOrElseThrow(e -> new UnknownResourceException("Group "+grp.getGroupId()+" does not exist")))
-                    .peek(grp -> {
-                        if (grp.getSector() != null) {
-                            throw new InvalidInputException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");
-                        }
-                    })
-                    .peek(group -> group.setSector(sectorEntity))
-                    .collect(Collectors.toSet()));
+
+            sectorEntity.getGroups().forEach(grp -> groupService.getGroupEntityById(grp.getGroupId())
+                    .peek(group -> {if (group.getSector() != null)
+                        throw new InvalidInputException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");})
+                    .peek(sectorEntity::addGroup));
 
             Log.debug("Creating sector: " + sectorDto.getName());
 

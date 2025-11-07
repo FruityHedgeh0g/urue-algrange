@@ -27,20 +27,19 @@ public class UserDto {
     GroupDto group;
 
     @JsonView(Extended.class)
-    @JsonSerialize(using = ViewSerializers.class)
     Set<EventDto> organizedEvents;
 
     @JsonView(Extended.class)
-    @JsonSerialize(using = ViewSerializers.class)
     Set<EventDto> participatedEvents;
 
     @JsonView(Extended.class)
-    @JsonSerialize(using = ViewSerializers.class)
     Set<EventDto> createdEvents;
 
     @JsonView(Extended.class)
-    @JsonSerialize(using = ViewSerializers.class)
     Set<RoleDto> roles;
+
+    @JsonView(Basic.class)
+    boolean isActive;
 
     public interface Creation {}
     public interface Basic extends GlobalViews.IdentifierOnly {}

@@ -30,7 +30,6 @@ public class SectorDto {
     String description;
 
     @JsonView({Extended.class,Creation.class})
-    @JsonSerialize(using = ViewSerializers.class)
     Set<GroupDto> groups;
 
     public interface Creation {}

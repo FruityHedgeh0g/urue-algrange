@@ -31,6 +31,8 @@ public class UserEntity extends AuditTemplate{
     @JoinColumn(name = "group_id")
     private GroupEntity group;
 
+    @Column(name = "isActive")
+    private boolean isActive;
 
     @ManyToMany(mappedBy = "organizers")
     private Set<EventEntity> organizedEvents;

@@ -62,15 +62,12 @@ public class EventDto {
     String addressComplement;
 
     @JsonView(Extended.class)
-    @JsonSerialize(using = ViewSerializers.class)
     Set<UserEntity> participants;
 
     @JsonView(Extended.class)
-    @JsonSerialize(using = ViewSerializers.class)
     Set<UserEntity> organizers;
 
     @JsonView(Extended.class)
-    @JsonSerialize(using = ViewSerializers.class)
     UserDto creator;
 
     public interface Creation {}

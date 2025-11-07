@@ -1,9 +1,11 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidInputException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.model.dtos.GroupDto;
 import fr.fruityhedgeh0g.model.entities.GroupEntity;
+import fr.fruityhedgeh0g.model.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import io.quarkus.logging.Log;
@@ -27,6 +29,9 @@ public class GroupService {
     GroupRepository groupRepository;
 
     @Inject
+    UserService userService;
+
+    @Inject
     GroupMapper groupMapper;
 
     @Transactional
@@ -41,6 +46,7 @@ public class GroupService {
     }
 
     @PackagePrivate
+    @Transactional
     Try<GroupEntity> getGroupEntityById(@NotNull UUID groupId){
         Log.info("Getting group with id: " + groupId);
         return Try.of(() -> groupRepository
@@ -55,12 +61,14 @@ public class GroupService {
                 });
     }
 
+    @Transactional
     public Try<GroupDto> getGroupById(@NotNull UUID groupId){
          return getGroupEntityById(groupId).map(groupMapper::toDto)
                  .onFailure(e -> Log.error("A mapping error occurred: " + groupId, e));
     }
 
     @PackagePrivate
+    @Transactional
     Try<Set<GroupEntity>> getGroupsEntitiesBySectorId(@NotNull UUID sectorId){
         Log.info("Getting all groups");
         return Try.of(() -> groupRepository
@@ -74,6 +82,7 @@ public class GroupService {
                 });
     }
 
+    @Transactional
     public Try<Set<GroupDto>> getGroupsBySectorId(@NotNull UUID sectorId){
         return getGroupsEntitiesBySectorId(sectorId)
                 .map(groupEntities -> groupEntities
@@ -133,7 +142,42 @@ public class GroupService {
                 });
     }
 
+    @Transactional
+    public Try<GroupDto> assignUserToGroup(@NotNull UUID userId, @NotNull UUID groupId){
+        return Try.of(() -> groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId)))
+                .peek(group -> {
+                    UserEntity userEntity = userService.getUserEntityById(userId)
+                            .getOrElseThrow(() -> new UnknownResourceException("User not found: " + userId));
 
+                    group.addMember(userEntity);
+                }).map(groupMapper::toDto)
+                .onFailure(ex -> {
+                    if (ex instanceof UnknownResourceException e) {
+                        Log.warn(ex.getMessage());
+                    }else {
+                        Log.error("Error assigning user to group with id: " + groupId, ex);
+                    }
+                });
+    }
+
+    @Transactional
+    public Try<GroupDto> unassignUserFromGroup(@NotNull UUID userId, @NotNull UUID groupId){
+        return Try.of(() -> groupRepository.findByIdOptional(groupId)
+                        .orElseThrow(() -> new UnknownResourceException("Group not found:" + groupId)))
+                .peek(group -> {
+                    UserEntity userEntity = userService.getUserEntityById(userId)
+                            .getOrElseThrow(e -> new UnknownResourceException("User not found:" +userId ));
+                    group.removeMember(userEntity);
+                }).map(groupMapper::toDto)
+                .onFailure(ex -> {
+                    switch (ex) {
+                        case UnknownResourceException e -> Log.warn(e.getMessage());
+                        case InvalidInputException e -> Log.warn(e.getMessage());
+                        default -> Log.error("Error unassigning user from group with id: " + groupId, ex);
+                    }
+                });
+    }
 
 
 }
