@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.model.dtos.configurations.ConfigurationDto;
-import fr.fruityhedgeh0g.model.entities.configurations.ConfigurationEntity;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;
 import io.quarkus.logging.Log;
@@ -13,7 +13,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @AllArgsConstructor
 @ApplicationScoped
@@ -29,10 +28,10 @@ public class ConfigurationService {
         Log.info("Getting configuration by name: " + name);
         return Try.of(() -> configurationRepository
                 .findByIdOptional(name)
-                .orElseThrow(NoSuchElementException::new))
+                .orElseThrow(() -> new UnknownResourceException("Configuration not found: " + name)))
                 .map(configurationMapper::toDto)
                 .onFailure(e -> {
-                    if (e instanceof NoSuchElementException) {
+                    if (e instanceof UnknownResourceException) {
                         Log.warn("Configuration not found: " + name);
                     }else {
                         Log.error("Error getting configuration by name: " + name, e);

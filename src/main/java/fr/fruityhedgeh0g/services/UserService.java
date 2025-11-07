@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.model.dtos.UserDto;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
@@ -44,7 +45,7 @@ public class UserService {
         return Try.of(() -> {
             Log.debug("Searching for already existing user with id: " + userDto.getUserId());
             if (userRepository.findByIdOptional(userDto.getUserId()).isPresent()) {
-                throw new DuplicateDataException();
+                throw new UnknownResourceException("User already exists: " + userDto.getUserId() + "");
             }
 
             Log.debug("Creating user: " + userDto.getUserId());
@@ -57,7 +58,7 @@ public class UserService {
                     .orElseThrow(NoSuchElementException::new)
             );
         }).onFailure(e -> {
-            if (e instanceof DuplicateDataException) {
+            if (e instanceof UnknownResourceException) {
                 Log.warn("User already exists: " + userDto.getUserId());
             }else {
                 Log.error("Error creating user with id: " + userDto.getUserId(), e);

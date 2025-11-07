@@ -1,5 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.model.dtos.EventDto;
 import fr.fruityhedgeh0g.model.entities.EventEntity;
 import fr.fruityhedgeh0g.repositories.EventRepository;
@@ -53,7 +55,7 @@ public class EventService {
         return Try.of(() -> {
             Log.debug("Searching for already existing event with name: " + eventDto.getName());
             if (eventRepository.existsByName(eventDto.getName())) {
-                throw new DuplicateDataException();
+                throw new DuplicateResourceException("Event already exists: " + eventDto.getName() + "");
             }
 
             Log.debug("Creating user: " + eventDto.getName());
@@ -64,10 +66,10 @@ public class EventService {
             return eventMapper.toDto(
                     eventRepository
                             .findByIdOptional(eventEntity.getEventId())
-                            .orElseThrow(NoSuchElementException::new)
+                            .orElseThrow(() -> new UnknownResourceException("Event not found:" + eventEntity.getEventId()))
             );
         }).onFailure(e -> {
-            if (e instanceof DuplicateDataException) {
+            if (e instanceof DuplicateResourceException) {
                 Log.warn("Event already exists: " + eventDto.getName());
             }else {
                 Log.error("Error creating event with name: " + eventDto.getName(), e);

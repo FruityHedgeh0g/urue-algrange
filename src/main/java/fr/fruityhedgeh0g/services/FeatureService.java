@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.model.dtos.configurations.FeatureDto;
 import fr.fruityhedgeh0g.repositories.FeatureRepository;
 import fr.fruityhedgeh0g.utilities.mappers.FeatureMapper;
@@ -12,8 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static io.smallrye.mutiny.helpers.spies.Spy.onFailure;
 
@@ -31,10 +30,10 @@ public class FeatureService {
         Log.debug("Getting feature by name: " + name);
         return Try.of(() -> featureRepository
                         .findByIdOptional(name)
-                        .orElseThrow(NoSuchElementException::new))
+                        .orElseThrow(() -> new UnknownResourceException("Feature not found: " + name)))
                 .map(featureMapper::toDto)
                 .onFailure(e -> {
-                    if (e instanceof NoSuchElementException) {
+                    if (e instanceof UnknownResourceException) {
                         Log.warn("Feature not found: " + name);
                     }else {
                         Log.error("Error getting feature by name: " + name, e);
