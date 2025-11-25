@@ -7,20 +7,22 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 
+import java.util.Set;
+
 @Mapper(componentModel = "jakarta-cdi", uses = UserMapper.class)
 public interface EventMapper {
 
     @Mappings({
             @Mapping(target = "creator", qualifiedByName = "UserDtoToNestedEntity"),
-            @Mapping(target = "organizers", qualifiedByName = "UserDtoToNestedEntity"),
-            @Mapping(target = "participants", qualifiedByName = "UserDtoToNestedEntity")
+            @Mapping(target = "organizers", qualifiedByName = "UserDtoSetToNestedEntitySet"),
+            @Mapping(target = "participants", qualifiedByName = "UserDtoSetToNestedEntitySet")
     })
     EventEntity toEntity(EventDto dto);
 
     @Mappings({
             @Mapping(target = "creator", qualifiedByName = "UserEntityToNestedDto"),
-            @Mapping(target = "organizers", qualifiedByName = "UserEntityToNestedDto"),
-            @Mapping(target = "participants", qualifiedByName = "UserEntityToNestedDto")
+            @Mapping(target = "organizers", qualifiedByName = "UserEntitySetToNestedDtoSet"),
+            @Mapping(target = "participants", qualifiedByName = "UserEntitySetToNestedDtoSet")
     })
     EventDto toDto(EventEntity entity);
 
@@ -39,4 +41,5 @@ public interface EventMapper {
             @Mapping(target = "participants", ignore = true)
     })
     EventDto toNestedDto(EventEntity entity);
+
 }

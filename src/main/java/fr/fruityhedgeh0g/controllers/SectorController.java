@@ -1,7 +1,6 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.GroupDto;
 import fr.fruityhedgeh0g.model.dtos.SectorDto;
 import fr.fruityhedgeh0g.services.SectorService;
 import io.quarkus.security.identity.SecurityIdentity;

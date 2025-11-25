@@ -4,6 +4,9 @@ import fr.fruityhedgeh0g.model.dtos.UserDto;
 import fr.fruityhedgeh0g.model.entities.UserEntity;
 import org.mapstruct.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
 public interface UserMapper {
 
@@ -40,6 +43,16 @@ public interface UserMapper {
             @Mapping(target = "createdEvents", ignore = true)
     })
     UserEntity toNestedEntity(UserDto dto);
+
+    @Named("UserDtoSetToNestedEntitySet")
+    default Set<UserEntity> toNestedEntitySet(Set<UserDto> dtos){
+        return dtos.stream().map(this::toNestedEntity).collect(Collectors.toSet());
+    };
+
+    @Named("UserEntitySetToNestedDtoSet")
+    default Set<UserDto> toNestedDtoSet(Set<UserEntity> entities){
+        return entities.stream().map(this::toNestedDto).collect(Collectors.toSet());
+    };
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     UserEntity updateEntityFromDto(@MappingTarget UserEntity userEntity, UserDto userDto);

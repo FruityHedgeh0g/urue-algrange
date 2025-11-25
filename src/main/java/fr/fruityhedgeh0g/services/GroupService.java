@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.PackagePrivate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -63,8 +64,17 @@ public class GroupService {
 
     @Transactional
     public Try<GroupDto> getGroupById(@NotNull UUID groupId){
-         return getGroupEntityById(groupId).map(groupMapper::toDto)
-                 .onFailure(e -> Log.error("A mapping error occurred: " + groupId, e));
+        return Try.of(() -> groupRepository
+                        .findByIdOptional(groupId)
+                        .orElseThrow(() -> new UnknownResourceException("Group not found:" + groupId)))
+                .map(groupMapper::toDto)
+                .onFailure(ex -> {
+                    if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
+                        Log.warn(e.getMessage());
+                    } else {
+                        Log.error("Error getting sector with id: " + groupId, ex);
+                    }
+                });
     }
 
     @PackagePrivate

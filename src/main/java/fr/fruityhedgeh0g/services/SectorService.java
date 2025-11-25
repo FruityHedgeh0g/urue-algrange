@@ -6,9 +6,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.model.dtos.SectorDto;
 import fr.fruityhedgeh0g.model.entities.GroupEntity;
 import fr.fruityhedgeh0g.model.entities.SectorEntity;
-import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
-import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
@@ -19,10 +17,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @ApplicationScoped
