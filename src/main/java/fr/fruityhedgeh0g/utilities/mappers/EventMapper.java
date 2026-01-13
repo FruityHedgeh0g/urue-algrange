@@ -14,15 +14,15 @@ public interface EventMapper {
 
     @Mappings({
             @Mapping(target = "creator", qualifiedByName = "UserDtoToNestedEntity"),
-            @Mapping(target = "organizers", qualifiedByName = "UserDtoSetToNestedEntitySet"),
-            @Mapping(target = "participants", qualifiedByName = "UserDtoSetToNestedEntitySet")
+            @Mapping(target = "organizers", qualifiedByName = "UserDtoToNestedEntity"),
+            @Mapping(target = "participants", qualifiedByName = "UserDtoToNestedEntity")
     })
     EventEntity toEntity(EventDto dto);
 
     @Mappings({
             @Mapping(target = "creator", qualifiedByName = "UserEntityToNestedDto"),
-            @Mapping(target = "organizers", qualifiedByName = "UserEntitySetToNestedDtoSet"),
-            @Mapping(target = "participants", qualifiedByName = "UserEntitySetToNestedDtoSet")
+            @Mapping(target = "organizers", qualifiedByName = "UserEntityToNestedDto"),
+            @Mapping(target = "participants", qualifiedByName = "UserEntityToNestedDto")
     })
     EventDto toDto(EventEntity entity);
 

@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.model.entities;
 
 import fr.fruityhedgeh0g.model.entities.medias.MediaEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,12 +23,15 @@ public class PostEntity extends AuditTemplate {
     @Id
     @Column(name = "post_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NotNull
     private UUID postId;
 
     @Column(name = "title", nullable = false)
+    @NotNull
     private String  title;
 
     @Column(name = "content", nullable = false)
+    @NotNull
     private String content;
 
     @OneToOne
