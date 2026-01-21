@@ -51,7 +51,6 @@ public class FeatureService {
     }
 
     @PackagePrivate
-    @Transactional
     //TODO : Développer l'update
     Try<FeatureEntity> updateFeature(@NonNull FeatureEntity entity) {
         return null;

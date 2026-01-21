@@ -25,11 +25,13 @@ public class MediaService {
     @Inject
     MediaMapper mediaMapper;
 
+    @Transactional
     public Try<List<MediaDto>> getAllMedia(){
         Log.info("Getting all medias");
         return null;
     }
 
+    @Transactional
     public Try<MediaDto> getMediaById(@NotNull UUID mediaId){
         Log.info("Getting media with id: " + mediaId);
         return Try.of(() -> mediaRepository

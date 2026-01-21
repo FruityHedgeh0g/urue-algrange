@@ -26,7 +26,7 @@ public class SectorController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<SectorDto> getAllSectors(){
+    public @JsonView(Views.Basic.class) List<SectorDto> getAllSectors(){
         return sectorService.getAllSectors().get();
     }
 
@@ -56,7 +56,7 @@ public class SectorController {
     @PATCH
     @Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
     @Produces(MediaType.APPLICATION_JSON)
-    public SectorDto updateSector(SectorDto sectorDto) {
+    public SectorDto updateSector(@JsonView(Views.Update.class) SectorDto sectorDto) {
         return sectorService.updateSector(sectorDto).get();
     }
 

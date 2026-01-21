@@ -58,6 +58,7 @@ public class GroupService {
                 });
     }
 
+    @Transactional
     public Try<GroupDto> getGroupById(@NotNull UUID groupId){
         return Try.of(() -> groupRepository
                         .findByIdOptional(groupId)
@@ -86,6 +87,7 @@ public class GroupService {
                 });
     }
 
+    @Transactional
     public Try<Set<GroupDto>> getGroupsBySectorId(@NotNull UUID sectorId){
         return getInternalEntitiesBySectorId(sectorId)
                 .map(groupEntities -> groupEntities

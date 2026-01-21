@@ -25,7 +25,7 @@ public class GroupController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<GroupDto> getAllGroups(){
+    public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
         return groupService.getAllGroups().get();
     }
 

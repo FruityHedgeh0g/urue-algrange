@@ -28,6 +28,7 @@ public class EventService {
     @Inject
     EventMapper eventMapper;
 
+    @Transactional
     public Try<List<EventDto>> getAllEvents(){
         Log.info("Getting all events");
         return Try.of(() -> eventRepository
@@ -38,6 +39,7 @@ public class EventService {
                 .onFailure(e -> Log.error("Error getting all events", e));
     }
 
+    @Transactional
     public Try<EventDto> getEventById(@NotNull UUID eventId){
         Log.info("Getting event with id: " + eventId);
         return Try.of(() -> eventRepository.findByIdOptional(eventId)

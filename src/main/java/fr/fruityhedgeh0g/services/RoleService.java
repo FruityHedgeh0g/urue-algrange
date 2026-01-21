@@ -26,11 +26,13 @@ public class RoleService {
     @Inject
     RoleMapper roleMapper;
 
+    @Transactional
     public Try<List<RoleDto>> getAllRoles() {
         Log.info("Getting all roles");
         return null;
     }
 
+    @Transactional
     public Try<RoleDto> getRoleById(@NotNull UUID roleId) {
         Log.info("Getting role with id: " + roleId);
         return Try.of(() -> roleRepository

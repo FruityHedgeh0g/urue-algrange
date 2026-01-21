@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.ConfigurationDto;
+import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.ConfigurationService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -34,7 +35,7 @@ public class ConfigurationController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ConfigurationDto> getAllConfigurations(){
+    public @JsonView(Views.Basic.class) List<ConfigurationDto> getAllConfigurations(){
         return configurationService.getAllConfigurations().get();
     }
 }
