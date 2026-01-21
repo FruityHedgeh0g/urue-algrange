@@ -1,13 +1,14 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.model.dtos.MediaDto;
-import fr.fruityhedgeh0g.model.entities.medias.MediaEntity;
+import fr.fruityhedgeh0g.dtos.MediaDto;
+import fr.fruityhedgeh0g.entities.medias.MediaEntity;
 import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.utilities.mappers.MediaMapper;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
@@ -44,6 +45,7 @@ public class MediaService {
                 });
     }
 
+    @Transactional
     public Try<MediaDto> createMedia(@NotNull MediaDto mediaDto){
         return Try.of(() -> {
             Log.debug("Creating media");
@@ -62,12 +64,14 @@ public class MediaService {
     }
 
     //TODO : Développer l'update
+    @Transactional
     public Try<MediaDto> updateMedia(@NotNull MediaDto mediaDto){
         Log.info("Updating media: " + mediaDto.getMediaId());
         return null;
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
+    @Transactional
     public void deleteMedia(@NotNull UUID mediaId){
         Log.info("Deleting media with id: " + mediaId);
         Try.of(() -> mediaRepository.deleteById(mediaId))

@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.model.entities;
+package fr.fruityhedgeh0g.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

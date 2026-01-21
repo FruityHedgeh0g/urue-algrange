@@ -1,14 +1,15 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.RoleDto;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.model.dtos.RoleDto;
-import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.utilities.mappers.RoleMapper;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
@@ -45,6 +46,7 @@ public class RoleService {
                 });
     }
 
+    @Transactional
     public Try<RoleDto> createRole(@NotNull RoleDto roleDto) {
         return Try.of(() -> {
             Log.debug("Searching for already existing role with name: " + roleDto.getName());
@@ -72,12 +74,14 @@ public class RoleService {
     }
 
     //TODO : Développer l'update
+    @Transactional
     public Try<RoleDto> updateRole(@NotNull RoleDto roleDto) {
         Log.info("Updating role: " + roleDto.getRoleId());
         return null;
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
+    @Transactional
     public void deleteRole(@NotNull UUID roleId) {
         Log.info("Deleting role with id: " + roleId);
         Try.run(() -> roleRepository.deleteById(roleId))

@@ -1,12 +1,11 @@
 package fr.fruityhedgeh0g.repositories;
 
-import fr.fruityhedgeh0g.model.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.GroupEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GroupRepository implements PanacheRepositoryBase<GroupEntity, UUID> {

@@ -1,11 +1,11 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.GroupDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidInputException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.model.dtos.GroupDto;
-import fr.fruityhedgeh0g.model.entities.GroupEntity;
-import fr.fruityhedgeh0g.model.entities.UserEntity;
+import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import io.quarkus.logging.Log;
@@ -17,10 +17,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.experimental.PackagePrivate;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -47,8 +44,7 @@ public class GroupService {
     }
 
     @PackagePrivate
-    @Transactional
-    Try<GroupEntity> getGroupEntityById(@NotNull UUID groupId){
+    Try<GroupEntity> getInternalEntityById(@NotNull UUID groupId){
         Log.info("Getting group with id: " + groupId);
         return Try.of(() -> groupRepository
                         .findByIdOptional(groupId)
@@ -62,7 +58,6 @@ public class GroupService {
                 });
     }
 
-    @Transactional
     public Try<GroupDto> getGroupById(@NotNull UUID groupId){
         return Try.of(() -> groupRepository
                         .findByIdOptional(groupId)
@@ -78,8 +73,7 @@ public class GroupService {
     }
 
     @PackagePrivate
-    @Transactional
-    Try<Set<GroupEntity>> getGroupsEntitiesBySectorId(@NotNull UUID sectorId){
+    Try<Set<GroupEntity>> getInternalEntitiesBySectorId(@NotNull UUID sectorId){
         Log.info("Getting all groups");
         return Try.of(() -> groupRepository
                         .findBySector(sectorId).orElseThrow(() -> new UnknownResourceException("No group found for sector: " + sectorId )))
@@ -92,9 +86,8 @@ public class GroupService {
                 });
     }
 
-    @Transactional
     public Try<Set<GroupDto>> getGroupsBySectorId(@NotNull UUID sectorId){
-        return getGroupsEntitiesBySectorId(sectorId)
+        return getInternalEntitiesBySectorId(sectorId)
                 .map(groupEntities -> groupEntities
                         .stream()
                         .map(groupMapper::toDto)
@@ -157,7 +150,7 @@ public class GroupService {
         return Try.of(() -> groupRepository.findByIdOptional(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId)))
                 .peek(group -> {
-                    UserEntity userEntity = userService.getUserEntityById(userId)
+                    UserEntity userEntity = userService.getInternalUserById(userId)
                             .getOrElseThrow(() -> new UnknownResourceException("User not found: " + userId));
 
                     group.addMember(userEntity);
@@ -176,7 +169,7 @@ public class GroupService {
         return Try.of(() -> groupRepository.findByIdOptional(groupId)
                         .orElseThrow(() -> new UnknownResourceException("Group not found:" + groupId)))
                 .peek(group -> {
-                    UserEntity userEntity = userService.getUserEntityById(userId)
+                    UserEntity userEntity = userService.getInternalUserById(userId)
                             .getOrElseThrow(e -> new UnknownResourceException("User not found:" +userId ));
                     group.removeMember(userEntity);
                 }).map(groupMapper::toDto)

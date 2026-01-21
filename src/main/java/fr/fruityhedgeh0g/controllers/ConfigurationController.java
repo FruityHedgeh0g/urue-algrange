@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.configurations.ConfigurationDto;
+import fr.fruityhedgeh0g.dtos.ConfigurationDto;
 import fr.fruityhedgeh0g.services.ConfigurationService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -28,15 +28,13 @@ public class ConfigurationController {
     @GET
     @Path("/{name}")
     public ConfigurationDto getConfigurationByName(@PathParam("name") String name) {
-
         return configurationService.getConfigurationByName(name)
                 .getOrElseThrow(e -> new RuntimeException(e));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/get/all")
-    public @JsonView(ConfigurationDto.Basic.class) List<ConfigurationDto> getAllConfigurations(){
+    public List<ConfigurationDto> getAllConfigurations(){
         return configurationService.getAllConfigurations().get();
     }
 }

@@ -1,6 +1,6 @@
-package fr.fruityhedgeh0g.model.entities;
+package fr.fruityhedgeh0g.entities;
 
-import fr.fruityhedgeh0g.model.entities.medias.MediaEntity;
+import fr.fruityhedgeh0g.entities.medias.MediaEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 

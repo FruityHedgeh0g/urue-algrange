@@ -1,13 +1,14 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.ConfigurationDto;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.model.dtos.configurations.ConfigurationDto;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -49,6 +50,7 @@ public class ConfigurationService {
     }
 
     //TODO : Développer l'update
+    @Transactional
     public Try<ConfigurationDto> updateConfiguration(@NotNull ConfigurationDto dto) {
         Log.info("Updating configuration: " + dto.getName());
 //        return Try.run(() -> configurationRepository.updateConfiguration(configurationMapper.toEntity(dto)))

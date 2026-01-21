@@ -1,9 +1,9 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.UserDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.model.dtos.UserDto;
-import fr.fruityhedgeh0g.model.entities.UserEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.logging.Log;
@@ -32,7 +32,7 @@ public class UserService {
 
     @PackagePrivate
     @Transactional
-    public Try<UserEntity> getUserEntityById(@NotNull UUID userId){
+    public Try<UserEntity> getInternalUserById(@NotNull UUID userId){
         Log.debug("Getting user with id: " + userId);
         return Try.of(() -> userRepository.findByIdOptional(userId)
                         .orElseThrow(() -> new UnknownResourceException("User not found: " + userId)))
@@ -47,7 +47,7 @@ public class UserService {
 
     @Transactional
     public Try<UserDto> getUserById(@NotNull UUID userId){
-        return getUserEntityById(userId).map(userMapper::toDto)
+        return getInternalUserById(userId).map(userMapper::toDto)
                 .onFailure(e -> Log.error("A mapping error occurred: " + userId, e));
     }
 
@@ -61,6 +61,7 @@ public class UserService {
                 .onFailure(e -> Log.error("Error getting all users", e));
     }
 
+    @Transactional
     public Try<UserDto> createUser(@NotNull UserDto userDto){
         return Try.of(() -> {
             Log.debug("Searching for already existing user with id: " + userDto.getUserId());
@@ -82,6 +83,7 @@ public class UserService {
         });
     }
 
+    @Transactional
     public Try<UserDto> updateUser(@NotNull UserDto userDto){
         return Try.of(() -> userRepository.findByIdOptional(userDto.getUserId())
                         .orElseThrow(() -> new UnknownResourceException("User not found: " + userDto.getUserId())))
@@ -96,11 +98,12 @@ public class UserService {
                 });
     }
 
-//    public void deleteUser(@NotNull UUID userId){
-//        Log.debug("Deleting user with id: " + userId);
-//        Try.run(() -> userRepository.deleteById(userId))
-//                .onFailure(e -> Log.error("Error deleting user with id: " + userId, e));
-//
-//    }
+    @Transactional
+    public void deleteUser(@NotNull UUID userId){
+        Log.debug("Deleting user with id: " + userId);
+        Try.run(() -> userRepository.deleteById(userId))
+                .onFailure(e -> Log.error("Error deleting user with id: " + userId, e));
+
+    }
 
 }

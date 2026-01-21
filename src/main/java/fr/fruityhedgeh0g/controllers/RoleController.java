@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.RoleDto;
+import fr.fruityhedgeh0g.dtos.RoleDto;
 import fr.fruityhedgeh0g.services.RoleService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -26,8 +26,7 @@ public class RoleController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/get/all")
-    public @JsonView(RoleDto.Basic.class) List<RoleDto> getAllRoles(){
+    public List<RoleDto> getAllRoles(){
         return roleService.getAllRoles().get();
     }
 }

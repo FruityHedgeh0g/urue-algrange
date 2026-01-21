@@ -1,11 +1,11 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.SectorDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidInputException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.model.dtos.SectorDto;
-import fr.fruityhedgeh0g.model.entities.GroupEntity;
-import fr.fruityhedgeh0g.model.entities.SectorEntity;
+import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.logging.Log;
@@ -69,7 +69,7 @@ public class SectorService {
             Log.debug("Checking if all groups exist and doesn't belong to another sector");
             SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
 
-            sectorEntity.getGroups().forEach(grp -> groupService.getGroupEntityById(grp.getGroupId())
+            sectorEntity.getGroups().forEach(grp -> groupService.getInternalEntityById(grp.getGroupId())
                     .peek(group -> {if (group.getSector() != null)
                         throw new InvalidInputException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");})
                     .peek(sectorEntity::addGroup));
@@ -95,7 +95,7 @@ public class SectorService {
         return Try.of(()-> {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
                     .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
-            GroupEntity groupEntity = groupService.getGroupEntityById(groupId)
+            GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
                     .getOrElseThrow(e -> new UnknownResourceException("Group not found: "+groupId));
 
             if (groupEntity.getSector() != null) throw new InvalidInputException("Group already belongs to a sector");
@@ -118,7 +118,7 @@ public class SectorService {
                 .peek(sector -> {
                     if (sector.getGroups().size() == 1) throw new InvalidInputException("Sector must contain at least one group");
 
-                    GroupEntity groupEntity = groupService.getGroupEntityById(groupId)
+                    GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
                             .getOrElseThrow(e -> new UnknownResourceException("Group not found:" +groupId ));
                     sector.removeGroup(groupEntity);
                 }).map(sectorMapper::toDto)
