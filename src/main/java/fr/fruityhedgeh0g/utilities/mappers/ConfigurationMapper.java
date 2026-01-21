@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.model.dtos.configurations.ConfigurationDto;
-import fr.fruityhedgeh0g.model.entities.configurations.ConfigurationEntity;
+import fr.fruityhedgeh0g.dtos.ConfigurationDto;
+import fr.fruityhedgeh0g.entities.configurations.ConfigurationEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "jakarta-cdi")

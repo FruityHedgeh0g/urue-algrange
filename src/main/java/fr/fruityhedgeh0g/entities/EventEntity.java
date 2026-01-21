@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.model.entities;
+package fr.fruityhedgeh0g.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -68,6 +68,6 @@ public class EventEntity extends AuditTemplate {
     private Set<UserEntity> organizers;
 
     @ManyToOne
-    @JoinColumn(name = "creator_id")
+    @JoinColumn(name = "creator_id", nullable = false)
     private UserEntity creator;
 }

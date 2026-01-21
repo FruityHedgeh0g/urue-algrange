@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.model.dtos.PostDto;
-import fr.fruityhedgeh0g.model.entities.PostEntity;
+import fr.fruityhedgeh0g.dtos.PostDto;
+import fr.fruityhedgeh0g.entities.PostEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "jakarta-cdi", uses = MediaMapper.class)

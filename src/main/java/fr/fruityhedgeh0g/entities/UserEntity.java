@@ -1,7 +1,6 @@
-package fr.fruityhedgeh0g.model.entities;
+package fr.fruityhedgeh0g.entities;
 
-import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
-import io.quarkus.security.identity.SecurityIdentity;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,9 +29,6 @@ public class UserEntity extends AuditTemplate{
     @ManyToOne
     @JoinColumn(name = "group_id")
     private GroupEntity group;
-
-    @Column(name = "isActive")
-    private boolean isActive;
 
     @ManyToMany(mappedBy = "organizers")
     private Set<EventEntity> organizedEvents;

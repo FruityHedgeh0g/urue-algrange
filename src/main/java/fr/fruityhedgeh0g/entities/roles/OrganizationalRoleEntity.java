@@ -1,8 +1,7 @@
-package fr.fruityhedgeh0g.model.entities.roles;
+package fr.fruityhedgeh0g.entities.roles;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

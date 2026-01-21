@@ -1,7 +1,9 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.model.dtos.UserDto;
+
+import fr.fruityhedgeh0g.dtos.UserDto;
+import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.UserService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -25,16 +27,14 @@ public class UserController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/get/all")
-    public @JsonView(UserDto.Basic.class) List<UserDto> getAllUsers(){
+    public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
         return userService.getAllUsers().get();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/add")
-    public @JsonView(UserDto.Basic.class) UserDto addUser( @JsonView(UserDto.Creation.class) UserDto userDto){
+    public @JsonView(Views.CreationResponse.class) UserDto addUser(@JsonView(Views.Creation.class) UserDto userDto){
         return userService.createUser(userDto).get();
     }
 

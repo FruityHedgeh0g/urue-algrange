@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.model.entities.medias;
+package fr.fruityhedgeh0g.entities.medias;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
-@DiscriminatorValue(value = "PHOTO")
+@DiscriminatorValue(value = "VIDEO")
 @Getter
 @Setter
-public class PhotoEntity extends MediaEntity{
+public class VideoEntity extends MediaEntity {
 }

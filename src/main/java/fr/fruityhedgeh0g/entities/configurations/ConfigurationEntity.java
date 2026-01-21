@@ -1,6 +1,6 @@
-package fr.fruityhedgeh0g.model.entities.configurations;
+package fr.fruityhedgeh0g.entities.configurations;
 
-import fr.fruityhedgeh0g.model.entities.AuditTemplate;
+import fr.fruityhedgeh0g.entities.AuditTemplate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

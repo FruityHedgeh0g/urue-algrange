@@ -1,13 +1,14 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.model.dtos.PostDto;
-import fr.fruityhedgeh0g.model.entities.PostEntity;
+import fr.fruityhedgeh0g.dtos.PostDto;
+import fr.fruityhedgeh0g.entities.PostEntity;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
@@ -49,6 +50,7 @@ public class PostService {
                 });
     }
 
+    @Transactional
     public Try<PostDto> createPost(@NotNull PostDto postDto) {
         return Try.of(() -> {
             Log.debug("Creating post");
@@ -67,12 +69,14 @@ public class PostService {
     }
 
     //TODO : Développer l'update
+    @Transactional
     public Try<PostDto> updatePost(@NotNull PostDto postDto) {
         Log.debug("Updating post: " + postDto.getPostId());
         return null;
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
+    @Transactional
     public void deletePost(@NotNull UUID postId) {
         Log.debug("Deleting post with id: " + postId);
         Try.of(() -> postRepository.deleteById(postId))

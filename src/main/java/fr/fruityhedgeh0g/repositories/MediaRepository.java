@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.repositories;
 
-import fr.fruityhedgeh0g.model.entities.medias.MediaEntity;
+import fr.fruityhedgeh0g.entities.medias.MediaEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 

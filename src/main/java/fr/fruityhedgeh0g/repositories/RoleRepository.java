@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.repositories;
 
-import fr.fruityhedgeh0g.model.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 
