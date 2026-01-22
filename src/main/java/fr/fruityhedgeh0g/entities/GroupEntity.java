@@ -28,10 +28,10 @@ public class GroupEntity extends AuditTemplate {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group",fetch = FetchType.EAGER)
     private Set<UserEntity> members;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
 

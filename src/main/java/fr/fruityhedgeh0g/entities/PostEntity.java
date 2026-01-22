@@ -33,11 +33,11 @@ public class PostEntity extends AuditTemplate {
     @NotNull
     private String content;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "media_id")
     private MediaEntity banner;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "post_attachments", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private List<MediaEntity> attachments;
 }

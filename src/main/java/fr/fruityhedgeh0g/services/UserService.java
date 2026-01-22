@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.UserDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.MandatoryFieldMissingException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.UserRepository;
@@ -23,16 +24,19 @@ import java.util.UUID;
 @ApplicationScoped
 public class UserService {
 
-
     @Inject
     UserRepository userRepository;
+
+    @Inject
+    GroupService groupService;
+
 
     @Inject
     UserMapper userMapper;
 
     @PackagePrivate
     @Transactional
-    public Try<UserEntity> getInternalUserById(@NotNull UUID userId){
+    Try<UserEntity> getInternalUserById(@NotNull UUID userId){
         Log.debug("Getting user with id: " + userId);
         return Try.of(() -> userRepository.findByIdOptional(userId)
                         .orElseThrow(() -> new UnknownResourceException("User not found: " + userId)))
@@ -64,6 +68,9 @@ public class UserService {
     @Transactional
     public Try<UserDto> createUser(@NotNull UserDto userDto){
         return Try.of(() -> {
+            if(userDto.getUserId() == null)
+                throw new MandatoryFieldMissingException("User id is mandatory");
+
             Log.debug("Searching for already existing user with id: " + userDto.getUserId());
             if (userRepository.existsById(userDto.getUserId()))
                 throw new DuplicateResourceException("User already exists: " + userDto.getUserId());
@@ -78,15 +85,29 @@ public class UserService {
             switch (ex){
                 case NoSuchElementException e -> Log.warn(e.getMessage());
                 case DuplicateResourceException e -> Log.warn(e.getMessage());
+                case MandatoryFieldMissingException e -> Log.warn(e.getMessage());
                 default -> Log.error("Error creating user with id: " + userDto.getUserId(), ex);
             }
         });
     }
 
     @Transactional
+    @PackagePrivate
+    public Try<Boolean> existsById(@NotNull UUID userId){
+        Log.info("Checking if user exists with id: " + userId);
+        return Try.of(() -> userRepository.existsById(userId))
+                .onFailure(e -> Log.error("Error checking if user exists with id: " + userId, e));
+    }
+
+    @Transactional
     public Try<UserDto> updateUser(@NotNull UserDto userDto){
+
         return Try.of(() -> userRepository.findByIdOptional(userDto.getUserId())
                         .orElseThrow(() -> new UnknownResourceException("User not found: " + userDto.getUserId())))
+                .peek(user -> {
+                    if (!groupService.existsGroupById(userDto.getUserId()).get() && userDto.getGroup() != null)
+                        throw new UnknownResourceException("Group not found: " + userDto.getUserId());
+                })
                 .peek(user -> userMapper.updateEntityFromDto(user, userDto))
                 .map(userMapper::toDto)
                 .onFailure(ex -> {
@@ -98,12 +119,13 @@ public class UserService {
                 });
     }
 
-    @Transactional
-    public void deleteUser(@NotNull UUID userId){
-        Log.debug("Deleting user with id: " + userId);
-        Try.run(() -> userRepository.deleteById(userId))
-                .onFailure(e -> Log.error("Error deleting user with id: " + userId, e));
-
-    }
+//INFO : Non nécéssité de supprimer des users
+//    @Transactional
+//    public void deleteUser(@NotNull UUID userId){
+//        Log.debug("Deleting user with id: " + userId);
+//        Try.run(() -> userRepository.deleteById(userId))
+//                .onFailure(e -> Log.error("Error deleting user with id: " + userId, e));
+//
+//    }
 
 }

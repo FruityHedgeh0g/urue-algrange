@@ -13,16 +13,16 @@ import java.util.UUID;
 @Value
 public class MediaDto {
 
-    @JsonView(Views.CreationResponse.class)
+    @JsonView({Views.CreationResponse.class,Views.Basic.class})
     UUID mediaId;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     String fileKey;
 
     @JsonView(Views.Creation.class)
     String originalFilename;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     String contentType;
 
     @JsonView(Views.Creation.class)

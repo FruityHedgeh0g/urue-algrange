@@ -22,21 +22,28 @@ public class UserEntity extends AuditTemplate{
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @ManyToMany
-    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    //TODO: faire une estimation de l'utilité de garder les rôles en EAGER
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private Set<RoleEntity> roles;
 
-    @ManyToOne
-    @JoinColumn(name = "group_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(
+            name = "group_id")
     private GroupEntity group;
 
-    @ManyToMany(mappedBy = "organizers")
+    //TODO : Gérer le N+1
+    @ManyToMany(mappedBy = "organizers", fetch = FetchType.LAZY)
     private Set<EventEntity> organizedEvents;
 
-    @ManyToMany(mappedBy = "participants")
+    @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
     private Set<EventEntity> participatedEvents;
 
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     private Set<EventEntity> createdEvents;
 
 }

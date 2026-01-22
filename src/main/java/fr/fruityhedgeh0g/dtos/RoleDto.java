@@ -12,15 +12,15 @@ import java.util.UUID;
 @Value
 public class RoleDto {
 
-    @JsonView(Views.CreationResponse.class)
+    @JsonView({Views.CreationResponse.class, Views.Basic.class})
     UUID roleId;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class, Views.Basic.class})
     String name;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     String description;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     String roleType;
 }

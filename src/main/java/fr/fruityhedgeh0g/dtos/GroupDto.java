@@ -12,18 +12,18 @@ import java.util.UUID;
 @Value
 public class GroupDto {
 
-    @JsonView(Views.CreationResponse.class)
+    @JsonView({Views.CreationResponse.class,Views.Basic.class})
     UUID groupId;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     String name;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     String description;
 
     Set<UserEntity> members;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     SectorEntity sector;
 
 }

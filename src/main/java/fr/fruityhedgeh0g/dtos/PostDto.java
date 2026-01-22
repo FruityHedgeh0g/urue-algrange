@@ -12,10 +12,10 @@ import java.util.UUID;
 @Value
 public class PostDto {
 
-    @JsonView(Views.CreationResponse.class)
+    @JsonView({Views.CreationResponse.class,Views.Basic.class})
     UUID postId;
 
-    @JsonView(Views.Creation.class)
+    @JsonView({Views.Creation.class,Views.Basic.class})
     String  title;
 
     @JsonView(Views.Creation.class)

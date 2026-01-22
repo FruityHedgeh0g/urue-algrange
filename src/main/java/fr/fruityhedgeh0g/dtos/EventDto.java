@@ -13,7 +13,7 @@ import java.util.UUID;
 public class EventDto {
 
 
-    @JsonView(Views.CreationResponse.class)
+    @JsonView({Views.CreationResponse.class, Views.Basic.class})
     UUID eventId;
 
     @JsonView(Views.Creation.class)

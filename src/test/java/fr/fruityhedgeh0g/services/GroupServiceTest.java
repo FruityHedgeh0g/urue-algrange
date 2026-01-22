@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 @QuarkusTest
-
 public class GroupServiceTest {
 
     @Inject

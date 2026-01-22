@@ -59,15 +59,16 @@ public class EventEntity extends AuditTemplate {
     @Column(name = "address_complement")
     private String addressComplement;
 
-    @ManyToMany
+    //TODO: Gérer les N+1
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "event_participants", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<UserEntity> participants;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "event_organizers", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<UserEntity> organizers;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private UserEntity creator;
 }

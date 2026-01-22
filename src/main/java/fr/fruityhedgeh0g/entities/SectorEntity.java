@@ -28,7 +28,7 @@ public class SectorEntity extends AuditTemplate {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "sector")
+    @OneToMany(mappedBy = "sector", fetch = FetchType.LAZY)
     private Set<GroupEntity> groups;
 
     public void addGroup(GroupEntity group) {

@@ -43,6 +43,14 @@ public class GroupService {
                     .onFailure(e -> Log.error("Error getting all groups", e));
     }
 
+    @Transactional
+    @PackagePrivate
+    Try<Boolean> existsGroupById(@NotNull UUID groupId){
+        Log.info("Checking if group exists with id: " + groupId);
+        return Try.of(() -> groupRepository.existsById(groupId))
+                .onFailure(e -> Log.error("Error checking if group exists with id: " + groupId, e));
+    }
+
     @PackagePrivate
     Try<GroupEntity> getInternalEntityById(@NotNull UUID groupId){
         Log.info("Getting group with id: " + groupId);
