@@ -7,6 +7,7 @@ import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.vavr.control.Try;
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -86,7 +87,7 @@ public class GroupServiceTest {
     public void getGroupByIdTest_Failure_Null(){
         Try<GroupDto> result = groupService.getGroupById(null);
         Assertions.assertTrue(result.isFailure());
-        Assertions.assertThrowsExactly(NullPointerException.class, result::get);
+        Assertions.assertThrowsExactly(ConstraintViolationException.class, result::get);
     }
 
 

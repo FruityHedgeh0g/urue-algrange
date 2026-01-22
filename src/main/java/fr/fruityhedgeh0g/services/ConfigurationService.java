@@ -25,6 +25,7 @@ public class ConfigurationService {
     @Inject
     ConfigurationMapper configurationMapper;
 
+    @Transactional
     public Try<ConfigurationDto> getConfigurationByName(@NotBlank String name) {
         Log.info("Getting configuration by name: " + name);
         return Try.of(() -> configurationRepository
@@ -40,6 +41,7 @@ public class ConfigurationService {
                 });
     }
 
+    @Transactional
     public Try<List<ConfigurationDto>> getAllConfigurations() {
         Log.info("Getting all configurations");
         return Try.of(() ->configurationRepository.findAll()

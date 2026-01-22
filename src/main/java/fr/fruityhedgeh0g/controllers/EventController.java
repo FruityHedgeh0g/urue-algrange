@@ -24,7 +24,7 @@ public class EventController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<EventDto> getAllEvents(){
+    public @JsonView(Views.Basic.class) List<EventDto> getAllEvents(){
         return eventService.getAllEvents().get();
     }
 

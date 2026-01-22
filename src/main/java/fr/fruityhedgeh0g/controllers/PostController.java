@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.PostDto;
+import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.PostService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
@@ -26,7 +27,7 @@ public class PostController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<PostDto> getAllPosts(){
+    public @JsonView(Views.Basic.class) List<PostDto> getAllPosts(){
         return postService.getAllPosts().get();
     }
 }

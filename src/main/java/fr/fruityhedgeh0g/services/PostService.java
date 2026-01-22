@@ -25,6 +25,7 @@ public class PostService {
     @Inject
     PostMapper postMapper;
 
+    @Transactional
     public Try<List<PostDto>> getAllPosts() {
         Log.debug("Getting all posts");
         return Try.of(() -> postRepository
@@ -35,6 +36,7 @@ public class PostService {
                 .onFailure(e -> Log.error("Error getting all posts", e));
     }
 
+    @Transactional
     public Try<PostDto> getPostById(@NotNull UUID postId) {
         Log.debug("Getting post with id: " + postId);
         return Try.of(() -> postRepository
