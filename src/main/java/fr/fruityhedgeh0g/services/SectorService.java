@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.SectorDto;
+import fr.fruityhedgeh0g.dtos.SectorDtos.SectorDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidInputException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;

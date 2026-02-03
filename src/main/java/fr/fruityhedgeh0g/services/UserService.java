@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.UserDto;
+import fr.fruityhedgeh0g.dtos.UserDtos.UserDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.MandatoryFieldMissingException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;

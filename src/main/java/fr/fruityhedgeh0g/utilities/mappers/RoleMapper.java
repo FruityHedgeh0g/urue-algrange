@@ -1,38 +1,32 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.RoleDto;
+import fr.fruityhedgeh0g.dtos.RoleDtos.NestedRoleDto;
+import fr.fruityhedgeh0g.dtos.RoleDtos.RoleDto;
 import fr.fruityhedgeh0g.entities.roles.LegalRoleEntity;
 import fr.fruityhedgeh0g.entities.roles.OrganizationalRoleEntity;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.SubclassMapping;
-
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.mapstruct.ObjectFactory;
 
 @Mapper(componentModel = "jakarta-cdi")
 public interface RoleMapper {
 
-    @Mapping(target = "roleType", constant = "ORGANIZATIONAL")
     RoleDto toDto(OrganizationalRoleEntity entity);
 
-    @Mapping(target = "roleType", constant = "LEGAL")
     RoleDto toDto(LegalRoleEntity entity);
 
-    default RoleDto toDto(RoleEntity entity) {
-        switch (entity) {
-            case OrganizationalRoleEntity organizationalRoleEntity -> {return toDto(organizationalRoleEntity);}
-            case LegalRoleEntity legalRoleEntity -> {return toDto(legalRoleEntity);}
-            default -> throw new IllegalStateException("Unexpected role entity type: " + entity.getClass().getSimpleName());
-        }
-    }
+    NestedRoleDto toNestedDto(OrganizationalRoleEntity entity);
 
+    NestedRoleDto toNestedDto(LegalRoleEntity entity);
+
+    @Mapping(target = "roleType", constant = "ORGANIZATIONAL")
     OrganizationalRoleEntity toOrganizationalRoleEntity(RoleDto dto);
 
+    @Mapping(target = "roleType", constant = "LEGAL")
     LegalRoleEntity toLegalRoleEntity(RoleDto dto);
 
+    @ObjectFactory
     default RoleEntity toEntity(RoleDto dto) {
         switch (dto.getRoleType()){
             case "ORGANIZATIONAL" -> {return toOrganizationalRoleEntity(dto);}
@@ -40,6 +34,10 @@ public interface RoleMapper {
             default -> throw new IllegalStateException("Unexpected role type");
         }
     }
+
+
+
+
 
 //    @Named("roleEntityToDto")
 //    @Mapping(target = "roleType", constant = "LEGAL")

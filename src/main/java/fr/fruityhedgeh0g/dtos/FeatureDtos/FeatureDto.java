@@ -1,17 +1,14 @@
-package fr.fruityhedgeh0g.dtos;
+package fr.fruityhedgeh0g.dtos.FeatureDtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import jakarta.persistence.Column;
+import fr.fruityhedgeh0g.dtos.Views;
 import lombok.Value;
 
 @Value
 public class FeatureDto {
-    @JsonView(Views.Basic.class)
     String name;
 
-    @JsonView(Views.Basic.class)
     String description;
 
-    @JsonView(Views.Basic.class)
     boolean isActive;
 }

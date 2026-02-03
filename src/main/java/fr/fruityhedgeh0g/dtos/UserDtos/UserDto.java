@@ -1,10 +1,12 @@
-package fr.fruityhedgeh0g.dtos;
+package fr.fruityhedgeh0g.dtos.UserDtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.entities.EventEntity;
-import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.dtos.GroupDtos.GroupDto;
+import fr.fruityhedgeh0g.dtos.GroupDtos.NestedGroupDto;
+import fr.fruityhedgeh0g.dtos.RoleDtos.NestedRoleDto;
+import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.Builder;
 import lombok.Value;
 
@@ -15,14 +17,20 @@ import java.util.UUID;
 @Builder
 public class UserDto {
 
-    @JsonView({Views.Creation.class, Views.Basic.class , Views.Update.class})
+    @JsonView({Views.Minimal.class,Views.Creation.class,Views.Update.class})
     UUID userId;
 
-    @JsonView({Views.Detailed.class, Views.Update.class})
-    Set<RoleEntity> roles;
+    @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    String firstName;
+
+    @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    String lastName;
 
     @JsonView(Views.Detailed.class)
-    GroupDto group;
+    Set<NestedRoleDto> roles;
+
+    @JsonView(Views.Detailed.class)
+    NestedGroupDto group;
 
     //INFO : Retrait des Sets au profit d'une méthode dans EventService retournant ces infos pour un couple Utilisateur/EventType
 //    @JsonView(Views.Detailed.class)

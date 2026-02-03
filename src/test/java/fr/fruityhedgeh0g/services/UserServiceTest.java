@@ -1,24 +1,15 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.UserDto;
-import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.dtos.UserDtos.UserDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.MandatoryFieldMissingException;
-import fr.fruityhedgeh0g.repositories.UserRepository;
-import io.quarkus.logging.Log;
-import io.quarkus.test.Mock;
-import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
-import io.vavr.control.Try;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @QuarkusTest

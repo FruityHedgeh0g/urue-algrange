@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.MediaDto;
+import fr.fruityhedgeh0g.dtos.MediaDtos.MediaDto;
 import fr.fruityhedgeh0g.entities.medias.MediaEntity;
 import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.utilities.mappers.MediaMapper;

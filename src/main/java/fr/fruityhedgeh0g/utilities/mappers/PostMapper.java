@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.PostDto;
+import fr.fruityhedgeh0g.dtos.PostDtos.NestedPostDto;
+import fr.fruityhedgeh0g.dtos.PostDtos.PostDto;
 import fr.fruityhedgeh0g.entities.PostEntity;
 import org.mapstruct.Mapper;
 
@@ -9,4 +10,6 @@ public interface PostMapper {
     PostEntity toEntity(PostDto dto);
 
     PostDto toDto(PostEntity entity);
+
+    NestedPostDto toNestedDto(PostEntity entity);
 }

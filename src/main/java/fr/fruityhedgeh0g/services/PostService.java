@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.PostDto;
+import fr.fruityhedgeh0g.dtos.PostDtos.PostDto;
 import fr.fruityhedgeh0g.entities.PostEntity;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;

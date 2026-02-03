@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.GroupDto;
+import fr.fruityhedgeh0g.dtos.GroupDtos.GroupDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import io.quarkus.test.TestTransaction;

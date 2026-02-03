@@ -1,39 +1,43 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.MediaDto;
-import fr.fruityhedgeh0g.dtos.RoleDto;
+import fr.fruityhedgeh0g.dtos.MediaDtos.MediaDto;
+import fr.fruityhedgeh0g.dtos.MediaDtos.NestedMediaDto;
 import fr.fruityhedgeh0g.entities.medias.MediaEntity;
 import fr.fruityhedgeh0g.entities.medias.PhotoEntity;
 import fr.fruityhedgeh0g.entities.medias.VideoEntity;
-import fr.fruityhedgeh0g.entities.roles.LegalRoleEntity;
-import fr.fruityhedgeh0g.entities.roles.OrganizationalRoleEntity;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.SubclassMapping;
+import org.mapstruct.ObjectFactory;
 
 @Mapper(componentModel = "jakarta-cdi")
 public interface MediaMapper {
 
-    @Mapping(target = "contentType", constant = "PHOTO")
     MediaDto toDto(PhotoEntity entity);
 
-    @Mapping(target = "contentType", constant = "VIDEO")
     MediaDto toDto(VideoEntity entity);
 
-    default MediaDto toDto(MediaEntity entity) {
-        switch (entity) {
-            case VideoEntity videoEntity -> {return toDto(videoEntity);}
-            case PhotoEntity photoEntity -> {return toDto(photoEntity);}
-            default -> throw new IllegalStateException("Unexpected media entity type: " + entity.getClass().getSimpleName());
-        }
-    }
+    NestedMediaDto toNestedDto(PhotoEntity entity);
 
+    NestedMediaDto toNestedDto(VideoEntity entity);
+
+//    @ObjectFactory
+//    default MediaDto toDto(MediaEntity entity) {
+//        switch (entity) {
+//            case VideoEntity videoEntity -> {return toDto(videoEntity);}
+//            case PhotoEntity photoEntity -> {return toDto(photoEntity);}
+//            default -> throw new IllegalStateException("Unexpected media entity type: " + entity.getClass().getSimpleName());
+//        }
+//    }
+
+
+
+    @Mapping(target = "contentType", constant = "VIDEO")
     VideoEntity toVideoEntity(MediaDto dto);
 
+    @Mapping(target = "contentType", constant = "PHOTO")
     PhotoEntity toPhotoEntity(MediaDto dto);
 
+    @ObjectFactory
     default MediaEntity toEntity(MediaDto dto) {
         switch(dto.getContentType()){
             case "VIDEO" -> {return toVideoEntity(dto);}

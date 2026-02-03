@@ -1,22 +1,28 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.UserDto;
+import fr.fruityhedgeh0g.dtos.UserDtos.NestedUserDto;
+import fr.fruityhedgeh0g.dtos.UserDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import org.mapstruct.*;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
 public interface UserMapper {
 
+    UserEntity toEntity(UserDto dto);
+
+    UserDto toDto(UserEntity entity);
+
+    NestedUserDto toNestedDto(UserEntity entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    UserEntity partialDtoToEntity(@MappingTarget UserEntity userEntity, UserDto userDto);
 //    @Mappings({
 //            @Mapping(target = "group", qualifiedByName = "GroupDtoToNestedEntity"),
 //            @Mapping(target = "organizedEvents", qualifiedByName = "EventDtoToNestedEntity"),
 //            @Mapping(target = "participatedEvents", qualifiedByName = "EventDtoToNestedEntity"),
 //            @Mapping(target = "createdEvents", qualifiedByName = "EventDtoToNestedEntity")
 //    })
-    UserEntity toEntity(UserDto dto);
+
 
 //    @Mappings({
 //            @Mapping(target = "group", qualifiedByName = "GroupEntityToNestedDto"),
@@ -24,10 +30,9 @@ public interface UserMapper {
 //            @Mapping(target = "participatedEvents", qualifiedByName = "EventEntityToNestedDto"),
 //            @Mapping(target = "createdEvents", qualifiedByName = "EventEntityToNestedDto")
 //    })
-    UserDto toDto(UserEntity entity);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    UserEntity updateEntityFromDto(@MappingTarget UserEntity userEntity, UserDto userDto);
+
+
 
 //    @Named("UserEntityToNestedDto")
 //    @Mappings({

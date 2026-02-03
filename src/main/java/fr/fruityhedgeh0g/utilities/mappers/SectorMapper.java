@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.SectorDto;
+import fr.fruityhedgeh0g.dtos.SectorDtos.NestedSectorDto;
+import fr.fruityhedgeh0g.dtos.SectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import org.mapstruct.*;
 
@@ -13,6 +14,11 @@ public interface SectorMapper {
 //    @Mapping(target = "groups", qualifiedByName = "GroupEntityToNestedDto")
     SectorDto toDto(SectorEntity entity);
 
+    NestedSectorDto toNestedDto(SectorEntity entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    SectorEntity partialDtoToEntity(@MappingTarget SectorEntity sectorEntity, SectorDto sectorDto);
+
 //    @Named("SectorDtoToNestedEntity")
 //    @Mapping(target = "groups", ignore = true)
 //    SectorEntity toNestedEntity(SectorDto dto);
@@ -21,6 +27,5 @@ public interface SectorMapper {
 //    @Mapping(target = "groups", ignore = true)
 //    SectorDto toNestedDto(SectorEntity entity);
 //
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    SectorEntity updateEntityFromDto(@MappingTarget SectorEntity sectorEntity, SectorDto sectorDto);
+
 }

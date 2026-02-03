@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.RoleDto;
+import fr.fruityhedgeh0g.dtos.RoleDtos.RoleDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.RoleService;
 import io.quarkus.security.identity.SecurityIdentity;

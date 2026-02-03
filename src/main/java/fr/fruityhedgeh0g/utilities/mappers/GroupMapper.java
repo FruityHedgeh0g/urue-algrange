@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.GroupDto;
+import fr.fruityhedgeh0g.dtos.GroupDtos.GroupDto;
+import fr.fruityhedgeh0g.dtos.GroupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import org.mapstruct.*;
 
@@ -13,11 +14,16 @@ public interface GroupMapper {
 //    })
     GroupDto toDto(GroupEntity entity);
 
+    NestedGroupDto toNestedDto(GroupEntity entity);
+
 //    @Mappings({
 //            @Mapping(target = "members", qualifiedByName = "UserDtoToNestedEntity"),
 //            @Mapping(target = "sector", qualifiedByName = "SectorDtoToNestedEntity")
 //    })
     GroupEntity toEntity(GroupDto dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    GroupEntity partialDtoToEntity(@MappingTarget GroupEntity groupEntity, GroupDto groupDto);
 
 //    @Named("GroupDtoToNestedEntity")
 //    @Mappings({
@@ -33,6 +39,5 @@ public interface GroupMapper {
 //    })
 //    GroupDto toNestedDto(GroupEntity entity);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    GroupEntity updateEntityFromDto(@MappingTarget GroupEntity groupEntity, GroupDto groupDto);
+
 }

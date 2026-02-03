@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.ConfigurationDto;
+import fr.fruityhedgeh0g.dtos.ConfigurationDtos.ConfigurationDto;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;

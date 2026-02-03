@@ -12,7 +12,11 @@ public class Views {
     public static class UpdateResponse extends Update {}
 
     //Read DTO types
-    public static class Basic {}
+    public static class Minimal {}
+
+    public static class Basic extends Minimal{}
 
     public static class Detailed extends Basic {}
+
+
 }
