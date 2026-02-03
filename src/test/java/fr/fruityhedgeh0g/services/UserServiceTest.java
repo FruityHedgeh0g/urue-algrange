@@ -46,9 +46,9 @@ public class UserServiceTest {
                 .userId(UUID.randomUUID())
                 .build();
 
-        //TODO: Debug :D
+        //TODO: Debug :D check @InjectMock and @Mock
         //Mockito.when(userRepository.existsById(userDto.getUserId())).thenReturn(true);
-        Mockito.when(userService.existsById(userDto.getUserId()).get()).thenReturn(true);
+        //Mockito.when(userService.existsById(userDto.getUserId()).get()).thenReturn(true);
 
         Assertions.assertThrowsExactly(
                 DuplicateResourceException.class,
