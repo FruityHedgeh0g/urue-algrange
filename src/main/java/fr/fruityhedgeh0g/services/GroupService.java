@@ -129,7 +129,7 @@ public class GroupService {
         Log.debug("Updating group: " + groupDto.getGroupId());
         return Try.of(() -> groupRepository.findByIdOptional(groupDto.getGroupId())
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupDto.getGroupId())))
-                .peek(group -> groupMapper.updateEntityFromDto(group, groupDto))
+                .peek(group -> groupMapper.partialDtoToEntity(group, groupDto))
                 .map(groupMapper::toDto)
                 .onFailure(ex -> {
                     if (ex instanceof UnknownResourceException) {

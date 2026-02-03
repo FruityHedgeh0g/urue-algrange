@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.utilities.mappers;
 import fr.fruityhedgeh0g.dtos.EventDtos.EventDto;
 import fr.fruityhedgeh0g.entities.EventEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "jakarta-cdi", uses = UserMapper.class)
 public interface EventMapper {
@@ -12,6 +13,9 @@ public interface EventMapper {
 //            @Mapping(target = "organizers", qualifiedByName = "UserDtoSetToNestedEntitySet"),
 //            @Mapping(target = "participants", qualifiedByName = "UserDtoSetToNestedEntitySet")
 //    })
+
+    @Mapping(target = "participants", ignore = true)
+    @Mapping(target = "organizers", ignore = true)
     EventEntity toEntity(EventDto dto);
 
 //    @Mappings({

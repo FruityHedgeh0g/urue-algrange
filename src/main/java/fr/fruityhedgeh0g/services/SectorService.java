@@ -137,7 +137,7 @@ public class SectorService {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorDto.getSectorId())
                     .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorDto.getSectorId()));
 
-            sectorMapper.updateEntityFromDto(sectorEntity,sectorDto);
+            sectorMapper.partialDtoToEntity(sectorEntity,sectorDto);
 
             return sectorMapper.toDto(sectorEntity);
         }).onFailure(ex -> {

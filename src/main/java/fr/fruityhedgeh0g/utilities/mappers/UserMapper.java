@@ -8,14 +8,17 @@ import org.mapstruct.*;
 @Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
 public interface UserMapper {
 
+    @Mapping(target = "roles",ignore = true)
     UserEntity toEntity(UserDto dto);
 
     UserDto toDto(UserEntity entity);
 
     NestedUserDto toNestedDto(UserEntity entity);
 
+    @Mapping(target = "roles",ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     UserEntity partialDtoToEntity(@MappingTarget UserEntity userEntity, UserDto userDto);
+
 //    @Mappings({
 //            @Mapping(target = "group", qualifiedByName = "GroupDtoToNestedEntity"),
 //            @Mapping(target = "organizedEvents", qualifiedByName = "EventDtoToNestedEntity"),

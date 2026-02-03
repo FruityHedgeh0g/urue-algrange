@@ -108,7 +108,7 @@ public class UserService {
                     if (!groupService.existsGroupById(userDto.getUserId()).get() && userDto.getGroup() != null)
                         throw new UnknownResourceException("Group not found: " + userDto.getUserId());
                 })
-                .peek(user -> userMapper.updateEntityFromDto(user, userDto))
+                .peek(user -> userMapper.partialDtoToEntity(user, userDto))
                 .map(userMapper::toDto)
                 .onFailure(ex -> {
                     if (ex instanceof UnknownResourceException) {

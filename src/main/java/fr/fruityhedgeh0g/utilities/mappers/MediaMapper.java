@@ -20,14 +20,13 @@ public interface MediaMapper {
 
     NestedMediaDto toNestedDto(VideoEntity entity);
 
-//    @ObjectFactory
-//    default MediaDto toDto(MediaEntity entity) {
-//        switch (entity) {
-//            case VideoEntity videoEntity -> {return toDto(videoEntity);}
-//            case PhotoEntity photoEntity -> {return toDto(photoEntity);}
-//            default -> throw new IllegalStateException("Unexpected media entity type: " + entity.getClass().getSimpleName());
-//        }
-//    }
+    default MediaDto toDto(MediaEntity entity) {
+        switch (entity) {
+            case VideoEntity videoEntity -> {return toDto(videoEntity);}
+            case PhotoEntity photoEntity -> {return toDto(photoEntity);}
+            default -> throw new IllegalStateException("Unexpected media entity type: " + entity.getClass().getSimpleName());
+        }
+    }
 
 
 
