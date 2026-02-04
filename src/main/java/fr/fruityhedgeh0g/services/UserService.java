@@ -104,10 +104,6 @@ public class UserService {
 
         return Try.of(() -> userRepository.findByIdOptional(userDto.getUserId())
                         .orElseThrow(() -> new UnknownResourceException("User not found: " + userDto.getUserId())))
-                .peek(user -> {
-                    if (!groupService.existsGroupById(userDto.getUserId()).get() && userDto.getGroup() != null)
-                        throw new UnknownResourceException("Group not found: " + userDto.getUserId());
-                })
                 .peek(user -> userMapper.partialDtoToEntity(user, userDto))
                 .map(userMapper::toDto)
                 .onFailure(ex -> {

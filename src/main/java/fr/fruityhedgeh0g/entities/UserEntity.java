@@ -2,14 +2,12 @@ package fr.fruityhedgeh0g.entities;
 
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 import java.util.UUID;
 
+@Builder
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
