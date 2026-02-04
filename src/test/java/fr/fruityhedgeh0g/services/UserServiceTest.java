@@ -9,6 +9,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -19,41 +20,95 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @QuarkusTest
-@Transactional
+@TestTransaction
 class UserServiceTest {
-    @Inject
+    @InjectMock
     UserRepository userRepository;
-
-    @InjectMock
-    UserMapper userMapper;
-
-    @InjectMock
-    GroupService groupService;
 
     @Inject
     UserService userService;
 
+    private UserDto userDto;
+    private UserDto userDtoWithoutId;
+    private UserEntity userEntity;
+
+
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(userMapper);
-        Mockito.reset(groupService);
-    }
+        reset(userRepository);
 
-    @Test
-    public void updateUser_UnknownUser_Failure() {
-        UserDto userDto = UserDto.builder()
-                .userId(UUID.randomUUID())
+        UUID randomUUID = UUID.randomUUID();
+
+        userDto = UserDto.builder()
+                .userId(randomUUID)
                 .firstName("Platy")
                 .lastName("Pus")
                 .build();
 
+        userEntity = UserEntity.builder()
+                .userId(randomUUID)
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+
+        userDtoWithoutId = UserDto.builder()
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+
+
+    }
+
+    @Test
+    public void getUserById_Success(){
+        when(userRepository.findByIdOptional(Mockito.any()))
+                .thenReturn(Optional.ofNullable(userEntity));
+
+        Assertions.assertEquals(
+                userService.getUserById(UUID.randomUUID()).get(),
+                userDto
+        );
+    }
+
+    @Test
+    public void getInternalUserById_IdIsNull_Failure(){
+        Assertions.assertThrowsExactly(
+                ConstraintViolationException.class,
+                () -> userService.getInternalUserById(null).get());
+    }
+
+    @Test
+    public void getInternalUserById_UnknownUser_Failure(){
+        Assertions.assertThrowsExactly(
+                UnknownResourceException.class,
+                () -> userService.getInternalUserById(UUID.randomUUID()).get());
+    }
+
+    @Test
+    public void getInternalUserById_Success(){
+        when(userRepository.findByIdOptional(Mockito.any()))
+                .thenReturn(Optional.ofNullable(userEntity));
+
+        Assertions.assertEquals(
+                userService.getInternalUserById(UUID.randomUUID()).get(),
+                userEntity
+        );
+
+    }
+
+
+
+    @Test
+    public void updateUser_UnknownUser_Failure() {
         Assertions.assertThrowsExactly(
                 UnknownResourceException.class,
                 () -> userService.updateUser(userDto).get());
@@ -69,51 +124,25 @@ class UserServiceTest {
 
     @Test
     public void updateUser_Success() {
-        UUID randomUUID = UUID.randomUUID();
+        when(userRepository.findByIdOptional(Mockito.any()))
+                .thenReturn(java.util.Optional.of(UserEntity.builder().build()));
 
-        UserEntity user = UserEntity.builder()
-                .userId(randomUUID)
-                .firstName("Platy")
-                .lastName("Pus")
-                .build();
+        Assertions.assertEquals(userService.updateUser(userDto).get(), userDto);
 
-        userRepository.persist(user);
-
-        UserDto userDto = UserDto.builder()
-                .userId(randomUUID)
-                .firstName("Hedge")
-                .lastName("Hog")
-                .build();
-
-        Assertions.assertDoesNotThrow(() -> userService.updateUser(userDto).get());
     }
 
 
     @Test
     public void createUser_IdMissing_Failure() {
-        UserDto userDto = UserDto.builder()
-                .build();
-
         Assertions.assertThrowsExactly(
                 MandatoryFieldMissingException.class,
-                () -> userService.createUser(userDto).get()
+                () -> userService.createUser(userDtoWithoutId).get()
         );
     }
 
     @Test
     public void createUser_UserAlreadyExists_Failure() {
-        UUID randomUUID = UUID.randomUUID();
-        UserEntity user = UserEntity.builder()
-                .userId(randomUUID)
-                .firstName("Fruity")
-                .lastName("Hog")
-                .build();
-
-        userRepository.persist(user);
-
-        UserDto userDto = UserDto.builder()
-                .userId(randomUUID)
-                .build();
+        when(userRepository.existsById(Mockito.any())).thenReturn(true);
 
         Assertions.assertThrowsExactly(
                 DuplicateResourceException.class,
@@ -131,14 +160,9 @@ class UserServiceTest {
 
     @Test
     public void createUser_Success() {
-        UserDto userDto = UserDto.builder()
-                .userId(UUID.randomUUID())
-                .firstName("Platy")
-                .lastName("Pus")
-                .build();
-
         Assertions.assertDoesNotThrow(() -> userService.createUser(userDto).get());
 
+        verify(userRepository).persist(any(UserEntity.class));
     }
 
 
