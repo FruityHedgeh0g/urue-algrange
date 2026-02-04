@@ -70,6 +70,8 @@ class UserServiceTest {
 
     }
 
+    /** @see UserService#existsById(UUID) **/
+
     @Test
     public void existsById_IdIsNull_Failure(){
         Assertions.assertThrowsExactly(
@@ -95,7 +97,7 @@ class UserServiceTest {
 
 
 
-
+    /** @see UserService#getUserById(UUID) **/
 
     @Test
     public void getUserById_Success(){
@@ -107,6 +109,8 @@ class UserServiceTest {
                 userDto
         );
     }
+
+    /** @see UserService#getInternalUserById(UUID) **/
 
     @Test
     public void getInternalUserById_IdIsNull_Failure(){
@@ -134,6 +138,8 @@ class UserServiceTest {
 
     }
 
+    /** @see UserService#updateUser(UserDto) **/
+
     @Test
     public void updateUser_UnknownUser_Failure() {
         Assertions.assertThrowsExactly(
@@ -158,6 +164,8 @@ class UserServiceTest {
 
     }
 
+
+    /** @see UserService#createUser(UserDto) **/
 
     @Test
     public void createUser_IdMissing_Failure() {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.UserDtos.UserDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.UserService;
+import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Path("/api/users")
-//@Authenticated
+@Authenticated
 public class UserController {
     @Inject
     SecurityIdentity identity;

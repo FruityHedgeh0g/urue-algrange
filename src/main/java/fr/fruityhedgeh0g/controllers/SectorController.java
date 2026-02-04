@@ -41,7 +41,7 @@ public class SectorController {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{sectorId}/assign/{groupId}")
-    public SectorDto addGroupToSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
+    public @JsonView(Views.Detailed.class) SectorDto addGroupToSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
         return sectorService.assignGroupToSector(sectorId,groupId).get();
     }
 
@@ -49,14 +49,14 @@ public class SectorController {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{sectorId}/unassign/{groupId}")
-    public SectorDto removeGroupFromSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
-        return sectorService.unassignGroupToSector(sectorId,groupId).get();
+    public @JsonView(Views.Detailed.class) SectorDto removeGroupFromSector(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId) {
+        return sectorService.unassignGroupFromSector(sectorId,groupId).get();
     }
 
     @PATCH
     @Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
     @Produces(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.Basic.class) SectorDto updateSector(SectorDto sectorDto) {
+    public @JsonView(Views.UpdateResponse.class) SectorDto updateSector(@JsonView(Views.Update.class) SectorDto sectorDto) {
         return sectorService.updateSector(sectorDto).get();
     }
 

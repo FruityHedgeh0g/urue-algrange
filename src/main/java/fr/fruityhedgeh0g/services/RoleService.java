@@ -60,7 +60,7 @@ public class RoleService {
             RoleEntity roleEntity = roleMapper.toEntity(roleDto);
             roleRepository.persist(roleEntity);
 
-            Log.debug("User created, retrieving up-to-date role infos: " + roleEntity.getRoleId());
+            Log.debug("Role created, retrieving up-to-date role infos: " + roleEntity.getRoleId());
             return roleMapper.toDto(
                     roleRepository
                             .findByIdOptional(roleEntity.getRoleId())

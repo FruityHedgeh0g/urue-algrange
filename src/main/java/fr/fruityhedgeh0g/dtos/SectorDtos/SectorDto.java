@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.GroupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.entities.GroupEntity;
+import lombok.Builder;
 import lombok.Value;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Value
+@Builder
 public class SectorDto {
 
     @JsonView({Views.Minimal.class,Views.CreationResponse.class,Views.UpdateResponse.class}) UUID sectorId;

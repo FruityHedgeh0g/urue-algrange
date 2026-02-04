@@ -64,20 +64,13 @@ public class SectorService {
         return Try.of(() -> {
             Log.debug("Searching for already existing sector with name: " + sectorDto.getName());
             if (sectorRepository.existsByName(sectorDto.getName())) {throw new DuplicateResourceException("A sector with the same name already exists");}
-            if (sectorDto.getGroups().isEmpty()) {throw new InvalidInputException("A sector must contain at least one group at creation");}
 
             Log.debug("Checking if all groups exist and doesn't belong to another sector");
             SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
 
-            sectorEntity.getGroups().forEach(grp -> groupService.getInternalEntityById(grp.getGroupId())
-                    .peek(group -> {if (group.getSector() != null)
-                        throw new InvalidInputException("A group can only belong to one sector. Group " + grp.getGroupId() + " already belongs to a sector");})
-                    .peek(sectorEntity::addGroup));
-
             Log.debug("Creating sector: " + sectorDto.getName());
 
             sectorRepository.persist(sectorEntity);
-
 
             Log.debug("Sector created, retrieving up-to-date sector infos: " + sectorEntity.getSectorId());
             return sectorMapper.toDto(sectorEntity);
@@ -96,28 +89,25 @@ public class SectorService {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
                     .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
             GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
-                    .getOrElseThrow(e -> new UnknownResourceException("Group not found: "+groupId));
+                    .getOrElseThrow(e -> {throw new UnknownResourceException("Group not found: "+groupId);});
 
             if (groupEntity.getSector() != null) throw new InvalidInputException("Group already belongs to a sector");
 
-            sectorEntity.addGroup(groupEntity);
+            //sectorEntity.addGroup(groupEntity);
             return sectorMapper.toDto(sectorEntity);
         }).onFailure(ex -> {
             switch (ex) {
                 case UnknownResourceException e -> Log.warn(e.getMessage());
-                case InvalidInputException e -> Log.warn(e.getMessage());
                 default -> Log.error("Error assigning group to sector with id: " + sectorId, ex);
             }
         });
     }
 
     @Transactional
-    public Try<SectorDto> unassignGroupToSector(@NotNull UUID sectorId, @NotNull UUID groupId) {
+    public Try<SectorDto> unassignGroupFromSector(@NotNull UUID sectorId, @NotNull UUID groupId) {
         return Try.of(() -> sectorRepository.findByIdOptional(sectorId)
                 .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId)))
                 .peek(sector -> {
-                    if (sector.getGroups().size() == 1) throw new InvalidInputException("Sector must contain at least one group");
-
                     GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
                             .getOrElseThrow(e -> new UnknownResourceException("Group not found:" +groupId ));
                     sector.removeGroup(groupEntity);
@@ -125,7 +115,6 @@ public class SectorService {
                 .onFailure(ex -> {
                     switch (ex) {
                         case UnknownResourceException e -> Log.warn(e.getMessage());
-                        case InvalidInputException e -> Log.warn(e.getMessage());
                         default -> Log.error("Error unassigning group to sector with id: " + sectorId, ex);
                     }
                 });
