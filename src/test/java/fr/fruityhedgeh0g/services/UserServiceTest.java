@@ -8,6 +8,7 @@ import fr.fruityhedgeh0g.exceptions.MandatoryFieldMissingException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,16 +39,16 @@ class UserServiceTest {
     UserService userService;
 
     private UserDto userDto;
-    private UserDto userDtoWithoutId;
     private UserEntity userEntity;
 
-
+    private UserDto userDtoWithoutId;
 
     @BeforeEach
     public void setUp() {
         reset(userRepository);
 
         UUID randomUUID = UUID.randomUUID();
+        UUID anotherRandomUUID = UUID.randomUUID();
 
         userDto = UserDto.builder()
                 .userId(randomUUID)
@@ -67,6 +69,33 @@ class UserServiceTest {
 
 
     }
+
+    @Test
+    public void existsById_IdIsNull_Failure(){
+        Assertions.assertThrowsExactly(
+                ConstraintViolationException.class,
+                () -> userService.existsById(null));
+    }
+
+    @Test
+    public void existsById_Success(){
+        when(userRepository.existsById(Mockito.any()))
+                .thenReturn(true);
+
+        Assertions.assertTrue(userService.existsById(UUID.randomUUID()).get());
+    }
+
+    @Test
+    public void existsById_UnknownUser_Success() {
+        when(userRepository.existsById(Mockito.any()))
+                .thenReturn(false);
+
+        Assertions.assertFalse(userService.existsById(UUID.randomUUID()).get());
+    }
+
+
+
+
 
     @Test
     public void getUserById_Success(){
@@ -104,8 +133,6 @@ class UserServiceTest {
         );
 
     }
-
-
 
     @Test
     public void updateUser_UnknownUser_Failure() {

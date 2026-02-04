@@ -12,8 +12,7 @@ import java.util.UUID;
 @Value
 public class SectorDto {
 
-    @JsonView({Views.Minimal.class,Views.CreationResponse.class,Views.UpdateResponse.class})
-    UUID sectorId;
+    @JsonView({Views.Minimal.class,Views.CreationResponse.class,Views.UpdateResponse.class}) UUID sectorId;
 
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
     String name;
