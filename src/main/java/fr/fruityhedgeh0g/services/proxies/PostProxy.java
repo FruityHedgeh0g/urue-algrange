@@ -2,12 +2,15 @@ package fr.fruityhedgeh0g.services.proxies;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
+import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import lombok.AllArgsConstructor;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +18,14 @@ import java.util.UUID;
 @Identifier("postProxy")
 @AllArgsConstructor
 @ApplicationScoped
+@Authenticated
 public class PostProxy implements PostService {
+    @Inject
+    SecurityIdentity identity;
+
+    @Inject
+    JsonWebToken token;
+
     @Inject
     PostService postService;
 

@@ -36,14 +36,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public Try<UserEntity> getInternalUserById(UUID userId){
-        Log.debug("Getting user with id: " + userId);
+        Log.infof("Getting user with id: %id", userId);
         return Try.of(() -> userRepository.findByIdOptional(userId)
                         .orElseThrow(() -> new UnknownResourceException("User not found: " + userId)))
                 .onFailure(ex -> {
                     if (ex instanceof UnknownResourceException) {
                         Log.warn(ex.getMessage());
                     }else {
-                        Log.error("Error getting user with id: " + userId, ex);
+                        Log.errorf(ex,"Error getting user with id: %id", userId );
                     }
                 });
     }
@@ -51,12 +51,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
         return getInternalUserById(userId).map(userMapper::toDto)
-                .onFailure(e -> Log.error("A mapping error occurred: " + userId, e));
+                .onFailure(e ->  Log.errorf(e,"Error getting user with id: %id", userId ));
     }
 
     @Transactional
     public Try<List<UserDto>> getAllUsers(){
-        Log.debug("Getting all users");
+        Log.info("Getting all users");
         return Try.of(() -> userRepository.findAll()
                         .stream()
                         .map(userMapper::toDto)
@@ -66,26 +66,27 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public Try<UserDto> createUser(UserDto userDto){
+        Log.infof("Creating user: %u", userDto);
         return Try.of(() -> {
             if(userDto.getUserId() == null)
                 throw new MandatoryFieldMissingException("User id is mandatory");
 
-            Log.debug("Searching for already existing user with id: " + userDto.getUserId());
+            Log.debugf("Searching for already existing user with id: %id" , userDto.getUserId());
             if (userRepository.existsById(userDto.getUserId()))
                 throw new DuplicateResourceException("User already exists: " + userDto.getUserId());
 
-            Log.debug("Creating user: " + userDto.getUserId());
+            Log.debugf("Persisting new user: " , userDto);
             UserEntity userEntity = userMapper.toEntity(userDto);
             userRepository.persist(userEntity);
 
-            Log.debug("User created, retrieving up-to-date user infos: " + userDto.getUserId());
+            Log.debugf("User created. Sending up-to-date user infos: %u" , userDto);
             return userMapper.toDto(userEntity);
         }).onFailure(ex -> {
             switch (ex){
                 case NoSuchElementException e -> Log.warn(e.getMessage());
                 case DuplicateResourceException e -> Log.warn(e.getMessage());
                 case MandatoryFieldMissingException e -> Log.warn(e.getMessage());
-                default -> Log.error("Error creating user with id: " + userDto.getUserId(), ex);
+                default -> Log.errorf(ex,"Error creating user: %u" , userDto);
             }
         });
     }
@@ -93,14 +94,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @PackagePrivate
     public Try<Boolean> existsById(UUID userId){
-        Log.info("Checking if user exists with id: " + userId);
+        Log.infof("Checking user existence with id: %id", userId);
         return Try.of(() -> userRepository.existsById(userId))
-                .onFailure(e -> Log.error("Error checking if user exists with id: " + userId, e));
+                .onFailure(e -> Log.errorf(e,"Error checking user existence with id: %id" ,userId));
     }
 
     @Transactional
     public Try<UserDto> updateUser(UserDto userDto){
-
+        Log.infof("Updating user: %u", userDto);
         return Try.of(() -> userRepository.findByIdOptional(userDto.getUserId())
                         .orElseThrow(() -> new UnknownResourceException("User not found: " + userDto.getUserId())))
                 .peek(user -> userMapper.partialDtoToEntity(user, userDto))
@@ -109,7 +110,7 @@ public class UserServiceImpl implements UserService {
                     if (ex instanceof UnknownResourceException) {
                         Log.warn(ex.getMessage());
                     }else {
-                        Log.error("Error updating user with id: " + userDto.getUserId(), ex);
+                        Log.errorf(ex,"Error updating user : %u" , userDto);
                     }
                 });
     }

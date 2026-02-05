@@ -19,11 +19,6 @@ import java.util.UUID;
 @Path("/api/users")
 //@Authenticated
 public class UserController {
-    @Inject
-    SecurityIdentity identity;
-
-    @Inject
-    JsonWebToken token;
 
     @Inject
     @Identifier("userProxy")
