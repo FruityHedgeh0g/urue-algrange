@@ -1,11 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.MediaDtos.MediaDto;
-import fr.fruityhedgeh0g.dtos.RoleDtos.NestedRoleDto;
-import fr.fruityhedgeh0g.dtos.RoleDtos.RoleDto;
-import fr.fruityhedgeh0g.entities.medias.MediaEntity;
-import fr.fruityhedgeh0g.entities.medias.PhotoEntity;
-import fr.fruityhedgeh0g.entities.medias.VideoEntity;
+import fr.fruityhedgeh0g.dtos.roleDtos.NestedRoleDto;
+import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
 import fr.fruityhedgeh0g.entities.roles.LegalRoleEntity;
 import fr.fruityhedgeh0g.entities.roles.OrganizationalRoleEntity;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;

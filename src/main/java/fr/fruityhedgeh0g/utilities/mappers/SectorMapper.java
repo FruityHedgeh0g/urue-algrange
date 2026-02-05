@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.SectorDtos.NestedSectorDto;
-import fr.fruityhedgeh0g.dtos.SectorDtos.SectorDto;
+import fr.fruityhedgeh0g.dtos.sectorDtos.NestedSectorDto;
+import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import org.mapstruct.*;
 

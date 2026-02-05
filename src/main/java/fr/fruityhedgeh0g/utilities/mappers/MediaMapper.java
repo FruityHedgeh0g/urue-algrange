@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.MediaDtos.MediaDto;
-import fr.fruityhedgeh0g.dtos.MediaDtos.NestedMediaDto;
+import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
+import fr.fruityhedgeh0g.dtos.mediaDtos.NestedMediaDto;
 import fr.fruityhedgeh0g.entities.medias.MediaEntity;
 import fr.fruityhedgeh0g.entities.medias.PhotoEntity;
 import fr.fruityhedgeh0g.entities.medias.VideoEntity;

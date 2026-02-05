@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.PostDtos.NestedPostDto;
-import fr.fruityhedgeh0g.dtos.PostDtos.PostDto;
+import fr.fruityhedgeh0g.dtos.postDtos.NestedPostDto;
+import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.entities.PostEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.GroupDtos.GroupDto;
-import fr.fruityhedgeh0g.dtos.GroupDtos.NestedGroupDto;
+import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
+import fr.fruityhedgeh0g.dtos.groupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import org.mapstruct.*;
 

@@ -1,9 +1,9 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.GroupDtos.GroupDto;
+import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.GroupService;
+import fr.fruityhedgeh0g.services.GroupServiceImpl;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -21,19 +21,19 @@ public class GroupController {
     JsonWebToken token;
 
     @Inject
-    GroupService groupService;
+    GroupServiceImpl groupServiceImpl;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
-        return groupService.getAllGroups().get();
+        return groupServiceImpl.getAllGroups().get();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public @JsonView(Views.CreationResponse.class) GroupDto addGroup(@JsonView(Views.Creation.class) GroupDto groupDto){
-        return groupService.createGroup(groupDto).get();
+        return groupServiceImpl.createGroup(groupDto).get();
     }
 }
 

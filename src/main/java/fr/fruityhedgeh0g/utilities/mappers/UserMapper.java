@@ -1,7 +1,7 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.UserDtos.NestedUserDto;
-import fr.fruityhedgeh0g.dtos.UserDtos.UserDto;
+import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
+import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import org.mapstruct.*;
 

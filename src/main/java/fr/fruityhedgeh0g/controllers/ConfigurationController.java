@@ -1,9 +1,9 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.ConfigurationDtos.ConfigurationDto;
+import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.ConfigurationService;
+import fr.fruityhedgeh0g.services.ConfigurationServiceImpl;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -24,18 +24,18 @@ public class ConfigurationController {
     JsonWebToken token;
 
     @Inject
-    ConfigurationService configurationService;
+    ConfigurationServiceImpl configurationServiceImpl;
 
     @GET
     @Path("/{name}")
     public ConfigurationDto getConfigurationByName(@PathParam("name") String name) {
-        return configurationService.getConfigurationByName(name)
+        return configurationServiceImpl.getConfigurationByName(name)
                 .getOrElseThrow(e -> new RuntimeException(e));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<ConfigurationDto> getAllConfigurations(){
-        return configurationService.getAllConfigurations().get();
+        return configurationServiceImpl.getAllConfigurations().get();
     }
 }

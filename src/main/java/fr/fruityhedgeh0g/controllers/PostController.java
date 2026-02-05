@@ -1,9 +1,9 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.PostDtos.PostDto;
+import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.PostService;
+import fr.fruityhedgeh0g.services.PostServiceImpl;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -23,11 +23,11 @@ public class PostController {
     JsonWebToken token;
 
     @Inject
-    PostService postService;
+    PostServiceImpl postServiceImpl;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<PostDto> getAllPosts(){
-        return postService.getAllPosts().get();
+        return postServiceImpl.getAllPosts().get();
     }
 }

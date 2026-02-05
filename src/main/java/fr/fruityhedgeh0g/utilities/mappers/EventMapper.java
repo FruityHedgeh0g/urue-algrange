@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.EventDtos.EventDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.entities.EventEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

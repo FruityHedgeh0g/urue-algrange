@@ -1,6 +1,6 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
-import fr.fruityhedgeh0g.dtos.FeatureDtos.FeatureDto;
+import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
 import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
 import org.mapstruct.Mapper;
 

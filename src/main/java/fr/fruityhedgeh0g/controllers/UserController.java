@@ -2,10 +2,9 @@ package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import fr.fruityhedgeh0g.dtos.UserDtos.UserDto;
+import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.UserService;
-import io.quarkus.security.Authenticated;
+import fr.fruityhedgeh0g.services.UserServiceImpl;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Path("/api/users")
-@Authenticated
+//@Authenticated
 public class UserController {
     @Inject
     SecurityIdentity identity;
@@ -25,33 +24,33 @@ public class UserController {
     JsonWebToken token;
 
     @Inject
-    UserService userService;
+    UserServiceImpl userServiceImpl;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
-        return userService.getAllUsers().get();
+        return userServiceImpl.getAllUsers().get();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public @JsonView(Views.CreationResponse.class) UserDto addUser(@JsonView(Views.Creation.class) UserDto userDto){
-        return userService.createUser(userDto).get();
+        return userServiceImpl.createUser(userDto).get();
     }
 
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public @JsonView(Views.UpdateResponse.class) UserDto updateUser(@JsonView(Views.Update.class) UserDto userDto){
-        return userService.updateUser(userDto).get();
+        return userServiceImpl.updateUser(userDto).get();
     }
 
     @GET
     @Path("/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Detailed.class) UserDto getUserById(@PathParam("userId") UUID userId){
-        return userService.getUserById(userId).get();
+        return userServiceImpl.getUserById(userId).get();
     }
 
 }

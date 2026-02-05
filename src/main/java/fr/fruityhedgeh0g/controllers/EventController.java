@@ -1,9 +1,9 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.EventDtos.EventDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.EventService;
+import fr.fruityhedgeh0g.services.EventServiceImpl;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -20,18 +20,19 @@ public class EventController {
     @Inject
     JsonWebToken token;
 
-    @Inject EventService eventService;
+    @Inject
+    EventServiceImpl eventServiceImpl;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<EventDto> getAllEvents(){
-        return eventService.getAllEvents().get();
+        return eventServiceImpl.getAllEvents().get();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public @JsonView(Views.CreationResponse.class) EventDto addEvent(@JsonView(Views.Creation.class) EventDto eventDto){
-        return eventService.createEvent(eventDto).get();
+        return eventServiceImpl.createEvent(eventDto).get();
     }
 }
