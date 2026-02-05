@@ -12,7 +12,7 @@ public interface SectorService {
     Try<SectorDto> getSectorById(@NotNull UUID sectorId);
     Try<SectorDto> createSector(@NotNull SectorDto sectorDto);
     Try<SectorDto> updateSector(@NotNull SectorDto sectorDto);
-    void deleteSector(@NotNull UUID sectorId);
+    Try<Void> deleteSector(@NotNull UUID sectorId);
     Try<SectorDto> assignGroupToSector(@NotNull UUID sectorId, @NotNull UUID groupId);
     Try<SectorDto> unassignGroupFromSector(@NotNull UUID sectorId, @NotNull UUID groupId);
 
