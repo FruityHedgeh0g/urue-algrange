@@ -2,7 +2,7 @@ package fr.fruityhedgeh0g.services;
 
 import org.junit.jupiter.api.BeforeEach;
 
-public class EventServiceImplTest {
+public class EventServiceTest {
 
     @BeforeEach
     public void setUp() {

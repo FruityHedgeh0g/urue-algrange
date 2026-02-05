@@ -2,21 +2,21 @@ package fr.fruityhedgeh0g.services;
 
 import org.junit.jupiter.api.BeforeEach;
 
-public class MediaServiceImplTest {
+public class FeatureServiceTest {
 
     @BeforeEach
     public void setUp() {
 
     }
 
-    //getMediaById
+    //getFeatureById
 
-    //createMedia
+    //createFeature
 
-    //updateMedia
+    //updateFeature
 
-    //deleteMedia
+    //deleteFeature
 
-    //getAllMedias
+    //getAllFeatures
 
 }

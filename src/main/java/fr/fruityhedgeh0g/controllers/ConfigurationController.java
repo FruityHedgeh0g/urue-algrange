@@ -3,8 +3,9 @@ package fr.fruityhedgeh0g.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.ConfigurationServiceImpl;
+import fr.fruityhedgeh0g.services.proxies.ConfigurationProxy;
 import io.quarkus.security.identity.SecurityIdentity;
+import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -24,18 +25,19 @@ public class ConfigurationController {
     JsonWebToken token;
 
     @Inject
-    ConfigurationServiceImpl configurationServiceImpl;
+    @Identifier( "configurationProxy")
+    ConfigurationProxy configurationService;
 
     @GET
     @Path("/{name}")
     public ConfigurationDto getConfigurationByName(@PathParam("name") String name) {
-        return configurationServiceImpl.getConfigurationByName(name)
+        return configurationService.getConfigurationByName(name)
                 .getOrElseThrow(e -> new RuntimeException(e));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<ConfigurationDto> getAllConfigurations(){
-        return configurationServiceImpl.getAllConfigurations().get();
+        return configurationService.getAllConfigurations().get();
     }
 }

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.UserServiceImpl;
+import fr.fruityhedgeh0g.services.interfaces.UserService;
+import fr.fruityhedgeh0g.services.proxies.UserProxy;
 import io.quarkus.security.identity.SecurityIdentity;
+import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -24,33 +26,34 @@ public class UserController {
     JsonWebToken token;
 
     @Inject
-    UserServiceImpl userServiceImpl;
+    @Identifier("userProxy")
+    UserService userService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
-        return userServiceImpl.getAllUsers().get();
+        return userService.getAllUsers().get();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public @JsonView(Views.CreationResponse.class) UserDto addUser(@JsonView(Views.Creation.class) UserDto userDto){
-        return userServiceImpl.createUser(userDto).get();
+        return userService.createUser(userDto).get();
     }
 
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public @JsonView(Views.UpdateResponse.class) UserDto updateUser(@JsonView(Views.Update.class) UserDto userDto){
-        return userServiceImpl.updateUser(userDto).get();
+        return userService.updateUser(userDto).get();
     }
 
     @GET
     @Path("/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Detailed.class) UserDto getUserById(@PathParam("userId") UUID userId){
-        return userServiceImpl.getUserById(userId).get();
+        return userService.getUserById(userId).get();
     }
 
 }

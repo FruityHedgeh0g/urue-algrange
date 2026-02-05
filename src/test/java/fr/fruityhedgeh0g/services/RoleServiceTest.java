@@ -2,7 +2,7 @@ package fr.fruityhedgeh0g.services;
 
 import org.junit.jupiter.api.BeforeEach;
 
-public class RoleServiceImplTest {
+public class RoleServiceTest {
 
     @BeforeEach
     public void setUp() {

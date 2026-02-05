@@ -13,6 +13,8 @@ import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -28,7 +30,7 @@ public class SectorServiceImpl implements SectorService {
     @Inject
     SectorRepository sectorRepository;
 
-    @Inject
+    @Inject()
     GroupService groupService;
 
     @Inject

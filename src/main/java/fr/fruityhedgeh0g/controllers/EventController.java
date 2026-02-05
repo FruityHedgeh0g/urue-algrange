@@ -3,9 +3,12 @@ package fr.fruityhedgeh0g.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.EventServiceImpl;
+import fr.fruityhedgeh0g.services.interfaces.EventService;
+import fr.fruityhedgeh0g.services.proxies.EventProxy;
 import io.quarkus.security.identity.SecurityIdentity;
+import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -21,18 +24,19 @@ public class EventController {
     JsonWebToken token;
 
     @Inject
-    EventServiceImpl eventServiceImpl;
+    @Identifier( "eventProxy")
+    EventService eventService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<EventDto> getAllEvents(){
-        return eventServiceImpl.getAllEvents().get();
+        return eventService.getAllEvents().get();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public @JsonView(Views.CreationResponse.class) EventDto addEvent(@JsonView(Views.Creation.class) EventDto eventDto){
-        return eventServiceImpl.createEvent(eventDto).get();
+        return eventService.createEvent(eventDto).get();
     }
 }

@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 @TestTransaction
-public class SectorServiceImplTest {
+public class SectorServiceTest {
 
     @InjectMock
     SectorRepository sectorRepository;
