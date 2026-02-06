@@ -108,7 +108,6 @@ public class SectorServiceImpl implements SectorService {
         });
     }
 
-    //TODO: check si le groupe est bien dans ce secteur avant de le retirer
     @Transactional
     public Try<SectorDto> unassignGroupFromSector( UUID sectorId,  UUID groupId) {
         Log.infof("Unassigning group with id: %id from sector with id: %id", groupId, sectorId);
@@ -117,6 +116,10 @@ public class SectorServiceImpl implements SectorService {
             return sectorRepository.findByIdOptional(sectorId)
                 .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId));
         }).peek(sector -> {
+                    Log.debugf("Checking if group with id: %id is assigned to this sector", groupId);
+                    if (!sector.getGroups().stream().anyMatch(e -> e.getGroupId().equals(groupId)))
+                        throw new InvalidInputException("Group is not assigned to this sector");
+
                     Log.debugf("Checking if group with id: %id exists", groupId);
                     GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
                             .getOrElseThrow(e -> new UnknownResourceException("Group not found:" +groupId ));
