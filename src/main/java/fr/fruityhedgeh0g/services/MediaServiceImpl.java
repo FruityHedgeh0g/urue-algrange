@@ -6,9 +6,12 @@ import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.services.interfaces.MediaService;
 import fr.fruityhedgeh0g.utilities.mappers.MediaMapper;
 import io.quarkus.logging.Log;
+import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -21,6 +24,8 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @ApplicationScoped
+@Identifier("serviceImpl")
+@Default
 public class MediaServiceImpl implements MediaService {
     @Inject
     MediaRepository mediaRepository;

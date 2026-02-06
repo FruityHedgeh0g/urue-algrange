@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.groupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.dtos.roleDtos.NestedRoleDto;
 import fr.fruityhedgeh0g.dtos.Views;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 
@@ -14,12 +16,15 @@ import java.util.UUID;
 @Builder
 public class UserDto {
 
+    @NotNull
     @JsonView({Views.Minimal.class,Views.Creation.class,Views.Update.class})
     UUID userId;
 
+    @NotBlank
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
     String firstName;
 
+    @NotBlank
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
     String lastName;
 

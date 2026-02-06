@@ -39,13 +39,13 @@ public class SectorServiceTest {
     GroupRepository groupRepository;
 
     @InjectMock
-    GroupService groupService;
+    GroupServiceImpl groupService;
 
     @InjectMock
     SectorMapper sectorMapper;
 
     @Inject
-    SectorService sectorService;
+    SectorServiceImpl sectorService;
 
     SectorDto sectorDto;
     SectorEntity sectorEntity;

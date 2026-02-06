@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.proxies.GroupProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -16,14 +17,9 @@ import java.util.List;
 
 @Path("/api/groups")
 public class GroupController {
-    @Inject
-    SecurityIdentity identity;
 
     @Inject
-    JsonWebToken token;
-
-    @Inject
-    @Identifier( "groupProxy")
+    @Identifier("serviceProxy")
     GroupService groupService;
 
     @GET

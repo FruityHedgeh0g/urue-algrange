@@ -9,10 +9,14 @@ import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
+import io.quarkus.arc.profile.IfBuildProfile;
 import io.quarkus.logging.Log;
+import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -26,6 +30,8 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @ApplicationScoped
+@Identifier("serviceImpl")
+@Default
 public class UserServiceImpl implements UserService {
 
     @Inject
@@ -37,9 +43,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Try<UserEntity> getInternalUserById(UUID userId){
         Log.infof("Getting user with id: %id", userId);
-        return Try.of(() -> userRepository.findByIdOptional(userId)
-                        .orElseThrow(() -> new UnknownResourceException("User not found: " + userId)))
-                .onFailure(ex -> {
+        return Try.of(() -> userRepository
+                        .findByIdOptional(userId)
+                        .orElseThrow(() ->
+                                new UnknownResourceException("User not found: " + userId))
+                ).onFailure(ex -> {
                     if (ex instanceof UnknownResourceException) {
                         Log.warn(ex.getMessage());
                     }else {
@@ -50,24 +58,32 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
-        return getInternalUserById(userId).map(userMapper::toDto)
-                .onFailure(e ->  Log.errorf(e,"Error getting user with id: %id", userId ));
+        return getInternalUserById(userId)
+                .map(userMapper::toDto)
+                .onFailure(e ->
+                        Log.errorf(e,"Error getting user with id: %id", userId )
+                );
     }
 
     @Transactional
     public Try<List<UserDto>> getAllUsers(){
         Log.info("Getting all users");
-        return Try.of(() -> userRepository.findAll()
+        return Try.of(() -> userRepository
+                        .findAll()
                         .stream()
                         .map(userMapper::toDto)
                         .toList())
-                .onFailure(e -> Log.error("Error getting all users", e));
+                .onFailure(e ->
+                        Log.error("Error getting all users", e)
+                );
     }
 
     @Transactional
     public Try<UserDto> createUser(UserDto userDto){
         Log.infof("Creating user: %u", userDto);
         return Try.of(() -> {
+
+            Log.debugf("Validating user: %u" , userDto);
             if(userDto.getUserId() == null)
                 throw new MandatoryFieldMissingException("User id is mandatory");
 
@@ -81,6 +97,7 @@ public class UserServiceImpl implements UserService {
 
             Log.debugf("User created. Sending up-to-date user infos: %u" , userDto);
             return userMapper.toDto(userEntity);
+
         }).onFailure(ex -> {
             switch (ex){
                 case NoSuchElementException e -> Log.warn(e.getMessage());
@@ -95,17 +112,23 @@ public class UserServiceImpl implements UserService {
     @PackagePrivate
     public Try<Boolean> existsById(UUID userId){
         Log.infof("Checking user existence with id: %id", userId);
-        return Try.of(() -> userRepository.existsById(userId))
-                .onFailure(e -> Log.errorf(e,"Error checking user existence with id: %id" ,userId));
+        return Try.of(() -> userRepository
+                        .existsById(userId))
+                .onFailure(e ->
+                        Log.errorf(e,"Error checking user existence with id: %id" ,userId)
+                );
     }
 
     @Transactional
     public Try<UserDto> updateUser(UserDto userDto){
         Log.infof("Updating user: %u", userDto);
-        return Try.of(() -> userRepository.findByIdOptional(userDto.getUserId())
-                        .orElseThrow(() -> new UnknownResourceException("User not found: " + userDto.getUserId())))
-                .peek(user -> userMapper.partialDtoToEntity(user, userDto))
-                .map(userMapper::toDto)
+        return Try.of(() -> userRepository
+                        .findByIdOptional(userDto.getUserId())
+                        .orElseThrow(() ->
+                                new UnknownResourceException("User not found: " + userDto.getUserId()))
+                ).peek(user ->
+                        userMapper.partialDtoToEntity(user, userDto)
+                ).map(userMapper::toDto)
                 .onFailure(ex -> {
                     if (ex instanceof UnknownResourceException) {
                         Log.warn(ex.getMessage());

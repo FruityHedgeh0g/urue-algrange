@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.services.proxies.RoleProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -17,14 +18,9 @@ import java.util.UUID;
 
 @Path("/api/roles")
 public class RoleController {
-    @Inject
-    SecurityIdentity identity;
 
     @Inject
-    JsonWebToken token;
-
-    @Inject
-    @Identifier( "roleProxy")
+    @Identifier("serviceProxy")
     RoleService roleService;
 
     @GET

@@ -8,6 +8,7 @@ import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.services.proxies.UserProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -21,7 +22,7 @@ import java.util.UUID;
 public class UserController {
 
     @Inject
-    @Identifier("userProxy")
+    @Identifier("serviceProxy")
     UserService userService;
 
     @GET

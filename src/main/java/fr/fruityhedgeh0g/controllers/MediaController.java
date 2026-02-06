@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.services.interfaces.MediaService;
 import fr.fruityhedgeh0g.services.proxies.MediaProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -18,14 +19,9 @@ import java.util.List;
 
 @Path("/api/medias")
 public class MediaController {
-    @Inject
-    SecurityIdentity identity;
 
     @Inject
-    JsonWebToken token;
-
-    @Inject
-    @Identifier( "mediaProxy")
+    @Identifier("serviceProxy")
     MediaService mediaService;
 
     @GET

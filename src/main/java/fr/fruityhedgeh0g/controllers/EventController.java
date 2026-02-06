@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.services.interfaces.EventService;
 import fr.fruityhedgeh0g.services.proxies.EventProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.inject.Qualifier;
 import jakarta.ws.rs.*;
@@ -17,14 +18,9 @@ import java.util.List;
 
 @Path("/api/events")
 public class EventController {
-    @Inject
-    SecurityIdentity identity;
 
     @Inject
-    JsonWebToken token;
-
-    @Inject
-    @Identifier( "eventProxy")
+    @Identifier("serviceProxy")
     EventService eventService;
 
     @GET

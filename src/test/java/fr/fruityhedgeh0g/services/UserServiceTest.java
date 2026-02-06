@@ -31,7 +31,7 @@ class UserServiceTest {
     UserRepository userRepository;
 
     @Inject
-    UserService userService;
+    UserServiceImpl userService;
 
     private UserDto userDto;
     private UserEntity userEntity;

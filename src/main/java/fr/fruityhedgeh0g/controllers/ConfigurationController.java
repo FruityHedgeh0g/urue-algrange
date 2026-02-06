@@ -3,9 +3,11 @@ package fr.fruityhedgeh0g.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
 import fr.fruityhedgeh0g.dtos.Views;
+import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
 import fr.fruityhedgeh0g.services.proxies.ConfigurationProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -18,15 +20,10 @@ import java.util.List;
 
 @Path("/api/configurations")
 public class ConfigurationController {
-    @Inject
-    SecurityIdentity identity;
 
     @Inject
-    JsonWebToken token;
-
-    @Inject
-    @Identifier( "configurationProxy")
-    ConfigurationProxy configurationService;
+    @Identifier("serviceProxy")
+    ConfigurationService configurationService;
 
     @GET
     @Path("/{name}")

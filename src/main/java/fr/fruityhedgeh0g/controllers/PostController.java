@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.services.interfaces.PostService;
 import fr.fruityhedgeh0g.services.proxies.PostProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -18,14 +19,9 @@ import java.util.List;
 
 @Path("/api/posts")
 public class PostController {
-    @Inject
-    SecurityIdentity identity;
 
     @Inject
-    JsonWebToken token;
-
-    @Inject
-    @Identifier( "postProxy")
+    @Identifier("serviceProxy")
     PostService postService;
 
     @GET

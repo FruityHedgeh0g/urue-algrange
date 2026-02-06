@@ -4,24 +4,28 @@ import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
+import io.quarkus.arc.profile.IfBuildProfile;
 import io.quarkus.logging.Log;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
 import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
 import java.util.UUID;
 
-@Identifier("userProxy")
 @AllArgsConstructor
 @ApplicationScoped
 @Authenticated
+@Identifier("serviceProxy")
 public class UserProxy implements UserService {
     @Inject
     SecurityIdentity identity;
@@ -30,6 +34,7 @@ public class UserProxy implements UserService {
     JsonWebToken token;
 
     @Inject
+    @Identifier("serviceImpl")
     UserService userService;
 
     @Override

@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.services.interfaces.SectorService;
 import fr.fruityhedgeh0g.services.proxies.SectorProxy;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -17,14 +18,9 @@ import java.util.UUID;
 
 @Path("/api/sectors")
 public class SectorController {
-    @Inject
-    SecurityIdentity identity;
 
     @Inject
-    JsonWebToken token;
-
-    @Inject
-    @Identifier( "sectorProxy")
+    @Identifier("serviceProxy")
     SectorService sectorService;
 
     @GET

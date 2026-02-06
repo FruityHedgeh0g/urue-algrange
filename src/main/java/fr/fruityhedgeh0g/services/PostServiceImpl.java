@@ -6,9 +6,12 @@ import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;
 import io.quarkus.logging.Log;
+import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -21,6 +24,8 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @ApplicationScoped
+@Identifier("serviceImpl")
+@Default
 public class PostServiceImpl implements PostService {
     @Inject
     PostRepository postRepository;

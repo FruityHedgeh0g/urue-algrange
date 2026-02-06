@@ -5,9 +5,12 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.FeatureRepository;
 import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import io.quarkus.logging.Log;
+import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +23,8 @@ import static io.smallrye.mutiny.helpers.spies.Spy.onFailure;
 
 @AllArgsConstructor
 @ApplicationScoped
+@Identifier("serviceImpl")
+@Default
 public class FeatureServiceImpl implements FeatureService {
 
     @Inject
