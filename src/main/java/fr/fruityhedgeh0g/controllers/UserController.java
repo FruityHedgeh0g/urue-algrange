@@ -5,30 +5,28 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
-import fr.fruityhedgeh0g.services.proxies.UserProxy;
-import io.quarkus.security.identity.SecurityIdentity;
+import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
 import java.util.UUID;
 
 @Path("/api/users")
-//@Authenticated
 public class UserController {
 
     @Inject
-    @Identifier("serviceProxy")
+    @Identifier("proxy")
     UserService userService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
-        return userService.getAllUsers().get();
+        List<UserDto> users = userService.getAllUsers().get();
+        Log.debugf("Retrieved %s users", users.toString());
+        return users;
     }
 
     @POST

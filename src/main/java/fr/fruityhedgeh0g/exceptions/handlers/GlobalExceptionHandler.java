@@ -8,8 +8,6 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
-import java.util.NoSuchElementException;
-
 
 public class GlobalExceptionHandler {
 

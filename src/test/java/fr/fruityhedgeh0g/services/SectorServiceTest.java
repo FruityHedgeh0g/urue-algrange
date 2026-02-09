@@ -8,8 +8,6 @@ import fr.fruityhedgeh0g.exceptions.InvalidInputException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
-import fr.fruityhedgeh0g.services.interfaces.GroupService;
-import fr.fruityhedgeh0g.services.interfaces.SectorService;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
@@ -25,7 +23,6 @@ import org.mockito.Mockito;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest

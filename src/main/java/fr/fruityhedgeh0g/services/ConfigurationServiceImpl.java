@@ -8,15 +8,10 @@ import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;
 import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
-import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
-import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
 import java.util.List;

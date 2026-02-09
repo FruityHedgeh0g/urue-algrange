@@ -4,15 +4,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
-import fr.fruityhedgeh0g.services.proxies.EventProxy;
-import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
-import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-import jakarta.inject.Qualifier;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
 
@@ -20,7 +15,7 @@ import java.util.List;
 public class EventController {
 
     @Inject
-    @Identifier("serviceProxy")
+    @Identifier("proxy")
     EventService eventService;
 
     @GET

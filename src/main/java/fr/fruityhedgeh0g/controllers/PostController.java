@@ -4,16 +4,12 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
-import fr.fruityhedgeh0g.services.proxies.PostProxy;
-import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
-import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
 
@@ -21,7 +17,7 @@ import java.util.List;
 public class PostController {
 
     @Inject
-    @Identifier("serviceProxy")
+    @Identifier("proxy")
     PostService postService;
 
     @GET
