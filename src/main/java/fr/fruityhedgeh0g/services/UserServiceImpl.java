@@ -116,8 +116,7 @@ public class UserServiceImpl implements UserService {
     @PackagePrivate
     public Try<Boolean> existsById(UUID userId){
         Log.infof("Checking user existence with id: %s", userId);
-        return Try.of(() -> userRepository
-                        .existsById(userId))
+        return Try.of(() -> userRepository.existsById(userId))
                 .onFailure(e ->
                         Log.errorf(e,"Error checking user existence with id: %s" ,userId)
                 );
@@ -126,20 +125,20 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Try<UserDto> updateUser(UserDto userDto){
         Log.infof("Updating user: %s", userDto);
-        return Try.of(() -> userRepository
-                        .findByIdOptional(userDto.getUserId())
-                        .orElseThrow(() ->
-                                new UnknownResourceException("User not found: " + userDto.getUserId()))
-                ).peek(user ->
-                        userMapper.partialDtoToEntity(user, userDto)
-                ).map(userMapper::toDto)
-                .onFailure(ex -> {
-                    if (ex instanceof UnknownResourceException) {
-                        Log.warn(ex.getMessage());
-                    }else {
-                        Log.errorf(ex,"Error updating user : %s" , userDto);
-                    }
-                });
+        return Try.of(() -> {
+            UserEntity user = userRepository.findByIdOptional(userDto.getUserId())
+                    .orElseThrow(() -> new UnknownResourceException("User not found: " + userDto.getUserId()));
+
+            user = userMapper.partialDtoToEntity(user, userDto);
+
+            return userMapper.toDto(user);
+        }).onFailure(ex -> {
+            if (ex instanceof UnknownResourceException) {
+                Log.warn(ex.getMessage());
+            }else {
+                Log.errorf(ex,"Error updating user : %s" , userDto);
+            }
+        });
     }
 
 //INFO : Non nécéssité de supprimer des users

@@ -128,9 +128,7 @@ public class GroupServiceImpl implements GroupService {
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupDto.getGroupId())))
                 .peek(g -> {
                     groupRepository.findByName(groupDto.getName())
-                            .filter(group ->
-                                    !g.getGroupId().equals(groupDto.getGroupId())
-                            ).isPresent();
+                            .filter(group -> !g.getGroupId().equals(groupDto.getGroupId())).isPresent();
                 })
                 .peek(group -> groupMapper.partialDtoToEntity(group, groupDto))
                 .map(groupMapper::toDto)

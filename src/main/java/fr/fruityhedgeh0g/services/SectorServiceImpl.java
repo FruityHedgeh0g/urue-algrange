@@ -51,17 +51,18 @@ public class SectorServiceImpl implements SectorService {
     @Transactional
     public Try<SectorDto> getSectorById( UUID sectorId) {
         Log.infof("Getting sector with id: %s", sectorId);
-        return Try.of(() -> sectorRepository
-                        .findByIdOptional(sectorId)
-                        .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId)))
-                .map(sectorMapper::toDto)
-                .onFailure(ex -> {
-                    if (ex instanceof UnknownResourceException e) {
-                        Log.warn(e.getMessage());
-                    } else {
-                        Log.errorf(ex, "Error getting sector with id: %s", sectorId);
-                    }
-                });
+        return Try.of(() -> {
+            SectorEntity sector = sectorRepository.findByIdOptional(sectorId)
+                    .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId));
+
+            return sectorMapper.toDto(sector);
+        }).onFailure(ex -> {
+            if (ex instanceof UnknownResourceException e) {
+                Log.warn(e.getMessage());
+            } else {
+                Log.errorf(ex, "Error getting sector with id: %s", sectorId);
+            }
+        });
     }
 
     @Transactional
@@ -69,11 +70,15 @@ public class SectorServiceImpl implements SectorService {
         Log.infof("Creating sector: %s", sectorDto);
         return Try.of(() -> {
             Log.debugf("Checking if sector with name: %s already exists", sectorDto.getName());
-            if (sectorRepository.existsByName(sectorDto.getName())) {throw new DuplicateResourceException("A sector with the same name already exists");}
+            if (sectorRepository.existsByName(sectorDto.getName()))
+                throw new DuplicateResourceException("A sector with the same name already exists");
+
             SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
 
             Log.debug("Persisting new sector: " + sectorEntity.getSectorId());
+
             sectorRepository.persist(sectorEntity);
+
             return sectorMapper.toDto(sectorEntity);
         }).onFailure(ex -> {
             switch (ex) {
@@ -114,25 +119,26 @@ public class SectorServiceImpl implements SectorService {
         Log.infof("Unassigning group with id: %s from sector with id: %s", groupId, sectorId);
         return Try.of(() -> {
             Log.debugf("Checking if sector with id: %s exists", sectorId);
-            return sectorRepository.findByIdOptional(sectorId)
+            SectorEntity sector = sectorRepository.findByIdOptional(sectorId)
                 .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId));
-        }).peek(sector -> {
-                    Log.debugf("Checking if group with id: %s is assigned to this sector", groupId);
-                    if (!sector.getGroups().stream().anyMatch(e -> e.getGroupId().equals(groupId)))
-                        throw new InvalidInputException("Group is not assigned to this sector");
 
-                    Log.debugf("Checking if group with id: %s exists", groupId);
-                    GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
-                            .getOrElseThrow(e -> new UnknownResourceException("Group not found:" +groupId ));
+            Log.debugf("Checking if group with id: %s is assigned to this sector", groupId);
+            if (sector.getGroups().stream().noneMatch(e -> e.getGroupId().equals(groupId)))
+                throw new InvalidInputException("Group is not assigned to this sector");
 
-                    sector.removeGroup(groupEntity);
-                }).map(sectorMapper::toDto)
-                .onFailure(ex -> {
-                    switch (ex) {
-                        case UnknownResourceException e -> Log.warn(e.getMessage());
-                        default -> Log.errorf(ex, "Error unassigning group with id: %s from sector with id: %s", groupId, sectorId);
-                    }
-                });
+            Log.debugf("Checking if group with id: %s exists", groupId);
+            GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
+                    .getOrElseThrow(e -> new UnknownResourceException("Group not found:" +groupId ));
+
+            sector.removeGroup(groupEntity);
+
+            return sectorMapper.toDto(sector);
+        }).onFailure(ex -> {
+            switch (ex) {
+                case UnknownResourceException e -> Log.warn(e.getMessage());
+                default -> Log.errorf(ex, "Error unassigning group with id: %s from sector with id: %s", groupId, sectorId);
+            }
+        });
     }
 
     @Transactional
@@ -163,6 +169,7 @@ public class SectorServiceImpl implements SectorService {
             Log.debugf("Checking if sector with id: %s exists", sectorId);
             SectorEntity sector =sectorRepository.findByIdOptional(sectorId)
                         .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId));
+
             Log.debugf("Deleting sector with id: %s", sectorId);
             sectorRepository.delete(sector);
         }).onFailure(ex -> {
