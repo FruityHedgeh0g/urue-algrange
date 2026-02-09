@@ -24,27 +24,13 @@ public class FeatureServiceImpl implements FeatureService {
     FeatureRepository featureRepository;
 
     public Try<FeatureEntity> getFeatureByName( String name) {
-        Log.debug("Getting feature by name: " + name);
-        return Try.of(() -> featureRepository
-                        .findByIdOptional(name)
-                        .orElseThrow(() -> new UnknownResourceException("Feature not found: " + name)))
-                .onFailure(e -> {
-                    if (e instanceof UnknownResourceException) {
-                        Log.warn("Feature not found: " + name);
-                    }else {
-                        Log.error("Error getting feature by name: " + name, e);
-                    }
-                });
+        return null;
 
 
     }
 
     public Try<List<FeatureEntity>> getAllFeatures() {
-        Log.debug("Getting all features");
-        return Try.of(() -> featureRepository.findAll()
-                .stream()
-                .toList())
-                .onFailure(e -> Log.error("Error getting all features", e));
+        return null;
     }
 
     //TODO : Développer l'update

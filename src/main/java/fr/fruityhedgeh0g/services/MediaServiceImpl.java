@@ -31,56 +31,28 @@ public class MediaServiceImpl implements MediaService {
 
     @Transactional
     public Try<List<MediaDto>> getAllMedia(){
-        Log.info("Getting all medias");
         return null;
     }
 
     @Transactional
     public Try<MediaDto> getMediaById( UUID mediaId){
-        Log.info("Getting media with id: " + mediaId);
-        return Try.of(() -> mediaRepository
-                        .findByIdOptional(mediaId)
-                        .orElseThrow(NoSuchElementException::new))
-                .map(mediaMapper::toDto)
-                .onFailure(e -> {
-                    if (e instanceof NoSuchElementException) {
-                        Log.warn("Media not found: " + mediaId);
-                    }else {
-                        Log.error("Error getting media with id: " + mediaId, e);
-                    }
-                });
+        return null;
     }
 
     @Transactional
     public Try<MediaDto> createMedia( MediaDto mediaDto){
-        return Try.of(() -> {
-            Log.debug("Creating media");
-            MediaEntity mediaEntity = mediaMapper.toEntity(mediaDto);
-            mediaRepository.persist(mediaEntity);
-
-            Log.debug("Media created, retrieving up-to-date media infos: " + mediaEntity.getMediaId());
-            return mediaMapper.toDto(
-                    mediaRepository
-                            .findByIdOptional(mediaEntity.getMediaId())
-                            .orElseThrow(NoSuchElementException::new)
-            );
-        }).onFailure(e -> {
-                Log.error("Error creating media", e);
-        });
+        return null;
     }
 
     //TODO : Développer l'update
     @Transactional
     public Try<MediaDto> updateMedia( MediaDto mediaDto){
-        Log.info("Updating media: " + mediaDto.getMediaId());
         return null;
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     @Transactional
-    public void deleteMedia( UUID mediaId){
-        Log.info("Deleting media with id: " + mediaId);
-        Try.of(() -> mediaRepository.deleteById(mediaId))
-                .onFailure(e -> Log.error("Error deleting media with id: " + mediaId, e));
+    public Try<Void> deleteMedia( UUID mediaId) {
+        return null;
     }
 }

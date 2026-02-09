@@ -33,26 +33,26 @@ public class MediaProxy implements MediaService {
 
     @Override
     public Try<List<MediaDto>> getAllMedia() {
-        return null;
+        return mediaService.getAllMedia();
     }
 
     @Override
     public Try<MediaDto> getMediaById(UUID mediaId) {
-        return null;
+        return mediaService.getMediaById(mediaId);
     }
 
     @Override
     public Try<MediaDto> createMedia(MediaDto mediaDto) {
-        return null;
+        return mediaService.createMedia(mediaDto);
     }
 
     @Override
     public Try<MediaDto> updateMedia(MediaDto mediaDto) {
-        return null;
+        return mediaService.updateMedia(mediaDto);
     }
 
     @Override
-    public void deleteMedia(UUID mediaId) {
-
+    public Try<Void> deleteMedia(UUID mediaId) {
+        return mediaService.deleteMedia(mediaId);
     }
 }

@@ -9,8 +9,14 @@ import java.util.UUID;
 
 public interface EventService {
     Try<List<EventDto>> getAllEvents();
+    Try<List<EventDto>> getAllEventsFiltered(@NotNull String filter);
     Try<EventDto> getEventById(@NotNull UUID eventId);
     Try<EventDto> createEvent(@NotNull EventDto eventDto);
     Try<EventDto> updateEvent(@NotNull EventDto eventDto);
-    void deleteEvent(@NotNull UUID eventId);
+    Try<Void> deleteEvent(@NotNull UUID eventId);
+    Try<EventDto> addParticipant(@NotNull UUID eventId, @NotNull UUID userId);
+    Try<EventDto> removeParticipant(@NotNull UUID eventId, @NotNull UUID userId);
+    Try<EventDto> addOrganizer(@NotNull UUID eventId, @NotNull UUID userId);
+    Try<EventDto> removeOrganizer(@NotNull UUID eventId, @NotNull UUID userId);
+
 }

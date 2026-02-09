@@ -32,16 +32,16 @@ public class ConfigurationProxy implements ConfigurationService {
 
     @Override
     public Try<List<ConfigurationDto>> getAllConfigurations() {
-        return null;
+        return configurationService.getAllConfigurations();
     }
 
     @Override
     public Try<ConfigurationDto> getConfigurationByName(String name) {
-        return null;
+        return configurationService.getConfigurationByName(name);
     }
 
     @Override
     public Try<ConfigurationDto> updateConfiguration(ConfigurationDto configurationDto) {
-        return null;
+        return configurationService.updateConfiguration(configurationDto);
     }
 }

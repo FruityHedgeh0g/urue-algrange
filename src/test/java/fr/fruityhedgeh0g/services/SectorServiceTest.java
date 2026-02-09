@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.groupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
@@ -20,7 +21,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -46,6 +49,7 @@ public class SectorServiceTest {
 
     SectorDto sectorDto;
     SectorEntity sectorEntity;
+    SectorEntity anotherSectorEntity;
     GroupEntity groupEntity;
 
     @BeforeEach
@@ -54,8 +58,9 @@ public class SectorServiceTest {
 
         UUID randomUUID = UUID.randomUUID();
 
-        sectorDto = SectorDto.builder().sectorId(randomUUID).name("Mordor").build();
-        sectorEntity = SectorEntity.builder().sectorId(randomUUID).name("Mordor").build();
+        sectorDto = SectorDto.builder().sectorId(randomUUID).name("Mordor").groups(new HashSet<>()).build();
+        sectorEntity = SectorEntity.builder().sectorId(randomUUID).name("Mordor").groups(new HashSet<>()).build();
+        anotherSectorEntity = SectorEntity.builder().sectorId(UUID.randomUUID()).name("Rohan").groups(new HashSet<>()).build();
         groupEntity = GroupEntity.builder().groupId(randomUUID).name("Legion of Sauron").build();
 
     }
@@ -188,6 +193,7 @@ public class SectorServiceTest {
 
     @Test
     public void assignGroupToSector_Success(){
+
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
         when(groupService.getInternalEntityById(any())).thenReturn(Try.of(() -> groupEntity));
 
@@ -202,7 +208,6 @@ public class SectorServiceTest {
     @Test
     public void assignGroupToSector_UnknownGroup_Failure(){
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupRepository.findByIdOptional(any())).thenReturn(Optional.of(groupEntity));
 
         Assertions.assertThrowsExactly(
                 UnknownResourceException.class,
@@ -240,8 +245,10 @@ public class SectorServiceTest {
 
     @Test
     public void assignGroupToSector_GroupBelongsToAnotherSector_Failure(){
+        anotherSectorEntity.addGroup(groupEntity);
+
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.getInternalEntityById(any()).get()).thenReturn(groupEntity);
+        when(groupService.getInternalEntityById(any())).thenReturn(Try.of(() -> groupEntity));
 
         Assertions.assertThrowsExactly(
                 InvalidInputException.class,

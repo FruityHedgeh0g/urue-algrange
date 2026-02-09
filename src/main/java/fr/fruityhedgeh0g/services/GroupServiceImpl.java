@@ -145,18 +145,8 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Transactional
-    public void deleteGroup( UUID groupId){
-        Log.info("Deleting group with id: " + groupId);
-        Try.of(() -> groupRepository.findByIdOptional(groupId)
-                    .orElseThrow(() -> new UnknownResourceException("Group not found: " +groupId)))
-                .peek(group -> groupRepository.delete(group))
-                .onFailure(ex -> {
-                    if (ex instanceof UnknownResourceException e) {
-                        Log.warn(ex.getMessage());
-                    }else {
-                        Log.error("Error deleting group with id: " + groupId, ex);
-                    }
-                });
+    public Try<Void> deleteGroup( UUID groupId){
+        return null;
     }
 
     @Transactional

@@ -19,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @ApplicationScoped
 @Identifier("proxy")
-@Authenticated
+//@Authenticated
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
 public class UserProxy implements UserService {
     @Inject
@@ -34,32 +34,49 @@ public class UserProxy implements UserService {
 
     @Override
     public Try<UserDto> getUserById(UUID userId) {
+
         return userService.getUserById(userId);
     }
 
     @Override
     public Try<List<UserDto>> getAllUsers() {
+
         return userService.getAllUsers();
     }
 
     @Override
     public Try<UserDto> createUser(UserDto userDto) {
+
         return userService.createUser(userDto);
     }
 
     @Override
     public Try<UserDto> updateUser(UserDto userDto) {
+
         return userService.updateUser(userDto);
     }
 
     @Override
     public Try<Boolean> existsById(UUID userId) {
+
         return userService.existsById(userId);
     }
 
     @Override
     public Try<UserEntity> getInternalUserById(UUID userId) {
+
         return userService.getInternalUserById(userId);
+    }
+
+    @Override
+    public Try<UserDto> assignRoleToUser(UUID userId, UUID roleId) {
+
+        return userService.assignRoleToUser(userId, roleId);
+    }
+
+    @Override
+    public Try<UserDto> unassignRoleFromUser(UUID userId, UUID roleId) {
+        return userService.unassignRoleFromUser(userId, roleId);
     }
 
 }

@@ -32,65 +32,33 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     public Try<List<RoleDto>> getAllRoles() {
-        Log.info("Getting all roles");
+        return null;
+    }
+
+    @Override
+    public Try<List<RoleDto>> getAllRolesFiltered(String filter) {
         return null;
     }
 
     @Transactional
     public Try<RoleDto> getRoleById( UUID roleId) {
-        Log.info("Getting role with id: " + roleId);
-        return Try.of(() -> roleRepository
-                        .findByIdOptional(roleId)
-                        .orElseThrow(NoSuchElementException::new))
-                .map(roleMapper::toDto)
-                .onFailure(e -> {
-                    if (e instanceof NoSuchElementException) {
-                        Log.warn("Role not found: " + roleId);
-                    }else {
-                        Log.error("Error getting role with id: " + roleId, e);
-                    }
-                });
+        return null;
     }
 
     @Transactional
     public Try<RoleDto> createRole( RoleDto roleDto) {
-        return Try.of(() -> {
-            Log.debug("Searching for already existing role with name: " + roleDto.getName());
-            if (roleRepository.existsByName(roleDto.getName())) {
-                throw new UnknownResourceException("Role already exists: " + roleDto.getName() + "");
-            }
-
-            Log.debug("Creating role: " + roleDto.getName());
-            RoleEntity roleEntity = roleMapper.toEntity(roleDto);
-            roleRepository.persist(roleEntity);
-
-            Log.debug("Role created, retrieving up-to-date role infos: " + roleEntity.getRoleId());
-            return roleMapper.toDto(
-                    roleRepository
-                            .findByIdOptional(roleEntity.getRoleId())
-                            .orElseThrow(NoSuchElementException::new)
-            );
-        }).onFailure(e -> {
-            if (e instanceof UnknownResourceException) {
-                Log.warn("Role already exists: " + roleDto.getName());
-            }else {
-                Log.error("Error creating role with name: " + roleDto.getName(), e);
-            }
-        });
+        return null;
     }
 
     //TODO : Développer l'update
     @Transactional
     public Try<RoleDto> updateRole( RoleDto roleDto) {
-        Log.info("Updating role: " + roleDto.getRoleId());
         return null;
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     @Transactional
-    public void deleteRole( UUID roleId) {
-        Log.info("Deleting role with id: " + roleId);
-        Try.run(() -> roleRepository.deleteById(roleId))
-                .onFailure(e -> Log.error("Error deleting role with id: " + roleId, e));
+    public Try<Void> deleteRole( UUID roleId) {
+        return null;
     }
 }

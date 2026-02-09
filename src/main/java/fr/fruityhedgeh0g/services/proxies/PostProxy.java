@@ -33,26 +33,57 @@ public class PostProxy implements PostService {
 
     @Override
     public Try<List<PostDto>> getAllPosts() {
-        return null;
+        return postService.getAllPosts();
+    }
+
+    @Override
+    public Try<List<PostDto>> getAllPostsFiltered(String filter) {
+        return postService.getAllPostsFiltered(filter);
     }
 
     @Override
     public Try<PostDto> getPostById(UUID postId) {
-        return null;
+        return postService.getPostById(postId);
     }
 
     @Override
     public Try<PostDto> createPost(PostDto postDto) {
-        return null;
+        return postService.createPost(postDto);
     }
 
     @Override
     public Try<PostDto> updatePost(PostDto postDto) {
-        return null;
+        return postService.updatePost(postDto);
     }
 
     @Override
-    public void deletePost(UUID postId) {
+    public Try<Void> deletePost(UUID postId) {
 
+        return postService.deletePost(postId);
+    }
+
+    @Override
+    public Try<PostDto> addPostBanner(UUID postId, UUID bannerId) {
+        return postService.addPostBanner(postId, bannerId);
+    }
+
+    @Override
+    public Try<PostDto> deletePostBanner(UUID postId) {
+        return postService.deletePostBanner(postId);
+    }
+
+    @Override
+    public Try<PostDto> updatePostBanner(UUID postId, UUID tagId) {
+        return postService.updatePostBanner(postId, tagId);
+    }
+
+    @Override
+    public Try<PostDto> addPostAttachment(UUID postId, UUID attachmentId) {
+        return postService.addPostAttachment(postId, attachmentId);
+    }
+
+    @Override
+    public Try<PostDto> deletePostAttachment(UUID postId, UUID attachmentId) {
+        return postService.deletePostAttachment(postId, attachmentId);
     }
 }

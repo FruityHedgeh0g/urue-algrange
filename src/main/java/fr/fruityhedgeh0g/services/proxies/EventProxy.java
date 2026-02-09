@@ -33,26 +33,52 @@ public class EventProxy implements EventService {
 
     @Override
     public Try<List<EventDto>> getAllEvents() {
-        return null;
+        return eventService.getAllEvents();
+    }
+
+    @Override
+    public Try<List<EventDto>> getAllEventsFiltered(String filter) {
+        return eventService.getAllEventsFiltered(filter);
     }
 
     @Override
     public Try<EventDto> getEventById(UUID eventId) {
-        return null;
+        return eventService.getEventById(eventId);
     }
 
     @Override
     public Try<EventDto> createEvent(EventDto eventDto) {
-        return null;
+        return eventService.createEvent(eventDto);
     }
 
     @Override
     public Try<EventDto> updateEvent(EventDto eventDto) {
-        return null;
+        return eventService.updateEvent(eventDto);
     }
 
     @Override
-    public void deleteEvent(UUID eventId) {
+    public Try<Void> deleteEvent(UUID eventId) {
 
+        return eventService.deleteEvent(eventId);
+    }
+
+    @Override
+    public Try<EventDto> addParticipant(UUID eventId, UUID userId) {
+        return eventService.addParticipant(eventId, userId);
+    }
+
+    @Override
+    public Try<EventDto> removeParticipant(UUID eventId, UUID userId) {
+        return eventService.removeParticipant(eventId, userId);
+    }
+
+    @Override
+    public Try<EventDto> addOrganizer(UUID eventId, UUID userId) {
+        return eventService.addOrganizer(eventId, userId);
+    }
+
+    @Override
+    public Try<EventDto> removeOrganizer(UUID eventId, UUID userId) {
+        return eventService.removeOrganizer(eventId, userId);
     }
 }

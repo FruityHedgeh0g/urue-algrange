@@ -33,26 +33,32 @@ public class RoleProxy implements RoleService {
 
     @Override
     public Try<List<RoleDto>> getAllRoles() {
-        return null;
+        return roleService.getAllRoles();
+    }
+
+    @Override
+    public Try<List<RoleDto>> getAllRolesFiltered(String filter) {
+        return roleService.getAllRolesFiltered(filter);
     }
 
     @Override
     public Try<RoleDto> getRoleById(UUID roleId) {
-        return null;
+        return roleService.getRoleById(roleId);
     }
 
     @Override
     public Try<RoleDto> createRole(RoleDto roleDto) {
-        return null;
+        return roleService.createRole(roleDto);
     }
 
     @Override
     public Try<RoleDto> updateRole(RoleDto roleDto) {
-        return null;
+        return roleService.updateRole(roleDto);
     }
 
     @Override
-    public void deleteRole(UUID roleId) {
+    public Try<Void> deleteRole(UUID roleId) {
 
+        return roleService.deleteRole(roleId);
     }
 }

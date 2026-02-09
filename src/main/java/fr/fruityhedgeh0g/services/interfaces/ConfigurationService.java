@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface ConfigurationService {
     Try<List<ConfigurationDto>> getAllConfigurations();
-    public Try<ConfigurationDto> getConfigurationByName(@NotBlank String name);
+    Try<ConfigurationDto> getConfigurationByName(@NotBlank String name);
     Try<ConfigurationDto> updateConfiguration(@NotNull ConfigurationDto configurationDto);
 }

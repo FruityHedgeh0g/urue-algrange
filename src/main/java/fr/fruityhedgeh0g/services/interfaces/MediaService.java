@@ -12,5 +12,5 @@ public interface MediaService {
     Try<MediaDto> getMediaById(@NotNull UUID mediaId);
     Try<MediaDto> createMedia(@NotNull MediaDto mediaDto);
     Try<MediaDto> updateMedia(@NotNull MediaDto mediaDto);
-    void deleteMedia(@NotNull UUID mediaId);
+    Try<Void> deleteMedia(@NotNull UUID mediaId);
 }

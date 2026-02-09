@@ -33,25 +33,25 @@ public class EventDto {
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
     NestedUserDto creator;
 
-    @JsonView({Views.Detailed.class})
+    @JsonView({Views.Detailed.class,Views.Update.class})
     String latitude;
 
-    @JsonView({Views.Detailed.class})
+    @JsonView({Views.Detailed.class,Views.Update.class})
     String longitude;
 
-    @JsonView({Views.Detailed.class})
+    @JsonView({Views.Detailed.class,Views.Update.class})
     String address;
 
-    @JsonView({Views.Detailed.class})
+    @JsonView({Views.Detailed.class,Views.Update.class})
     String city;
 
-    @JsonView({Views.Detailed.class})
+    @JsonView({Views.Detailed.class,Views.Update.class})
     String country;
 
-    @JsonView({Views.Detailed.class})
+    @JsonView({Views.Detailed.class,Views.Update.class})
     String postalCode;
 
-    @JsonView({Views.Detailed.class})
+    @JsonView({Views.Detailed.class,Views.Update.class})
     String addressComplement;
 
     @JsonView({Views.Detailed.class})

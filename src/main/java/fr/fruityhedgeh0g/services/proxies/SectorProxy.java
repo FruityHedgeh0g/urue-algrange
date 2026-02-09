@@ -33,26 +33,31 @@ public class SectorProxy implements SectorService {
 
     @Override
     public Try<List<SectorDto>> getAllSectors() {
+
         return sectorService.getAllSectors();
     }
 
     @Override
     public Try<SectorDto> getSectorById(UUID sectorId) {
+
         return sectorService.getSectorById(sectorId);
     }
 
     @Override
     public Try<SectorDto> createSector(SectorDto sectorDto) {
+
         return sectorService.createSector(sectorDto);
     }
 
     @Override
     public Try<SectorDto> updateSector(SectorDto sectorDto) {
+
         return sectorService.updateSector(sectorDto);
     }
 
     @Override
     public Try<Void> deleteSector(UUID sectorId) {
+
         return sectorService.deleteSector(sectorId);
     }
 

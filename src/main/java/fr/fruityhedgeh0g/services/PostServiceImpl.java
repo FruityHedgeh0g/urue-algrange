@@ -31,62 +31,59 @@ public class PostServiceImpl implements PostService {
 
     @Transactional
     public Try<List<PostDto>> getAllPosts() {
-        Log.debug("Getting all posts");
-        return Try.of(() -> postRepository
-                .findAll()
-                .stream()
-                .map(postMapper::toDto)
-                .toList())
-                .onFailure(e -> Log.error("Error getting all posts", e));
+        return null;
+    }
+
+    @Override
+    public Try<List<PostDto>> getAllPostsFiltered(String filter) {
+        return null;
     }
 
     @Transactional
     public Try<PostDto> getPostById( UUID postId) {
-        Log.debug("Getting post with id: " + postId);
-        return Try.of(() -> postRepository
-                        .findByIdOptional(postId)
-                        .orElseThrow(NoSuchElementException::new))
-                .map(postMapper::toDto)
-                .onFailure(e -> {
-                    if (e instanceof NoSuchElementException) {
-                        Log.warn("Post not found: " + postId);
-                    }else {
-                        Log.error("Error getting post with id: " + postId, e);
-                    }
-                });
+        return null;
     }
 
     @Transactional
     public Try<PostDto> createPost( PostDto postDto) {
-        return Try.of(() -> {
-            Log.debug("Creating post");
-            PostEntity postEntity = postMapper.toEntity(postDto);
-            postRepository.persist(postEntity);
-
-            Log.debug("Post created, retrieving up-to-date post infos: " + postEntity.getPostId());
-            return postMapper.toDto(
-                    postRepository
-                            .findByIdOptional(postEntity.getPostId())
-                            .orElseThrow(NoSuchElementException::new)
-            );
-        }).onFailure(e -> {
-            Log.error("Error creating post", e);
-        });
+        return null;
     }
 
     //TODO : Développer l'update
     @Transactional
     public Try<PostDto> updatePost( PostDto postDto) {
-        Log.debug("Updating post: " + postDto.getPostId());
         return null;
     }
 
     //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     @Transactional
-    public void deletePost( UUID postId) {
-        Log.debug("Deleting post with id: " + postId);
-        Try.of(() -> postRepository.deleteById(postId))
-                .onFailure(e -> Log.error("Error deleting post with id: " + postId, e));
+    public Try<Void> deletePost( UUID postId) {
+        return null;
+    }
+
+    @Override
+    public Try<PostDto> addPostBanner(UUID postId, UUID bannerId) {
+        return null;
+    }
+
+    @Override
+    public Try<PostDto> deletePostBanner(UUID postId) {
+        return null;
+    }
+
+    @Override
+    public Try<PostDto> updatePostBanner(UUID postId, UUID tagId) {
+        return null;
+    }
+
+    @Override
+    public Try<PostDto> addPostAttachment(UUID postId, UUID attachmentId) {
+        return null;
+    }
+
+    @Override
+    public Try<PostDto> deletePostAttachment(UUID postId, UUID attachmentId) {
+        return null;
     }
 
 }

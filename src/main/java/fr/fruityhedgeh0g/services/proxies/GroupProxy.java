@@ -34,41 +34,41 @@ public class GroupProxy implements GroupService {
 
     @Override
     public Try<List<GroupDto>> getAllGroups() {
-        return null;
+        return groupService.getAllGroups();
     }
 
     @Override
     public Try<GroupDto> getGroupById(UUID groupId) {
-        return null;
+        return groupService.getGroupById(groupId);
     }
 
     @Override
     public Try<GroupDto> createGroup(GroupDto groupDto) {
-        return null;
+        return groupService.createGroup(groupDto);
     }
 
     @Override
     public Try<GroupDto> updateGroup(GroupDto groupDto) {
-        return null;
+        return groupService.updateGroup(groupDto);
     }
 
     @Override
-    public void deleteGroup(UUID groupId) {
-
+    public Try<Void> deleteGroup(UUID groupId) {
+        return groupService.deleteGroup(groupId);
     }
 
     @Override
     public Try<GroupDto> assignUserToGroup(UUID userId, UUID groupId) {
-        return null;
+        return groupService.assignUserToGroup(userId, groupId);
     }
 
     @Override
     public Try<GroupDto> unassignUserFromGroup(UUID userId, UUID groupId) {
-        return null;
+        return groupService.unassignUserFromGroup(userId, groupId);
     }
 
     @Override
     public Try<GroupEntity> getInternalEntityById(UUID groupId) {
-        return null;
+        return groupService.getInternalEntityById(groupId);
     }
 }

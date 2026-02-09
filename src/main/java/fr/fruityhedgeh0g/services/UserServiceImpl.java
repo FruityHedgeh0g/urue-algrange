@@ -50,6 +50,16 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
+    @Override
+    public Try<UserDto> assignRoleToUser(UUID userId, UUID roleId) {
+        return null;
+    }
+
+    @Override
+    public Try<UserDto> unassignRoleFromUser(UUID userId, UUID roleId) {
+        return null;
+    }
+
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
         return getInternalUserById(userId)

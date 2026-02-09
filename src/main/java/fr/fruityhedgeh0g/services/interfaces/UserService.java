@@ -15,4 +15,6 @@ public interface UserService {
     Try<UserDto> updateUser(@NotNull UserDto userDto);
     Try<Boolean> existsById(@NotNull UUID userId);
     Try<UserEntity> getInternalUserById(@NotNull UUID userId);
+    Try<UserDto> assignRoleToUser(@NotNull UUID userId, @NotNull UUID roleId);
+    Try<UserDto> unassignRoleFromUser(@NotNull UUID userId, @NotNull UUID roleId);
 }

@@ -13,7 +13,7 @@ public interface GroupService {
     Try<GroupDto> getGroupById(@NotNull UUID groupId);
     Try<GroupDto> createGroup(@NotNull GroupDto groupDto);
     Try<GroupDto> updateGroup(@NotNull GroupDto groupDto);
-    void deleteGroup(@NotNull UUID groupId);
+    Try<Void> deleteGroup(@NotNull UUID groupId);
     Try<GroupDto> assignUserToGroup(@NotNull UUID userId, @NotNull UUID groupId);
     Try<GroupDto> unassignUserFromGroup(@NotNull UUID userId, @NotNull UUID groupId);
     Try<GroupEntity> getInternalEntityById(@NotNull UUID groupId);
