@@ -208,6 +208,7 @@ public class SectorServiceTest {
     @Test
     public void assignGroupToSector_UnknownGroup_Failure(){
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
+        //when(groupService.getInternalEntityById(any())).thenReturn(Try.failure(new UnknownResourceException("Group not found")));
 
         Assertions.assertThrowsExactly(
                 UnknownResourceException.class,

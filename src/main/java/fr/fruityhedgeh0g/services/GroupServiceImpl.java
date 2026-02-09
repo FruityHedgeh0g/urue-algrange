@@ -72,17 +72,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Transactional
     public Try<GroupDto> getGroupById( UUID groupId){
-        return Try.of(() -> groupRepository
-                        .findByIdOptional(groupId)
-                        .orElseThrow(() -> new UnknownResourceException("Group not found:" + groupId)))
+        return getInternalEntityById(groupId)
                 .map(groupMapper::toDto)
-                .onFailure(ex -> {
-                    if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
-                        Log.warn(e.getMessage());
-                    } else {
-                        Log.error("Error getting sector with id: " + groupId, ex);
-                    }
-                });
+                .onFailure(e -> Log.errorf(e, "Error getting group with id: %s" , groupId ));
     }
 
     @PackagePrivate
@@ -106,13 +98,14 @@ public class GroupServiceImpl implements GroupService {
                         .stream()
                         .map(groupMapper::toDto)
                         .collect(Collectors.toSet()))
-                .onFailure(e -> Log.error("A mapping error occurred: " + sectorId, e));
+                .onFailure(e -> Log.errorf(e ,"A mapping error occurred for sector id: %s" + sectorId));
     }
 
     @Transactional
     public Try<GroupDto> createGroup( GroupDto groupDto){
         return Try.of(() -> {
-            if (groupRepository.existsByName(groupDto.getName())) throw new DuplicateResourceException("Group already exists: " + groupDto.getName() );
+            if (groupRepository.existsByName(groupDto.getName()))
+                throw new DuplicateResourceException("Group already exists: " + groupDto.getName() );
 
             GroupEntity groupEntity = groupMapper.toEntity(groupDto);
 
@@ -121,18 +114,24 @@ public class GroupServiceImpl implements GroupService {
             return groupMapper.toDto(groupEntity);
         }).onFailure(e -> {
             if (e instanceof DuplicateResourceException) {
-                Log.warn("Group already exists: " + groupDto.getName());
+                Log.warnf("Group already exists: %s" , groupDto.getName());
             }else {
-                Log.error("Error creating group with name: " + groupDto.getName(), e);
+                Log.errorf(e, "Error creating group with name: %s" , groupDto.getName() );
             }
         });
     }
 
     @Transactional
     public Try<GroupDto> updateGroup( GroupDto groupDto){
-        Log.debug("Updating group: " + groupDto.getGroupId());
+        Log.debugf("Updating group: %s" , groupDto.getGroupId());
         return Try.of(() -> groupRepository.findByIdOptional(groupDto.getGroupId())
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupDto.getGroupId())))
+                .peek(g -> {
+                    groupRepository.findByName(groupDto.getName())
+                            .filter(group ->
+                                    !g.getGroupId().equals(groupDto.getGroupId())
+                            ).isPresent();
+                })
                 .peek(group -> groupMapper.partialDtoToEntity(group, groupDto))
                 .map(groupMapper::toDto)
                 .onFailure(ex -> {

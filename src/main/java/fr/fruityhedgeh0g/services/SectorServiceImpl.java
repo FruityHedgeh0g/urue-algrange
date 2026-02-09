@@ -86,7 +86,7 @@ public class SectorServiceImpl implements SectorService {
 
     @Transactional
     public Try<SectorDto> assignGroupToSector( UUID sectorId,  UUID groupId) {
-        Log.infof("Assigning group with id: %id to sector with id: %s", groupId, sectorId);
+        Log.infof("Assigning group with id: %s to sector with id: %s", groupId, sectorId);
         return Try.of(()-> {
             Log.debugf("Checking if sector with id: %s exists", sectorId);
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
@@ -96,7 +96,7 @@ public class SectorServiceImpl implements SectorService {
             GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
                     .getOrElseThrow(e -> {throw new UnknownResourceException("Group not found: "+groupId);});
 
-            Log.debugf("Checking if group with id: %id is already assigned to a sector", groupId);
+            Log.debugf("Checking if group with id: %s is already assigned to a sector", groupId);
             if (groupEntity.getSector() != null) throw new InvalidInputException("Group already belongs to a sector");
 
             sectorEntity.addGroup(groupEntity);
@@ -104,7 +104,7 @@ public class SectorServiceImpl implements SectorService {
         }).onFailure(ex -> {
             switch (ex) {
                 case UnknownResourceException e -> Log.warn(e.getMessage());
-                default -> Log.errorf(ex, "Error assigning group with id: %id to sector with id: %s", groupId, sectorId);
+                default -> Log.errorf(ex, "Error assigning group with id: %s to sector with id: %s", groupId, sectorId);
             }
         });
     }
