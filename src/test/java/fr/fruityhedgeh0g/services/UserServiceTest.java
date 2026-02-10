@@ -110,14 +110,14 @@ class UserServiceTest {
     public void getInternalUserById_IdIsNull_Failure(){
         Assertions.assertThrowsExactly(
                 ConstraintViolationException.class,
-                () -> userService.getInternalUserById(null).get());
+                () -> userService.getInternalUserById(null));
     }
 
     @Test
     public void getInternalUserById_UnknownUser_Failure(){
         Assertions.assertThrowsExactly(
                 UnknownResourceException.class,
-                () -> userService.getInternalUserById(UUID.randomUUID()).get());
+                () -> userService.getInternalUserById(UUID.randomUUID()));
     }
 
     @Test
@@ -126,7 +126,7 @@ class UserServiceTest {
                 .thenReturn(Optional.ofNullable(userEntity));
 
         Assertions.assertEquals(
-                userService.getInternalUserById(UUID.randomUUID()).get(),
+                userService.getInternalUserById(UUID.randomUUID()),
                 userEntity
         );
 
@@ -164,7 +164,7 @@ class UserServiceTest {
     @Test
     public void createUser_IdMissing_Failure() {
         Assertions.assertThrowsExactly(
-                MandatoryFieldMissingException.class,
+                ConstraintViolationException.class,
                 () -> userService.createUser(userDtoWithoutId).get()
         );
     }
@@ -194,5 +194,8 @@ class UserServiceTest {
         verify(userRepository).persist(any(UserEntity.class));
     }
 
+    /** @see UserServiceImpl#assignRoleToUser(UUID, UUID) **/
+
+    /** @see UserServiceImpl#unassignRoleFromUser(UUID, UUID) **/
 
 }

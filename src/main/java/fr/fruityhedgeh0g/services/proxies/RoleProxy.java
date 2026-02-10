@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services.proxies;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
@@ -37,13 +39,18 @@ public class RoleProxy implements RoleService {
     }
 
     @Override
-    public Try<List<RoleDto>> getAllRolesFiltered(String filter) {
+    public Try<List<RoleDto>> getAllRolesFiltered(RoleTypeEnum[] filter) {
         return roleService.getAllRolesFiltered(filter);
     }
 
     @Override
     public Try<RoleDto> getRoleById(UUID roleId) {
         return roleService.getRoleById(roleId);
+    }
+
+    @Override
+    public RoleEntity getInternalRoleById(UUID roleId) {
+        return null;
     }
 
     @Override

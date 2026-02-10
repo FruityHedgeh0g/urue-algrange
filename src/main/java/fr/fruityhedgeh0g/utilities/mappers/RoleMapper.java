@@ -5,9 +5,8 @@ import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
 import fr.fruityhedgeh0g.entities.roles.LegalRoleEntity;
 import fr.fruityhedgeh0g.entities.roles.OrganizationalRoleEntity;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ObjectFactory;
+import fr.fruityhedgeh0g.enums.RoleTypeEnum;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "jakarta-cdi")
 public interface RoleMapper {
@@ -37,11 +36,14 @@ public interface RoleMapper {
     @ObjectFactory
     default RoleEntity toEntity(RoleDto dto) {
         switch (dto.getRoleType()){
-            case "ORGANIZATIONAL" -> {return toOrganizationalRoleEntity(dto);}
-            case "LEGAL" -> {return toLegalRoleEntity(dto);}
+            case RoleTypeEnum.ORGANIZATIONAL -> {return toOrganizationalRoleEntity(dto);}
+            case RoleTypeEnum.LEGAL -> {return toLegalRoleEntity(dto);}
             default -> throw new IllegalStateException("Unexpected role type");
         }
     }
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    RoleEntity partialDtoToEntity(@MappingTarget RoleEntity entity, RoleDto dto);
 
 
 

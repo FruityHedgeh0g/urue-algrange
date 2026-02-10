@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
 import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.FeatureRepository;
@@ -34,7 +35,7 @@ public class FeatureServiceImpl implements FeatureService {
     }
 
     //TODO : Développer l'update
-    public Try<FeatureEntity> updateFeature( FeatureEntity entity) {
+    public Try<FeatureEntity> updateFeature( FeatureDto dto) {
         return null;
     }
 }

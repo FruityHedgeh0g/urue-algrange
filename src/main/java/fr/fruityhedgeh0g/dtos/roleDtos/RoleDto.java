@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.dtos.roleDtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.Views;
+import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Value;
@@ -25,5 +26,5 @@ public class RoleDto {
 
     @NotBlank
     @JsonView({Views.Detailed.class,Views.Creation.class,Views.Update.class})
-    String roleType;
+    RoleTypeEnum roleType;
 }

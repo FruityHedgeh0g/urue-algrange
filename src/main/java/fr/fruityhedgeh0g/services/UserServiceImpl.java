@@ -1,11 +1,13 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.MandatoryFieldMissingException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.UserRepository;
+import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.logging.Log;
@@ -20,6 +22,7 @@ import lombok.experimental.PackagePrivate;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -32,43 +35,82 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Inject
+    @Identifier("serviceImpl")
+    RoleService roleService;
+
+    @Inject
     UserMapper userMapper;
 
-    @Transactional
-    public Try<UserEntity> getInternalUserById(UUID userId){
+    @Override
+    public UserEntity getInternalUserById(UUID userId) throws UnknownResourceException{
         Log.infof("Getting user with id: %s", userId);
-        return Try.of(() -> userRepository
-                        .findByIdOptional(userId)
-                        .orElseThrow(() ->
-                                new UnknownResourceException("User not found: " + userId))
-                ).onFailure(ex -> {
-                    if (ex instanceof UnknownResourceException) {
-                        Log.warn(ex.getMessage());
-                    }else {
-                        Log.errorf(ex,"Error getting user with id: %s", userId );
-                    }
-                });
+        return userRepository.findByIdOptional(userId).orElseThrow(() ->
+                new UnknownResourceException("User not found: " + userId)
+        );
     }
 
     @Override
+    @Transactional
     public Try<UserDto> assignRoleToUser(UUID userId, UUID roleId) {
-        return null;
+        Log.infof("Assigning role with id: %s to user with id: %s", roleId, userId);
+        return Try.of(() -> {
+            UserEntity user = getInternalUserById(userId);
+            RoleEntity role = roleService.getInternalRoleById(roleId);
+
+            if (user.getRoles().stream().anyMatch(e -> e.getRoleId().equals(roleId)))
+                throw new DuplicateResourceException("User already has this role");
+
+            user.addRole(role);
+
+            userRepository.persist(user);
+            return userMapper.toDto(user);
+        }).onFailure(ex -> {
+            switch (ex){
+                case UnknownResourceException e -> Log.warn(e.getMessage());
+                case DuplicateResourceException e -> Log.warn(e.getMessage());
+                default -> Log.errorf(ex,"Error assigning role with id: %s to user with id: %s", roleId, userId);
+            }
+        });
     }
 
     @Override
+    @Transactional
     public Try<UserDto> unassignRoleFromUser(UUID userId, UUID roleId) {
-        return null;
+        Log.infof("Unassigning role with id: %s from user with id: %s", roleId, userId);
+        return Try.of(() -> {
+            UserEntity user = getInternalUserById(userId);
+            RoleEntity role = roleService.getInternalRoleById(roleId);
+
+            user.removeRole(role);
+
+            userRepository.persist(user);
+
+            return userMapper.toDto(user);
+        }).onFailure(ex -> {
+            if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
+                Log.warn(e.getMessage());
+            } else {
+                Log.errorf(ex, "Error assigning role with id: %s to user with id: %s", roleId, userId);
+            }
+        });
     }
 
+    @Override
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
-        return getInternalUserById(userId)
+        return Try.of(() -> getInternalUserById(userId))
                 .map(userMapper::toDto)
-                .onFailure(e ->
-                        Log.errorf(e,"Error getting user with id: %s", userId )
-                );
+                .onFailure(e -> {
+                    if (Objects.requireNonNull(e) instanceof UnknownResourceException ex) {
+                        Log.warn(ex.getMessage());
+                    } else {
+                        Log.errorf(e, "Error getting user with id: %s", userId);
+                    }
+                });
+
     }
 
+    @Override
     @Transactional
     public Try<List<UserDto>> getAllUsers(){
         Log.info("Getting all users");
@@ -82,15 +124,11 @@ public class UserServiceImpl implements UserService {
                 );
     }
 
+    @Override
     @Transactional
     public Try<UserDto> createUser(UserDto userDto){
         Log.infof("Creating user: %s", userDto);
         return Try.of(() -> {
-
-            Log.debugf("Validating user: %s" , userDto);
-            if(userDto.getUserId() == null)
-                throw new MandatoryFieldMissingException("User id is mandatory");
-
             Log.debugf("Searching for already existing user with id: %s" , userDto.getUserId());
             if (userRepository.existsById(userDto.getUserId()))
                 throw new DuplicateResourceException("User already exists: " + userDto.getUserId());
@@ -112,8 +150,8 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    @Override
     @Transactional
-    @PackagePrivate
     public Try<Boolean> existsById(UUID userId){
         Log.infof("Checking user existence with id: %s", userId);
         return Try.of(() -> userRepository.existsById(userId))
@@ -122,15 +160,13 @@ public class UserServiceImpl implements UserService {
                 );
     }
 
+    @Override
     @Transactional
     public Try<UserDto> updateUser(UserDto userDto){
         Log.infof("Updating user: %s", userDto);
         return Try.of(() -> {
-            UserEntity user = userRepository.findByIdOptional(userDto.getUserId())
-                    .orElseThrow(() -> new UnknownResourceException("User not found: " + userDto.getUserId()));
-
+            UserEntity user = getInternalUserById(userDto.getUserId());
             user = userMapper.partialDtoToEntity(user, userDto);
-
             return userMapper.toDto(user);
         }).onFailure(ex -> {
             if (ex instanceof UnknownResourceException) {

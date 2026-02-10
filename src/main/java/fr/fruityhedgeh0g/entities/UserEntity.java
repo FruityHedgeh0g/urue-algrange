@@ -51,4 +51,12 @@ public class UserEntity extends AuditTemplate{
     @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     private Set<EventEntity> createdEvents;
 
+    public void addRole(RoleEntity role){
+        this.roles.add(role);
+    }
+
+    public void removeRole(RoleEntity role){
+        this.roles.remove(role);
+    }
+
 }

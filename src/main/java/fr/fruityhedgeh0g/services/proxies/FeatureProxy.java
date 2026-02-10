@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services.proxies;
 
+import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
 import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
 import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import io.quarkus.arc.properties.IfBuildProperty;
@@ -41,7 +42,7 @@ public class FeatureProxy implements FeatureService {
     }
 
     @Override
-    public Try<FeatureEntity> updateFeature(FeatureEntity featureEntity) {
-        return featureService.updateFeature(featureEntity);
+    public Try<FeatureEntity> updateFeature(FeatureDto featureDto) {
+        return featureService.updateFeature(featureDto);
     }
 }

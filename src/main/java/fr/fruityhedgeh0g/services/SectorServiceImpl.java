@@ -31,12 +31,14 @@ public class SectorServiceImpl implements SectorService {
     @Inject
     SectorRepository sectorRepository;
 
-    @Inject()
+    @Inject
+    @Identifier("serviceImpl")
     GroupService groupService;
 
     @Inject
     SectorMapper sectorMapper;
 
+    @Override
     @Transactional
     public Try<List<SectorDto>> getAllSectors() {
         Log.info("Getting all sectors");
@@ -48,6 +50,7 @@ public class SectorServiceImpl implements SectorService {
                 .onFailure(e -> Log.error("Error getting all sectors", e));
     }
 
+    @Override
     @Transactional
     public Try<SectorDto> getSectorById( UUID sectorId) {
         Log.infof("Getting sector with id: %s", sectorId);
@@ -65,6 +68,7 @@ public class SectorServiceImpl implements SectorService {
         });
     }
 
+    @Override
     @Transactional
     public Try<SectorDto> createSector( SectorDto sectorDto) {
         Log.infof("Creating sector: %s", sectorDto);
@@ -89,6 +93,7 @@ public class SectorServiceImpl implements SectorService {
         });
     }
 
+    @Override
     @Transactional
     public Try<SectorDto> assignGroupToSector( UUID sectorId,  UUID groupId) {
         Log.infof("Assigning group with id: %s to sector with id: %s", groupId, sectorId);
@@ -98,8 +103,7 @@ public class SectorServiceImpl implements SectorService {
                     .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
             Log.debugf("Checking if group with id: %s exists", groupId);
-            GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
-                    .getOrElseThrow(e -> {throw new UnknownResourceException("Group not found: "+groupId);});
+            GroupEntity groupEntity = groupService.getInternalEntityById(groupId);
 
             Log.debugf("Checking if group with id: %s is already assigned to a sector", groupId);
             if (groupEntity.getSector() != null) throw new InvalidInputException("Group already belongs to a sector");
@@ -107,13 +111,15 @@ public class SectorServiceImpl implements SectorService {
             sectorEntity.addGroup(groupEntity);
             return sectorMapper.toDto(sectorEntity);
         }).onFailure(ex -> {
-            switch (ex) {
-                case UnknownResourceException e -> Log.warn(e.getMessage());
-                default -> Log.errorf(ex, "Error assigning group with id: %s to sector with id: %s", groupId, sectorId);
+            if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
+                Log.warn(e.getMessage());
+            } else {
+                Log.errorf(ex, "Error assigning group with id: %s to sector with id: %s", groupId, sectorId);
             }
         });
     }
 
+    @Override
     @Transactional
     public Try<SectorDto> unassignGroupFromSector( UUID sectorId,  UUID groupId) {
         Log.infof("Unassigning group with id: %s from sector with id: %s", groupId, sectorId);
@@ -127,20 +133,21 @@ public class SectorServiceImpl implements SectorService {
                 throw new InvalidInputException("Group is not assigned to this sector");
 
             Log.debugf("Checking if group with id: %s exists", groupId);
-            GroupEntity groupEntity = groupService.getInternalEntityById(groupId)
-                    .getOrElseThrow(e -> new UnknownResourceException("Group not found:" +groupId ));
+            GroupEntity groupEntity = groupService.getInternalEntityById(groupId);
 
             sector.removeGroup(groupEntity);
 
             return sectorMapper.toDto(sector);
         }).onFailure(ex -> {
-            switch (ex) {
-                case UnknownResourceException e -> Log.warn(e.getMessage());
-                default -> Log.errorf(ex, "Error unassigning group with id: %s from sector with id: %s", groupId, sectorId);
+            if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
+                Log.warn(e.getMessage());
+            } else {
+                Log.errorf(ex, "Error unassigning group with id: %s from sector with id: %s", groupId, sectorId);
             }
         });
     }
 
+    @Override
     @Transactional
     public Try<SectorDto> updateSector( SectorDto sectorDto) {
         Log.infof("Updating sector: %s", sectorDto);
@@ -162,6 +169,7 @@ public class SectorServiceImpl implements SectorService {
         });
     }
 
+    @Override
     @Transactional
     public Try<Void> deleteSector( UUID sectorId) {
         Log.infof("Deleting sector with id: %s", sectorId);

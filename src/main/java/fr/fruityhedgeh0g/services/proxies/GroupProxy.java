@@ -68,7 +68,7 @@ public class GroupProxy implements GroupService {
     }
 
     @Override
-    public Try<GroupEntity> getInternalEntityById(UUID groupId) {
+    public GroupEntity getInternalEntityById(UUID groupId) {
         return groupService.getInternalEntityById(groupId);
     }
 }

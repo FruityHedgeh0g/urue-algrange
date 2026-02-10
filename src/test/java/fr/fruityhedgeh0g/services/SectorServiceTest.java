@@ -195,7 +195,7 @@ public class SectorServiceTest {
     public void assignGroupToSector_Success(){
 
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.getInternalEntityById(any())).thenReturn(Try.of(() -> groupEntity));
+        when(groupService.getInternalEntityById(any())).thenReturn(groupEntity);
 
         //Todo check l'insertion du secteur dans le group
         Assertions.assertEquals(
@@ -249,7 +249,7 @@ public class SectorServiceTest {
         anotherSectorEntity.addGroup(groupEntity);
 
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.getInternalEntityById(any())).thenReturn(Try.of(() -> groupEntity));
+        when(groupService.getInternalEntityById(any())).thenReturn(groupEntity);
 
         Assertions.assertThrowsExactly(
                 InvalidInputException.class,
@@ -263,7 +263,7 @@ public class SectorServiceTest {
     @Test
     public void unassignGroupToSector_Success(){
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.getInternalEntityById(groupEntity.getGroupId())).thenReturn(Try.of(() -> groupEntity));
+        when(groupService.getInternalEntityById(groupEntity.getGroupId())).thenReturn(groupEntity);
 
         //verify(sectorEntity).removeGroup(any(GroupEntity.class));
 

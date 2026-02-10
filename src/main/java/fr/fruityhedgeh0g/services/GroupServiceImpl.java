@@ -56,25 +56,24 @@ public class GroupServiceImpl implements GroupService {
                 .onFailure(e -> Log.error("Error checking if group exists with id: " + groupId, e));
     }
 
-    public Try<GroupEntity> getInternalEntityById( UUID groupId){
+    public GroupEntity getInternalEntityById( UUID groupId){
         Log.info("Getting group with id: " + groupId);
-        return Try.of(() -> groupRepository
-                        .findByIdOptional(groupId)
-                        .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId)))
-                .onFailure(e -> {
-                    if (e instanceof UnknownResourceException) {
-                        Log.warn("Group not found: " + groupId);
-                    }else {
-                        Log.error("Error getting group with id: " + groupId, e);
-                    }
-                });
+        return groupRepository.findByIdOptional(groupId).orElseThrow(() ->
+                new UnknownResourceException("Group not found: " + groupId));
+
     }
 
     @Transactional
     public Try<GroupDto> getGroupById( UUID groupId){
-        return getInternalEntityById(groupId)
+        return Try.of(() ->getInternalEntityById(groupId))
                 .map(groupMapper::toDto)
-                .onFailure(e -> Log.errorf(e, "Error getting group with id: %s" , groupId ));
+                .onFailure(e -> {
+                    if (e instanceof UnknownResourceException) {
+                        Log.warn(e.getMessage());
+                    }else {
+                        Log.error("Error getting group with id: " + groupId, e);
+                    }
+                });
     }
 
     @PackagePrivate
@@ -151,8 +150,7 @@ public class GroupServiceImpl implements GroupService {
         return Try.of(() -> groupRepository.findByIdOptional(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId)))
                 .peek(group -> {
-                    UserEntity userEntity = userServiceImpl.getInternalUserById(userId)
-                            .getOrElseThrow(() -> new UnknownResourceException("User not found: " + userId));
+                    UserEntity userEntity = userServiceImpl.getInternalUserById(userId);
 
                     group.addMember(userEntity);
                 }).map(groupMapper::toDto)
@@ -170,8 +168,7 @@ public class GroupServiceImpl implements GroupService {
         return Try.of(() -> groupRepository.findByIdOptional(groupId)
                         .orElseThrow(() -> new UnknownResourceException("Group not found:" + groupId)))
                 .peek(group -> {
-                    UserEntity userEntity = userServiceImpl.getInternalUserById(userId)
-                            .getOrElseThrow(e -> new UnknownResourceException("User not found:" +userId ));
+                    UserEntity userEntity = userServiceImpl.getInternalUserById(userId);
                     group.removeMember(userEntity);
                 }).map(groupMapper::toDto)
                 .onFailure(ex -> {

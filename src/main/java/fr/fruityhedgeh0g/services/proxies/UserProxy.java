@@ -63,7 +63,7 @@ public class UserProxy implements UserService {
     }
 
     @Override
-    public Try<UserEntity> getInternalUserById(UUID userId) {
+    public UserEntity getInternalUserById(UUID userId) {
 
         return userService.getInternalUserById(userId);
     }
