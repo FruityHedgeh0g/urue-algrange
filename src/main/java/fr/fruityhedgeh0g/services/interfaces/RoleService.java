@@ -16,7 +16,7 @@ public interface RoleService {
     Try<List<RoleDto>> getAllRoles();
     Try<List<RoleDto>> getAllRolesFilteredByRoleType(@NotNull @Size(min = 1) RoleTypeEnum[] filter);
     Try<RoleDto> getRoleById(@NotNull UUID roleId);
-    RoleEntity internalGetRoleById(@NotNull UUID roleId) throws UnknownResourceException;
+    RoleEntity internalGetRoleById(@NotNull UUID roleId);
     Try<RoleDto> createRole(@NotNull @Valid RoleDto roleDto);
     Try<RoleDto> updateRole(@NotNull @Valid RoleDto roleDto);
     Try<Void> deleteRole(@NotNull UUID roleId);

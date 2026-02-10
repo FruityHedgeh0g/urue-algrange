@@ -34,7 +34,13 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     public Try<List<EventDto>> getAllEvents(){
-        return null;
+        Log.info("Getting all events");
+        return Try.of(() -> eventRepository
+                .findAll()
+                .stream()
+                .map(eventMapper::toDto)
+                .toList())
+                .onFailure(e -> Log.error("Error getting all events", e));
     }
 
     @Override

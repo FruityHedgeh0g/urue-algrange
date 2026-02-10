@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import io.quarkus.arc.properties.IfBuildProperty;
+import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @ApplicationScoped
 @Identifier("proxy")
-//@Authenticated
+@Authenticated
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
 public class UserProxy implements UserService {
     @Inject

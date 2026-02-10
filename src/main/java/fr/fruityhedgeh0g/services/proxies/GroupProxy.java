@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -70,5 +71,20 @@ public class GroupProxy implements GroupService {
     @Override
     public GroupEntity internalGetEntityById(UUID groupId) {
         return groupService.internalGetEntityById(groupId);
+    }
+
+    @Override
+    public Boolean internalExistsById(UUID groupId) {
+        return groupService.internalExistsById(groupId);
+    }
+
+    @Override
+    public Set<GroupEntity> internalGetBySectorId(UUID sectorId) {
+        return groupService.internalGetBySectorId(sectorId);
+    }
+
+    @Override
+    public Try<Set<GroupDto>> getGroupsBySectorId(UUID sectorId) {
+        return groupService.getGroupsBySectorId(sectorId);
     }
 }

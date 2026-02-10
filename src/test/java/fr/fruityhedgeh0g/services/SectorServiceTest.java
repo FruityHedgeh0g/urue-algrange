@@ -262,7 +262,7 @@ public class SectorServiceTest {
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
         when(groupService.internalGetEntityById(groupEntity.getGroupId())).thenReturn(groupEntity);
 
-        //verify(sectorEntity).removeGroup(any(GroupEntity.class));
+        verify(sectorEntity).removeGroup(any(GroupEntity.class));
 
         Assertions.assertEquals(
                 sectorService.unassignGroupFromSector(sectorDto.getSectorId(),groupEntity.getGroupId()).get(),

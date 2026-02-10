@@ -18,7 +18,6 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.experimental.PackagePrivate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,6 +36,9 @@ public class GroupServiceImpl implements GroupService {
     @Inject
     GroupMapper groupMapper;
 
+    //Todo faire un checkup du service pour assurer la cohérence des méthodes
+
+    @Override
     @Transactional
     public Try<List<GroupDto>> getAllGroups(){
         Log.info("Getting all groups");
@@ -48,14 +50,13 @@ public class GroupServiceImpl implements GroupService {
                     .onFailure(e -> Log.error("Error getting all groups", e));
     }
 
-    @Transactional
-    @PackagePrivate
-    Try<Boolean> existsGroupById( UUID groupId){
+    @Override
+    public Boolean internalExistsById( UUID groupId){
         Log.info("Checking if group exists with id: " + groupId);
-        return Try.of(() -> groupRepository.existsById(groupId))
-                .onFailure(e -> Log.error("Error checking if group exists with id: " + groupId, e));
+        return groupRepository.existsById(groupId);
     }
 
+    @Override
     public GroupEntity internalGetEntityById(UUID groupId){
         Log.info("Getting group with id: " + groupId);
         return groupRepository.findByIdOptional(groupId).orElseThrow(() ->
@@ -63,8 +64,10 @@ public class GroupServiceImpl implements GroupService {
 
     }
 
+    @Override
     @Transactional
     public Try<GroupDto> getGroupById( UUID groupId){
+        Log.info("Getting group with id: " + groupId);
         return Try.of(() -> internalGetEntityById(groupId))
                 .map(groupMapper::toDto)
                 .onFailure(e -> {
@@ -76,23 +79,23 @@ public class GroupServiceImpl implements GroupService {
                 });
     }
 
-    @PackagePrivate
-    Try<Set<GroupEntity>> getInternalEntitiesBySectorId( UUID sectorId){
+    @Override
+    public Set<GroupEntity> internalGetBySectorId(UUID sectorId) throws UnknownResourceException{
         Log.info("Getting all groups");
-        return Try.of(() -> groupRepository
-                        .findBySector(sectorId).orElseThrow(() -> new UnknownResourceException("No group found for sector: " + sectorId )))
-                .onFailure(ex -> {
-                    if (ex instanceof UnknownResourceException e) {
-                        Log.warn(ex.getMessage());
-                    }else {
-                        Log.error("Error getting all groups", ex);
-                    }
-                });
+        return groupRepository
+                .findBySector(sectorId)
+                .orElseThrow(() -> new
+                        UnknownResourceException("No group found for sector: " + sectorId )
+                );
+
     }
 
+
+    @Override
     @Transactional
     public Try<Set<GroupDto>> getGroupsBySectorId( UUID sectorId){
-        return getInternalEntitiesBySectorId(sectorId)
+        Log.info("Getting all groups for sector with id: " + sectorId);
+        return Try.of(() -> internalGetBySectorId(sectorId))
                 .map(groupEntities -> groupEntities
                         .stream()
                         .map(groupMapper::toDto)
@@ -100,8 +103,10 @@ public class GroupServiceImpl implements GroupService {
                 .onFailure(e -> Log.errorf(e ,"A mapping error occurred for sector id: %s" + sectorId));
     }
 
+    @Override
     @Transactional
     public Try<GroupDto> createGroup( GroupDto groupDto){
+        Log.debugf("Creating group with name: %s" , groupDto.getName());
         return Try.of(() -> {
             if (groupRepository.existsByName(groupDto.getName()))
                 throw new DuplicateResourceException("Group already exists: " + groupDto.getName() );
@@ -120,11 +125,11 @@ public class GroupServiceImpl implements GroupService {
         });
     }
 
+    @Override
     @Transactional
     public Try<GroupDto> updateGroup( GroupDto groupDto){
         Log.debugf("Updating group: %s" , groupDto.getGroupId());
-        return Try.of(() -> groupRepository.findByIdOptional(groupDto.getGroupId())
-                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupDto.getGroupId())))
+        return Try.of(() -> internalGetEntityById(groupDto.getGroupId()))
                 .peek(g -> {
                     groupRepository.findByName(groupDto.getName())
                             .filter(group -> !g.getGroupId().equals(groupDto.getGroupId())).isPresent();
@@ -140,15 +145,17 @@ public class GroupServiceImpl implements GroupService {
                 });
     }
 
+    @Override
     @Transactional
     public Try<Void> deleteGroup( UUID groupId){
         return null;
     }
 
+    @Override
     @Transactional
     public Try<GroupDto> assignUserToGroup( UUID userId,  UUID groupId){
-        return Try.of(() -> groupRepository.findByIdOptional(groupId)
-                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId)))
+        Log.debugf("Assigning user with id: %s to group with id: %s" , userId, groupId);
+        return Try.of(() -> internalGetEntityById(groupId))
                 .peek(group -> {
                     UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
 
@@ -163,10 +170,11 @@ public class GroupServiceImpl implements GroupService {
                 });
     }
 
+    @Override
     @Transactional
     public Try<GroupDto> unassignUserFromGroup( UUID userId,  UUID groupId){
-        return Try.of(() -> groupRepository.findByIdOptional(groupId)
-                        .orElseThrow(() -> new UnknownResourceException("Group not found:" + groupId)))
+        Log.debugf("Unassigning user with id: %s from group with id: %s" , userId, groupId);
+        return Try.of(() -> internalGetEntityById(groupId))
                 .peek(group -> {
                     UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
                     group.removeMember(userEntity);

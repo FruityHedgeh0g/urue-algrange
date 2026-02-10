@@ -37,11 +37,6 @@ public class PostProxy implements PostService {
     }
 
     @Override
-    public Try<List<PostDto>> getAllPostsFiltered(String filter) {
-        return postService.getAllPostsFiltered(filter);
-    }
-
-    @Override
     public Try<PostDto> getPostById(UUID postId) {
         return postService.getPostById(postId);
     }

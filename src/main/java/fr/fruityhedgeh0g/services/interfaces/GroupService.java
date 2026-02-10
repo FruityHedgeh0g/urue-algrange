@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface GroupService {
@@ -18,5 +19,8 @@ public interface GroupService {
     Try<Void> deleteGroup(@NotNull UUID groupId);
     Try<GroupDto> assignUserToGroup(@NotNull UUID userId, @NotNull UUID groupId);
     Try<GroupDto> unassignUserFromGroup(@NotNull UUID userId, @NotNull UUID groupId);
-    GroupEntity internalGetEntityById(@NotNull UUID groupId) throws UnknownResourceException;
+    GroupEntity internalGetEntityById(@NotNull UUID groupId);
+    Boolean internalExistsById(@NotNull UUID groupId);
+    Set<GroupEntity> internalGetBySectorId(@NotNull UUID sectorId);
+    Try<Set<GroupDto>> getGroupsBySectorId(@NotNull UUID sectorId);
 }

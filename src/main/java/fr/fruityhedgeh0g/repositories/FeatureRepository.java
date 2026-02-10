@@ -4,11 +4,13 @@ import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.Optional;
+
 @ApplicationScoped
 public class FeatureRepository implements PanacheRepositoryBase<FeatureEntity, String> {
 
-//    public Optional<FeatureEntity> findByName(String name) {
-//        return Optional.ofNullable(find("name", name)
-//                .firstResult());
-//    }
+    public Optional<FeatureEntity> findByName(String name) {
+        return Optional.ofNullable(find("name", name)
+                .firstResult());
+    }
 }

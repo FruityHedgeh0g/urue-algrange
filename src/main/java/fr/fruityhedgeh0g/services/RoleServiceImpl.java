@@ -31,6 +31,7 @@ public class RoleServiceImpl implements RoleService {
     @Inject
     RoleRepository roleRepository;
 
+    //Todo : ne devrait pas avoir l'accès, trouver un moyen de découpler ce service du service utilisateur.
     @Inject
     @Identifier("serviceImpl")
     UserService userService;
@@ -48,6 +49,7 @@ public class RoleServiceImpl implements RoleService {
                 .toList())
                 .onFailure(ex -> Log.error("Error getting all roles", ex));
     }
+
 
     @Override
     @Transactional
@@ -76,7 +78,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleEntity internalGetRoleById(UUID roleId) {
+    public RoleEntity internalGetRoleById(UUID roleId) throws UnknownResourceException {
         Log.infof("Getting role with id: %s", roleId);
         return roleRepository.findByIdOptional(roleId).orElseThrow(() ->
                 new UnknownResourceException("Role not found"));
@@ -104,7 +106,7 @@ public class RoleServiceImpl implements RoleService {
         });
     }
 
-    //TODO : Développer l'update
+
     @Transactional
     public Try<RoleDto> updateRole( RoleDto roleDto) {
         return Try.of(() -> {

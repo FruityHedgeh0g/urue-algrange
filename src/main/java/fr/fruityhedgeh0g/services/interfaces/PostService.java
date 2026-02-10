@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface PostService {
     Try<List<PostDto>> getAllPosts();
-    Try<List<PostDto>> getAllPostsFiltered(@NotNull String filter);
     Try<PostDto> getPostById(@NotNull UUID postId);
     Try<PostDto> createPost(@NotNull @Valid PostDto postDto);
     Try<PostDto> updatePost(@NotNull @Valid PostDto postDto);

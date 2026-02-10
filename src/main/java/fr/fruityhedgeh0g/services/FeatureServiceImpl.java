@@ -11,6 +11,7 @@ import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -24,14 +25,36 @@ public class FeatureServiceImpl implements FeatureService {
     @Inject
     FeatureRepository featureRepository;
 
+    @Override
+    @Transactional
     public Try<FeatureEntity> getFeatureByName( String name) {
-        return null;
+        Log.infof("Getting feature by name: %s", name);
+        return Try.of(() -> featureRepository
+                .findByName(name)
+                .orElseThrow(() ->
+                        new UnknownResourceException("Feature not found: " + name))
+        ).onFailure(e -> {
+            if (e instanceof UnknownResourceException ex) {
+                Log.warn(ex.getMessage());
+            } else {
+                Log.errorf(e,"Error getting feature by name: %s", name );
+            }
+        });
 
 
     }
 
+    @Override
+    @Transactional
     public Try<List<FeatureEntity>> getAllFeatures() {
-        return null;
+        Log.info("Getting all features");
+        return Try.of(() -> featureRepository
+                .listAll()
+                .stream()
+                .toList())
+                .onFailure(e -> {
+                    Log.errorf(e,"Error getting all features");
+                });
     }
 
     //TODO : Développer l'update

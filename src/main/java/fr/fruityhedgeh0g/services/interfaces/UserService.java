@@ -18,7 +18,7 @@ public interface UserService {
     Try<UserDto> updateUser(@NotNull @Valid UserDto userDto);
     Boolean internalExistsById(@NotNull UUID userId);
     Boolean internalExistsByRole(@NotNull UUID roleId);
-    UserEntity internalGetUserById(@NotNull UUID userId) throws UnknownResourceException;
+    UserEntity internalGetUserById(@NotNull UUID userId);
     Try<UserDto> assignRoleToUser(@NotNull UUID userId, @NotNull UUID roleId);
     Try<UserDto> unassignRoleFromUser(@NotNull UUID userId, @NotNull UUID roleId);
 }
