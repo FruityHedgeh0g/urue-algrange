@@ -1,9 +1,11 @@
 package fr.fruityhedgeh0g.repositories;
 
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,5 +18,10 @@ public class RoleRepository implements PanacheRepositoryBase<RoleEntity, UUID> {
     public Optional<RoleEntity> findByName(String name) {
         return Optional.ofNullable(find("name", name)
                 .firstResult());
+    }
+
+    public List<RoleEntity> findByType(RoleTypeEnum[] filter) {
+        return find("roleType", (Object[]) filter)
+                .list();
     }
 }

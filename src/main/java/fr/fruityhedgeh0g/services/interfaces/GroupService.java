@@ -18,5 +18,5 @@ public interface GroupService {
     Try<Void> deleteGroup(@NotNull UUID groupId);
     Try<GroupDto> assignUserToGroup(@NotNull UUID userId, @NotNull UUID groupId);
     Try<GroupDto> unassignUserFromGroup(@NotNull UUID userId, @NotNull UUID groupId);
-    GroupEntity getInternalEntityById(@NotNull UUID groupId) throws UnknownResourceException;
+    GroupEntity internalGetEntityById(@NotNull UUID groupId) throws UnknownResourceException;
 }

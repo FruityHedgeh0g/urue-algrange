@@ -13,10 +13,12 @@ import java.util.UUID;
 public interface UserService {
     Try<UserDto> getUserById(@NotNull UUID userId);
     Try<List<UserDto>> getAllUsers();
+    List<UserEntity> internalGetAllUsersFilteredByRole(@NotNull UUID roleId);
     Try<UserDto> createUser(@NotNull @Valid UserDto userDto);
     Try<UserDto> updateUser(@NotNull @Valid UserDto userDto);
-    Try<Boolean> existsById(@NotNull UUID userId);
-    UserEntity getInternalUserById(@NotNull UUID userId) throws UnknownResourceException;
+    Boolean internalExistsById(@NotNull UUID userId);
+    Boolean internalExistsByRole(@NotNull UUID roleId);
+    UserEntity internalGetUserById(@NotNull UUID userId) throws UnknownResourceException;
     Try<UserDto> assignRoleToUser(@NotNull UUID userId, @NotNull UUID roleId);
     Try<UserDto> unassignRoleFromUser(@NotNull UUID userId, @NotNull UUID roleId);
 }

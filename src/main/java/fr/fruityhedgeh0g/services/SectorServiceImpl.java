@@ -103,7 +103,7 @@ public class SectorServiceImpl implements SectorService {
                     .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
             Log.debugf("Checking if group with id: %s exists", groupId);
-            GroupEntity groupEntity = groupService.getInternalEntityById(groupId);
+            GroupEntity groupEntity = groupService.internalGetEntityById(groupId);
 
             Log.debugf("Checking if group with id: %s is already assigned to a sector", groupId);
             if (groupEntity.getSector() != null) throw new InvalidInputException("Group already belongs to a sector");
@@ -133,7 +133,7 @@ public class SectorServiceImpl implements SectorService {
                 throw new InvalidInputException("Group is not assigned to this sector");
 
             Log.debugf("Checking if group with id: %s exists", groupId);
-            GroupEntity groupEntity = groupService.getInternalEntityById(groupId);
+            GroupEntity groupEntity = groupService.internalGetEntityById(groupId);
 
             sector.removeGroup(groupEntity);
 
@@ -177,6 +177,8 @@ public class SectorServiceImpl implements SectorService {
             Log.debugf("Checking if sector with id: %s exists", sectorId);
             SectorEntity sector =sectorRepository.findByIdOptional(sectorId)
                         .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId));
+
+            sector.getGroups().forEach(group -> group.setSector(null));
 
             Log.debugf("Deleting sector with id: %s", sectorId);
             sectorRepository.delete(sector);

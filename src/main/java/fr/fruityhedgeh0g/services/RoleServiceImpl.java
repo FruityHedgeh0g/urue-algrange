@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
+import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.RoleMapper;
 import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
@@ -18,8 +19,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -29,6 +30,10 @@ import java.util.UUID;
 public class RoleServiceImpl implements RoleService {
     @Inject
     RoleRepository roleRepository;
+
+    @Inject
+    @Identifier("serviceImpl")
+    UserService userService;
 
     @Inject
     RoleMapper roleMapper;
@@ -46,17 +51,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public Try<List<RoleDto>> getAllRolesFiltered(RoleTypeEnum[] filter) {
+    public Try<List<RoleDto>> getAllRolesFilteredByRoleType(RoleTypeEnum[] filter) {
         Log.infof("Getting all roles filtered by: %s", Arrays.toString(filter));
         return Try.of(() -> roleRepository
-                .findAll()
+                .findByType(filter)
                 .stream()
-                .filter(role -> Arrays
-                        .stream(filter)
-                        .anyMatch(r ->
-                                r.equals(role.getRoleType())
-                        )
-                )
                 .map(roleMapper::toDto)
                 .toList())
                 .onFailure(ex -> Log.error("Error getting all filtered roles", ex));
@@ -65,7 +64,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @Override
     public Try<RoleDto> getRoleById( UUID roleId) {
-        return Try.of(() -> getInternalRoleById(roleId))
+        return Try.of(() -> internalGetRoleById(roleId))
                 .map(roleMapper::toDto)
                 .onFailure(ex -> {
                     if (ex instanceof UnknownResourceException e) {
@@ -77,7 +76,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleEntity getInternalRoleById(UUID roleId) {
+    public RoleEntity internalGetRoleById(UUID roleId) {
         Log.infof("Getting role with id: %s", roleId);
         return roleRepository.findByIdOptional(roleId).orElseThrow(() ->
                 new UnknownResourceException("Role not found"));
@@ -109,7 +108,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public Try<RoleDto> updateRole( RoleDto roleDto) {
         return Try.of(() -> {
-            RoleEntity roleEntity = getInternalRoleById(roleDto.getRoleId());
+            RoleEntity roleEntity = internalGetRoleById(roleDto.getRoleId());
 
             Log.debugf("Checking if role with name: %s already exists", roleDto.getName());
             if (!roleDto.getName().equals(roleEntity.getName()) && roleRepository.existsByName(roleDto.getName()))
@@ -128,9 +127,25 @@ public class RoleServiceImpl implements RoleService {
         );
     }
 
-    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
+    @Override
     @Transactional
     public Try<Void> deleteRole( UUID roleId) {
-        return null;
+        Log.infof("Deleting role with id: %s", roleId);
+        return Try.run(() -> {
+            Log.debugf("Checking if role with id: %s exists", roleId);
+            if (userService.internalExistsByRole(roleId))
+                throw new IllegalStateException("Cannot delete role with id: " + roleId + " as it is assigned to users");
+
+            Log.debugf("Checking if role with id: %s exists", roleId);
+            RoleEntity roleEntity = internalGetRoleById(roleId);
+
+            roleRepository.delete(roleEntity);
+        }).onFailure(ex -> {
+            switch (ex){
+                case IllegalStateException e -> Log.warn(e.getMessage());
+                case UnknownResourceException e -> Log.warn(e.getMessage());
+                default -> Log.errorf(ex, "Error deleting role with id: %s", roleId);
+            }
+        });
     }
 }

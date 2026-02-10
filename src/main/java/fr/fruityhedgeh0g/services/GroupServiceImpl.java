@@ -56,7 +56,7 @@ public class GroupServiceImpl implements GroupService {
                 .onFailure(e -> Log.error("Error checking if group exists with id: " + groupId, e));
     }
 
-    public GroupEntity getInternalEntityById( UUID groupId){
+    public GroupEntity internalGetEntityById(UUID groupId){
         Log.info("Getting group with id: " + groupId);
         return groupRepository.findByIdOptional(groupId).orElseThrow(() ->
                 new UnknownResourceException("Group not found: " + groupId));
@@ -65,7 +65,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Transactional
     public Try<GroupDto> getGroupById( UUID groupId){
-        return Try.of(() ->getInternalEntityById(groupId))
+        return Try.of(() -> internalGetEntityById(groupId))
                 .map(groupMapper::toDto)
                 .onFailure(e -> {
                     if (e instanceof UnknownResourceException) {
@@ -150,7 +150,7 @@ public class GroupServiceImpl implements GroupService {
         return Try.of(() -> groupRepository.findByIdOptional(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId)))
                 .peek(group -> {
-                    UserEntity userEntity = userServiceImpl.getInternalUserById(userId);
+                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
 
                     group.addMember(userEntity);
                 }).map(groupMapper::toDto)
@@ -168,7 +168,7 @@ public class GroupServiceImpl implements GroupService {
         return Try.of(() -> groupRepository.findByIdOptional(groupId)
                         .orElseThrow(() -> new UnknownResourceException("Group not found:" + groupId)))
                 .peek(group -> {
-                    UserEntity userEntity = userServiceImpl.getInternalUserById(userId);
+                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
                     group.removeMember(userEntity);
                 }).map(groupMapper::toDto)
                 .onFailure(ex -> {

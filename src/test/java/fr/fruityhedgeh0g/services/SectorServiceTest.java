@@ -1,6 +1,5 @@
 package fr.fruityhedgeh0g.services;
 
-import fr.fruityhedgeh0g.dtos.groupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
@@ -13,7 +12,6 @@ import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
-import io.vavr.control.Try;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +21,6 @@ import org.mockito.Mockito;
 
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -195,7 +192,7 @@ public class SectorServiceTest {
     public void assignGroupToSector_Success(){
 
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.getInternalEntityById(any())).thenReturn(groupEntity);
+        when(groupService.internalGetEntityById(any())).thenReturn(groupEntity);
 
         //Todo check l'insertion du secteur dans le group
         Assertions.assertEquals(
@@ -249,7 +246,7 @@ public class SectorServiceTest {
         anotherSectorEntity.addGroup(groupEntity);
 
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.getInternalEntityById(any())).thenReturn(groupEntity);
+        when(groupService.internalGetEntityById(any())).thenReturn(groupEntity);
 
         Assertions.assertThrowsExactly(
                 InvalidInputException.class,
@@ -263,7 +260,7 @@ public class SectorServiceTest {
     @Test
     public void unassignGroupToSector_Success(){
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.getInternalEntityById(groupEntity.getGroupId())).thenReturn(groupEntity);
+        when(groupService.internalGetEntityById(groupEntity.getGroupId())).thenReturn(groupEntity);
 
         //verify(sectorEntity).removeGroup(any(GroupEntity.class));
 

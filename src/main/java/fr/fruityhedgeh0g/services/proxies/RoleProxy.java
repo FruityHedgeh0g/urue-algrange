@@ -39,8 +39,8 @@ public class RoleProxy implements RoleService {
     }
 
     @Override
-    public Try<List<RoleDto>> getAllRolesFiltered(RoleTypeEnum[] filter) {
-        return roleService.getAllRolesFiltered(filter);
+    public Try<List<RoleDto>> getAllRolesFilteredByRoleType(RoleTypeEnum[] filter) {
+        return roleService.getAllRolesFilteredByRoleType(filter);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class RoleProxy implements RoleService {
     }
 
     @Override
-    public RoleEntity getInternalRoleById(UUID roleId) {
+    public RoleEntity internalGetRoleById(UUID roleId) {
         return null;
     }
 

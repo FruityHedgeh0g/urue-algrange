@@ -18,12 +18,8 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.experimental.PackagePrivate;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @AllArgsConstructor
 @ApplicationScoped
@@ -42,7 +38,7 @@ public class UserServiceImpl implements UserService {
     UserMapper userMapper;
 
     @Override
-    public UserEntity getInternalUserById(UUID userId) throws UnknownResourceException{
+    public UserEntity internalGetUserById(UUID userId) throws UnknownResourceException{
         Log.infof("Getting user with id: %s", userId);
         return userRepository.findByIdOptional(userId).orElseThrow(() ->
                 new UnknownResourceException("User not found: " + userId)
@@ -54,8 +50,8 @@ public class UserServiceImpl implements UserService {
     public Try<UserDto> assignRoleToUser(UUID userId, UUID roleId) {
         Log.infof("Assigning role with id: %s to user with id: %s", roleId, userId);
         return Try.of(() -> {
-            UserEntity user = getInternalUserById(userId);
-            RoleEntity role = roleService.getInternalRoleById(roleId);
+            UserEntity user = internalGetUserById(userId);
+            RoleEntity role = roleService.internalGetRoleById(roleId);
 
             if (user.getRoles().stream().anyMatch(e -> e.getRoleId().equals(roleId)))
                 throw new DuplicateResourceException("User already has this role");
@@ -78,8 +74,8 @@ public class UserServiceImpl implements UserService {
     public Try<UserDto> unassignRoleFromUser(UUID userId, UUID roleId) {
         Log.infof("Unassigning role with id: %s from user with id: %s", roleId, userId);
         return Try.of(() -> {
-            UserEntity user = getInternalUserById(userId);
-            RoleEntity role = roleService.getInternalRoleById(roleId);
+            UserEntity user = internalGetUserById(userId);
+            RoleEntity role = roleService.internalGetRoleById(roleId);
 
             user.removeRole(role);
 
@@ -98,7 +94,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
-        return Try.of(() -> getInternalUserById(userId))
+        return Try.of(() -> internalGetUserById(userId))
                 .map(userMapper::toDto)
                 .onFailure(e -> {
                     if (Objects.requireNonNull(e) instanceof UnknownResourceException ex) {
@@ -109,6 +105,13 @@ public class UserServiceImpl implements UserService {
                 });
 
     }
+
+    @Override
+    public List<UserEntity> internalGetAllUsersFilteredByRole(UUID roleId){
+        Log.infof("Getting all users filtered by role with id: %s", roleId);
+        return userRepository.findByRole(roleId);
+    }
+
 
     @Override
     @Transactional
@@ -151,13 +154,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public Try<Boolean> existsById(UUID userId){
+    public Boolean internalExistsById(UUID userId){
         Log.infof("Checking user existence with id: %s", userId);
-        return Try.of(() -> userRepository.existsById(userId))
-                .onFailure(e ->
-                        Log.errorf(e,"Error checking user existence with id: %s" ,userId)
-                );
+        return userRepository.existsById(userId);
+    }
+
+    @Override
+    public Boolean internalExistsByRole(UUID roleId) {
+        return userRepository.existsByRole(roleId);
     }
 
     @Override
@@ -165,7 +169,7 @@ public class UserServiceImpl implements UserService {
     public Try<UserDto> updateUser(UserDto userDto){
         Log.infof("Updating user: %s", userDto);
         return Try.of(() -> {
-            UserEntity user = getInternalUserById(userDto.getUserId());
+            UserEntity user = internalGetUserById(userDto.getUserId());
             user = userMapper.partialDtoToEntity(user, userDto);
             return userMapper.toDto(user);
         }).onFailure(ex -> {

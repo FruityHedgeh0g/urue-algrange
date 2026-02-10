@@ -4,7 +4,6 @@ import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import io.quarkus.arc.properties.IfBuildProperty;
-import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
@@ -45,6 +44,11 @@ public class UserProxy implements UserService {
     }
 
     @Override
+    public List<UserEntity> internalGetAllUsersFilteredByRole(UUID roleId) {
+        return userService.internalGetAllUsersFilteredByRole(roleId);
+    }
+
+    @Override
     public Try<UserDto> createUser(UserDto userDto) {
 
         return userService.createUser(userDto);
@@ -57,15 +61,20 @@ public class UserProxy implements UserService {
     }
 
     @Override
-    public Try<Boolean> existsById(UUID userId) {
+    public Boolean internalExistsById(UUID userId) {
 
-        return userService.existsById(userId);
+        return userService.internalExistsById(userId);
     }
 
     @Override
-    public UserEntity getInternalUserById(UUID userId) {
+    public Boolean internalExistsByRole(UUID roleId) {
+        return userService.internalExistsByRole(roleId);
+    }
 
-        return userService.getInternalUserById(userId);
+    @Override
+    public UserEntity internalGetUserById(UUID userId) {
+
+        return userService.internalGetUserById(userId);
     }
 
     @Override

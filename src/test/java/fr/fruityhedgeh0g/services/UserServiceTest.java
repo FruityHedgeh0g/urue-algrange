@@ -4,7 +4,6 @@ package fr.fruityhedgeh0g.services;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
-import fr.fruityhedgeh0g.exceptions.MandatoryFieldMissingException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import io.quarkus.test.InjectMock;
@@ -64,29 +63,29 @@ class UserServiceTest {
 
     }
 
-    /** @see UserServiceImpl#existsById(UUID) **/
+    /** @see UserServiceImpl#internalExistsById(UUID) **/
 
     @Test
-    public void existsById_IdIsNull_Failure(){
+    public void internalExistsById_IdIsNull_Failure(){
         Assertions.assertThrowsExactly(
                 ConstraintViolationException.class,
-                () -> userService.existsById(null));
+                () -> userService.internalExistsById(null));
     }
 
     @Test
-    public void existsById_Success(){
+    public void internalExistsById_Success(){
         when(userRepository.existsById(Mockito.any()))
                 .thenReturn(true);
 
-        Assertions.assertTrue(userService.existsById(UUID.randomUUID()).get());
+        Assertions.assertTrue(userService.internalExistsById(UUID.randomUUID()));
     }
 
     @Test
-    public void existsById_UnknownUser_Success() {
+    public void internalExistsById_UnknownUser_Success() {
         when(userRepository.existsById(Mockito.any()))
                 .thenReturn(false);
 
-        Assertions.assertFalse(userService.existsById(UUID.randomUUID()).get());
+        Assertions.assertFalse(userService.internalExistsById(UUID.randomUUID()));
     }
 
 
@@ -104,29 +103,29 @@ class UserServiceTest {
         );
     }
 
-    /** @see UserServiceImpl#getInternalUserById(UUID) **/
+    /** @see UserServiceImpl#internalGetUserById(UUID) **/
 
     @Test
-    public void getInternalUserById_IdIsNull_Failure(){
+    public void internalGetUserById_IdIsNull_Failure(){
         Assertions.assertThrowsExactly(
                 ConstraintViolationException.class,
-                () -> userService.getInternalUserById(null));
+                () -> userService.internalGetUserById(null));
     }
 
     @Test
-    public void getInternalUserById_UnknownUser_Failure(){
+    public void internalGetUserById_UnknownUser_Failure(){
         Assertions.assertThrowsExactly(
                 UnknownResourceException.class,
-                () -> userService.getInternalUserById(UUID.randomUUID()));
+                () -> userService.internalGetUserById(UUID.randomUUID()));
     }
 
     @Test
-    public void getInternalUserById_Success(){
+    public void internalGetUserById_Success(){
         when(userRepository.findByIdOptional(Mockito.any()))
                 .thenReturn(Optional.ofNullable(userEntity));
 
         Assertions.assertEquals(
-                userService.getInternalUserById(UUID.randomUUID()),
+                userService.internalGetUserById(UUID.randomUUID()),
                 userEntity
         );
 

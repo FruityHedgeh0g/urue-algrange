@@ -6,7 +6,6 @@ import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import io.vavr.control.Try;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -15,9 +14,9 @@ import java.util.UUID;
 
 public interface RoleService {
     Try<List<RoleDto>> getAllRoles();
-    Try<List<RoleDto>> getAllRolesFiltered(@NotNull @Size(min = 1) RoleTypeEnum[] filter);
+    Try<List<RoleDto>> getAllRolesFilteredByRoleType(@NotNull @Size(min = 1) RoleTypeEnum[] filter);
     Try<RoleDto> getRoleById(@NotNull UUID roleId);
-    RoleEntity getInternalRoleById(@NotNull UUID roleId) throws UnknownResourceException;
+    RoleEntity internalGetRoleById(@NotNull UUID roleId) throws UnknownResourceException;
     Try<RoleDto> createRole(@NotNull @Valid RoleDto roleDto);
     Try<RoleDto> updateRole(@NotNull @Valid RoleDto roleDto);
     Try<Void> deleteRole(@NotNull UUID roleId);
