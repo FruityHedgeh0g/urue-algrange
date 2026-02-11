@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.entities.roles;
 
 import fr.fruityhedgeh0g.entities.AuditTemplate;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -34,6 +36,19 @@ public abstract class RoleEntity extends AuditTemplate {
     @Enumerated(EnumType.STRING)
     @Column(name = "role_type", nullable = false, insertable = false, updatable = false)
     private RoleTypeEnum roleType;
+
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    private Set<UserEntity> users;
+
+    public void addUser(UserEntity user){
+        this.users.add(user);
+    }
+
+    public void removeUser(UserEntity user){
+        this.users.remove(user);
+    }
+
+
 
 //    @ManyToMany(mappedBy = "roles")
 //    private Set<UserEntity> users;

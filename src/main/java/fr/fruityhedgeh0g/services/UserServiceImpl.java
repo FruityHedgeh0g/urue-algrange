@@ -58,7 +58,6 @@ public class UserServiceImpl implements UserService {
 
             user.addRole(role);
 
-            userRepository.persist(user);
             return userMapper.toDto(user);
         }).onFailure(ex -> {
             switch (ex){
@@ -78,8 +77,6 @@ public class UserServiceImpl implements UserService {
             RoleEntity role = roleService.internalGetRoleById(roleId);
 
             user.removeRole(role);
-
-            userRepository.persist(user);
 
             return userMapper.toDto(user);
         }).onFailure(ex -> {

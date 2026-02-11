@@ -53,10 +53,12 @@ public class UserEntity extends AuditTemplate{
 
     public void addRole(RoleEntity role){
         this.roles.add(role);
+        role.addUser(this);
     }
 
     public void removeRole(RoleEntity role){
         this.roles.remove(role);
+        role.removeUser(this);
     }
 
 }

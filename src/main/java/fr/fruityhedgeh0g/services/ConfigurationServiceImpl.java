@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
+import fr.fruityhedgeh0g.entities.configurations.ConfigurationEntity;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
@@ -54,13 +55,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 .onFailure(e -> Log.error("Error getting all configurations", e));
     }
 
-    //TODO : Développer l'update
     @Transactional
     public Try<ConfigurationDto> updateConfiguration( ConfigurationDto dto) {
         Log.info("Updating configuration: " + dto.getName());
-//        return Try.run(() -> configurationRepository.updateConfiguration(configurationMapper.toEntity(dto)))
-//                .onFailure(e -> Log.error("Error updating configuration", e))
-//                .isSuccess();
-        return null;
+        return Try.of(() -> {
+            Log.debugf("Checking if configuration with name: %s already exists", dto.getName());
+            ConfigurationEntity configuration = configurationRepository.findByIdOptional(dto.getName())
+                    .orElseThrow(() -> new UnknownResourceException("Configuration not found: " + dto.getName()));
+
+            configurationMapper.partialDtoToEntity(configuration, dto);
+
+            return configurationMapper.toDto(configuration);
+        }).onFailure(e -> {
+            if (e instanceof UnknownResourceException) {
+                Log.warn(e.getMessage());
+            } else {
+                Log.error("Error updating configuration: " + dto.getName(), e);
+            }
+        });
     }
 }

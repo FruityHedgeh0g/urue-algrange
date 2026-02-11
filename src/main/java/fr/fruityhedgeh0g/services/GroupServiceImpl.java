@@ -31,6 +31,7 @@ public class GroupServiceImpl implements GroupService {
     GroupRepository groupRepository;
 
     @Inject
+    @Identifier( "serviceImpl")
     UserService userServiceImpl;
 
     @Inject
@@ -129,18 +130,21 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Try<GroupDto> updateGroup( GroupDto groupDto){
         Log.debugf("Updating group: %s" , groupDto.getGroupId());
-        return Try.of(() -> internalGetEntityById(groupDto.getGroupId()))
-                .peek(g -> {
-                    groupRepository.findByName(groupDto.getName())
-                            .filter(group -> !g.getGroupId().equals(groupDto.getGroupId())).isPresent();
-                })
-                .peek(group -> groupMapper.partialDtoToEntity(group, groupDto))
-                .map(groupMapper::toDto)
-                .onFailure(ex -> {
-                    if (ex instanceof UnknownResourceException) {
-                        Log.warn(ex.getMessage());
-                    }else {
-                        Log.error("Error updating group with id: " + groupDto.getGroupId(), ex);
+        return Try.of(() -> {
+                    Log.debugf("Checking if group with id: %s exists" , groupDto.getGroupId());
+                    GroupEntity group = internalGetEntityById(groupDto.getGroupId());
+
+                    Log.debugf("Checking if group with name: %s already exists" , groupDto.getName());
+                    if (groupRepository.findByName(groupDto.getName()).stream().anyMatch(e -> !e.getGroupId().equals(groupDto.getGroupId())))
+                        throw new DuplicateResourceException("Group already exists: " + groupDto.getName());
+
+                    groupMapper.partialDtoToEntity(group, groupDto);
+                    return groupMapper.toDto(group);
+                }).onFailure(ex -> {
+                    switch(ex) {
+                        case UnknownResourceException e -> Log.warn(e.getMessage());
+                        case DuplicateResourceException e -> Log.warn(e.getMessage());
+                        default -> Log.errorf(ex,"Error updating group with id: %s" , groupDto.getGroupId() );
                     }
                 });
     }
@@ -155,13 +159,13 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Try<GroupDto> assignUserToGroup( UUID userId,  UUID groupId){
         Log.debugf("Assigning user with id: %s to group with id: %s" , userId, groupId);
-        return Try.of(() -> internalGetEntityById(groupId))
-                .peek(group -> {
+        return Try.of(() -> {
+                    GroupEntity group = internalGetEntityById(groupId);
                     UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
 
                     group.addMember(userEntity);
-                }).map(groupMapper::toDto)
-                .onFailure(ex -> {
+                    return groupMapper.toDto(group);
+                }).onFailure(ex -> {
                     if (ex instanceof UnknownResourceException e) {
                         Log.warn(ex.getMessage());
                     }else {
@@ -174,12 +178,12 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Try<GroupDto> unassignUserFromGroup( UUID userId,  UUID groupId){
         Log.debugf("Unassigning user with id: %s from group with id: %s" , userId, groupId);
-        return Try.of(() -> internalGetEntityById(groupId))
-                .peek(group -> {
+        return Try.of(() -> {
+                    GroupEntity group = internalGetEntityById(groupId);
                     UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
                     group.removeMember(userEntity);
-                }).map(groupMapper::toDto)
-                .onFailure(ex -> {
+                    return groupMapper.toDto(group);
+                }).onFailure(ex -> {
                     switch (ex) {
                         case UnknownResourceException e -> Log.warn(e.getMessage());
                         case InvalidInputException e -> Log.warn(e.getMessage());

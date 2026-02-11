@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
+import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -30,11 +32,6 @@ import java.util.UUID;
 public class RoleServiceImpl implements RoleService {
     @Inject
     RoleRepository roleRepository;
-
-    //Todo : ne devrait pas avoir l'accès, trouver un moyen de découpler ce service du service utilisateur.
-    @Inject
-    @Identifier("serviceImpl")
-    UserService userService;
 
     @Inject
     RoleMapper roleMapper;
@@ -135,11 +132,10 @@ public class RoleServiceImpl implements RoleService {
         Log.infof("Deleting role with id: %s", roleId);
         return Try.run(() -> {
             Log.debugf("Checking if role with id: %s exists", roleId);
-            if (userService.internalExistsByRole(roleId))
-                throw new IllegalStateException("Cannot delete role with id: " + roleId + " as it is assigned to users");
-
-            Log.debugf("Checking if role with id: %s exists", roleId);
             RoleEntity roleEntity = internalGetRoleById(roleId);
+
+            if (!roleEntity.getUsers().isEmpty())
+                throw new IllegalStateException("Cannot delete role with id: " + roleId + " as it is assigned to users");
 
             roleRepository.delete(roleEntity);
         }).onFailure(ex -> {
@@ -150,4 +146,5 @@ public class RoleServiceImpl implements RoleService {
             }
         });
     }
+
 }
