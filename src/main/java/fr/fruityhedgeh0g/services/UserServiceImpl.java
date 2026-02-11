@@ -91,6 +91,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
+        Log.infof("Getting user with id: %s", userId);
         return Try.of(() -> internalGetUserById(userId))
                 .map(userMapper::toDto)
                 .onFailure(e -> {
@@ -133,7 +134,7 @@ public class UserServiceImpl implements UserService {
             if (userRepository.existsById(userDto.getUserId()))
                 throw new DuplicateResourceException("User already exists: " + userDto.getUserId());
 
-            Log.debugf("Persisting new user: " , userDto);
+            Log.debugf("Persisting new user: %s", userDto);
             UserEntity userEntity = userMapper.toEntity(userDto);
             userRepository.persist(userEntity);
 

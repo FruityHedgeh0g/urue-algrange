@@ -13,11 +13,5 @@ public class ConfigurationRepository implements PanacheRepositoryBase<Configurat
 //                .firstResult());
 //    }
 
-    public int updateConfiguration(ConfigurationEntity entity) {
-        return update("value = :value where name = :name", Parameters
-                .with("value", entity.getValue())
-                .and("name", entity.getName()));
-
-    }
 
 }

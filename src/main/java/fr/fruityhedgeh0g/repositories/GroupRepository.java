@@ -26,11 +26,4 @@ public class GroupRepository implements PanacheRepositoryBase<GroupEntity, UUID>
         return Optional.of(new HashSet<>(list("sector_id", sectorId)));
     }
 
-    public int update(GroupEntity entity){
-        return update("name = :name, description = :description, sector_id = :sectorId where group_id = :groupId", Parameters
-                .with("name", entity.getName())
-                .and("description", entity.getDescription())
-                .and("sector_id", entity.getSector())
-                .and("group_id", entity.getGroupId()));
-    }
 }

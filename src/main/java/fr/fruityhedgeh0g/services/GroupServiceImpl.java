@@ -107,7 +107,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public Try<GroupDto> createGroup( GroupDto groupDto){
-        Log.debugf("Creating group with name: %s" , groupDto.getName());
+        Log.infof("Creating group with name: %s" , groupDto.getName());
         return Try.of(() -> {
             if (groupRepository.existsByName(groupDto.getName()))
                 throw new DuplicateResourceException("Group already exists: " + groupDto.getName() );
@@ -129,7 +129,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public Try<GroupDto> updateGroup( GroupDto groupDto){
-        Log.debugf("Updating group: %s" , groupDto.getGroupId());
+        Log.infof("Updating group with id: %s" , groupDto.getGroupId());
         return Try.of(() -> {
                     Log.debugf("Checking if group with id: %s exists" , groupDto.getGroupId());
                     GroupEntity group = internalGetEntityById(groupDto.getGroupId());
@@ -152,7 +152,23 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public Try<Void> deleteGroup( UUID groupId){
-        return null;
+        Log.infof("Deleting group with id: %s" , groupId);
+        return Try.run(() -> {
+            Log.debugf("Checking if group with id: %s exists" , groupId);
+            GroupEntity group = internalGetEntityById(groupId);
+
+            Log.debugf("Removing all members from group with id: %s" , groupId);
+            group.getMembers().forEach(group::removeMember);
+
+            Log.debugf("Deleting group with id: %s" , groupId);
+            groupRepository.delete(group);
+        }).onFailure(ex -> {
+            switch(ex) {
+                case UnknownResourceException e -> Log.warn(e.getMessage());
+                default -> Log.errorf(ex,"Error deleting group with id: %s" , groupId );
+            }
+
+        });
     }
 
     @Override

@@ -32,17 +32,17 @@ public class FeatureProxy implements FeatureService {
     FeatureService featureService;
 
     @Override
-    public Try<List<FeatureEntity>> getAllFeatures() {
+    public Try<List<FeatureDto>> getAllFeatures() {
         return featureService.getAllFeatures();
     }
 
     @Override
-    public Try<FeatureEntity> getFeatureByName(String name) {
+    public Try<FeatureDto> getFeatureByName(String name) {
         return featureService.getFeatureByName(name);
     }
 
     @Override
-    public Try<FeatureEntity> updateFeature(FeatureDto featureDto) {
+    public Try<FeatureDto> updateFeature(FeatureDto featureDto) {
         return featureService.updateFeature(featureDto);
     }
 }

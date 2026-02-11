@@ -9,8 +9,4 @@ import java.util.Optional;
 @ApplicationScoped
 public class FeatureRepository implements PanacheRepositoryBase<FeatureEntity, String> {
 
-    public Optional<FeatureEntity> findByName(String name) {
-        return Optional.ofNullable(find("name", name)
-                .firstResult());
-    }
 }

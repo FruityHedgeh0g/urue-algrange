@@ -7,9 +7,9 @@ import lombok.Value;
 @Value
 public class ConfigurationDto {
 
-    @JsonView({Views.Basic.class})
+    @JsonView({Views.Basic.class, Views.UpdateResponse.class})
     String name;
 
-    @JsonView({Views.Basic.class})
+    @JsonView({Views.Basic.class, Views.UpdateResponse.class})
     String value;
 }

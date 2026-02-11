@@ -39,6 +39,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public Try<List<RoleDto>> getAllRoles() {
+        Log.info("Getting all roles");
         return Try.of(() -> roleRepository
                 .findAll()
                 .stream()
@@ -63,6 +64,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @Override
     public Try<RoleDto> getRoleById( UUID roleId) {
+        Log.infof("Getting role with id: %s", roleId);
         return Try.of(() -> internalGetRoleById(roleId))
                 .map(roleMapper::toDto)
                 .onFailure(ex -> {
@@ -83,6 +85,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     public Try<RoleDto> createRole( RoleDto roleDto) {
+        Log.infof("Creating role: %s", roleDto);
         return Try.of(() -> {
             Log.debugf("Checking if role with name: %s already exists", roleDto.getName());
             if (roleRepository.existsByName(roleDto.getName()))
@@ -106,7 +109,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     public Try<RoleDto> updateRole( RoleDto roleDto) {
+        Log.infof("Updating role: %s", roleDto);
         return Try.of(() -> {
+            Log.debugf("Checking if role with id: %s exists", roleDto.getRoleId());
             RoleEntity roleEntity = internalGetRoleById(roleDto.getRoleId());
 
             Log.debugf("Checking if role with name: %s already exists", roleDto.getName());

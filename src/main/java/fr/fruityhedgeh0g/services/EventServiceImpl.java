@@ -50,7 +50,17 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     public Try<EventDto> getEventById( UUID eventId){
-        return null;
+        Log.infof("Getting event with id: %s" , eventId);
+        return Try.of(() -> eventRepository.findByIdOptional(eventId)
+                .orElseThrow(() -> new UnknownResourceException("Event not found with id: " + eventId)))
+                .map(eventMapper::toDto)
+                .onFailure(ex -> {
+                    if (ex instanceof UnknownResourceException e) {
+                        Log.warn(e.getMessage());
+                    } else {
+                        Log.errorf(ex,"Error getting event with id: %s" , eventId);
+                    }
+                });
     }
 
     @Transactional
