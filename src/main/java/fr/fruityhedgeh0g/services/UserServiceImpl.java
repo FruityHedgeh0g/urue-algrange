@@ -38,11 +38,11 @@ public class UserServiceImpl implements UserService {
     UserMapper userMapper;
 
     @Override
-    public UserEntity internalGetUserById(UUID userId) throws UnknownResourceException{
+    public Try<UserEntity> internalGetUserById(UUID userId) throws UnknownResourceException {
         Log.infof("Getting user with id: %s", userId);
-        return userRepository.findByIdOptional(userId).orElseThrow(() ->
+        return Try.of(() -> userRepository.findByIdOptional(userId).orElseThrow(() ->
                 new UnknownResourceException("User not found: " + userId)
-        );
+        ));
     }
 
     @Override
@@ -50,9 +50,11 @@ public class UserServiceImpl implements UserService {
     public Try<UserDto> assignRoleToUser(UUID userId, UUID roleId) {
         Log.infof("Assigning role with id: %s to user with id: %s", roleId, userId);
         return Try.of(() -> {
-            UserEntity user = internalGetUserById(userId);
-            RoleEntity role = roleService.internalGetRoleById(roleId);
+            UserEntity user = internalGetUserById(userId).getOrElseThrow(ex -> ex);
 
+            RoleEntity role = roleService.internalGetRoleById(roleId).getOrElseThrow(ex -> ex);
+
+            Log.debugf("Checking if user with id: %s already has this role", userId);
             if (user.getRoles().stream().anyMatch(e -> e.getRoleId().equals(roleId)))
                 throw new DuplicateResourceException("User already has this role");
 
@@ -73,17 +75,20 @@ public class UserServiceImpl implements UserService {
     public Try<UserDto> unassignRoleFromUser(UUID userId, UUID roleId) {
         Log.infof("Unassigning role with id: %s from user with id: %s", roleId, userId);
         return Try.of(() -> {
-            UserEntity user = internalGetUserById(userId);
-            RoleEntity role = roleService.internalGetRoleById(roleId);
+            Log.debugf("Checking if user with id: %s exists and retrieve it", userId);
+            UserEntity user = internalGetUserById(userId).getOrElseThrow(ex -> ex);
+
+            Log.debugf("Checking if role with id: %s exists and retrieve it", roleId);
+            RoleEntity role = roleService.internalGetRoleById(roleId).getOrElseThrow(ex -> ex);
 
             user.removeRole(role);
 
             return userMapper.toDto(user);
         }).onFailure(ex -> {
-            if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
-                Log.warn(e.getMessage());
-            } else {
-                Log.errorf(ex, "Error assigning role with id: %s to user with id: %s", roleId, userId);
+            switch(ex) {
+                case UnknownResourceException e -> Log.warn(e.getMessage());
+                case DuplicateResourceException e -> Log.warn(e.getMessage());
+                default -> Log.errorf(ex, "Error unassigning role with id: %s from user with id: %s", roleId, userId);
             }
         });
     }
@@ -92,10 +97,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
         Log.infof("Getting user with id: %s", userId);
-        return Try.of(() -> internalGetUserById(userId))
+        return Try.of(() -> internalGetUserById(userId).getOrElseThrow(ex -> ex))
                 .map(userMapper::toDto)
                 .onFailure(e -> {
-                    if (Objects.requireNonNull(e) instanceof UnknownResourceException ex) {
+                    if (e instanceof UnknownResourceException ex) {
                         Log.warn(ex.getMessage());
                     } else {
                         Log.errorf(e, "Error getting user with id: %s", userId);
@@ -105,9 +110,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserEntity> internalGetAllUsersFilteredByRole(UUID roleId){
+    public Try<List<UserEntity>> internalGetAllUsersFilteredByRole(UUID roleId){
         Log.infof("Getting all users filtered by role with id: %s", roleId);
-        return userRepository.findByRole(roleId);
+        return Try.of(() ->userRepository.findByRole(roleId));
     }
 
 
@@ -152,14 +157,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean internalExistsById(UUID userId){
+    public Try<Boolean> internalExistsById(UUID userId){
         Log.infof("Checking user existence with id: %s", userId);
-        return userRepository.existsById(userId);
+        return Try.of(() ->userRepository.existsById(userId));
     }
 
     @Override
-    public Boolean internalExistsByRole(UUID roleId) {
-        return userRepository.existsByRole(roleId);
+    public Try<Boolean> internalExistsByRole(UUID roleId) {
+
+        return Try.of(() -> userRepository.existsByRole(roleId));
     }
 
     @Override
@@ -167,7 +173,8 @@ public class UserServiceImpl implements UserService {
     public Try<UserDto> updateUser(UserDto userDto){
         Log.infof("Updating user: %s", userDto);
         return Try.of(() -> {
-            UserEntity user = internalGetUserById(userDto.getUserId());
+            Log.debugf("Checking if user with id: %s exists and retrieve it", userDto.getUserId());
+            UserEntity user = internalGetUserById(userDto.getUserId()).getOrElseThrow(ex -> ex);
             user = userMapper.partialDtoToEntity(user, userDto);
             return userMapper.toDto(user);
         }).onFailure(ex -> {

@@ -19,8 +19,8 @@ public interface GroupService {
     Try<Void> deleteGroup(@NotNull UUID groupId);
     Try<GroupDto> assignUserToGroup(@NotNull UUID userId, @NotNull UUID groupId);
     Try<GroupDto> unassignUserFromGroup(@NotNull UUID userId, @NotNull UUID groupId);
-    GroupEntity internalGetEntityById(@NotNull UUID groupId);
-    Boolean internalExistsById(@NotNull UUID groupId);
-    Set<GroupEntity> internalGetBySectorId(@NotNull UUID sectorId);
+    Try<GroupEntity> internalGetEntityById(@NotNull UUID groupId);
+    Try<Boolean> internalExistsById(@NotNull UUID groupId);
+    Try<Set<GroupEntity>> internalGetBySectorId(@NotNull UUID sectorId);
     Try<Set<GroupDto>> getGroupsBySectorId(@NotNull UUID sectorId);
 }

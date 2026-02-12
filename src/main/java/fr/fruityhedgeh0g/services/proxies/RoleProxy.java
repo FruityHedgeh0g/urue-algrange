@@ -49,7 +49,7 @@ public class RoleProxy implements RoleService {
     }
 
     @Override
-    public RoleEntity internalGetRoleById(UUID roleId) {
+    public Try<RoleEntity> internalGetRoleById(UUID roleId) {
         return null;
     }
 

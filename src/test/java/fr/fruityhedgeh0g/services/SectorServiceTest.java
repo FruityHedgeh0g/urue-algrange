@@ -12,6 +12,7 @@ import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.vavr.control.Try;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
@@ -192,7 +193,7 @@ public class SectorServiceTest {
     public void assignGroupToSector_Success(){
 
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.internalGetEntityById(any())).thenReturn(groupEntity);
+        when(groupService.internalGetEntityById(any())).thenReturn(Try.of(() -> groupEntity));
 
         //Todo check l'insertion du secteur dans le group
         Assertions.assertEquals(
@@ -246,7 +247,7 @@ public class SectorServiceTest {
         anotherSectorEntity.addGroup(groupEntity);
 
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.internalGetEntityById(any())).thenReturn(groupEntity);
+        when(groupService.internalGetEntityById(any())).thenReturn(Try.of(() -> groupEntity));
 
         Assertions.assertThrowsExactly(
                 InvalidInputException.class,
@@ -260,7 +261,7 @@ public class SectorServiceTest {
     @Test
     public void unassignGroupToSector_Success(){
         when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.of(sectorEntity));
-        when(groupService.internalGetEntityById(groupEntity.getGroupId())).thenReturn(groupEntity);
+        when(groupService.internalGetEntityById(groupEntity.getGroupId())).thenReturn(Try.of(() -> groupEntity));
 
         verify(sectorEntity).removeGroup(any(GroupEntity.class));
 

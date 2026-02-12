@@ -77,7 +77,7 @@ class UserServiceTest {
         when(userRepository.existsById(Mockito.any()))
                 .thenReturn(true);
 
-        Assertions.assertTrue(userService.internalExistsById(UUID.randomUUID()));
+        Assertions.assertTrue(userService.internalExistsById(UUID.randomUUID()).get());
     }
 
     @Test
@@ -85,7 +85,7 @@ class UserServiceTest {
         when(userRepository.existsById(Mockito.any()))
                 .thenReturn(false);
 
-        Assertions.assertFalse(userService.internalExistsById(UUID.randomUUID()));
+        Assertions.assertFalse(userService.internalExistsById(UUID.randomUUID()).get());
     }
 
 
@@ -103,6 +103,17 @@ class UserServiceTest {
         );
     }
 
+    @Test
+    public void getUserById_IdIsNull_Failure(){
+    }
+
+    @Test
+    public void getUserById_UnknownUser_Failure(){
+    }
+
+
+
+
     /** @see UserServiceImpl#internalGetUserById(UUID) **/
 
     @Test
@@ -116,7 +127,7 @@ class UserServiceTest {
     public void internalGetUserById_UnknownUser_Failure(){
         Assertions.assertThrowsExactly(
                 UnknownResourceException.class,
-                () -> userService.internalGetUserById(UUID.randomUUID()));
+                () -> userService.internalGetUserById(UUID.randomUUID()).get());
     }
 
     @Test
@@ -125,7 +136,7 @@ class UserServiceTest {
                 .thenReturn(Optional.ofNullable(userEntity));
 
         Assertions.assertEquals(
-                userService.internalGetUserById(UUID.randomUUID()),
+                userService.internalGetUserById(UUID.randomUUID()).get(),
                 userEntity
         );
 
@@ -195,6 +206,85 @@ class UserServiceTest {
 
     /** @see UserServiceImpl#assignRoleToUser(UUID, UUID) **/
 
+    @Test
+    public void assignRoleToUser_Success(){
+    }
+
+    @Test
+    public void assignRoleToUser_UnknownUser_Failure(){
+    }
+
+    @Test
+    public void assignRoleToUser_UnknownRole_Failure(){
+    }
+
+    @Test
+    public void assignRoleToUser_RoleAlreadyAssigned_Failure(){
+    }
+
+    @Test
+    public void assignRoleToUser_UserIdIsNull_Failure(){
+    }
+
+    @Test
+    public void assignRoleToUser_RoleIdIsNull_Failure(){
+    }
+
+
+
     /** @see UserServiceImpl#unassignRoleFromUser(UUID, UUID) **/
+
+    @Test
+    public void unassignRoleFromUser_Success(){
+    }
+
+    @Test
+    public void unassignRoleFromUser_UnknownUser_Failure(){
+    }
+
+    @Test
+    public void unassignRoleFromUser_UnknownRole_Failure(){
+    }
+
+    @Test
+    public void unassignRoleFromUser_UserIdIsNull_Failure(){
+    }
+
+    @Test
+    public void unassignRoleFromUser_RoleIdIsNull_Failure(UUID roleId){
+    }
+
+    /** @see UserServiceImpl#internalGetAllUsersFilteredByRole(UUID) **/
+
+    @Test
+    public void internalGetAllUsers_Success(){
+    }
+
+    @Test
+    public void internalGetAllUsers_EmptyFilter_Failure(){
+    }
+
+    /** @see UserServiceImpl#getAllUsers() **/
+
+    @Test
+    public void getAllUsers_Success(){
+    }
+
+    /** @see UserServiceImpl#internalExistsByRole(UUID) **/
+
+    @Test
+    public void internalExistsByRole_Success(){
+    }
+
+    @Test
+    public void internalExistsByRole_UnknownRole_Success(){
+    }
+
+
+
+
+
+
+
 
 }

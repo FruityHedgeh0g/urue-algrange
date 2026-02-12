@@ -69,17 +69,17 @@ public class GroupProxy implements GroupService {
     }
 
     @Override
-    public GroupEntity internalGetEntityById(UUID groupId) {
+    public Try<GroupEntity> internalGetEntityById(UUID groupId) {
         return groupService.internalGetEntityById(groupId);
     }
 
     @Override
-    public Boolean internalExistsById(UUID groupId) {
+    public Try<Boolean> internalExistsById(UUID groupId) {
         return groupService.internalExistsById(groupId);
     }
 
     @Override
-    public Set<GroupEntity> internalGetBySectorId(UUID sectorId) {
+    public Try<Set<GroupEntity>> internalGetBySectorId(UUID sectorId) {
         return groupService.internalGetBySectorId(sectorId);
     }
 

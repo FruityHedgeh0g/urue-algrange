@@ -52,16 +52,16 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public Boolean internalExistsById( UUID groupId){
+    public Try<Boolean> internalExistsById(UUID groupId){
         Log.info("Checking if group exists with id: " + groupId);
-        return groupRepository.existsById(groupId);
+        return Try.of(() -> groupRepository.existsById(groupId));
     }
 
     @Override
-    public GroupEntity internalGetEntityById(UUID groupId){
+    public Try<GroupEntity> internalGetEntityById(UUID groupId){
         Log.info("Getting group with id: " + groupId);
-        return groupRepository.findByIdOptional(groupId).orElseThrow(() ->
-                new UnknownResourceException("Group not found: " + groupId));
+        return Try.of(() -> groupRepository.findByIdOptional(groupId).orElseThrow(() ->
+                new UnknownResourceException("Group not found: " + groupId)));
 
     }
 
@@ -69,7 +69,7 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Try<GroupDto> getGroupById( UUID groupId){
         Log.info("Getting group with id: " + groupId);
-        return Try.of(() -> internalGetEntityById(groupId))
+        return Try.of(() -> internalGetEntityById(groupId).getOrElseThrow(ex -> ex))
                 .map(groupMapper::toDto)
                 .onFailure(e -> {
                     if (e instanceof UnknownResourceException) {
@@ -81,13 +81,13 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public Set<GroupEntity> internalGetBySectorId(UUID sectorId) throws UnknownResourceException{
+    public Try<Set<GroupEntity>> internalGetBySectorId(UUID sectorId) throws UnknownResourceException{
         Log.info("Getting all groups");
-        return groupRepository
+        return Try.of(() -> groupRepository
                 .findBySector(sectorId)
                 .orElseThrow(() -> new
                         UnknownResourceException("No group found for sector: " + sectorId )
-                );
+                ));
 
     }
 
@@ -96,7 +96,7 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Try<Set<GroupDto>> getGroupsBySectorId( UUID sectorId){
         Log.info("Getting all groups for sector with id: " + sectorId);
-        return Try.of(() -> internalGetBySectorId(sectorId))
+        return Try.of(() -> internalGetBySectorId(sectorId).getOrElseThrow(ex -> ex))
                 .map(groupEntities -> groupEntities
                         .stream()
                         .map(groupMapper::toDto)
@@ -131,8 +131,8 @@ public class GroupServiceImpl implements GroupService {
     public Try<GroupDto> updateGroup( GroupDto groupDto){
         Log.infof("Updating group with id: %s" , groupDto.getGroupId());
         return Try.of(() -> {
-                    Log.debugf("Checking if group with id: %s exists" , groupDto.getGroupId());
-                    GroupEntity group = internalGetEntityById(groupDto.getGroupId());
+                    Log.debugf("Checking if group with id: %s exists and retrieve it" , groupDto.getGroupId());
+                    GroupEntity group = internalGetEntityById(groupDto.getGroupId()).getOrElseThrow(ex -> ex);
 
                     Log.debugf("Checking if group with name: %s already exists" , groupDto.getName());
                     if (groupRepository.findByName(groupDto.getName()).stream().anyMatch(e -> !e.getGroupId().equals(groupDto.getGroupId())))
@@ -154,8 +154,8 @@ public class GroupServiceImpl implements GroupService {
     public Try<Void> deleteGroup( UUID groupId){
         Log.infof("Deleting group with id: %s" , groupId);
         return Try.run(() -> {
-            Log.debugf("Checking if group with id: %s exists" , groupId);
-            GroupEntity group = internalGetEntityById(groupId);
+            Log.debugf("Checking if group with id: %s exists and retrieve it" , groupId);
+            GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
 
             Log.debugf("Removing all members from group with id: %s" , groupId);
             group.getMembers().forEach(group::removeMember);
@@ -176,8 +176,11 @@ public class GroupServiceImpl implements GroupService {
     public Try<GroupDto> assignUserToGroup( UUID userId,  UUID groupId){
         Log.debugf("Assigning user with id: %s to group with id: %s" , userId, groupId);
         return Try.of(() -> {
-                    GroupEntity group = internalGetEntityById(groupId);
-                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
+                    Log.debugf("Checking if user with id: %s exists and retrieve it" , userId);
+                    GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
+
+                    Log.debugf("Checking if user with id: %s is already assigned to this group and retrieve it" , userId);
+                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId).getOrElseThrow(ex -> ex);
 
                     group.addMember(userEntity);
                     return groupMapper.toDto(group);
@@ -195,8 +198,10 @@ public class GroupServiceImpl implements GroupService {
     public Try<GroupDto> unassignUserFromGroup( UUID userId,  UUID groupId){
         Log.debugf("Unassigning user with id: %s from group with id: %s" , userId, groupId);
         return Try.of(() -> {
-                    GroupEntity group = internalGetEntityById(groupId);
-                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId);
+                    Log.debugf("Checking if user with id: %s exists and retrieve it" , userId);
+                    GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
+                    Log.debugf("Checking if user with id: %s is assigned to this group and retrieve it" , userId);
+                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId).getOrElseThrow(ex -> ex);
                     group.removeMember(userEntity);
                     return groupMapper.toDto(group);
                 }).onFailure(ex -> {

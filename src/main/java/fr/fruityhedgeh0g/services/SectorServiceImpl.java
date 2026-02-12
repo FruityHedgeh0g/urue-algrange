@@ -102,8 +102,8 @@ public class SectorServiceImpl implements SectorService {
             SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
                     .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
-            Log.debugf("Checking if group with id: %s exists", groupId);
-            GroupEntity groupEntity = groupService.internalGetEntityById(groupId);
+            Log.debugf("Checking if group with id: %s exists and retrieve it", groupId);
+            GroupEntity groupEntity = groupService.internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
 
             Log.debugf("Checking if group with id: %s is already assigned to a sector", groupId);
             if (groupEntity.getSector() != null) throw new InvalidInputException("Group already belongs to a sector");
@@ -132,8 +132,8 @@ public class SectorServiceImpl implements SectorService {
             if (sector.getGroups().stream().noneMatch(e -> e.getGroupId().equals(groupId)))
                 throw new InvalidInputException("Group is not assigned to this sector");
 
-            Log.debugf("Checking if group with id: %s exists", groupId);
-            GroupEntity groupEntity = groupService.internalGetEntityById(groupId);
+            Log.debugf("Checking if group with id: %s exists and retrieve it", groupId);
+            GroupEntity groupEntity = groupService.internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
 
             sector.removeGroup(groupEntity);
 

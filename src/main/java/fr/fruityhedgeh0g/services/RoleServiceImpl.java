@@ -1,15 +1,12 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
-import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
-import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
-import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.RoleMapper;
 import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
@@ -21,7 +18,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,7 +61,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Try<RoleDto> getRoleById( UUID roleId) {
         Log.infof("Getting role with id: %s", roleId);
-        return Try.of(() -> internalGetRoleById(roleId))
+        return Try.of(() -> internalGetRoleById(roleId).getOrElseThrow(ex -> ex))
                 .map(roleMapper::toDto)
                 .onFailure(ex -> {
                     if (ex instanceof UnknownResourceException e) {
@@ -77,10 +73,10 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleEntity internalGetRoleById(UUID roleId) throws UnknownResourceException {
+    public Try<RoleEntity> internalGetRoleById(UUID roleId) throws UnknownResourceException {
         Log.infof("Getting role with id: %s", roleId);
-        return roleRepository.findByIdOptional(roleId).orElseThrow(() ->
-                new UnknownResourceException("Role not found"));
+        return Try.of(() ->roleRepository.findByIdOptional(roleId).orElseThrow(() ->
+                new UnknownResourceException("Role not found")));
     }
 
     @Transactional
@@ -111,8 +107,8 @@ public class RoleServiceImpl implements RoleService {
     public Try<RoleDto> updateRole( RoleDto roleDto) {
         Log.infof("Updating role: %s", roleDto);
         return Try.of(() -> {
-            Log.debugf("Checking if role with id: %s exists", roleDto.getRoleId());
-            RoleEntity roleEntity = internalGetRoleById(roleDto.getRoleId());
+            Log.debugf("Checking if role with id: %s exists and retrieve it", roleDto.getRoleId());
+            RoleEntity roleEntity = internalGetRoleById(roleDto.getRoleId()).getOrElseThrow(ex -> ex);
 
             Log.debugf("Checking if role with name: %s already exists", roleDto.getName());
             if (!roleDto.getName().equals(roleEntity.getName()) && roleRepository.existsByName(roleDto.getName()))
@@ -136,8 +132,8 @@ public class RoleServiceImpl implements RoleService {
     public Try<Void> deleteRole( UUID roleId) {
         Log.infof("Deleting role with id: %s", roleId);
         return Try.run(() -> {
-            Log.debugf("Checking if role with id: %s exists", roleId);
-            RoleEntity roleEntity = internalGetRoleById(roleId);
+            Log.debugf("Checking if role with id: %s exists and retrieve it", roleId);
+            RoleEntity roleEntity = internalGetRoleById(roleId).getOrElseThrow(ex -> ex);
 
             if (!roleEntity.getUsers().isEmpty())
                 throw new IllegalStateException("Cannot delete role with id: " + roleId + " as it is assigned to users");

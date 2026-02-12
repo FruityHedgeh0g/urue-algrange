@@ -45,7 +45,7 @@ public class UserProxy implements UserService {
     }
 
     @Override
-    public List<UserEntity> internalGetAllUsersFilteredByRole(UUID roleId) {
+    public Try<List<UserEntity>> internalGetAllUsersFilteredByRole(UUID roleId) {
         return userService.internalGetAllUsersFilteredByRole(roleId);
     }
 
@@ -62,18 +62,18 @@ public class UserProxy implements UserService {
     }
 
     @Override
-    public Boolean internalExistsById(UUID userId) {
+    public Try<Boolean> internalExistsById(UUID userId) {
 
         return userService.internalExistsById(userId);
     }
 
     @Override
-    public Boolean internalExistsByRole(UUID roleId) {
+    public Try<Boolean> internalExistsByRole(UUID roleId) {
         return userService.internalExistsByRole(roleId);
     }
 
     @Override
-    public UserEntity internalGetUserById(UUID userId) {
+    public Try<UserEntity> internalGetUserById(UUID userId) {
 
         return userService.internalGetUserById(userId);
     }
