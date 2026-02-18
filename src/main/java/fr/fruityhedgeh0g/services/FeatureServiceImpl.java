@@ -49,7 +49,7 @@ public class FeatureServiceImpl implements FeatureService {
     public Try<List<FeatureDto>> getAllFeatures() {
         Log.info("Getting all features");
         return Try.of(() -> featureRepository
-                .listAll()
+                .findAll()
                 .stream()
                 .map(featureMapper::toDto)
                 .toList())

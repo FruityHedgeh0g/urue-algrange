@@ -4,14 +4,13 @@ import fr.fruityhedgeh0g.entities.AuditTemplate;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Set;
 import java.util.UUID;
 
+@SuperBuilder
 @Entity
 @Table(name = "roles")
 @NoArgsConstructor

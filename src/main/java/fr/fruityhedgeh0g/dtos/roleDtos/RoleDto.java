@@ -6,12 +6,14 @@ import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Value;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Value
+@Builder
 public class RoleDto {
 
     @NotNull

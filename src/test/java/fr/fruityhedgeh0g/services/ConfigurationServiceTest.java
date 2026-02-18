@@ -37,6 +37,12 @@ public class ConfigurationServiceTest {
     ConfigurationEntity configurationEntity;
     ConfigurationDto configurationDto;
 
+    ConfigurationEntity anotherConfigurationEntity;
+    ConfigurationDto anotherConfigurationDto;
+
+    List<ConfigurationEntity> configurationEntities;
+    List<ConfigurationDto> configurationDtos;
+
 
     @BeforeEach
     public void setUp() {
@@ -51,12 +57,31 @@ public class ConfigurationServiceTest {
                 .name(configurationEntity.getName())
                 .value(configurationEntity.getValue())
                 .build();
+
+        anotherConfigurationEntity = ConfigurationEntity.builder()
+                .name("secondConfiguration")
+                .value("second value")
+                .build();
+
+        anotherConfigurationDto = ConfigurationDto.builder()
+                .name(anotherConfigurationEntity.getName())
+                .value(anotherConfigurationEntity.getValue())
+                .build();
+
+        configurationEntities = List.of(configurationEntity, anotherConfigurationEntity);
+        configurationDtos = List.of(configurationDto, anotherConfigurationDto);
     }
 
     /** @see ConfigurationServiceImpl#getAllConfigurations()  **/
 
     @Test
     public void getAllConfigurations_Success(){
+        PanacheQuery<ConfigurationEntity> mockedPanacheQuery = mock(PanacheQuery.class);
+        when(mockedPanacheQuery.page(any())).thenReturn(mockedPanacheQuery);
+        when(mockedPanacheQuery.stream()).thenReturn(configurationEntities.stream());
+        when(configurationRepository.findAll()).thenReturn(mockedPanacheQuery);
+
+        Assertions.assertEquals(configurationService.getAllConfigurations().get(),configurationDtos);
     }
     
     @Test 
@@ -113,7 +138,7 @@ public class ConfigurationServiceTest {
     @Test
     public void updateConfiguration_Failure_UnknownResourceException(){
         Assertions.assertThrowsExactly(UnknownResourceException.class,
-                () -> configurationService.getConfigurationByName("DummyName").get()
+                () -> configurationService.updateConfiguration(configurationDto).get()
         );
     }
 
@@ -129,7 +154,7 @@ public class ConfigurationServiceTest {
         when(configurationRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
 
         Assertions.assertThrowsExactly(RuntimeException.class,
-                () -> configurationService.getConfigurationByName("DummyName").get()
+                () -> configurationService.updateConfiguration(configurationDto).get()
         );
     }
 

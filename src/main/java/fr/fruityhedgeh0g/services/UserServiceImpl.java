@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.services;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidInputException;
 import fr.fruityhedgeh0g.exceptions.MandatoryFieldMissingException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.entities.UserEntity;
@@ -52,11 +53,11 @@ public class UserServiceImpl implements UserService {
         return Try.of(() -> {
             UserEntity user = internalGetUserById(userId).getOrElseThrow(ex -> ex);
 
-            RoleEntity role = roleService.internalGetRoleById(roleId).getOrElseThrow(ex -> ex);
-
             Log.debugf("Checking if user with id: %s already has this role", userId);
             if (user.getRoles().stream().anyMatch(e -> e.getRoleId().equals(roleId)))
                 throw new DuplicateResourceException("User already has this role");
+
+            RoleEntity role = roleService.internalGetRoleById(roleId).getOrElseThrow(ex -> ex);
 
             user.addRole(role);
 
@@ -79,7 +80,8 @@ public class UserServiceImpl implements UserService {
             UserEntity user = internalGetUserById(userId).getOrElseThrow(ex -> ex);
 
             Log.debugf("Checking if role with id: %s exists and retrieve it", roleId);
-            RoleEntity role = roleService.internalGetRoleById(roleId).getOrElseThrow(ex -> ex);
+            RoleEntity role = user.getRoles().stream().filter(e -> e.getRoleId().equals(roleId)).findFirst()
+                    .orElseThrow(() -> new UnknownResourceException("Role not found"));
 
             user.removeRole(role);
 
@@ -148,9 +150,7 @@ public class UserServiceImpl implements UserService {
 
         }).onFailure(ex -> {
             switch (ex){
-                case NoSuchElementException e -> Log.warn(e.getMessage());
                 case DuplicateResourceException e -> Log.warn(e.getMessage());
-                case MandatoryFieldMissingException e -> Log.warn(e.getMessage());
                 default -> Log.errorf(ex,"Error creating user: %s" , userDto);
             }
         });
