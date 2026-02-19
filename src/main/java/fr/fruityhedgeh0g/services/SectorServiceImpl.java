@@ -106,12 +106,12 @@ public class SectorServiceImpl implements SectorService {
             GroupEntity groupEntity = groupService.internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
 
             Log.debugf("Checking if group with id: %s is already assigned to a sector", groupId);
-            if (groupEntity.getSector() != null) throw new InvalidInputException("Group already belongs to a sector");
+            if (groupEntity.getSector() != null) throw new DuplicateResourceException("Group already belongs to a sector");
 
             sectorEntity.addGroup(groupEntity);
             return sectorMapper.toDto(sectorEntity);
         }).onFailure(ex -> {
-            if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
+            if (ex instanceof UnknownResourceException e) {
                 Log.warn(e.getMessage());
             } else {
                 Log.errorf(ex, "Error assigning group with id: %s to sector with id: %s", groupId, sectorId);
@@ -130,7 +130,7 @@ public class SectorServiceImpl implements SectorService {
 
             Log.debugf("Checking if group with id: %s is assigned to this sector", groupId);
             if (sector.getGroups().stream().noneMatch(e -> e.getGroupId().equals(groupId)))
-                throw new InvalidInputException("Group is not assigned to this sector");
+                throw new UnknownResourceException("Group is not assigned to this sector");
 
             Log.debugf("Checking if group with id: %s exists and retrieve it", groupId);
             GroupEntity groupEntity = groupService.internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
@@ -161,7 +161,7 @@ public class SectorServiceImpl implements SectorService {
 
             return sectorMapper.toDto(sectorEntity);
         }).onFailure(ex -> {
-            if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
+            if (ex instanceof UnknownResourceException e) {
                 Log.warn(e.getMessage());
             } else {
                 Log.errorf(ex, "Error updating sector: %s", sectorDto);
@@ -183,7 +183,7 @@ public class SectorServiceImpl implements SectorService {
             Log.debugf("Deleting sector with id: %s", sectorId);
             sectorRepository.delete(sector);
         }).onFailure(ex -> {
-            if (Objects.requireNonNull(ex) instanceof UnknownResourceException e) {
+            if (ex instanceof UnknownResourceException e) {
                 Log.warn(e.getMessage());
             } else {
                 Log.errorf(ex, "Error deleting sector with id: %s", sectorId);

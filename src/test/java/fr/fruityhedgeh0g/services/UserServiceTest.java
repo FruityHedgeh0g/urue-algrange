@@ -267,9 +267,16 @@ class UserServiceTest {
     /** @see UserServiceImpl#internalExistsById **/
 
     @Test
-    public void InternalExistsById_Success(){
+    public void InternalExistsById_Success_True(){
 
     }
+
+    @Test
+    public void InternalExistsById_Success_False(){
+
+    }
+
+
 
     @Test
     public void InternalExistsById_Failure_NotManagedException(){
@@ -287,9 +294,15 @@ class UserServiceTest {
     /** @see UserServiceImpl#internalExistsByRole **/
 
     @Test
-    public void InternalExistsByRole_Success(){
+    public void InternalExistsByRole_Success_True(){
 
     }
+
+    @Test
+    public void InternalExistsByRole_Success_False(){
+
+    }
+
 
     @Test
     public void InternalExistsByRole_Failure_NotManagedException(){
