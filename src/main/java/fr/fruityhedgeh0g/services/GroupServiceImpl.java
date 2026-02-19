@@ -44,11 +44,11 @@ public class GroupServiceImpl implements GroupService {
     public Try<List<GroupDto>> getAllGroups(){
         Log.info("Getting all groups");
         return Try.of(() -> groupRepository
-                .findAll()
-                    .stream()
-                    .map(groupMapper::toDto)
-                    .toList())
-                    .onFailure(e -> Log.error("Error getting all groups", e));
+                        .findAll()
+                        .stream()
+                        .map(groupMapper::toDto)
+                        .toList())
+                .onFailure(e -> Log.error("Error getting all groups", e));
     }
 
     @Override
@@ -83,12 +83,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public Try<Set<GroupEntity>> internalGetBySectorId(UUID sectorId) throws UnknownResourceException{
         Log.info("Getting all groups");
-        return Try.of(() -> groupRepository
-                .findBySector(sectorId)
-                .orElseThrow(() -> new
-                        UnknownResourceException("No group found for sector: " + sectorId )
-                ));
-
+        return Try.of(() -> groupRepository.findBySector(sectorId).orElseThrow(() ->
+                        new UnknownResourceException("No group found for sector: " + sectorId )));
     }
 
 
@@ -109,6 +105,7 @@ public class GroupServiceImpl implements GroupService {
     public Try<GroupDto> createGroup( GroupDto groupDto){
         Log.infof("Creating group with name: %s" , groupDto.getName());
         return Try.of(() -> {
+            Log.debugf("Checking if group with name: %s already exists" , groupDto.getName());
             if (groupRepository.existsByName(groupDto.getName()))
                 throw new DuplicateResourceException("Group already exists: " + groupDto.getName() );
 
@@ -135,7 +132,7 @@ public class GroupServiceImpl implements GroupService {
                     GroupEntity group = internalGetEntityById(groupDto.getGroupId()).getOrElseThrow(ex -> ex);
 
                     Log.debugf("Checking if group with name: %s already exists" , groupDto.getName());
-                    if (groupRepository.findByName(groupDto.getName()).stream().anyMatch(e -> !e.getGroupId().equals(groupDto.getGroupId())))
+                    if (groupRepository.existsByName(groupDto.getName()) && !groupDto.getName().equals(group.getName()))
                         throw new DuplicateResourceException("Group already exists: " + groupDto.getName());
 
                     groupMapper.partialDtoToEntity(group, groupDto);
@@ -156,6 +153,9 @@ public class GroupServiceImpl implements GroupService {
         return Try.run(() -> {
             Log.debugf("Checking if group with id: %s exists and retrieve it" , groupId);
             GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
+
+            Log.debugf("Removing group from sector with id: %s" , group.getSector().getSectorId());
+            group.getSector().removeGroup(group);
 
             Log.debugf("Removing all members from group with id: %s" , groupId);
             group.getMembers().forEach(group::removeMember);
@@ -179,8 +179,15 @@ public class GroupServiceImpl implements GroupService {
                     Log.debugf("Checking if user with id: %s exists and retrieve it" , userId);
                     GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
 
-                    Log.debugf("Checking if user with id: %s is already assigned to this group and retrieve it" , userId);
+                    if (group.getMembers().stream().anyMatch(e -> e.getUserId().equals(userId)))
+                        throw new DuplicateResourceException("User already belongs to this group");
+
+                    Log.debugf("Checking if user with id: %s exists and retrieve it" , userId);
                     UserEntity userEntity = userServiceImpl.internalGetUserById(userId).getOrElseThrow(ex -> ex);
+
+                    Log.debugf("Checking if user with id: %s is already assigned to a group" , userId);
+                    if (userEntity.getGroup() != null)
+                        throw new DuplicateResourceException("User already belongs to a group");
 
                     group.addMember(userEntity);
                     return groupMapper.toDto(group);
@@ -198,10 +205,14 @@ public class GroupServiceImpl implements GroupService {
     public Try<GroupDto> unassignUserFromGroup( UUID userId,  UUID groupId){
         Log.debugf("Unassigning user with id: %s from group with id: %s" , userId, groupId);
         return Try.of(() -> {
-                    Log.debugf("Checking if user with id: %s exists and retrieve it" , userId);
+                    Log.debugf("Checking if group with id: %s exists and retrieve it" , groupId);
                     GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
+
                     Log.debugf("Checking if user with id: %s is assigned to this group and retrieve it" , userId);
-                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId).getOrElseThrow(ex -> ex);
+                    UserEntity userEntity = group.getMembers().stream()
+                            .filter(user -> user.getUserId().equals(userId)).findFirst()
+                            .orElseThrow(() -> new UnknownResourceException("User is not assigned to this group"));
+
                     group.removeMember(userEntity);
                     return groupMapper.toDto(group);
                 }).onFailure(ex -> {

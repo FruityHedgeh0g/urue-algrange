@@ -51,6 +51,7 @@ public class UserServiceImpl implements UserService {
     public Try<UserDto> assignRoleToUser(UUID userId, UUID roleId) {
         Log.infof("Assigning role with id: %s to user with id: %s", roleId, userId);
         return Try.of(() -> {
+            Log.debugf("Checking if user with id: %s exists and retrieve it", userId);
             UserEntity user = internalGetUserById(userId).getOrElseThrow(ex -> ex);
 
             Log.debugf("Checking if user with id: %s already has this role", userId);
@@ -147,7 +148,6 @@ public class UserServiceImpl implements UserService {
 
             Log.debugf("User created. Sending up-to-date user infos: %s" , userDto);
             return userMapper.toDto(userEntity);
-
         }).onFailure(ex -> {
             switch (ex){
                 case DuplicateResourceException e -> Log.warn(e.getMessage());
@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Try<Boolean> internalExistsByRole(UUID roleId) {
-
+        Log.infof("Checking user existence with role id: %s", roleId);
         return Try.of(() -> userRepository.existsByRole(roleId));
     }
 
@@ -175,7 +175,9 @@ public class UserServiceImpl implements UserService {
         return Try.of(() -> {
             Log.debugf("Checking if user with id: %s exists and retrieve it", userDto.getUserId());
             UserEntity user = internalGetUserById(userDto.getUserId()).getOrElseThrow(ex -> ex);
+
             user = userMapper.partialDtoToEntity(user, userDto);
+
             return userMapper.toDto(user);
         }).onFailure(ex -> {
             if (ex instanceof UnknownResourceException) {

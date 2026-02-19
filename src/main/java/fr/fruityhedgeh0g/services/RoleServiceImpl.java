@@ -64,8 +64,8 @@ public class RoleServiceImpl implements RoleService {
         return Try.of(() -> internalGetRoleById(roleId).getOrElseThrow(ex -> ex))
                 .map(roleMapper::toDto)
                 .onFailure(ex -> {
-                    if (ex instanceof UnknownResourceException e) {
-                        Log.warn(e.getMessage());
+                    if (ex instanceof UnknownResourceException) {
+                        Log.warn(ex.getMessage());
                     } else {
                         Log.errorf(ex, "Error getting role with id: %s", roleId);
                     }
@@ -94,8 +94,8 @@ public class RoleServiceImpl implements RoleService {
 
             return roleMapper.toDto(roleEntity);
         }).onFailure(ex -> {
-            if (ex instanceof DuplicateResourceException e) {
-                Log.warn(e.getMessage());
+            if (ex instanceof DuplicateResourceException) {
+                Log.warn(ex.getMessage());
             } else {
                 Log.errorf(ex, "Error creating role: %s", roleDto);
             }
