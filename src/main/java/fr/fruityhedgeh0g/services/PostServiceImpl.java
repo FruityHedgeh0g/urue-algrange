@@ -74,7 +74,6 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
-    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     @Override
     @Transactional
     public Try<Void> deletePost( UUID postId) {

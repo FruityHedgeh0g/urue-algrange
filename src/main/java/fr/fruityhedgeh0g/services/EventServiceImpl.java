@@ -68,13 +68,11 @@ public class EventServiceImpl implements EventService {
         return null;
     }
 
-    //TODO : Développer l'update
     @Transactional
     public Try<EventDto> updateEvent( EventDto eventDto){
         return null;
     }
 
-    //TODO : Gérer la suppression des références sur les autres tables (Côté Entity)
     @Transactional
     public Try<Void> deleteEvent( UUID eventId){
         return null;
