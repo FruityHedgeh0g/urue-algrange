@@ -13,8 +13,10 @@ function applyTheme(theme: "light" | "dark" | null) {
   const root = document.documentElement;
   if (theme === "dark") {
     root.setAttribute("data-theme", "dark");
+  } else if (theme === "light") {
+    root.setAttribute("data-theme", "light");
   } else {
-    root.removeAttribute("data-theme");
+    root.removeAttribute("data-theme"); // system preference via CSS @media
   }
 }
 

@@ -22,7 +22,11 @@
 
 .caret{ opacity: 0.6; }
 
-.nav-dropdown{ position: relative; }
+.nav-dropdown{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
 
 .dropdown-menu{
   position: absolute;
@@ -41,6 +45,7 @@
 
 .dropdown-item{
   width: 100%;
+  box-sizing: border-box;
   text-align: left;
   background: transparent;
   border: none;
