@@ -12,7 +12,6 @@
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  position: relative;
 }
 
 /* Thin tricolor accent bar */
@@ -27,23 +26,8 @@
 .nav-left{
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
-}
-
-.logo{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius);
-  color: var(--color-muted);
-  font-weight: 700;
-  text-decoration: none;
-  user-select: none;
-  background: var(--color-surface-elev);
 }
 
 .nav-links{
@@ -52,14 +36,11 @@
   gap: 6px;
 }
 
-
-
-
-
-
-
 .nav-right{
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .login-btn{
@@ -80,11 +61,6 @@
   box-shadow: var(--focus-ring);
 }
 
-@media (max-width: 720px){
-  .nav-links{ display: none; }
-}
-
-
 /* Theme toggle button */
 .theme-toggle{
   appearance: none;
@@ -101,7 +77,6 @@
 .theme-toggle:hover{ background: var(--color-hover); }
 .theme-toggle:focus-visible{ box-shadow: var(--focus-ring); }
 .theme-toggle .icon{ font-size: 16px; line-height: 1; }
-
 
 /* Centered logo container */
 .nav-center{ justify-self: center; }
@@ -124,4 +99,49 @@
   max-height: 80%;
   object-fit: contain;
   display: block;
+}
+
+/* Hamburger button (mobile only) */
+.burger-btn{
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.burger-btn span{
+  display: block;
+  height: 2px;
+  background: var(--color-text);
+  border-radius: 2px;
+  transition: transform .2s, opacity .2s;
+}
+
+@media (max-width: 720px){
+  .burger-btn{ display: flex; }
+
+  .nav-links{
+    display: none;
+  }
+
+  .nav-links.open{
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+    padding: 8px 0 12px;
+    z-index: 40;
+  }
 }

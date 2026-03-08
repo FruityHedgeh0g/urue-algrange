@@ -2,49 +2,44 @@ import React, { useEffect, useState } from "react";
 import "./Navbar.css";
 import { DropdownMenu } from "./DropdownMenu";
 
-
 const THEME_KEY = "urue-theme";
 
-function getSystemPrefersDark(): boolean{
-  if (typeof window === 'undefined' || !window.matchMedia) return false;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+function getSystemPrefersDark(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-function applyTheme(theme: 'light'|'dark'|null){
+function applyTheme(theme: "light" | "dark" | null) {
   const root = document.documentElement;
-  if(theme === 'dark'){
-    root.setAttribute('data-theme','dark');
-  } else if(theme === 'light'){
-    root.removeAttribute('data-theme');
+  if (theme === "dark") {
+    root.setAttribute("data-theme", "dark");
   } else {
-    // no preference: remove attribute to let CSS @media pick
-    root.removeAttribute('data-theme');
+    root.removeAttribute("data-theme");
   }
 }
 
 const Navbar: React.FC = () => {
   const [isDark, setIsDark] = useState<boolean>(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Initialize theme from storage or system
   useEffect(() => {
-    try{
-      const saved = localStorage.getItem(THEME_KEY) as 'light'|'dark'|null;
-      const shouldDark = saved ? saved === 'dark' : getSystemPrefersDark();
+    try {
+      const saved = localStorage.getItem(THEME_KEY) as "light" | "dark" | null;
+      const shouldDark = saved ? saved === "dark" : getSystemPrefersDark();
       setIsDark(shouldDark);
       applyTheme(saved ?? null);
-    }catch{
+    } catch {
       const shouldDark = getSystemPrefersDark();
       setIsDark(shouldDark);
       applyTheme(null);
     }
   }, []);
 
-  // Keep state and DOM in sync when toggling
   const toggleTheme = () => {
-    setIsDark(prev => {
+    setIsDark((prev) => {
       const next = !prev;
-      const val: 'light'|'dark' = next ? 'dark' : 'light';
-      try{ localStorage.setItem(THEME_KEY, val); }catch{}
+      const val: "light" | "dark" = next ? "dark" : "light";
+      try { localStorage.setItem(THEME_KEY, val); } catch {}
       applyTheme(val);
       return next;
     });
@@ -53,7 +48,19 @@ const Navbar: React.FC = () => {
   return (
     <header className="navbar">
       <div className="nav-left">
-        <nav className="nav-links" aria-label="Primary">
+        <button
+          type="button"
+          className="burger-btn"
+          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <nav className={`nav-links${menuOpen ? " open" : ""}`} aria-label="Principal">
           <DropdownMenu
             label="Services"
             items={[
@@ -65,7 +72,7 @@ const Navbar: React.FC = () => {
           <DropdownMenu
             label="Association"
             items={[
-              { label: "Qui sommes-nous?", href: "#about" },
+              { label: "Qui sommes-nous ?", href: "#about" },
               { label: "Équipe", href: "#team" },
               { label: "Contact", href: "#contact" },
             ]}
@@ -82,11 +89,11 @@ const Navbar: React.FC = () => {
 
       <div className="nav-center">
         <a className="logo-image" href="#" aria-label="Accueil">
-          <img src={`logo_asso_transparent.png`} alt="Une Rose Un Espoir - Algrange" />
+          <img src="logo_asso_transparent.png" alt="Une Rose Un Espoir - Algrange" />
         </a>
       </div>
 
-      <div className="nav-right" aria-label="Actions">
+      <div className="nav-right">
         <button
           type="button"
           className="theme-toggle"
@@ -95,9 +102,11 @@ const Navbar: React.FC = () => {
           aria-label={isDark ? "Passer en mode clair" : "Passer en mode sombre"}
           title={isDark ? "Mode clair" : "Mode sombre"}
         >
-          <span className="icon" aria-hidden>{isDark ? '☀️' : '🌙'}</span>
+          <span className="icon" aria-hidden>{isDark ? "☀️" : "🌙"}</span>
         </button>
-        <button className="login-btn" onClick={() => alert("Connexion")}>Se connecter</button>
+        <button className="login-btn" onClick={() => alert("Connexion")}>
+          Se connecter
+        </button>
       </div>
     </header>
   );

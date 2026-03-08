@@ -1,7 +1,7 @@
 import React from "react";
 import "./ClickableButton.css";
 
-export interface ClickableBouttonProps {
+export interface ClickableButtonProps {
     /** Texte du bouton */
     label: string;
     /** Callback au clic (optionnel) */
@@ -14,7 +14,7 @@ export interface ClickableBouttonProps {
     disabled?: boolean;
 }
 
-const ClickableBoutton: React.FC<ClickableBouttonProps> = ({
+const ClickableButton: React.FC<ClickableButtonProps> = ({
                                                                label,
                                                                onClick,
                                                                imageSrc,
@@ -44,4 +44,4 @@ const ClickableBoutton: React.FC<ClickableBouttonProps> = ({
     );
 };
 
-export default ClickableBoutton;
+export default ClickableButton;
