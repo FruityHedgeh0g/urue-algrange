@@ -2,21 +2,21 @@ package fr.fruityhedgeh0g.dtos;
 
 public class Views {
     //Creation DTO types
-    public static class Creation {}
+    public interface Creation {}
 
-    public static class CreationResponse extends Creation {}
+    public interface CreationResponse extends Creation {}
 
     //Response DTO types
-    public static class Update {}
+    public interface Update {}
 
-    public static class UpdateResponse extends Update {}
+    public interface UpdateResponse extends Update {}
 
     //Read DTO types
-    public static class Minimal {}
+    public interface Minimal {}
 
-    public static class Basic extends Minimal{}
+    public interface Basic extends Minimal{}
 
-    public static class Detailed extends Basic {}
+    public interface Detailed extends Basic {}
 
 
 }
