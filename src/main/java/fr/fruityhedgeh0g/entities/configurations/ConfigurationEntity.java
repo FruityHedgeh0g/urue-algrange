@@ -20,6 +20,6 @@ public class ConfigurationEntity extends AuditTemplate {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "value", nullable = false)
+    @Column(name = "config_value", nullable = false)
     private String value;
 }
