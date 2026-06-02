@@ -1,0 +1,112 @@
+/* Carousel component styles */
+.carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Maintain aspect ratio while being responsive */
+.carousel-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 6; /* wide banner */
+  /* Fallback for older browsers: set a min-height */
+  min-height: 220px;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform 500ms ease;
+  will-change: transform;
+}
+
+.carousel-slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Optional caption overlay */
+.carousel-caption {
+  position: absolute;
+  left: 20px;
+  bottom: 18px;
+  padding: 10px 14px;
+  background: color-mix(in oklab, var(--color-surface-elev) 70%, transparent);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  max-width: min(90%, 720px);
+}
+
+/* Navigation arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: color-mix(in oklab, var(--color-surface-elev) 85%, transparent);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.carousel-arrow:hover { background: var(--color-hover); }
+.carousel-arrow:focus-visible { box-shadow: var(--focus-ring); }
+
+.carousel-arrow.left { left: 12px; }
+.carousel-arrow.right { right: 12px; }
+
+/* Dots indicators */
+.carousel-dots{
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  z-index: 5;
+}
+
+.carousel-dot{
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.35);
+  cursor: pointer;
+  padding: 0;
+  transition: background .2s, border-color .2s;
+}
+
+.carousel-dot.active{
+  background: var(--color-white);
+  border-color: var(--color-white);
+}
+
+.carousel-dot:hover:not(.active){
+  background: rgba(255,255,255,.6);
+}
+
+@media (max-width: 720px) {
+  .carousel-viewport { aspect-ratio: 16 / 9; min-height: 180px; }
+  .carousel-caption { left: 12px; right: 12px; bottom: 12px; padding: 8px 10px; }
+  .carousel-arrow { width: 36px; height: 36px; }
+}

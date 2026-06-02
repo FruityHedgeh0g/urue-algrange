@@ -1,0 +1,88 @@
+/* Global theme: Blue/Red/White (Bootstrap-like) */
+:root{
+  /* Core palette */
+  --color-primary: #0d6efd;           /* Bootstrap primary blue */
+  --color-primary-hover: #0b5ed7;
+  --color-primary-dark: #0a58ca;
+  --color-danger: #dc3545;            /* Bootstrap red */
+  --color-danger-hover: #bb2d3b;
+  --color-white: #ffffff;              /* Keep true white for tricolor accent */
+
+  /* Surfaces & text */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;            /* base surface (navbar, cards) */
+  --color-surface-elev: #ffffff;       /* elevated surfaces (menus, popovers) */
+  --color-border: #e5e7eb;             /* neutral border */
+  --color-text: #1f2937;               /* slate-800 */
+  --color-muted: #6b7280;              /* slate-500 */
+  --color-hover: #f1f5ff;              /* very light blue hover */
+
+  /* Shadows & radius */
+  --radius: 10px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 6px 20px rgba(0,0,0,.08);
+  --focus-ring: 0 0 0 3px rgba(13,110,253,.25);
+}
+
+/* Dark theme aligned with Blue/Red brand and "Roses & Bikes" spirit */
+:root[data-theme="dark"]{
+  --color-primary: #4da3ff;           /* lighter primary for better contrast on dark */
+  --color-primary-hover: #2f8cff;
+  --color-primary-dark: #1f6fe6;
+  --color-danger: #ff6b7a;             /* vibrant rose red */
+  --color-danger-hover: #ff5163;
+
+  --color-bg: #0b1220;                 /* deep navy */
+  --color-surface: #111827;            /* near slate-900 */
+  --color-surface-elev: #0f172a;       /* slightly elevated */
+  --color-border: #243047;             /* cool navy border */
+  --color-text: #e5e7eb;               /* slate-200 */
+  --color-muted: #9aa3b2;              /* slate-400 */
+  --color-hover: rgba(77,163,255,0.12);/* subtle blue wash */
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.55);
+  --focus-ring: 0 0 0 3px rgba(77,163,255,.35);
+}
+
+/* Respect system preference on first load when no explicit choice yet */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]){
+    --color-primary: #4da3ff;
+    --color-primary-hover: #2f8cff;
+    --color-primary-dark: #1f6fe6;
+    --color-danger: #ff6b7a;
+    --color-danger-hover: #ff5163;
+
+    --color-bg: #0b1220;
+    --color-surface: #111827;
+    --color-surface-elev: #0f172a;
+    --color-border: #243047;
+    --color-text: #e5e7eb;
+    --color-muted: #9aa3b2;
+    --color-hover: rgba(77,163,255,0.12);
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+    --shadow-md: 0 8px 24px rgba(0,0,0,.55);
+    --focus-ring: 0 0 0 3px rgba(77,163,255,.35);
+  }
+}
+
+html, body, #root{
+  height: 100%;
+}
+
+body{
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility: visually consistent focus ring */
+:where(button, a, [tabindex="0"], input, select, textarea):focus-visible{
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
