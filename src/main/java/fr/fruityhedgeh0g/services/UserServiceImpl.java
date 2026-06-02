@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Try<UserEntity> internalGetUserById(UUID userId) throws UnknownResourceException {
-        Log.infof("Getting user with id: %s", userId);
+        Log.infof("Getting user by id: %s", userId);
         return Try.of(() -> userRepository.findByIdOptional(userId).orElseThrow(() ->
                 new UnknownResourceException("User not found: " + userId)
         ));
@@ -99,12 +99,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Try<UserDto> getUserById(UUID userId){
-        Log.infof("Getting user with id: %s", userId);
+        Log.infof("Getting user by id: %s", userId);
         return Try.of(() -> internalGetUserById(userId).getOrElseThrow(ex -> ex))
                 .map(userMapper::toDto)
                 .onFailure(e -> {
                     if (e instanceof UnknownResourceException ex) {
-                        Log.warn(ex.getMessage());
+                        Log.info(ex.getMessage());
                     } else {
                         Log.errorf(e, "Error getting user with id: %s", userId);
                     }
@@ -114,8 +114,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Try<List<UserEntity>> internalGetAllUsersFilteredByRole(UUID roleId){
-        Log.infof("Getting all users filtered by role with id: %s", roleId);
-        return Try.of(() ->userRepository.findByRole(roleId));
+        Log.infof("Getting all users filtered by role id: %s", roleId);
+        return Try.of(() ->userRepository.findByRole(roleId))
+                .map(l -> {
+                    if (l.isEmpty()) throw new UnknownResourceException("No user found for role id: " + roleId);
+                    return l;})
+                .onFailure(e -> Log.error("Error getting all filtered users", e));
     }
 
 
