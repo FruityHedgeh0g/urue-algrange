@@ -18,7 +18,6 @@ import java.util.List;
 public class ConfigurationController {
 
     @Inject
-    @Identifier("proxy")
     ConfigurationService configurationService;
 
     @GET

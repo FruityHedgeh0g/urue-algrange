@@ -15,7 +15,6 @@ import java.util.List;
 public class GroupController {
 
     @Inject
-    @Identifier("proxy")
     GroupService groupService;
 
     @GET

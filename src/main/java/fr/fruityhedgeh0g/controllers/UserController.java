@@ -18,7 +18,6 @@ import java.util.UUID;
 public class UserController {
 
     @Inject
-    @Identifier("proxy")
     UserService userService;
 
     @GET

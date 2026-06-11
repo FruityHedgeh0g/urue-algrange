@@ -16,7 +16,6 @@ import java.util.UUID;
 public class SectorController {
 
     @Inject
-    @Identifier("proxy")
     SectorService sectorService;
 
     @GET

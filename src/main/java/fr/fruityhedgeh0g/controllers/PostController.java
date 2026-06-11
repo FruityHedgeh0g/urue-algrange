@@ -17,7 +17,6 @@ import java.util.List;
 public class PostController {
 
     @Inject
-    @Identifier("proxy")
     PostService postService;
 
     @GET

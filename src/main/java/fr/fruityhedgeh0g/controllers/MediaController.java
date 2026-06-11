@@ -17,7 +17,6 @@ import java.util.List;
 public class MediaController {
 
     @Inject
-    @Identifier("proxy")
     MediaService mediaService;
 
     @GET

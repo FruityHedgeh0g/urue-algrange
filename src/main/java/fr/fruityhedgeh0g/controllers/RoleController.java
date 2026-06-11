@@ -16,7 +16,6 @@ import java.util.UUID;
 public class RoleController {
 
     @Inject
-    @Identifier("proxy")
     RoleService roleService;
 
     @GET
