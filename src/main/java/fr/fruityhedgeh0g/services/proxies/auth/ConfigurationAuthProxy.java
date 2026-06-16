@@ -17,7 +17,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import java.util.List;
 import java.util.Optional;
 
-@AllArgsConstructor
 @Priority(100)
 @Authenticated
 @Decorator

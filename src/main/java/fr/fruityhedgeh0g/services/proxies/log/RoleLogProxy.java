@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@AllArgsConstructor
 @Priority(200)
 @Decorator
 public class RoleLogProxy implements RoleService {
@@ -54,7 +53,7 @@ public class RoleLogProxy implements RoleService {
                 .onSuccess(role -> Log.debugf("Role created."))
                 .onFailure(t -> {
                     switch(t){
-                        case DuplicateResourceException ex -> Log.errorf(t,"A role already exists for the id provided [%s].", roleDto.getRoleId());
+                        case DuplicateResourceException ex -> Log.errorf(ex,"A role already exists for the id provided [%s].", roleDto.getRoleId());
                         default -> Log.errorf(t,"An error occurred while creating role.");
                     }
                 })
@@ -69,8 +68,8 @@ public class RoleLogProxy implements RoleService {
                 .onSuccess(role -> Log.debugf("Role updated."))
                 .onFailure(t -> {
                     switch(t){
-                        case UnknownResourceException ex -> Log.errorf(t,"There is no role with id %s.", roleDto.getRoleId());
-                        case DuplicateResourceException ex -> Log.errorf(t, "A role already exists with this name [%s].", roleDto.getName());
+                        case UnknownResourceException ex -> Log.errorf(ex,"There is no role with id %s.", roleDto.getRoleId());
+                        case DuplicateResourceException ex -> Log.errorf(ex, "A role already exists with this name [%s].", roleDto.getName());
                         default -> Log.errorf(t,"An error occurred while updating role.");
                     }
                 })

@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@AllArgsConstructor
 @Priority(100)
 @Authenticated
 @Decorator
@@ -37,26 +36,26 @@ public class GroupAuthProxy implements GroupService {
 
     @Override
     public List<GroupDto> listAll() {
-        return null;
+        return groupService.listAll();
     }
 
     @Override
     public Optional<GroupDto> getById(UUID groupId) {
-        return null;
+        return groupService.getById(groupId);
     }
 
     @Override
     public GroupDto create(GroupDto groupDto) {
-        return null;
+        return groupService.create(groupDto);
     }
 
     @Override
     public GroupDto update(GroupDto groupDto) {
-        return null;
+        return groupService.update(groupDto);
     }
 
     @Override
     public void delete(UUID groupId) {
-
+        groupService.delete(groupId);
     }
 }

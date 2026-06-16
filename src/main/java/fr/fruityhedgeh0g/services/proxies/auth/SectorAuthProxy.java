@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@AllArgsConstructor
 @Priority(100)
 @Authenticated
 @Decorator
@@ -37,25 +36,26 @@ public class SectorAuthProxy implements SectorService {
 
     @Override
     public List<SectorDto> listAll() {
-        return null;
+        return sectorService.listAll();
     }
 
     @Override
     public Optional<SectorDto> getById(UUID sectorId) {
-        return null;
+        return sectorService.getById(sectorId);
     }
 
     @Override
     public SectorDto create(SectorDto sectorDto) {
-        return null;
+        return sectorService.create(sectorDto);
     }
 
     @Override
     public SectorDto update(SectorDto sectorDto) {
-        return null;
+        return sectorService.update(sectorDto);
     }
 
     @Override
     public void delete(UUID sectorId) {
+        sectorService.delete(sectorId);
     }
 }

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@AllArgsConstructor
 @Priority(200)
 @Decorator
 public class UserLogProxy implements UserService{
@@ -53,7 +52,7 @@ public class UserLogProxy implements UserService{
                 .onSuccess(user -> Log.debugf("User created."))
                 .onFailure(t -> {
                     switch(t){
-                        case DuplicateResourceException ex -> Log.errorf(t,"A user already exists for the id provided [%s].", userDto.getUserId());
+                        case DuplicateResourceException ex -> Log.errorf(ex,"A user already exists for the id provided [%s].", userDto.getUserId());
                         default -> Log.errorf(t,"An error occurred while creating user.");
                     }
                 })
@@ -67,7 +66,7 @@ public class UserLogProxy implements UserService{
                 .onSuccess(user -> Log.debugf("User updated."))
                 .onFailure(t -> {
                     switch(t){
-                        case UnknownResourceException ex -> Log.errorf(t,"There is no user with id %s.", userDto.getUserId());
+                        case UnknownResourceException ex -> Log.errorf(ex,"There is no user with id %s.", userDto.getUserId());
                         default -> Log.errorf(t,"An error occurred while updating user.");
                     }
                 })

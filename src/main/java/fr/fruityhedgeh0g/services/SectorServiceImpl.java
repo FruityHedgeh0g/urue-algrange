@@ -1,6 +1,10 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
+import fr.fruityhedgeh0g.entities.SectorEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
@@ -40,22 +44,37 @@ public class SectorServiceImpl implements SectorService {
 
     @Override
     public Optional<SectorDto> getById(UUID sectorId) {
-        return null;
+        return sectorRepository.findByIdOptional(sectorId)
+                .map(sectorMapper::toDto);
     }
 
     @Override
     public SectorDto create(SectorDto sectorDto) {
-        return null;
+        if (sectorRepository.existsByName(sectorDto.getName()))
+            throw new DuplicateResourceException("A sector with this name already exists.");
+
+        SectorEntity sectorEntity = sectorMapper.toEntity(sectorDto);
+        sectorRepository.persist(sectorEntity);
+
+        return sectorMapper.toDto(sectorEntity);
     }
 
     @Override
     public SectorDto update(SectorDto sectorDto) {
-        return null;
+        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorDto.getSectorId())
+                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+
+        if (!sectorEntity.getName().equals(sectorDto.getName()) && sectorRepository.existsByName(sectorDto.getName()))
+            throw new DuplicateResourceException("A sector with this name already exists in the system.");
+
+        sectorEntity = sectorMapper.partialDtoToEntity(sectorEntity,sectorDto);
+        sectorRepository.persist(sectorEntity);
+        return sectorMapper.toDto(sectorEntity);
     }
 
     @Override
     public void delete(UUID sectorId) {
-
+        sectorRepository.deleteById(sectorId);
     }
 
 //    @Override

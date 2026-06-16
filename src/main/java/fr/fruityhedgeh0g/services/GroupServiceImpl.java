@@ -1,6 +1,10 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
+import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
@@ -38,22 +42,38 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Optional<GroupDto> getById(UUID groupId) {
-        return null;
+        return groupRepository.findByIdOptional(groupId)
+                .map(groupMapper::toDto);
     }
 
     @Override
     public GroupDto create(GroupDto groupDto) {
-        return null;
+        if (groupRepository.existsByName(groupDto.getName()))
+            throw new DuplicateResourceException("This resource already exists in the system.");
+
+        GroupEntity groupEntity = groupMapper.toEntity(groupDto);
+        groupRepository.persist(groupEntity);
+
+        return groupMapper.toDto(groupEntity);
     }
 
     @Override
     public GroupDto update(GroupDto groupDto) {
-        return null;
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupDto.getGroupId())
+                .orElseThrow(() -> new UnknownResourceException("This resource is unknown is the system and cannot be updated."));
+
+        if (!groupEntity.getName().equals(groupDto.getName()) && groupRepository.existsByName(groupDto.getName()))
+            throw new DuplicateResourceException("A group with this name already exists in the system.");
+
+        groupEntity = groupMapper.partialDtoToEntity(groupEntity,groupDto);
+        groupRepository.persist(groupEntity);
+
+        return groupMapper.toDto(groupEntity);
     }
 
     @Override
     public void delete(UUID groupId) {
-
+        groupRepository.deleteById(groupId);
     }
 
 //    //Todo faire un checkup du service pour assurer la cohérence des méthodes
