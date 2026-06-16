@@ -1,8 +1,6 @@
-package fr.fruityhedgeh0g.services.proxies;
+package fr.fruityhedgeh0g.services.proxies.auth;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
-import fr.fruityhedgeh0g.enums.RoleTypeEnum;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
@@ -10,6 +8,8 @@ import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
 import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
@@ -22,10 +22,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @ApplicationScoped
 @Alternative
-@Priority(1)
+@Priority(100)
 @Authenticated
+@Decorator
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
-public class RoleProxy implements RoleService {
+public class RoleAuthProxy implements RoleService {
     @Inject
     SecurityIdentity identity;
 
@@ -33,42 +34,32 @@ public class RoleProxy implements RoleService {
     JsonWebToken token;
 
     @Inject
-    @Identifier("serviceImpl")
+    @Delegate
     RoleService roleService;
 
-    @Override
-    public Try<List<RoleDto>> getAllRoles() {
-        return roleService.getAllRoles();
-    }
 
     @Override
-    public Try<List<RoleDto>> getAllRolesFilteredByRoleType(RoleTypeEnum[] filter) {
-        return roleService.getAllRolesFilteredByRoleType(filter);
-    }
-
-    @Override
-    public Try<RoleDto> getRoleById(UUID roleId) {
-        return roleService.getRoleById(roleId);
-    }
-
-    @Override
-    public Try<RoleEntity> internalGetRoleById(UUID roleId) {
+    public Try<List<RoleDto>> listAll() {
         return null;
     }
 
     @Override
-    public Try<RoleDto> createRole(RoleDto roleDto) {
-        return roleService.createRole(roleDto);
+    public Try<RoleDto> getById(UUID roleId) {
+        return null;
     }
 
     @Override
-    public Try<RoleDto> updateRole(RoleDto roleDto) {
-        return roleService.updateRole(roleDto);
+    public Try<RoleDto> create(RoleDto roleDto) {
+        return null;
     }
 
     @Override
-    public Try<Void> deleteRole(UUID roleId) {
+    public Try<RoleDto> update(RoleDto roleDto) {
+        return null;
+    }
 
-        return roleService.deleteRole(roleId);
+    @Override
+    public Try<RoleDto> delete(UUID rolId) {
+        return null;
     }
 }

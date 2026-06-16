@@ -32,82 +32,107 @@ public class PostServiceImpl implements PostService {
     PostMapper postMapper;
 
     @Override
-    @Transactional
-    public Try<List<PostDto>> getAllPosts() {
-        Log.info("Getting all posts");
-        return Try.of(() -> postRepository
-                .findAll()
-                .stream()
-                .map(postMapper::toDto)
-                .toList())
-                .onFailure(e ->
-                        Log.error("Error getting all posts", e)
-                );
-    }
-
-    @Override
-    @Transactional
-    public Try<PostDto> getPostById( UUID postId) {
-        Log.infof("Getting post with id: %s", postId);
-        return Try.of(() -> postRepository
-                .findByIdOptional(postId)
-                .orElseThrow(() -> new UnknownResourceException("Post not found: " + postId)))
-                .map(postMapper::toDto)
-                .onFailure(e -> {
-                    if (e instanceof UnknownResourceException ex) {
-                        Log.warn(ex.getMessage());
-                    } else {
-                        Log.errorf(e, "Error getting post with id: %s", postId);
-                    }
-                });
-    }
-
-    @Override
-    @Transactional
-    public Try<PostDto> createPost( PostDto postDto) {
+    public Try<List<PostDto>> listAll() {
         return null;
     }
 
     @Override
-    @Transactional
-    public Try<PostDto> updatePost( PostDto postDto) {
+    public Try<PostDto> getById(UUID postId) {
         return null;
     }
 
     @Override
-    @Transactional
-    public Try<Void> deletePost( UUID postId) {
+    public Try<PostDto> create(PostDto postDto) {
         return null;
     }
 
     @Override
-    @Transactional
-    public Try<PostDto> addPostBanner(UUID postId, UUID bannerId) {
+    public Try<PostDto> update(PostDto postDto) {
         return null;
     }
 
     @Override
-    @Transactional
-    public Try<PostDto> deletePostBanner(UUID postId) {
+    public Try<PostDto> delete(UUID postId) {
         return null;
     }
 
-    @Override
-    @Transactional
-    public Try<PostDto> updatePostBanner(UUID postId, UUID tagId) {
-        return null;
-    }
-
-    @Override
-    @Transactional
-    public Try<PostDto> addPostAttachment(UUID postId, UUID attachmentId) {
-        return null;
-    }
-
-    @Override
-    @Transactional
-    public Try<PostDto> deletePostAttachment(UUID postId, UUID attachmentId) {
-        return null;
-    }
+//    @Override
+//    @Transactional
+//    public Try<List<PostDto>> getAllPosts() {
+//        Log.info("Getting all posts");
+//        return Try.of(() -> postRepository
+//                .findAll()
+//                .stream()
+//                .map(postMapper::toDto)
+//                .toList())
+//                .onFailure(e ->
+//                        Log.error("Error getting all posts", e)
+//                );
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> getPostById( UUID postId) {
+//        Log.infof("Getting post with id: %s", postId);
+//        return Try.of(() -> postRepository
+//                .findByIdOptional(postId)
+//                .orElseThrow(() -> new UnknownResourceException("Post not found: " + postId)))
+//                .map(postMapper::toDto)
+//                .onFailure(e -> {
+//                    if (e instanceof UnknownResourceException ex) {
+//                        Log.warn(ex.getMessage());
+//                    } else {
+//                        Log.errorf(e, "Error getting post with id: %s", postId);
+//                    }
+//                });
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> createPost( PostDto postDto) {
+//        return null;
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> updatePost( PostDto postDto) {
+//        return null;
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<Void> deletePost( UUID postId) {
+//        return null;
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> addPostBanner(UUID postId, UUID bannerId) {
+//        return null;
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> deletePostBanner(UUID postId) {
+//        return null;
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> updatePostBanner(UUID postId, UUID tagId) {
+//        return null;
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> addPostAttachment(UUID postId, UUID attachmentId) {
+//        return null;
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<PostDto> deletePostAttachment(UUID postId, UUID attachmentId) {
+//        return null;
+//    }
 
 }

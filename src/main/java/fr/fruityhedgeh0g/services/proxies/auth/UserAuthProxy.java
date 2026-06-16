@@ -1,14 +1,14 @@
-package fr.fruityhedgeh0g.services.proxies;
+package fr.fruityhedgeh0g.services.proxies.auth;
 
-import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
-import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
-import fr.fruityhedgeh0g.services.interfaces.FeatureService;
+import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.services.interfaces.UserService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
@@ -16,14 +16,18 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 
 @AllArgsConstructor
 @ApplicationScoped
 @Alternative
-@Priority(1)
+@Priority(100)
 @Authenticated
+@Decorator
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
-public class FeatureProxy implements FeatureService {
+public class UserAuthProxy implements UserService {
     @Inject
     SecurityIdentity identity;
 
@@ -31,21 +35,32 @@ public class FeatureProxy implements FeatureService {
     JsonWebToken token;
 
     @Inject
-    @Identifier("serviceImpl")
-    FeatureService featureService;
+    @Delegate
+    UserService userService;
+
 
     @Override
-    public Try<List<FeatureDto>> getAllFeatures() {
-        return featureService.getAllFeatures();
+    public List<UserDto> listAll() {
+        return List.of();
     }
 
     @Override
-    public Try<FeatureDto> getFeatureByName(String name) {
-        return featureService.getFeatureByName(name);
+    public Optional<UserDto> getById(UUID userId) {
+        return Optional.empty();
     }
 
     @Override
-    public Try<FeatureDto> updateFeature(FeatureDto featureDto) {
-        return featureService.updateFeature(featureDto);
+    public UserDto create(UserDto userDto) {
+        return null;
+    }
+
+    @Override
+    public UserDto update(UserDto userDto) {
+        return null;
+    }
+
+    @Override
+    public void delete(UUID userId) {
+
     }
 }

@@ -19,9 +19,9 @@ public class MediaController {
     @Inject
     MediaService mediaService;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.Basic.class) List<MediaDto> getAllMedias(){
-        return mediaService.getAllMedia().get();
-    }
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public @JsonView(Views.Basic.class) List<MediaDto> getAllMedias(){
+//        return mediaService.getAllMedia().get();
+//    }
 }

@@ -20,33 +20,33 @@ public class UserController {
     @Inject
     UserService userService;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
-        List<UserDto> users = userService.getAllUsers().get();
-        Log.debugf("Retrieved %s users", users.toString());
-        return users;
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.CreationResponse.class) UserDto addUser(@JsonView(Views.Creation.class) UserDto userDto){
-        return userService.createUser(userDto).get();
-    }
-
-    @PATCH
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.UpdateResponse.class) UserDto updateUser(@JsonView(Views.Update.class) UserDto userDto){
-        return userService.updateUser(userDto).get();
-    }
-
-    @GET
-    @Path("/{userId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.Detailed.class) UserDto getUserById(@PathParam("userId") UUID userId){
-        return userService.getUserById(userId).get();
-    }
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
+//        List<UserDto> users = userService.getAllUsers().get();
+//        Log.debugf("Retrieved %s users", users.toString());
+//        return users;
+//    }
+//
+//    @POST
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public @JsonView(Views.CreationResponse.class) UserDto addUser(@JsonView(Views.Creation.class) UserDto userDto){
+//        return userService.createUser(userDto).get();
+//    }
+//
+//    @PATCH
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public @JsonView(Views.UpdateResponse.class) UserDto updateUser(@JsonView(Views.Update.class) UserDto userDto){
+//        return userService.updateUser(userDto).get();
+//    }
+//
+//    @GET
+//    @Path("/{userId}")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public @JsonView(Views.Detailed.class) UserDto getUserById(@PathParam("userId") UUID userId){
+//        return userService.getUserById(userId).get();
+//    }
 
 }

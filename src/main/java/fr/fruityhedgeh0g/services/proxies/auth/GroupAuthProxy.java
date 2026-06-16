@@ -1,13 +1,15 @@
-package fr.fruityhedgeh0g.services.proxies;
+package fr.fruityhedgeh0g.services.proxies.auth;
 
-import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
-import fr.fruityhedgeh0g.services.interfaces.MediaService;
+import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
+import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
 import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
@@ -20,10 +22,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @ApplicationScoped
 @Alternative
-@Priority(1)
+@Priority(100)
 @Authenticated
+@Decorator
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
-public class MediaProxy implements MediaService {
+public class GroupAuthProxy implements GroupService {
     @Inject
     SecurityIdentity identity;
 
@@ -31,31 +34,32 @@ public class MediaProxy implements MediaService {
     JsonWebToken token;
 
     @Inject
-    @Identifier("serviceImpl")
-    MediaService mediaService;
+    @Delegate
+    GroupService groupService;
+
 
     @Override
-    public Try<List<MediaDto>> getAllMedia() {
-        return mediaService.getAllMedia();
+    public Try<List<GroupDto>> listAll() {
+        return null;
     }
 
     @Override
-    public Try<MediaDto> getMediaById(UUID mediaId) {
-        return mediaService.getMediaById(mediaId);
+    public Try<GroupDto> getById(UUID groupId) {
+        return null;
     }
 
     @Override
-    public Try<MediaDto> createMedia(MediaDto mediaDto) {
-        return mediaService.createMedia(mediaDto);
+    public Try<GroupDto> create(GroupDto groupDto) {
+        return null;
     }
 
     @Override
-    public Try<MediaDto> updateMedia(MediaDto mediaDto) {
-        return mediaService.updateMedia(mediaDto);
+    public Try<GroupDto> update(GroupDto groupDto) {
+        return null;
     }
 
     @Override
-    public Try<Void> deleteMedia(UUID mediaId) {
-        return mediaService.deleteMedia(mediaId);
+    public Try<GroupDto> delete(UUID groupId) {
+        return null;
     }
 }

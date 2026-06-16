@@ -1,13 +1,15 @@
-package fr.fruityhedgeh0g.services.proxies;
+package fr.fruityhedgeh0g.services.proxies.auth;
 
-import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
-import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
+import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
+import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import io.vavr.control.Try;
 import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
@@ -19,10 +21,11 @@ import java.util.List;
 @AllArgsConstructor
 @ApplicationScoped
 @Alternative
-@Priority(1)
+@Priority(100)
 @Authenticated
+@Decorator
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
-public class ConfigurationProxy implements ConfigurationService {
+public class FeatureAuthProxy implements FeatureService {
     @Inject
     SecurityIdentity identity;
 
@@ -30,21 +33,22 @@ public class ConfigurationProxy implements ConfigurationService {
     JsonWebToken token;
 
     @Inject
-    @Identifier("serviceImpl")
-    ConfigurationService configurationService;
+    @Delegate
+    FeatureService featureService;
+
 
     @Override
-    public Try<List<ConfigurationDto>> getAllConfigurations() {
-        return configurationService.getAllConfigurations();
+    public Try<List<FeatureDto>> listAll() {
+        return null;
     }
 
     @Override
-    public Try<ConfigurationDto> getConfigurationByName(String name) {
-        return configurationService.getConfigurationByName(name);
+    public Try<FeatureDto> getByName(String name) {
+        return null;
     }
 
     @Override
-    public Try<ConfigurationDto> updateConfiguration(ConfigurationDto configurationDto) {
-        return configurationService.updateConfiguration(configurationDto);
+    public Try<FeatureDto> update(FeatureDto featureDto) {
+        return null;
     }
 }

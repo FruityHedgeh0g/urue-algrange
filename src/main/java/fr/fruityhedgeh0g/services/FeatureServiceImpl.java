@@ -29,44 +29,59 @@ public class FeatureServiceImpl implements FeatureService {
     FeatureRepository featureRepository;
 
     @Override
-    @Transactional
-    public Try<FeatureDto> getFeatureByName( String name) {
-        Log.infof("Getting feature by name: %s", name);
-        return Try.of(() -> featureRepository.findByIdOptional(name).orElseThrow(
-                () -> new UnknownResourceException("Feature not found: " + name)))
-        .map(featureMapper::toDto)
-        .onFailure(e -> {
-            if (e instanceof UnknownResourceException ex) {
-                Log.warn(ex.getMessage());
-            } else {
-                Log.errorf(e,"Error getting feature by name: %s", name );
-            }
-        });
+    public Try<List<FeatureDto>> listAll() {
+        return null;
     }
 
     @Override
-    @Transactional
-    public Try<List<FeatureDto>> getAllFeatures() {
-        Log.info("Getting all features");
-        return Try.of(() -> featureRepository
-                .findAll()
-                .stream()
-                .map(featureMapper::toDto)
-                .toList())
-                .onFailure(e -> {
-                    Log.errorf(e,"Error getting all features");
-                });
+    public Try<FeatureDto> getByName(String name) {
+        return null;
     }
 
-    public Try<FeatureDto> updateFeature( FeatureDto dto) {
-        Log.infof("Updating feature: %s", dto.getName());
-        return Try.of(() -> {
-            Log.infof("Updating feature: %s", dto.getName());
-            FeatureEntity feature = featureRepository.findByIdOptional(dto.getName())
-                    .orElseThrow(() -> new UnknownResourceException("Feature not found: " + dto.getName()));
-
-            featureMapper.partialDtoToEntity(feature, dto);
-            return featureMapper.toDto(feature);
-        });
+    @Override
+    public Try<FeatureDto> update(FeatureDto featureDto) {
+        return null;
     }
+
+//    @Override
+//    @Transactional
+//    public Try<FeatureDto> getFeatureByName( String name) {
+//        Log.infof("Getting feature by name: %s", name);
+//        return Try.of(() -> featureRepository.findByIdOptional(name).orElseThrow(
+//                () -> new UnknownResourceException("Feature not found: " + name)))
+//        .map(featureMapper::toDto)
+//        .onFailure(e -> {
+//            if (e instanceof UnknownResourceException ex) {
+//                Log.warn(ex.getMessage());
+//            } else {
+//                Log.errorf(e,"Error getting feature by name: %s", name );
+//            }
+//        });
+//    }
+//
+//    @Override
+//    @Transactional
+//    public Try<List<FeatureDto>> getAllFeatures() {
+//        Log.info("Getting all features");
+//        return Try.of(() -> featureRepository
+//                .findAll()
+//                .stream()
+//                .map(featureMapper::toDto)
+//                .toList())
+//                .onFailure(e -> {
+//                    Log.errorf(e,"Error getting all features");
+//                });
+//    }
+//
+//    public Try<FeatureDto> updateFeature( FeatureDto dto) {
+//        Log.infof("Updating feature: %s", dto.getName());
+//        return Try.of(() -> {
+//            Log.infof("Updating feature: %s", dto.getName());
+//            FeatureEntity feature = featureRepository.findByIdOptional(dto.getName())
+//                    .orElseThrow(() -> new UnknownResourceException("Feature not found: " + dto.getName()));
+//
+//            featureMapper.partialDtoToEntity(feature, dto);
+//            return featureMapper.toDto(feature);
+//        });
+//    }
 }
