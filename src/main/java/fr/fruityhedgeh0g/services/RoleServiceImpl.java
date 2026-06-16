@@ -1,24 +1,22 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
-import fr.fruityhedgeh0g.enums.RoleTypeEnum;
+import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.utilities.mappers.RoleMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -33,41 +31,52 @@ public class RoleServiceImpl implements RoleService {
     RoleMapper roleMapper;
 
     @Override
-    public Try<List<RoleDto>> listAll() {
-        return null;
+    public List<RoleDto> listAll() {
+        return roleRepository.listAll()
+                .stream()
+                .map(roleMapper::toDto)
+                .toList();
     }
 
     @Override
-    public Try<RoleDto> getById(UUID roleId) {
-        return null;
+    public Optional<RoleDto> getById(UUID roleId) {
+        return roleRepository.findByIdOptional(roleId)
+                .map(roleMapper::toDto);
     }
 
     @Override
-    public Try<RoleDto> create(RoleDto roleDto) {
-        return null;
+    @Transactional
+    public RoleDto create(RoleDto roleDto) {
+        if (roleRepository.existsByName(roleDto.getName()))
+            throw new DuplicateResourceException("This resource already exists in the system.");
+
+        RoleEntity roleEntity = roleMapper.toEntity(roleDto);
+        roleRepository.persist(roleEntity);
+
+        return roleMapper.toDto(roleEntity);
     }
 
     @Override
-    public Try<RoleDto> update(RoleDto roleDto) {
-        return null;
+    @Transactional
+    public RoleDto update(RoleDto roleDto) {
+        RoleEntity roleEntity = roleRepository.findByIdOptional(roleDto.getRoleId())
+                .orElseThrow(() -> new UnknownResourceException("This resource is unknown is the system and cannot be updated."));
+
+        //Todo: tester qu'on essaye pas d'attribuer un nom déjà existant. Ce serait triste si ça passait :(
+
+        roleEntity = roleMapper.partialDtoToEntity(roleEntity,roleDto);
+        roleRepository.persist(roleEntity);
+
+        return roleMapper.toDto(roleEntity);
     }
 
     @Override
-    public Try<RoleDto> delete(UUID rolId) {
-        return null;
+    @Transactional
+    public void delete(UUID rolId) {
+        //Todo: tester si le role si le role appartient à des users, refuser la suppression le cas échéant
+        roleRepository.deleteById(rolId);
     }
 
-//    @Override
-//    @Transactional
-//    public Try<List<RoleDto>> getAllRoles() {
-//        Log.info("Getting all roles");
-//        return Try.of(() -> roleRepository
-//                .findAll()
-//                .stream()
-//                .map(roleMapper::toDto)
-//                .toList())
-//                .onFailure(ex -> Log.error("Error getting all roles", ex));
-//    }
 //
 //
 //    @Override
@@ -80,76 +89,6 @@ public class RoleServiceImpl implements RoleService {
 //                .map(roleMapper::toDto)
 //                .toList())
 //                .onFailure(ex -> Log.error("Error getting all filtered roles", ex));
-//    }
-//
-//    @Transactional
-//    @Override
-//    public Try<RoleDto> getRoleById( UUID roleId) {
-//        Log.infof("Getting role with id: %s", roleId);
-//        return Try.of(() -> internalGetRoleById(roleId).getOrElseThrow(ex -> ex))
-//                .map(roleMapper::toDto)
-//                .onFailure(ex -> {
-//                    if (ex instanceof UnknownResourceException) {
-//                        Log.warn(ex.getMessage());
-//                    } else {
-//                        Log.errorf(ex, "Error getting role with id: %s", roleId);
-//                    }
-//                });
-//    }
-//
-//    @Override
-//    public Try<RoleEntity> internalGetRoleById(UUID roleId) throws UnknownResourceException {
-//        Log.infof("Getting role with id: %s", roleId);
-//        return Try.of(() ->roleRepository.findByIdOptional(roleId).orElseThrow(() ->
-//                new UnknownResourceException("Role not found")));
-//    }
-//
-//    @Transactional
-//    public Try<RoleDto> createRole( RoleDto roleDto) {
-//        Log.infof("Creating role: %s", roleDto);
-//        return Try.of(() -> {
-//            Log.debugf("Checking if role with name: %s already exists", roleDto.getName());
-//            if (roleRepository.existsByName(roleDto.getName()))
-//                throw new DuplicateResourceException("Role already exists: " + roleDto.getName());
-//
-//            RoleEntity roleEntity = roleMapper.toEntity(roleDto);
-//
-//            Log.debug("Persisting new role: " + roleEntity.getRoleId());
-//            roleRepository.persist(roleEntity);
-//
-//            return roleMapper.toDto(roleEntity);
-//        }).onFailure(ex -> {
-//            if (ex instanceof DuplicateResourceException) {
-//                Log.warn(ex.getMessage());
-//            } else {
-//                Log.errorf(ex, "Error creating role: %s", roleDto);
-//            }
-//        });
-//    }
-//
-//
-//    @Transactional
-//    public Try<RoleDto> updateRole( RoleDto roleDto) {
-//        Log.infof("Updating role: %s", roleDto);
-//        return Try.of(() -> {
-//            Log.debugf("Checking if role with id: %s exists and retrieve it", roleDto.getRoleId());
-//            RoleEntity roleEntity = internalGetRoleById(roleDto.getRoleId()).getOrElseThrow(ex -> ex);
-//
-//            Log.debugf("Checking if role with name: %s already exists", roleDto.getName());
-//            if (!roleDto.getName().equals(roleEntity.getName()) && roleRepository.existsByName(roleDto.getName()))
-//                throw new DuplicateResourceException("Role already exists: " + roleDto.getName());
-//
-//            roleMapper.partialDtoToEntity(roleEntity, roleDto);
-//
-//            return roleMapper.toDto(roleEntity);
-//        }).onFailure( ex -> {
-//                switch (ex){
-//                    case DuplicateResourceException e -> Log.warn(e.getMessage());
-//                    case UnknownResourceException e -> Log.warn(e.getMessage());
-//                    default -> Log.errorf(ex, "Error updating role: %s", roleDto);
-//                }
-//        }
-//        );
 //    }
 //
 //    @Override

@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto update(UserDto userDto) {
         UserEntity userEntity = userRepository.findByIdOptional(userDto.getUserId())
                 .orElseThrow(() -> new UnknownResourceException("This resource is unknown is the system and cannot be updated."));
@@ -75,17 +76,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID userId) {
+        //Todo: non nécéssaire de supprimer des users.
+        // On peut cependant imaginer tester si le user est utilisé dans une autre table et le supprimer dans le cas contraire
         userRepository.deleteById(userId);
     }
 
-//    @Override
-//    public Try<UserEntity> internalGetUserById(UUID userId) throws UnknownResourceException {
-//        Log.infof("Getting user by id: %s", userId);
-//        return Try.of(() -> userRepository.findByIdOptional(userId).orElseThrow(() ->
-//                new UnknownResourceException("User not found: " + userId)
-//        ));
-//    }
 //
 //    @Override
 //    @Transactional
@@ -166,55 +163,6 @@ public class UserServiceImpl implements UserService {
 //
 //    @Override
 //    @Transactional
-//    public Try<List<UserDto>> getAllUsers(){
-//        Log.info("Getting all users");
-//        return Try.of(() -> userRepository
-//                        .findAll()
-//                        .stream()
-//                        .map(userMapper::toDto)
-//                        .toList())
-//                .onFailure(e ->
-//                        Log.error("Error getting all users", e)
-//                );
-//    }
-//
-//    @Override
-//    @Transactional
-//    public Try<UserDto> createUser(UserDto userDto){
-//        Log.infof("Creating user: %s", userDto);
-//        return Try.of(() -> {
-//            Log.debugf("Searching for already existing user with id: %s" , userDto.getUserId());
-//            if (userRepository.existsById(userDto.getUserId()))
-//                throw new DuplicateResourceException("User already exists: " + userDto.getUserId());
-//
-//            Log.debugf("Persisting new user: %s", userDto);
-//            UserEntity userEntity = userMapper.toEntity(userDto);
-//            userRepository.persist(userEntity);
-//
-//            Log.debugf("User created. Sending up-to-date user infos: %s" , userDto);
-//            return userMapper.toDto(userEntity);
-//        }).onFailure(ex -> {
-//            switch (ex){
-//                case DuplicateResourceException e -> Log.warn(e.getMessage());
-//                default -> Log.errorf(ex,"Error creating user: %s" , userDto);
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public Try<Boolean> internalExistsById(UUID userId){
-//        Log.infof("Checking user existence with id: %s", userId);
-//        return Try.of(() ->userRepository.existsById(userId));
-//    }
-//
-//    @Override
-//    public Try<Boolean> internalExistsByRole(UUID roleId) {
-//        Log.infof("Checking user existence with role id: %s", roleId);
-//        return Try.of(() -> userRepository.existsByRole(roleId));
-//    }
-//
-//    @Override
-//    @Transactional
 //    public Try<UserDto> updateUser(UserDto userDto){
 //        Log.infof("Updating user: %s", userDto);
 //        return Try.of(() -> {
@@ -231,15 +179,6 @@ public class UserServiceImpl implements UserService {
 //                Log.errorf(ex,"Error updating user : %s" , userDto);
 //            }
 //        });
-//    }
-
-//INFO : Non nécéssité de supprimer des users
-//    @Transactional
-//    public void deleteUser(@NotNull UUID userId){
-//        Log.debug("Deleting user with id: " + userId);
-//        Try.run(() -> userRepository.deleteById(userId))
-//                .onFailure(e -> Log.error("Error deleting user with id: " + userId, e));
-//
 //    }
 
 }

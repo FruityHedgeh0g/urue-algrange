@@ -5,8 +5,6 @@ import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
@@ -17,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -39,27 +38,27 @@ public class RoleAuthProxy implements RoleService {
 
 
     @Override
-    public Try<List<RoleDto>> listAll() {
-        return null;
+    public List<RoleDto> listAll() {
+        return roleService.listAll();
     }
 
     @Override
-    public Try<RoleDto> getById(UUID roleId) {
-        return null;
+    public Optional<RoleDto> getById(UUID roleId) {
+        return roleService.getById(roleId);
     }
 
     @Override
-    public Try<RoleDto> create(RoleDto roleDto) {
-        return null;
+    public RoleDto create(RoleDto roleDto) {
+        return roleService.create(roleDto);
     }
 
     @Override
-    public Try<RoleDto> update(RoleDto roleDto) {
-        return null;
+    public RoleDto update(RoleDto roleDto) {
+        return roleService.update(roleDto);
     }
 
     @Override
-    public Try<RoleDto> delete(UUID rolId) {
-        return null;
+    public void delete(UUID rolId) {
+        roleService.delete(rolId);
     }
 }

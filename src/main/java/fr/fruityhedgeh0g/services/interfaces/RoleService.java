@@ -11,15 +11,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface RoleService {
 
-    Try<List<RoleDto>> listAll();
-    Try<RoleDto> getById(@NotNull UUID roleId);
-    Try<RoleDto> create(@NotNull @Valid RoleDto roleDto);
-    Try<RoleDto> update(@NotNull @Valid RoleDto roleDto);
-    Try<RoleDto> delete(@NotNull UUID rolId);
+    List<RoleDto> listAll();
+    Optional<RoleDto> getById(@NotNull UUID roleId);
+    RoleDto create(@NotNull @Valid RoleDto roleDto);
+    RoleDto update(@NotNull @Valid RoleDto roleDto);
+    void delete(@NotNull UUID rolId);
 
 //    Try<List<RoleDto>> getAllRoles();
 //    Try<List<RoleDto>> getAllRolesFilteredByRoleType(@NotNull @Size(min = 1) RoleTypeEnum[] filter);

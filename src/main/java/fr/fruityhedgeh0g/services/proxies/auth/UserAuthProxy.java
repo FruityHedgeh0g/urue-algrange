@@ -41,26 +41,26 @@ public class UserAuthProxy implements UserService {
 
     @Override
     public List<UserDto> listAll() {
-        return List.of();
+        return userService.listAll();
     }
 
     @Override
     public Optional<UserDto> getById(UUID userId) {
-        return Optional.empty();
+        return userService.getById(userId);
     }
 
     @Override
     public UserDto create(UserDto userDto) {
-        return null;
+        return userService.create(userDto);
     }
 
     @Override
     public UserDto update(UserDto userDto) {
-        return null;
+        return userService.update(userDto);
     }
 
     @Override
     public void delete(UUID userId) {
-
+        userService.delete(userId);
     }
 }
