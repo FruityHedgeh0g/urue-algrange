@@ -62,7 +62,8 @@ public class RoleServiceImpl implements RoleService {
         RoleEntity roleEntity = roleRepository.findByIdOptional(roleDto.getRoleId())
                 .orElseThrow(() -> new UnknownResourceException("This resource is unknown is the system and cannot be updated."));
 
-        //Todo: tester qu'on essaye pas d'attribuer un nom déjà existant. Ce serait triste si ça passait :(
+        if (!roleEntity.getName().equals(roleDto.getName()) && roleRepository.existsByName(roleDto.getName()))
+            throw new DuplicateResourceException("A role with this name already exists in the system.");
 
         roleEntity = roleMapper.partialDtoToEntity(roleEntity,roleDto);
         roleRepository.persist(roleEntity);
@@ -72,9 +73,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public void delete(UUID rolId) {
+    public void delete(UUID roleId) {
         //Todo: tester si le role si le role appartient à des users, refuser la suppression le cas échéant
-        roleRepository.deleteById(rolId);
+        roleRepository.deleteById(roleId);
     }
 
 //

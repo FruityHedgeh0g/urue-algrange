@@ -17,11 +17,11 @@ public class GroupController {
     @Inject
     GroupService groupService;
 
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
-//        return groupService.getAllGroups().get();
-//    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
+        return groupService.listAll();
+    }
 
 //    @POST
 //    @Produces(MediaType.APPLICATION_JSON)

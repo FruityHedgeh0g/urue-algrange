@@ -18,11 +18,11 @@ public class SectorController {
     @Inject
     SectorService sectorService;
 
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public @JsonView(Views.Basic.class) List<SectorDto> getAllSectors(){
-//        return sectorService.getAllSectors().get();
-//    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public @JsonView(Views.Basic.class) List<SectorDto> getAllSectors(){
+        return sectorService.listAll();
+    }
 //
 //    @POST
 //    @Produces(MediaType.APPLICATION_JSON)

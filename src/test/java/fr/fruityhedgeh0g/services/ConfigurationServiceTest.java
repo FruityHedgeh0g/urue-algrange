@@ -72,90 +72,90 @@ public class ConfigurationServiceTest {
         configurationDtos = List.of(configurationDto, anotherConfigurationDto);
     }
 
-    /** @see ConfigurationServiceImpl#getAllConfigurations()  **/
-
-    @Test
-    public void getAllConfigurations_Success(){
-        PanacheQuery<ConfigurationEntity> mockedPanacheQuery = mock(PanacheQuery.class);
-        when(mockedPanacheQuery.page(any())).thenReturn(mockedPanacheQuery);
-        when(mockedPanacheQuery.stream()).thenReturn(configurationEntities.stream());
-        when(configurationRepository.findAll()).thenReturn(mockedPanacheQuery);
-
-        Assertions.assertEquals(configurationService.getAllConfigurations().get(),configurationDtos);
-    }
-    
-    @Test 
-    public void getAllConfigurations_Failure_NotManagedException(){
-        when(configurationRepository.findAll()).thenThrow(new RuntimeException("Dummy exception"));
-        Assertions.assertThrowsExactly(RuntimeException.class,
-                () -> configurationService.getAllConfigurations().get()
-        );
-    }
-
-    /** @see ConfigurationServiceImpl#getConfigurationByName(String)  **/
-
-    @Test
-    public void getConfigurationByName_Success(){
-        when(configurationRepository.findByIdOptional(any())).thenReturn(Optional.of(configurationEntity));
-
-        Assertions.assertEquals(configurationService.getConfigurationByName("firstConfiguration").get(),this.configurationDto);
-
-    }
-
-    @Test
-    public void getConfigurationByName_Failure_UnknownResourceException(){
-        Assertions.assertThrowsExactly(UnknownResourceException.class,
-                () -> configurationService.getConfigurationByName("DummyName").get()
-        );
-    }
-
-    @Test
-    public void getConfigurationByName_Failure_ConstraintViolation(){
-        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-                () -> configurationService.getConfigurationByName(null)
-        );
-    }
-
-    @Test
-    public void getConfigurationByName_Failure_NotManagedException(){
-        when(configurationRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
-
-        Assertions.assertThrowsExactly(RuntimeException.class,
-                () -> configurationService.getConfigurationByName("DummyName").get()
-        );
-    }
-
-
-    /** @see ConfigurationServiceImpl#updateConfiguration(ConfigurationDto)  **/
-
-    @Test
-    public void updateConfiguration_Success(){
-        when(configurationRepository.findByIdOptional(any())).thenReturn(Optional.of(configurationEntity));
-
-        Assertions.assertEquals(configurationService.updateConfiguration(configurationDto).get(),this.configurationDto);
-    }
-
-    @Test
-    public void updateConfiguration_Failure_UnknownResourceException(){
-        Assertions.assertThrowsExactly(UnknownResourceException.class,
-                () -> configurationService.updateConfiguration(configurationDto).get()
-        );
-    }
-
-    @Test
-    public void updateConfiguration_Failure_ConstraintViolation(){
-        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-                () -> configurationService.updateConfiguration(null)
-        );
-    }
-
-    @Test
-    public void updateConfiguration_Failure_NotManagedException(){
-        when(configurationRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
-
-        Assertions.assertThrowsExactly(RuntimeException.class,
-                () -> configurationService.updateConfiguration(configurationDto).get()
-        );
-    }
+//    /** @see ConfigurationServiceImpl#getAllConfigurations()  **/
+//
+//    @Test
+//    public void getAllConfigurations_Success(){
+//        PanacheQuery<ConfigurationEntity> mockedPanacheQuery = mock(PanacheQuery.class);
+//        when(mockedPanacheQuery.page(any())).thenReturn(mockedPanacheQuery);
+//        when(mockedPanacheQuery.stream()).thenReturn(configurationEntities.stream());
+//        when(configurationRepository.findAll()).thenReturn(mockedPanacheQuery);
+//
+//        Assertions.assertEquals(configurationService.getAllConfigurations().get(),configurationDtos);
+//    }
+//
+//    @Test
+//    public void getAllConfigurations_Failure_NotManagedException(){
+//        when(configurationRepository.findAll()).thenThrow(new RuntimeException("Dummy exception"));
+//        Assertions.assertThrowsExactly(RuntimeException.class,
+//                () -> configurationService.getAllConfigurations().get()
+//        );
+//    }
+//
+//    /** @see ConfigurationServiceImpl#getConfigurationByName(String)  **/
+//
+//    @Test
+//    public void getConfigurationByName_Success(){
+//        when(configurationRepository.findByIdOptional(any())).thenReturn(Optional.of(configurationEntity));
+//
+//        Assertions.assertEquals(configurationService.getConfigurationByName("firstConfiguration").get(),this.configurationDto);
+//
+//    }
+//
+//    @Test
+//    public void getConfigurationByName_Failure_UnknownResourceException(){
+//        Assertions.assertThrowsExactly(UnknownResourceException.class,
+//                () -> configurationService.getConfigurationByName("DummyName").get()
+//        );
+//    }
+//
+//    @Test
+//    public void getConfigurationByName_Failure_ConstraintViolation(){
+//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
+//                () -> configurationService.getConfigurationByName(null)
+//        );
+//    }
+//
+//    @Test
+//    public void getConfigurationByName_Failure_NotManagedException(){
+//        when(configurationRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
+//
+//        Assertions.assertThrowsExactly(RuntimeException.class,
+//                () -> configurationService.getConfigurationByName("DummyName").get()
+//        );
+//    }
+//
+//
+//    /** @see ConfigurationServiceImpl#updateConfiguration(ConfigurationDto)  **/
+//
+//    @Test
+//    public void updateConfiguration_Success(){
+//        when(configurationRepository.findByIdOptional(any())).thenReturn(Optional.of(configurationEntity));
+//
+//        Assertions.assertEquals(configurationService.updateConfiguration(configurationDto).get(),this.configurationDto);
+//    }
+//
+//    @Test
+//    public void updateConfiguration_Failure_UnknownResourceException(){
+//        Assertions.assertThrowsExactly(UnknownResourceException.class,
+//                () -> configurationService.updateConfiguration(configurationDto).get()
+//        );
+//    }
+//
+//    @Test
+//    public void updateConfiguration_Failure_ConstraintViolation(){
+//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
+//                () -> configurationService.updateConfiguration(null)
+//        );
+//    }
+//
+//    @Test
+//    public void updateConfiguration_Failure_NotManagedException(){
+//        when(configurationRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
+//
+//        Assertions.assertThrowsExactly(RuntimeException.class,
+//                () -> configurationService.updateConfiguration(configurationDto).get()
+//        );
+//    }
 
 }

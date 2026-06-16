@@ -18,11 +18,11 @@ public class RoleController {
     @Inject
     RoleService roleService;
 
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public @JsonView(Views.Basic.class) List<RoleDto> getAllRoles(){
-//        return roleService.getAllRoles().get();
-//    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public @JsonView(Views.Basic.class) List<RoleDto> getAllRoles(){
+        return roleService.listAll();
+    }
 //
 //    @GET
 //    @Produces(MediaType.APPLICATION_JSON)

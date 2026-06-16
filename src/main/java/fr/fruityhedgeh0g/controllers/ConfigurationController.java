@@ -21,15 +21,16 @@ public class ConfigurationController {
     ConfigurationService configurationService;
 
     @GET
-    @Path("/{name}")
-    public ConfigurationDto getConfigurationByName(@PathParam("name") String name) {
-        return configurationService.getConfigurationByName(name)
-                .getOrElseThrow(e -> new RuntimeException(e));
-    }
-
-    @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<ConfigurationDto> getAllConfigurations(){
-        return configurationService.getAllConfigurations().get();
+        return configurationService.listAll();
     }
+
+//    @GET
+//    @Path("/{name}")
+//    public ConfigurationDto getConfigurationByName(@PathParam("name") String name) {
+//        return configurationService.getConfigurationByName(name)
+//                .getOrElseThrow(e -> new RuntimeException(e));
+//    }
+
 }

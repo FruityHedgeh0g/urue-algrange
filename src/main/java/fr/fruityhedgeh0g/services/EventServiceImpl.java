@@ -1,23 +1,17 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
-import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.entities.EventEntity;
 import fr.fruityhedgeh0g.repositories.EventRepository;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
 import fr.fruityhedgeh0g.utilities.mappers.EventMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -33,28 +27,30 @@ public class EventServiceImpl implements EventService {
     EventMapper eventMapper;
 
     @Override
-    public Try<List<EventDto>> listAll() {
+    public List<EventDto> listAll() {
+        return eventRepository.listAll()
+                .stream()
+                .map(eventMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Optional<EventDto> getById(UUID eventId) {
         return null;
     }
 
     @Override
-    public Try<EventDto> getById(UUID eventId) {
+    public EventDto create(EventDto eventDto) {
         return null;
     }
 
     @Override
-    public Try<EventDto> create(EventDto eventDto) {
+    public EventDto update(EventDto eventDto) {
         return null;
     }
 
     @Override
-    public Try<EventDto> update(EventDto eventDto) {
-        return null;
-    }
-
-    @Override
-    public Try<EventDto> delete(UUID eventId) {
-        return null;
+    public void delete(UUID eventId) {
     }
 
 //    @Transactional

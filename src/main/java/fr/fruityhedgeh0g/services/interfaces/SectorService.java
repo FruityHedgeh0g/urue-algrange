@@ -7,14 +7,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface SectorService {
-    Try<List<SectorDto>> listAll();
-    Try<SectorDto> getById(@NotNull UUID sectorId);
-    Try<SectorDto> create(@NotNull @Valid SectorDto sectorDto);
-    Try<SectorDto> update(@NotNull @Valid SectorDto sectorDto);
-    Try<SectorDto> delete(@NotNull UUID sectorId);
+    List<SectorDto> listAll();
+    Optional<SectorDto> getById(@NotNull UUID sectorId);
+    SectorDto create(@NotNull @Valid SectorDto sectorDto);
+    SectorDto update(@NotNull @Valid SectorDto sectorDto);
+    void delete(@NotNull UUID sectorId);
 
 //    Try<List<SectorDto>> getAllSectors();
 //    Try<SectorDto> getSectorById(@NotNull UUID sectorId);

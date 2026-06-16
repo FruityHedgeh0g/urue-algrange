@@ -5,8 +5,6 @@ import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
@@ -17,11 +15,10 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
-@ApplicationScoped
-@Alternative
 @Priority(100)
 @Authenticated
 @Decorator
@@ -39,27 +36,27 @@ public class GroupAuthProxy implements GroupService {
 
 
     @Override
-    public Try<List<GroupDto>> listAll() {
+    public List<GroupDto> listAll() {
         return null;
     }
 
     @Override
-    public Try<GroupDto> getById(UUID groupId) {
+    public Optional<GroupDto> getById(UUID groupId) {
         return null;
     }
 
     @Override
-    public Try<GroupDto> create(GroupDto groupDto) {
+    public GroupDto create(GroupDto groupDto) {
         return null;
     }
 
     @Override
-    public Try<GroupDto> update(GroupDto groupDto) {
+    public GroupDto update(GroupDto groupDto) {
         return null;
     }
 
     @Override
-    public Try<GroupDto> delete(UUID groupId) {
-        return null;
+    public void delete(UUID groupId) {
+
     }
 }

@@ -1,26 +1,17 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
-import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
-import fr.fruityhedgeh0g.exceptions.InvalidInputException;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.entities.GroupEntity;
-import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @ApplicationScoped
@@ -38,28 +29,31 @@ public class GroupServiceImpl implements GroupService {
     GroupMapper groupMapper;
 
     @Override
-    public Try<List<GroupDto>> listAll() {
+    public List<GroupDto> listAll() {
+        return groupRepository.listAll()
+                .stream()
+                .map(groupMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Optional<GroupDto> getById(UUID groupId) {
         return null;
     }
 
     @Override
-    public Try<GroupDto> getById(UUID groupId) {
+    public GroupDto create(GroupDto groupDto) {
         return null;
     }
 
     @Override
-    public Try<GroupDto> create(GroupDto groupDto) {
+    public GroupDto update(GroupDto groupDto) {
         return null;
     }
 
     @Override
-    public Try<GroupDto> update(GroupDto groupDto) {
-        return null;
-    }
+    public void delete(UUID groupId) {
 
-    @Override
-    public Try<GroupDto> delete(UUID groupId) {
-        return null;
     }
 
 //    //Todo faire un checkup du service pour assurer la cohérence des méthodes

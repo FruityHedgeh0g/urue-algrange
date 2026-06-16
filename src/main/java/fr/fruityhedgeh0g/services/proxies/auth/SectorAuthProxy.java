@@ -5,8 +5,6 @@ import fr.fruityhedgeh0g.services.interfaces.SectorService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
@@ -17,11 +15,10 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
-@ApplicationScoped
-@Alternative
 @Priority(100)
 @Authenticated
 @Decorator
@@ -39,27 +36,26 @@ public class SectorAuthProxy implements SectorService {
 
 
     @Override
-    public Try<List<SectorDto>> listAll() {
+    public List<SectorDto> listAll() {
         return null;
     }
 
     @Override
-    public Try<SectorDto> getById(UUID sectorId) {
+    public Optional<SectorDto> getById(UUID sectorId) {
         return null;
     }
 
     @Override
-    public Try<SectorDto> create(SectorDto sectorDto) {
+    public SectorDto create(SectorDto sectorDto) {
         return null;
     }
 
     @Override
-    public Try<SectorDto> update(SectorDto sectorDto) {
+    public SectorDto update(SectorDto sectorDto) {
         return null;
     }
 
     @Override
-    public Try<SectorDto> delete(UUID sectorId) {
-        return null;
+    public void delete(UUID sectorId) {
     }
 }

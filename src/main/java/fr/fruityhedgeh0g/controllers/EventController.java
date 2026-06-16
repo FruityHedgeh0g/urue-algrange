@@ -17,11 +17,11 @@ public class EventController {
     @Inject
     EventService eventService;
 
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public @JsonView(Views.Basic.class) List<EventDto> getAllEvents(){
-//        return eventService.getAllEvents().get();
-//    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public @JsonView(Views.Basic.class) List<EventDto> getAllEvents(){
+        return eventService.listAll();
+    }
 
 //    @POST
 //    @Produces(MediaType.APPLICATION_JSON)

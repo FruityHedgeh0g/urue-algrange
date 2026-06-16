@@ -1,21 +1,17 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
-import fr.fruityhedgeh0g.entities.configurations.ConfigurationEntity;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
 import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @ApplicationScoped
@@ -30,17 +26,20 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     ConfigurationMapper configurationMapper;
 
     @Override
-    public Try<List<ConfigurationDto>> listAll() {
+    public List<ConfigurationDto> listAll() {
+        return configurationRepository.listAll()
+                .stream()
+                .map(configurationMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Optional<ConfigurationDto> getByName(String name) {
         return null;
     }
 
     @Override
-    public Try<ConfigurationDto> getByName(String name) {
-        return null;
-    }
-
-    @Override
-    public Try<ConfigurationDto> update(ConfigurationDto configurationDto) {
+    public ConfigurationDto update(ConfigurationDto configurationDto) {
         return null;
     }
 

@@ -5,8 +5,6 @@ import fr.fruityhedgeh0g.services.interfaces.PostService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
@@ -17,11 +15,10 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
-@ApplicationScoped
-@Alternative
 @Priority(100)
 @Authenticated
 @Decorator
@@ -39,27 +36,27 @@ public class PostAuthProxy implements PostService {
 
 
     @Override
-    public Try<List<PostDto>> listAll() {
+    public List<PostDto> listAll() {
         return null;
     }
 
     @Override
-    public Try<PostDto> getById(UUID postId) {
+    public Optional<PostDto> getById(UUID postId) {
         return null;
     }
 
     @Override
-    public Try<PostDto> create(PostDto postDto) {
+    public PostDto create(PostDto postDto) {
         return null;
     }
 
     @Override
-    public Try<PostDto> update(PostDto postDto) {
+    public PostDto update(PostDto postDto) {
         return null;
     }
 
     @Override
-    public Try<PostDto> delete(UUID postId) {
-        return null;
+    public void delete(UUID postId) {
+        ;
     }
 }

@@ -5,8 +5,6 @@ import fr.fruityhedgeh0g.services.interfaces.EventService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
@@ -17,11 +15,10 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
-@ApplicationScoped
-@Alternative
 @Priority(100)
 @Authenticated
 @Decorator
@@ -39,27 +36,27 @@ public class EventAuthProxy implements EventService {
 
 
     @Override
-    public Try<List<EventDto>> listAll() {
+    public List<EventDto> listAll() {
         return null;
     }
 
     @Override
-    public Try<EventDto> getById(UUID eventId) {
+    public Optional<EventDto> getById(UUID eventId) {
         return null;
     }
 
     @Override
-    public Try<EventDto> create(EventDto eventDto) {
+    public EventDto create(EventDto eventDto) {
         return null;
     }
 
     @Override
-    public Try<EventDto> update(EventDto eventDto) {
+    public EventDto update(EventDto eventDto) {
         return null;
     }
 
     @Override
-    public Try<EventDto> delete(UUID eventId) {
-        return null;
+    public void delete(UUID eventId) {
+
     }
 }

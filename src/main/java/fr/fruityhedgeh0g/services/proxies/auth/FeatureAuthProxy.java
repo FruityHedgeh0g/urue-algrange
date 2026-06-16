@@ -5,8 +5,6 @@ import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
@@ -17,10 +15,9 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
-@ApplicationScoped
-@Alternative
 @Priority(100)
 @Authenticated
 @Decorator
@@ -38,17 +35,17 @@ public class FeatureAuthProxy implements FeatureService {
 
 
     @Override
-    public Try<List<FeatureDto>> listAll() {
+    public List<FeatureDto> listAll() {
         return null;
     }
 
     @Override
-    public Try<FeatureDto> getByName(String name) {
+    public Optional<FeatureDto> getByName(String name) {
         return null;
     }
 
     @Override
-    public Try<FeatureDto> update(FeatureDto featureDto) {
+    public FeatureDto update(FeatureDto featureDto) {
         return null;
     }
 }

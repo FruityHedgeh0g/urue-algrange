@@ -20,13 +20,11 @@ public class UserController {
     @Inject
     UserService userService;
 
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
-//        List<UserDto> users = userService.getAllUsers().get();
-//        Log.debugf("Retrieved %s users", users.toString());
-//        return users;
-//    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
+        return userService.listAll();
+    }
 //
 //    @POST
 //    @Produces(MediaType.APPLICATION_JSON)

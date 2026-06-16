@@ -6,14 +6,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface EventService {
-    Try<List<EventDto>> listAll();
-    Try<EventDto> getById(@NotNull UUID eventId);
-    Try<EventDto> create(@NotNull @Valid EventDto eventDto);
-    Try<EventDto> update(@NotNull @Valid EventDto eventDto);
-    Try<EventDto> delete(@NotNull UUID eventId);
+    List<EventDto> listAll();
+    Optional<EventDto> getById(@NotNull UUID eventId);
+    EventDto create(@NotNull @Valid EventDto eventDto);
+    EventDto update(@NotNull @Valid EventDto eventDto);
+    void delete(@NotNull UUID eventId);
 //    Try<List<EventDto>> getAllEvents();
 //    Try<List<EventDto>> getAllEventsFiltered(@NotNull String filter);
 //    Try<EventDto> getEventById(@NotNull UUID eventId);

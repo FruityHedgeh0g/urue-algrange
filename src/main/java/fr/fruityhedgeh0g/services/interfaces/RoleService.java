@@ -20,7 +20,7 @@ public interface RoleService {
     Optional<RoleDto> getById(@NotNull UUID roleId);
     RoleDto create(@NotNull @Valid RoleDto roleDto);
     RoleDto update(@NotNull @Valid RoleDto roleDto);
-    void delete(@NotNull UUID rolId);
+    void delete(@NotNull UUID roleId);
 
 //    Try<List<RoleDto>> getAllRoles();
 //    Try<List<RoleDto>> getAllRolesFilteredByRoleType(@NotNull @Size(min = 1) RoleTypeEnum[] filter);

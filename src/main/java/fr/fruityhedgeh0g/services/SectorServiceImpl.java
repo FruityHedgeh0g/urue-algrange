@@ -1,26 +1,18 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
-import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
-import fr.fruityhedgeh0g.exceptions.InvalidInputException;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.entities.GroupEntity;
-import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -39,28 +31,31 @@ public class SectorServiceImpl implements SectorService {
     SectorMapper sectorMapper;
 
     @Override
-    public Try<List<SectorDto>> listAll() {
+    public List<SectorDto> listAll() {
+        return sectorRepository.listAll()
+                .stream()
+                .map(sectorMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Optional<SectorDto> getById(UUID sectorId) {
         return null;
     }
 
     @Override
-    public Try<SectorDto> getById(UUID sectorId) {
+    public SectorDto create(SectorDto sectorDto) {
         return null;
     }
 
     @Override
-    public Try<SectorDto> create(SectorDto sectorDto) {
+    public SectorDto update(SectorDto sectorDto) {
         return null;
     }
 
     @Override
-    public Try<SectorDto> update(SectorDto sectorDto) {
-        return null;
-    }
+    public void delete(UUID sectorId) {
 
-    @Override
-    public Try<SectorDto> delete(UUID sectorId) {
-        return null;
     }
 
 //    @Override

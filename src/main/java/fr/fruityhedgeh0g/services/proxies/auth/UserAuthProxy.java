@@ -21,8 +21,6 @@ import java.util.UUID;
 
 
 @AllArgsConstructor
-@ApplicationScoped
-@Alternative
 @Priority(100)
 @Authenticated
 @Decorator

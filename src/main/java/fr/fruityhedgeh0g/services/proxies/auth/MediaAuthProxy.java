@@ -5,8 +5,6 @@ import fr.fruityhedgeh0g.services.interfaces.MediaService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
@@ -17,11 +15,10 @@ import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
-@ApplicationScoped
-@Alternative
 @Priority(100)
 @Authenticated
 @Decorator
@@ -39,27 +36,27 @@ public class MediaAuthProxy implements MediaService {
 
 
     @Override
-    public Try<List<MediaDto>> listAll() {
+    public List<MediaDto> listAll() {
         return null;
     }
 
     @Override
-    public Try<MediaDto> getById(UUID mediaId) {
+    public Optional<MediaDto> getById(UUID mediaId) {
         return null;
     }
 
     @Override
-    public Try<MediaDto> create(MediaDto mediaDto) {
+    public MediaDto create(MediaDto mediaDto) {
         return null;
     }
 
     @Override
-    public Try<MediaDto> update(MediaDto mediaDto) {
+    public MediaDto update(MediaDto mediaDto) {
         return null;
     }
 
     @Override
-    public Try<MediaDto> delete(UUID mediaId) {
-        return null;
+    public void delete(UUID mediaId) {
+        ;
     }
 }

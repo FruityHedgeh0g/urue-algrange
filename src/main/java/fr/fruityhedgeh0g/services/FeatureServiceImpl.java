@@ -1,21 +1,17 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
-import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.FeatureRepository;
 import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import fr.fruityhedgeh0g.utilities.mappers.FeatureMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @ApplicationScoped
@@ -29,17 +25,20 @@ public class FeatureServiceImpl implements FeatureService {
     FeatureRepository featureRepository;
 
     @Override
-    public Try<List<FeatureDto>> listAll() {
+    public List<FeatureDto> listAll() {
+        return featureRepository.listAll()
+                .stream()
+                .map(featureMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Optional<FeatureDto> getByName(String name) {
         return null;
     }
 
     @Override
-    public Try<FeatureDto> getByName(String name) {
-        return null;
-    }
-
-    @Override
-    public Try<FeatureDto> update(FeatureDto featureDto) {
+    public FeatureDto update(FeatureDto featureDto) {
         return null;
     }
 

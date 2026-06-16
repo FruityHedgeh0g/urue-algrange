@@ -1,23 +1,17 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
-import fr.fruityhedgeh0g.entities.medias.MediaEntity;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.services.interfaces.MediaService;
 import fr.fruityhedgeh0g.utilities.mappers.MediaMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -32,28 +26,30 @@ public class MediaServiceImpl implements MediaService {
     MediaMapper mediaMapper;
 
     @Override
-    public Try<List<MediaDto>> listAll() {
+    public List<MediaDto> listAll() {
+        return mediaRepository.listAll()
+                .stream()
+                .map(mediaMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Optional<MediaDto> getById(UUID mediaId) {
         return null;
     }
 
     @Override
-    public Try<MediaDto> getById(UUID mediaId) {
+    public MediaDto create(MediaDto mediaDto) {
         return null;
     }
 
     @Override
-    public Try<MediaDto> create(MediaDto mediaDto) {
+    public MediaDto update(MediaDto mediaDto) {
         return null;
     }
 
     @Override
-    public Try<MediaDto> update(MediaDto mediaDto) {
-        return null;
-    }
-
-    @Override
-    public Try<MediaDto> delete(UUID mediaId) {
-        return null;
+    public void delete(UUID mediaId) {
     }
 
 //    @Transactional

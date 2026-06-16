@@ -1,23 +1,17 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
-import fr.fruityhedgeh0g.entities.PostEntity;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -32,28 +26,31 @@ public class PostServiceImpl implements PostService {
     PostMapper postMapper;
 
     @Override
-    public Try<List<PostDto>> listAll() {
+    public List<PostDto> listAll() {
+        return postRepository.listAll()
+                .stream()
+                .map(postMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Optional<PostDto> getById(UUID postId) {
         return null;
     }
 
     @Override
-    public Try<PostDto> getById(UUID postId) {
+    public PostDto create(PostDto postDto) {
         return null;
     }
 
     @Override
-    public Try<PostDto> create(PostDto postDto) {
+    public PostDto update(PostDto postDto) {
         return null;
     }
 
     @Override
-    public Try<PostDto> update(PostDto postDto) {
-        return null;
-    }
+    public void delete(UUID postId) {
 
-    @Override
-    public Try<PostDto> delete(UUID postId) {
-        return null;
     }
 
 //    @Override

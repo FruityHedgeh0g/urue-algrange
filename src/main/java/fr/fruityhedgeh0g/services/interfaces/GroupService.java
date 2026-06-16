@@ -9,16 +9,17 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 public interface GroupService {
 
-    Try<List<GroupDto>> listAll();
-    Try<GroupDto> getById(@NotNull UUID groupId);
-    Try<GroupDto> create(@NotNull @Valid GroupDto groupDto );
-    Try<GroupDto> update(@NotNull @Valid GroupDto groupDto );
-    Try<GroupDto> delete(@NotNull UUID groupId);
+    List<GroupDto> listAll();
+    Optional<GroupDto> getById(@NotNull UUID groupId);
+    GroupDto create(@NotNull @Valid GroupDto groupDto );
+    GroupDto update(@NotNull @Valid GroupDto groupDto );
+    void delete(@NotNull UUID groupId);
 
 //    Try<List<GroupDto>> getAllGroups();
 //    Try<GroupDto> getGroupById(@NotNull UUID groupId);
