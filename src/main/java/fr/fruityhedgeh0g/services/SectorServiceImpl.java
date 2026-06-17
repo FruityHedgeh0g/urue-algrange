@@ -10,6 +10,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
+import fr.fruityhedgeh0g.services.interfaces.internal.InternalGroupService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.smallrye.common.annotation.Identifier;
@@ -31,8 +32,8 @@ public class SectorServiceImpl implements SectorService {
     @Inject
     SectorRepository sectorRepository;
 
-    @Inject
-    GroupService groupService;
+//    @Inject
+//    InternalGroupService internalGroupService;
 
     @Inject
     SectorMapper sectorMapper;
@@ -93,19 +94,17 @@ public class SectorServiceImpl implements SectorService {
         SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
                 .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
-        GroupDto groupDto = groupService.getById(groupId)
-                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
-
-        if (groupDto.getSector() != null) {
-            if (groupDto.getSector().sectorId().equals(sectorId)) return;
-            throw new DuplicateResourceException("Group already assigned to another sector");
-        }
-
-        GroupEntity groupEntity = groupMapper.toEntity(groupDto);
-
-        sectorEntity.addGroup(groupEntity);
-
-        sectorRepository.persist(sectorEntity);
+//        GroupEntity groupEntity = internalGroupService.getInternalEntityById(groupId)
+//                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
+//
+//        if (groupEntity.getSector() != null) {
+//            if (groupEntity.getSector().getSectorId().equals(sectorId)) return;
+//            throw new DuplicateResourceException("Group already assigned to another sector");
+//        }
+//
+//        sectorEntity.addGroup(groupEntity);
+//
+//        sectorRepository.persist(sectorEntity);
     }
 
 

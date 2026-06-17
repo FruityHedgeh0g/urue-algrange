@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
+import fr.fruityhedgeh0g.services.interfaces.internal.InternalGroupService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,13 +22,9 @@ import java.util.*;
 @ApplicationScoped
 @Identifier("serviceImpl")
 @Default
-public class GroupServiceImpl implements GroupService {
+public class GroupServiceImpl implements InternalGroupService, GroupService {
     @Inject
     GroupRepository groupRepository;
-
-    @Inject
-    @Identifier( "serviceImpl")
-    UserService userServiceImpl;
 
     @Inject
     GroupMapper groupMapper;
@@ -78,6 +75,11 @@ public class GroupServiceImpl implements GroupService {
     public void delete(UUID groupId) {
         //todo: développer la suppression.
         groupRepository.deleteById(groupId);
+    }
+
+    @Override
+    public Optional<GroupEntity> getInternalEntityById(UUID groupId) {
+        return Optional.empty();
     }
 
 
