@@ -8,6 +8,7 @@ import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -35,20 +36,24 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Optional<PostDto> getById(UUID postId) {
-        return null;
+        return postRepository.findByIdOptional(postId)
+                .map(postMapper::toDto);
     }
 
     @Override
+    @Transactional
     public PostDto create(PostDto postDto) {
         return null;
     }
 
     @Override
+    @Transactional
     public PostDto update(PostDto postDto) {
         return null;
     }
 
     @Override
+    @Transactional
     public void delete(UUID postId) {
 
     }

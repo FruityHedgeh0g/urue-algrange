@@ -60,7 +60,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public RoleDto update(RoleDto roleDto) {
         RoleEntity roleEntity = roleRepository.findByIdOptional(roleDto.getRoleId())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown is the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
 
         if (!roleEntity.getName().equals(roleDto.getName()) && roleRepository.existsByName(roleDto.getName()))
             throw new DuplicateResourceException("A role with this name already exists in the system.");

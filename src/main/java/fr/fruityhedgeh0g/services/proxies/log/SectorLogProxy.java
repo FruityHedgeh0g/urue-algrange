@@ -27,7 +27,7 @@ public class SectorLogProxy implements SectorService {
     public List<SectorDto> listAll() {
         Log.debugf("Trying to retrieve all sectors.");
         return Try.of(sectorService::listAll)
-                .onSuccess(roles -> Log.debugf("%d sectors retrieved.",roles.size()))
+                .onSuccess(sectors -> Log.debugf("%d sectors retrieved.",sectors.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving sectors."))
                 .get();
     }
@@ -36,8 +36,8 @@ public class SectorLogProxy implements SectorService {
     public Optional<SectorDto> getById(UUID sectorId) {
         Log.debugf("Trying to retrieve sector by id %s.",sectorId);
         return Try.of(() -> sectorService.getById(sectorId))
-                .onSuccess(role -> {
-                    if (role.isPresent())
+                .onSuccess(sector -> {
+                    if (sector.isPresent())
                         Log.debugf("Sector retrieved.");
                     else Log.debugf("There is no sector with id %s.",sectorId);
                 })
@@ -49,7 +49,7 @@ public class SectorLogProxy implements SectorService {
     public SectorDto create(SectorDto sectorDto) {
         Log.debugf("Trying to create a new sector : %s", sectorDto.toString());
         return Try.of(() -> sectorService.create(sectorDto))
-                .onSuccess(role -> Log.debugf("Sector created."))
+                .onSuccess(sector -> Log.debugf("Sector created."))
                 .onFailure(t -> {
                     switch(t){
                         case DuplicateResourceException ex -> Log.errorf(ex,"A sector already exists for the id provided [%s].", sectorDto.getSectorId());
@@ -63,7 +63,7 @@ public class SectorLogProxy implements SectorService {
     public SectorDto update(SectorDto sectorDto) {
         Log.debugf("Trying to update an existing sector : %s", sectorDto.toString());
         return Try.of(() -> sectorService.update(sectorDto))
-                .onSuccess(role -> Log.debugf("Sector updated."))
+                .onSuccess(sector -> Log.debugf("Sector updated."))
                 .onFailure(t -> {
                     switch(t){
                         case UnknownResourceException ex -> Log.errorf(ex,"There is no sector with id %s.", sectorDto.getSectorId());
@@ -81,5 +81,15 @@ public class SectorLogProxy implements SectorService {
                 .onSuccess(v -> Log.debugf("Sector deleted."))
                 .onFailure(t -> Log.errorf(t,"An error occurred during sector deletion."))
                 .get();
+    }
+
+    @Override
+    public void assignGroup(UUID sectorId, UUID groupId) {
+
+    }
+
+    @Override
+    public void unassignGroup(UUID sectorId, UUID groupId) {
+
     }
 }

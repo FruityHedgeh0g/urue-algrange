@@ -16,6 +16,8 @@ public interface SectorService {
     SectorDto create(@NotNull @Valid SectorDto sectorDto);
     SectorDto update(@NotNull @Valid SectorDto sectorDto);
     void delete(@NotNull UUID sectorId);
+    void assignGroup(@NotNull UUID sectorId, @NotNull UUID groupId);
+    void unassignGroup(@NotNull UUID sectorId, @NotNull UUID groupId);
 
 //    Try<List<SectorDto>> getAllSectors();
 //    Try<SectorDto> getSectorById(@NotNull UUID sectorId);

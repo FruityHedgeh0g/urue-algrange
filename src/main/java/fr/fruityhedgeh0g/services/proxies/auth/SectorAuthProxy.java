@@ -58,4 +58,14 @@ public class SectorAuthProxy implements SectorService {
     public void delete(UUID sectorId) {
         sectorService.delete(sectorId);
     }
+
+    @Override
+    public void assignGroup(UUID sectorId, UUID groupId) {
+
+    }
+
+    @Override
+    public void unassignGroup(UUID sectorId, UUID groupId) {
+
+    }
 }

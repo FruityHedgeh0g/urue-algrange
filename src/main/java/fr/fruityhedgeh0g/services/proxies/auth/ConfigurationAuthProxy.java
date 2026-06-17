@@ -35,16 +35,16 @@ public class ConfigurationAuthProxy implements ConfigurationService {
 
     @Override
     public List<ConfigurationDto> listAll() {
-        return null;
+        return configurationService.listAll();
     }
 
     @Override
     public Optional<ConfigurationDto> getByName(String name) {
-        return null;
+        return configurationService.getByName(name);
     }
 
     @Override
     public ConfigurationDto update(ConfigurationDto configurationDto) {
-        return null;
+        return configurationService.update(configurationDto);
     }
 }

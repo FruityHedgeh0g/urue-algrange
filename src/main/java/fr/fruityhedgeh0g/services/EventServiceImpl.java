@@ -8,6 +8,7 @@ import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -36,20 +37,24 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Optional<EventDto> getById(UUID eventId) {
-        return null;
+        return eventRepository.findByIdOptional(eventId)
+                .map(eventMapper::toDto);
     }
 
     @Override
+    @Transactional
     public EventDto create(EventDto eventDto) {
         return null;
     }
 
     @Override
+    @Transactional
     public EventDto update(EventDto eventDto) {
         return null;
     }
 
     @Override
+    @Transactional
     public void delete(UUID eventId) {
     }
 

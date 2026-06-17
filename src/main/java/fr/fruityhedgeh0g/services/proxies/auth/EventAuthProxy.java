@@ -36,26 +36,26 @@ public class EventAuthProxy implements EventService {
 
     @Override
     public List<EventDto> listAll() {
-        return null;
+        return eventService.listAll();
     }
 
     @Override
     public Optional<EventDto> getById(UUID eventId) {
-        return null;
+        return eventService.getById(eventId);
     }
 
     @Override
     public EventDto create(EventDto eventDto) {
-        return null;
+        return eventService.create(eventDto);
     }
 
     @Override
     public EventDto update(EventDto eventDto) {
-        return null;
+        return eventService.update(eventDto);
     }
 
     @Override
     public void delete(UUID eventId) {
-
+        eventService.delete(eventId);
     }
 }

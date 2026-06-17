@@ -1,6 +1,10 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
+import fr.fruityhedgeh0g.entities.configurations.ConfigurationEntity;
+import fr.fruityhedgeh0g.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
 import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;
@@ -8,6 +12,7 @@ import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -35,12 +40,20 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public Optional<ConfigurationDto> getByName(String name) {
-        return null;
+        return configurationRepository.findByName(name)
+                .map(configurationMapper::toDto);
     }
 
     @Override
+    @Transactional
     public ConfigurationDto update(ConfigurationDto configurationDto) {
-        return null;
+        ConfigurationEntity configurationEntity = configurationRepository.findByName(configurationDto.getName())
+                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+
+        configurationEntity = configurationMapper.partialDtoToEntity(configurationEntity,configurationDto);
+        configurationRepository.persist(configurationEntity);
+
+        return configurationMapper.toDto(configurationEntity);
     }
 
 //    @Transactional

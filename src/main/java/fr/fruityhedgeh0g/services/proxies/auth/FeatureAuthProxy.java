@@ -35,16 +35,16 @@ public class FeatureAuthProxy implements FeatureService {
 
     @Override
     public List<FeatureDto> listAll() {
-        return null;
+        return featureService.listAll();
     }
 
     @Override
     public Optional<FeatureDto> getByName(String name) {
-        return null;
+        return featureService.getByName(name);
     }
 
     @Override
     public FeatureDto update(FeatureDto featureDto) {
-        return null;
+        return featureService.update(featureDto);
     }
 }

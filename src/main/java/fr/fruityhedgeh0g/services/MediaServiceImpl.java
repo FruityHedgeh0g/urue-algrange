@@ -8,6 +8,7 @@ import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -35,20 +36,24 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public Optional<MediaDto> getById(UUID mediaId) {
-        return null;
+        return mediaRepository.findByIdOptional(mediaId)
+                .map(mediaMapper::toDto);
     }
 
     @Override
+    @Transactional
     public MediaDto create(MediaDto mediaDto) {
         return null;
     }
 
     @Override
+    @Transactional
     public MediaDto update(MediaDto mediaDto) {
         return null;
     }
 
     @Override
+    @Transactional
     public void delete(UUID mediaId) {
     }
 

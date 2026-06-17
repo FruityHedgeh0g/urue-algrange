@@ -36,26 +36,26 @@ public class PostAuthProxy implements PostService {
 
     @Override
     public List<PostDto> listAll() {
-        return null;
+        return postService.listAll();
     }
 
     @Override
     public Optional<PostDto> getById(UUID postId) {
-        return null;
+        return postService.getById(postId);
     }
 
     @Override
     public PostDto create(PostDto postDto) {
-        return null;
+        return postService.create(postDto);
     }
 
     @Override
     public PostDto update(PostDto postDto) {
-        return null;
+        return postService.update(postDto);
     }
 
     @Override
     public void delete(UUID postId) {
-        ;
+        postService.delete(postId);
     }
 }

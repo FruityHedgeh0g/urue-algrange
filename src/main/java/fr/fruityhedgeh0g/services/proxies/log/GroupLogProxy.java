@@ -28,7 +28,7 @@ public class GroupLogProxy implements GroupService {
     public List<GroupDto> listAll() {
         Log.debugf("Trying to retrieve all groups.");
         return Try.of(groupService::listAll)
-                .onSuccess(roles -> Log.debugf("%d groups retrieved.",roles.size()))
+                .onSuccess(groups -> Log.debugf("%d groups retrieved.",groups.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving groups."))
                 .get();
     }
@@ -37,8 +37,8 @@ public class GroupLogProxy implements GroupService {
     public Optional<GroupDto> getById(UUID groupId) {
         Log.debugf("Trying to retrieve group by id %s.",groupId);
         return Try.of(() -> groupService.getById(groupId))
-                .onSuccess(role -> {
-                    if (role.isPresent())
+                .onSuccess(group -> {
+                    if (group.isPresent())
                         Log.debugf("Group retrieved.");
                     else Log.debugf("There is no group with id %s.",groupId);
                 })
@@ -50,7 +50,7 @@ public class GroupLogProxy implements GroupService {
     public GroupDto create(GroupDto groupDto) {
         Log.debugf("Trying to create a new group : %s", groupDto.toString());
         return Try.of(() -> groupService.create(groupDto))
-                .onSuccess(role -> Log.debugf("Group created."))
+                .onSuccess(group -> Log.debugf("Group created."))
                 .onFailure(t -> {
                     switch(t){
                         case DuplicateResourceException ex -> Log.errorf(ex,"A group already exists for the id provided [%s].", groupDto.getGroupId());
@@ -64,7 +64,7 @@ public class GroupLogProxy implements GroupService {
     public GroupDto update(GroupDto groupDto) {
         Log.debugf("Trying to update an existing group : %s", groupDto.toString());
         return Try.of(() -> groupService.update(groupDto))
-                .onSuccess(role -> Log.debugf("Group updated."))
+                .onSuccess(group -> Log.debugf("Group updated."))
                 .onFailure(t -> {
                     switch(t){
                         case UnknownResourceException ex -> Log.errorf(ex,"There is no group with id %s.", groupDto.getGroupId());

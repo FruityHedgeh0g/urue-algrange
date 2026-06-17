@@ -36,26 +36,26 @@ public class MediaAuthProxy implements MediaService {
 
     @Override
     public List<MediaDto> listAll() {
-        return null;
+        return mediaService.listAll();
     }
 
     @Override
     public Optional<MediaDto> getById(UUID mediaId) {
-        return null;
+        return mediaService.getById(mediaId);
     }
 
     @Override
     public MediaDto create(MediaDto mediaDto) {
-        return null;
+        return mediaService.create(mediaDto);
     }
 
     @Override
     public MediaDto update(MediaDto mediaDto) {
-        return null;
+        return mediaService.update(mediaDto);
     }
 
     @Override
     public void delete(UUID mediaId) {
-        ;
+        mediaService.delete(mediaId);
     }
 }

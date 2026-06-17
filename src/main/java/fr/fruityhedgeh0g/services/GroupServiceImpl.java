@@ -13,6 +13,7 @@ import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
@@ -47,6 +48,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    @Transactional
     public GroupDto create(GroupDto groupDto) {
         if (groupRepository.existsByName(groupDto.getName()))
             throw new DuplicateResourceException("This resource already exists in the system.");
@@ -58,9 +60,10 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    @Transactional
     public GroupDto update(GroupDto groupDto) {
         GroupEntity groupEntity = groupRepository.findByIdOptional(groupDto.getGroupId())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown is the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
 
         if (!groupEntity.getName().equals(groupDto.getName()) && groupRepository.existsByName(groupDto.getName()))
             throw new DuplicateResourceException("A group with this name already exists in the system.");
@@ -72,11 +75,12 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID groupId) {
+        //todo: développer la suppression.
         groupRepository.deleteById(groupId);
     }
 
-//    //Todo faire un checkup du service pour assurer la cohérence des méthodes
 //
 //    @Override
 //    @Transactional
