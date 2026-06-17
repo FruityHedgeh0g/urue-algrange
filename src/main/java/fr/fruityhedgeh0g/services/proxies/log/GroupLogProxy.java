@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services.proxies.log;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
+import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
@@ -83,4 +84,5 @@ public class GroupLogProxy implements GroupService {
                 .onFailure(t -> Log.errorf(t,"An error occurred during group deletion."))
                 .get();
     }
+
 }

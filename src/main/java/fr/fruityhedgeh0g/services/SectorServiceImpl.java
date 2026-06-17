@@ -10,6 +10,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
+import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +36,9 @@ public class SectorServiceImpl implements SectorService {
 
     @Inject
     SectorMapper sectorMapper;
+
+    @Inject
+    GroupMapper groupMapper;
 
     @Override
     public List<SectorDto> listAll() {
@@ -97,7 +101,11 @@ public class SectorServiceImpl implements SectorService {
             throw new DuplicateResourceException("Group already assigned to another sector");
         }
 
-        //todo: to continue
+        GroupEntity groupEntity = groupMapper.toEntity(groupDto);
+
+        sectorEntity.addGroup(groupEntity);
+
+        sectorRepository.persist(sectorEntity);
     }
 
 

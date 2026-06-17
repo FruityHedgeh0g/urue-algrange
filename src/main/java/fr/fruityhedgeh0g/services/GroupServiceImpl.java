@@ -2,7 +2,6 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
@@ -80,6 +79,7 @@ public class GroupServiceImpl implements GroupService {
         //todo: développer la suppression.
         groupRepository.deleteById(groupId);
     }
+
 
 //
 //    @Override

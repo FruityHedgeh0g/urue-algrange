@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services.proxies.auth;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
+import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
@@ -8,10 +9,7 @@ import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
-import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
@@ -58,4 +56,5 @@ public class GroupAuthProxy implements GroupService {
     public void delete(UUID groupId) {
         groupService.delete(groupId);
     }
+
 }

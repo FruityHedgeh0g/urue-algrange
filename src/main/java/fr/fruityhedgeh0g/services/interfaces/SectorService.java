@@ -27,5 +27,5 @@ public interface SectorService {
 //    Try<SectorDto> assignGroupToSector(@NotNull UUID sectorId, @NotNull UUID groupId);
 //    Try<SectorDto> unassignGroupFromSector(@NotNull UUID sectorId, @NotNull UUID groupId);
 
-
 }
+

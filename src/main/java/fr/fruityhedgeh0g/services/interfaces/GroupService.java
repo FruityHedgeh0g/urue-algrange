@@ -20,6 +20,8 @@ public interface GroupService {
     GroupDto create(@NotNull @Valid GroupDto groupDto );
     GroupDto update(@NotNull @Valid GroupDto groupDto );
     void delete(@NotNull UUID groupId);
+    Optional<GroupEntity> getEntityById(@NotNull UUID groupId);
+
 
 //    Try<List<GroupDto>> getAllGroups();
 //    Try<GroupDto> getGroupById(@NotNull UUID groupId);
