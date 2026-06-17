@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
+import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
@@ -29,7 +31,6 @@ public class SectorServiceImpl implements SectorService {
     SectorRepository sectorRepository;
 
     @Inject
-    @Identifier("serviceImpl")
     GroupService groupService;
 
     @Inject
@@ -85,8 +86,21 @@ public class SectorServiceImpl implements SectorService {
     @Override
     @Transactional
     public void assignGroup(UUID sectorId, UUID groupId) {
+        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
+        GroupDto groupDto = groupService.getById(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
+
+        if (groupDto.getSector() != null) {
+            if (groupDto.getSector().sectorId().equals(sectorId)) return;
+            throw new DuplicateResourceException("Group already assigned to another sector");
+        }
+
+        //todo: to continue
     }
+
+
 
     @Override
     @Transactional
