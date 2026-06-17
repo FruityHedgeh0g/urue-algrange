@@ -15,21 +15,20 @@ import java.util.List;
 public class GroupController {
 
     @Inject
-    @Identifier("proxy")
     GroupService groupService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
-        return groupService.getAllGroups().get();
+        return groupService.listAll();
     }
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.CreationResponse.class) GroupDto addGroup(@JsonView(Views.Creation.class) GroupDto groupDto){
-        return groupService.createGroup(groupDto).get();
-    }
+//    @POST
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public @JsonView(Views.CreationResponse.class) GroupDto addGroup(@JsonView(Views.Creation.class) GroupDto groupDto){
+//        return groupService.createGroup(groupDto).get();
+//    }
 }
 
 

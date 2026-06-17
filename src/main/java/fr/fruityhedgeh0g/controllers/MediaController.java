@@ -17,12 +17,11 @@ import java.util.List;
 public class MediaController {
 
     @Inject
-    @Identifier("proxy")
     MediaService mediaService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<MediaDto> getAllMedias(){
-        return mediaService.getAllMedia().get();
+        return mediaService.listAll();
     }
 }

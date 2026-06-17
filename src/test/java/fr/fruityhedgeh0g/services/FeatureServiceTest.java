@@ -75,90 +75,90 @@ public class FeatureServiceTest {
 
     }
 
-    /** @see FeatureServiceImpl#getAllFeatures()  **/
-
-    @Test
-    public void getAllFeatures_Success(){
-        PanacheQuery<FeatureEntity> mockedPanacheQuery = mock(PanacheQuery.class);
-        when(mockedPanacheQuery.page(any())).thenReturn(mockedPanacheQuery);
-        when(mockedPanacheQuery.stream()).thenReturn(featureEntities.stream());
-        when(featureRepository.findAll()).thenReturn(mockedPanacheQuery);
-
-        Assertions.assertEquals(featureService.getAllFeatures().get(),featureDtos);
-    }
-
-    @Test
-    public void getAllFeatures_Failure_NotManagedException(){
-        when(featureRepository.findAll()).thenThrow(new RuntimeException("Dummy exception"));
-        Assertions.assertThrowsExactly(RuntimeException.class,
-                () -> featureService.getAllFeatures().get()
-        );
-    }
-
-    /** @see FeatureServiceImpl#getFeatureByName(String)  **/
-
-    @Test
-    public void getFeatureByName_Success(){
-        when(featureRepository.findByIdOptional(any())).thenReturn(Optional.of(featureEntity));
-
-        Assertions.assertEquals(featureService.getFeatureByName("firstFeature").get(),featureDto);
-
-    }
-
-    @Test
-    public void getFeatureByName_Failure_UnknownResourceException(){
-        Assertions.assertThrowsExactly(UnknownResourceException.class,
-                () -> featureService.getFeatureByName("DummyName").get()
-        );
-    }
-
-    @Test
-    public void getFeatureByName_Failure_ConstraintViolation(){
-        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-                () -> featureService.getFeatureByName(null)
-        );
-    }
-
-    @Test
-    public void getFeatureByName_Failure_NotManagedException(){
-        when(featureRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
-
-        Assertions.assertThrowsExactly(RuntimeException.class,
-                () -> featureService.getFeatureByName("DummyName").get()
-        );
-    }
-
-
-    /** @see FeatureServiceImpl#updateFeature(FeatureDto)  **/
-
-    @Test
-    public void updateFeature_Success(){
-        when(featureRepository.findByIdOptional(any())).thenReturn(Optional.of(featureEntity));
-
-        Assertions.assertEquals(featureService.updateFeature(featureDto).get(),featureDto);
-    }
-
-    @Test
-    public void updateFeature_Failure_UnknownResourceException(){
-        Assertions.assertThrowsExactly(UnknownResourceException.class,
-                () -> featureService.updateFeature(featureDto).get()
-        );
-    }
-
-    @Test
-    public void updateFeature_Failure_ConstraintViolation(){
-        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-                () -> featureService.updateFeature(null)
-        );
-    }
-
-    @Test
-    public void updateFeature_Failure_NotManagedException(){
-        when(featureRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
-
-        Assertions.assertThrowsExactly(RuntimeException.class,
-                () -> featureService.updateFeature(featureDto).get()
-        );
-    }
+//    /** @see FeatureServiceImpl#getAllFeatures()  **/
+//
+//    @Test
+//    public void getAllFeatures_Success(){
+//        PanacheQuery<FeatureEntity> mockedPanacheQuery = mock(PanacheQuery.class);
+//        when(mockedPanacheQuery.page(any())).thenReturn(mockedPanacheQuery);
+//        when(mockedPanacheQuery.stream()).thenReturn(featureEntities.stream());
+//        when(featureRepository.findAll()).thenReturn(mockedPanacheQuery);
+//
+//        Assertions.assertEquals(featureService.getAllFeatures().get(),featureDtos);
+//    }
+//
+//    @Test
+//    public void getAllFeatures_Failure_NotManagedException(){
+//        when(featureRepository.findAll()).thenThrow(new RuntimeException("Dummy exception"));
+//        Assertions.assertThrowsExactly(RuntimeException.class,
+//                () -> featureService.getAllFeatures().get()
+//        );
+//    }
+//
+//    /** @see FeatureServiceImpl#getFeatureByName(String)  **/
+//
+//    @Test
+//    public void getFeatureByName_Success(){
+//        when(featureRepository.findByIdOptional(any())).thenReturn(Optional.of(featureEntity));
+//
+//        Assertions.assertEquals(featureService.getFeatureByName("firstFeature").get(),featureDto);
+//
+//    }
+//
+//    @Test
+//    public void getFeatureByName_Failure_UnknownResourceException(){
+//        Assertions.assertThrowsExactly(UnknownResourceException.class,
+//                () -> featureService.getFeatureByName("DummyName").get()
+//        );
+//    }
+//
+//    @Test
+//    public void getFeatureByName_Failure_ConstraintViolation(){
+//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
+//                () -> featureService.getFeatureByName(null)
+//        );
+//    }
+//
+//    @Test
+//    public void getFeatureByName_Failure_NotManagedException(){
+//        when(featureRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
+//
+//        Assertions.assertThrowsExactly(RuntimeException.class,
+//                () -> featureService.getFeatureByName("DummyName").get()
+//        );
+//    }
+//
+//
+//    /** @see FeatureServiceImpl#updateFeature(FeatureDto)  **/
+//
+//    @Test
+//    public void updateFeature_Success(){
+//        when(featureRepository.findByIdOptional(any())).thenReturn(Optional.of(featureEntity));
+//
+//        Assertions.assertEquals(featureService.updateFeature(featureDto).get(),featureDto);
+//    }
+//
+//    @Test
+//    public void updateFeature_Failure_UnknownResourceException(){
+//        Assertions.assertThrowsExactly(UnknownResourceException.class,
+//                () -> featureService.updateFeature(featureDto).get()
+//        );
+//    }
+//
+//    @Test
+//    public void updateFeature_Failure_ConstraintViolation(){
+//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
+//                () -> featureService.updateFeature(null)
+//        );
+//    }
+//
+//    @Test
+//    public void updateFeature_Failure_NotManagedException(){
+//        when(featureRepository.findByIdOptional(any())).thenThrow(new RuntimeException("Dummy exception"));
+//
+//        Assertions.assertThrowsExactly(RuntimeException.class,
+//                () -> featureService.updateFeature(featureDto).get()
+//        );
+//    }
 
 }

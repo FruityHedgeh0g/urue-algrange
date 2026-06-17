@@ -17,12 +17,11 @@ import java.util.List;
 public class PostController {
 
     @Inject
-    @Identifier("proxy")
     PostService postService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<PostDto> getAllPosts(){
-        return postService.getAllPosts().get();
+        return postService.listAll();
     }
 }

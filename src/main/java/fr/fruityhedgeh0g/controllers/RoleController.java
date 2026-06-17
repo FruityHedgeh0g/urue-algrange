@@ -16,28 +16,27 @@ import java.util.UUID;
 public class RoleController {
 
     @Inject
-    @Identifier("proxy")
     RoleService roleService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<RoleDto> getAllRoles(){
-        return roleService.getAllRoles().get();
+        return roleService.listAll();
     }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{roleId}")
-    public @JsonView(Views.Detailed.class) RoleDto getRoleById(@PathParam("roleId") UUID roleId){
-        return roleService.getRoleById(roleId).get();
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.CreationResponse.class) RoleDto addRole(@JsonView(Views.Creation.class) RoleDto roleDto){
-        return roleService.createRole(roleDto).get();
-    }
+//
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/{roleId}")
+//    public @JsonView(Views.Detailed.class) RoleDto getRoleById(@PathParam("roleId") UUID roleId){
+//        return roleService.getRoleById(roleId).get();
+//    }
+//
+//    @POST
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public @JsonView(Views.CreationResponse.class) RoleDto addRole(@JsonView(Views.Creation.class) RoleDto roleDto){
+//        return roleService.createRole(roleDto).get();
+//    }
 
 
 }

@@ -8,9 +8,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface FeatureService {
-    Try<List<FeatureDto>> getAllFeatures();
-    Try<FeatureDto> getFeatureByName(@NotBlank String name);
-    Try<FeatureDto> updateFeature(@NotNull @Valid FeatureDto featureDto);
+    List<FeatureDto> listAll();
+    Optional<FeatureDto> getByName(@NotNull String name);
+    FeatureDto update(@NotNull @Valid FeatureDto featureDto );
+
+//    Try<List<FeatureDto>> getAllFeatures();
+//    Try<FeatureDto> getFeatureByName(@NotBlank String name);
+//    Try<FeatureDto> updateFeature(@NotNull @Valid FeatureDto featureDto);
 }

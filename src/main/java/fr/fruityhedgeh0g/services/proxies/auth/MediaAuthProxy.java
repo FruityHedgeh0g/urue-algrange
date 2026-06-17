@@ -1,26 +1,28 @@
-package fr.fruityhedgeh0g.services.proxies;
+package fr.fruityhedgeh0g.services.proxies.auth;
 
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
 import fr.fruityhedgeh0g.services.interfaces.MediaService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
+import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-@AllArgsConstructor
-@ApplicationScoped
-@Identifier("proxy")
+@Priority(100)
 @Authenticated
+@Decorator
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
-public class MediaProxy implements MediaService {
+public class MediaAuthProxy implements MediaService {
     @Inject
     SecurityIdentity identity;
 
@@ -28,31 +30,32 @@ public class MediaProxy implements MediaService {
     JsonWebToken token;
 
     @Inject
-    @Identifier("serviceImpl")
+    @Delegate
     MediaService mediaService;
 
+
     @Override
-    public Try<List<MediaDto>> getAllMedia() {
-        return mediaService.getAllMedia();
+    public List<MediaDto> listAll() {
+        return mediaService.listAll();
     }
 
     @Override
-    public Try<MediaDto> getMediaById(UUID mediaId) {
-        return mediaService.getMediaById(mediaId);
+    public Optional<MediaDto> getById(UUID mediaId) {
+        return mediaService.getById(mediaId);
     }
 
     @Override
-    public Try<MediaDto> createMedia(MediaDto mediaDto) {
-        return mediaService.createMedia(mediaDto);
+    public MediaDto create(MediaDto mediaDto) {
+        return mediaService.create(mediaDto);
     }
 
     @Override
-    public Try<MediaDto> updateMedia(MediaDto mediaDto) {
-        return mediaService.updateMedia(mediaDto);
+    public MediaDto update(MediaDto mediaDto) {
+        return mediaService.update(mediaDto);
     }
 
     @Override
-    public Try<Void> deleteMedia(UUID mediaId) {
-        return mediaService.deleteMedia(mediaId);
+    public void delete(UUID mediaId) {
+        mediaService.delete(mediaId);
     }
 }

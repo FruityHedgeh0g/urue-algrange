@@ -1,26 +1,27 @@
-package fr.fruityhedgeh0g.services.proxies;
+package fr.fruityhedgeh0g.services.proxies.auth;
 
 import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
-import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
 import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
+import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.Optional;
 
-@AllArgsConstructor
-@ApplicationScoped
-@Identifier("proxy")
+@Priority(100)
 @Authenticated
+@Decorator
 @IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
-public class FeatureProxy implements FeatureService {
+public class FeatureAuthProxy implements FeatureService {
     @Inject
     SecurityIdentity identity;
 
@@ -28,21 +29,22 @@ public class FeatureProxy implements FeatureService {
     JsonWebToken token;
 
     @Inject
-    @Identifier("serviceImpl")
+    @Delegate
     FeatureService featureService;
 
+
     @Override
-    public Try<List<FeatureDto>> getAllFeatures() {
-        return featureService.getAllFeatures();
+    public List<FeatureDto> listAll() {
+        return featureService.listAll();
     }
 
     @Override
-    public Try<FeatureDto> getFeatureByName(String name) {
-        return featureService.getFeatureByName(name);
+    public Optional<FeatureDto> getByName(String name) {
+        return featureService.getByName(name);
     }
 
     @Override
-    public Try<FeatureDto> updateFeature(FeatureDto featureDto) {
-        return featureService.updateFeature(featureDto);
+    public FeatureDto update(FeatureDto featureDto) {
+        return featureService.update(featureDto);
     }
 }
