@@ -4,7 +4,6 @@ import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
-import fr.fruityhedgeh0g.services.interfaces.internal.InternalGroupService;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.annotation.Priority;

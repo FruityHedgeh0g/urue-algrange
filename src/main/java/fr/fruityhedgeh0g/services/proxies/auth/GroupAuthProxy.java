@@ -59,6 +59,16 @@ public class GroupAuthProxy implements GroupService {
     }
 
     @Override
+    public void assignUser(UUID groupId, UUID userId) {
+        groupService.assignUser(groupId, userId);
+    }
+
+    @Override
+    public void unassignUser(UUID groupId, UUID userId) {
+        groupService.unassignUser(groupId, userId);
+    }
+
+    @Override
     public Optional<GroupEntity> getEntityById(UUID groupId) {
         return Optional.empty();
     }

@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 
 import java.util.*;
 
+@AllArgsConstructor
 @ApplicationScoped
 @Default
 public class GroupServiceImpl implements GroupService, InternalGroupService {
@@ -73,6 +74,18 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     public void delete(UUID groupId) {
         //todo: développer la suppression.
         groupRepository.deleteById(groupId);
+    }
+
+    @Override
+    @Transactional
+    public void assignUser(UUID groupId, UUID userId) {
+
+    }
+
+    @Override
+    @Transactional
+    public void unassignUser(UUID groupId, UUID userId) {
+
     }
 
     @Override

@@ -87,6 +87,16 @@ public class GroupLogProxy implements GroupService {
     }
 
     @Override
+    public void assignUser(UUID groupId, UUID userId) {
+
+    }
+
+    @Override
+    public void unassignUser(UUID groupId, UUID userId) {
+
+    }
+
+    @Override
     public Optional<GroupEntity> getEntityById(UUID groupId) {
         Log.debugf("[INTERNAL] trying to retrieve group by id %s.",groupId);
         return Try.of(() -> groupService.getEntityById(groupId))

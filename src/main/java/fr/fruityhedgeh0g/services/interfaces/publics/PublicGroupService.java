@@ -14,4 +14,6 @@ public interface PublicGroupService {
     GroupDto create(@NotNull @Valid GroupDto groupDto );
     GroupDto update(@NotNull @Valid GroupDto groupDto );
     void delete(@NotNull UUID groupId);
+    void assignUser(@NotNull UUID groupId, @NotNull UUID userId);
+    void unassignUser(@NotNull UUID groupId, @NotNull UUID userId);
 }

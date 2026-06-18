@@ -6,6 +6,7 @@ import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
@@ -77,7 +78,12 @@ public class SectorServiceImpl implements SectorService {
     @Override
     @Transactional
     public void delete(UUID sectorId) {
-        //todo: développer la suppression.
+        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
+
+        if (!sectorEntity.getGroups().isEmpty())
+            throw new InvalidResourceException("Sector cannot be deleted because it contains groups");
+
         sectorRepository.deleteById(sectorId);
     }
 
@@ -105,89 +111,20 @@ public class SectorServiceImpl implements SectorService {
     @Override
     @Transactional
     public void unassignGroup(UUID sectorId, UUID groupId) {
+        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
+        GroupEntity groupEntity = internalGroupService.getEntityById(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
+
+        if (groupEntity.getSector() == null) return ;
+
+        if (!groupEntity.getSector().getSectorId().equals(sectorId))
+            throw new InvalidResourceException("This group is assigned to another to another sector");
+
+        sectorEntity.removeGroup(groupEntity);
+
+        sectorRepository.persist(sectorEntity);
     }
 
-
-//
-//    @Override
-//    @Transactional
-//    public Try<SectorDto> assignGroupToSector( UUID sectorId,  UUID groupId) {
-//        Log.infof("Assigning group with id: %s to sector with id: %s", groupId, sectorId);
-//        return Try.of(()-> {
-//            Log.debugf("Checking if sector with id: %s exists and retrieve it", sectorId);
-//            SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
-//                    .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
-//
-//            Log.debugf("Checking if group with id: %s is already assigned to this sector", groupId);
-//            if (sectorEntity.getGroups().stream().anyMatch(e -> e.getGroupId().equals(groupId)))
-//                throw new DuplicateResourceException("Group already belongs to this sector");
-//
-//
-//            Log.debugf("Checking if group with id: %s exists and retrieve it", groupId);
-//            GroupEntity groupEntity = groupService.internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
-//
-//            Log.debugf("Checking if group with id: %s is already assigned to a sector", groupId);
-//            if (groupEntity.getSector() != null) throw new DuplicateResourceException("Group already belongs to a sector");
-//
-//            sectorEntity.addGroup(groupEntity);
-//            return sectorMapper.toDto(sectorEntity);
-//        }).onFailure(ex -> {
-//            if (ex instanceof UnknownResourceException) {
-//                Log.warn(ex.getMessage());
-//            } else {
-//                Log.errorf(ex, "Error assigning group with id: %s to sector with id: %s", groupId, sectorId);
-//            }
-//        });
-//    }
-//
-//    @Override
-//    @Transactional
-//    public Try<SectorDto> unassignGroupFromSector( UUID sectorId,  UUID groupId) {
-//        Log.infof("Unassigning group with id: %s from sector with id: %s", groupId, sectorId);
-//        return Try.of(() -> {
-//            Log.debugf("Checking if sector with id: %s exists", sectorId);
-//            SectorEntity sector = sectorRepository.findByIdOptional(sectorId)
-//                .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId));
-//
-//
-//            Log.debugf("Checking if group with id: %s is assigned to this sector and retrieve it", groupId);
-//            GroupEntity groupEntity = sector.getGroups().stream()
-//                    .filter(e -> e.getGroupId().equals(groupId))
-//                    .findFirst().orElseThrow(() -> new UnknownResourceException("Group is not assigned to this sector"));
-//
-//            sector.removeGroup(groupEntity);
-//
-//            return sectorMapper.toDto(sector);
-//        }).onFailure(ex -> {
-//            if (ex instanceof UnknownResourceException) {
-//                Log.warn(ex.getMessage());
-//            } else {
-//                Log.errorf(ex, "Error unassigning group with id: %s from sector with id: %s", groupId, sectorId);
-//            }
-//        });
-//    }
-//
-//
-//    @Override
-//    @Transactional
-//    public Try<Void> deleteSector( UUID sectorId) {
-//        Log.infof("Deleting sector with id: %s", sectorId);
-//        return Try.run(() -> {
-//            Log.debugf("Checking if sector with id: %s exists", sectorId);
-//            SectorEntity sector =sectorRepository.findByIdOptional(sectorId)
-//                        .orElseThrow(() -> new UnknownResourceException("Sector not found:" + sectorId));
-//
-//            sector.getGroups().forEach(group -> group.setSector(null));
-//
-//            Log.debugf("Deleting sector with id: %s", sectorId);
-//            sectorRepository.delete(sector);
-//        }).onFailure(ex -> {
-//            if (ex instanceof UnknownResourceException) {
-//                Log.warn(ex.getMessage());
-//            } else {
-//                Log.errorf(ex, "Error deleting sector with id: %s", sectorId);
-//            }
-//        });
-//    }
 }
