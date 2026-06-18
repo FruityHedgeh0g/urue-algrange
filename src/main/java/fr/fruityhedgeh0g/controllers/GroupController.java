@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicGroupService;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -15,7 +16,7 @@ import java.util.List;
 public class GroupController {
 
     @Inject
-    GroupService groupService;
+    PublicGroupService groupService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

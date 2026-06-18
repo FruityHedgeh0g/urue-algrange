@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.MediaService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicMediaService;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -17,7 +18,7 @@ import java.util.List;
 public class MediaController {
 
     @Inject
-    MediaService mediaService;
+    PublicMediaService mediaService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

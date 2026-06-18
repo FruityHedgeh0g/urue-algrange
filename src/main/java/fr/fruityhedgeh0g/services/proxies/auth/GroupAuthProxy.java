@@ -70,6 +70,6 @@ public class GroupAuthProxy implements GroupService {
 
     @Override
     public Optional<GroupEntity> getEntityById(UUID groupId) {
-        return Optional.empty();
+        return groupService.getEntityById(groupId);
     }
 }

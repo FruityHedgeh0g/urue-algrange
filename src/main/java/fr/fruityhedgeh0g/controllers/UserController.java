@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicUserService;
 import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
@@ -18,7 +19,7 @@ import java.util.UUID;
 public class UserController {
 
     @Inject
-    UserService userService;
+    PublicUserService userService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

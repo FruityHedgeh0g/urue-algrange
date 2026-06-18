@@ -108,4 +108,5 @@ public class GroupLogProxy implements GroupService {
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
                 .get();
     }
+
 }

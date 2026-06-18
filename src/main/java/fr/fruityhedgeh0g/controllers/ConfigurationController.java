@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicConfigurationService;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -17,8 +18,7 @@ import java.util.List;
 @Path("/api/configurations")
 public class ConfigurationController {
 
-    @Inject
-    ConfigurationService configurationService;
+    @Inject PublicConfigurationService configurationService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

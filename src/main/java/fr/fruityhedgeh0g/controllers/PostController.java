@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicPostService;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -17,7 +18,7 @@ import java.util.List;
 public class PostController {
 
     @Inject
-    PostService postService;
+    PublicPostService postService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
