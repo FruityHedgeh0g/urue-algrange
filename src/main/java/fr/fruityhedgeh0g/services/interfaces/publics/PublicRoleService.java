@@ -1,21 +1,20 @@
-package fr.fruityhedgeh0g.services.interfaces;
+package fr.fruityhedgeh0g.services.interfaces.publics;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
-import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
-import fr.fruityhedgeh0g.enums.RoleTypeEnum;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.services.interfaces.publics.PublicRoleService;
-import io.vavr.control.Try;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface RoleService extends PublicRoleService {
+public interface PublicRoleService {
+
+    List<RoleDto> listAll();
+    Optional<RoleDto> getById(@NotNull UUID roleId);
+    RoleDto create(@NotNull @Valid RoleDto roleDto);
+    RoleDto update(@NotNull @Valid RoleDto roleDto);
+    void delete(@NotNull UUID roleId);
 
 //    Try<List<RoleDto>> getAllRoles();
 //    Try<List<RoleDto>> getAllRolesFilteredByRoleType(@NotNull @Size(min = 1) RoleTypeEnum[] filter);

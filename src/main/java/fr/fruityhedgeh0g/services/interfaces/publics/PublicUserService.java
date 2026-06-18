@@ -1,10 +1,6 @@
-package fr.fruityhedgeh0g.services.interfaces;
+package fr.fruityhedgeh0g.services.interfaces.publics;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
-import fr.fruityhedgeh0g.entities.UserEntity;
-import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.services.interfaces.publics.PublicUserService;
-import io.vavr.control.Try;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -12,7 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UserService extends PublicUserService {
+public interface PublicUserService {
+    List<UserDto> listAll();
+    Optional<UserDto> getById(@NotNull UUID userId);
+    UserDto create(@NotNull @Valid UserDto userDto);
+    UserDto update(@NotNull @Valid UserDto userDto);
+    void delete(@NotNull UUID userId);
 
 
 //    Try<UserDto> getUserById(@NotNull UUID userId);

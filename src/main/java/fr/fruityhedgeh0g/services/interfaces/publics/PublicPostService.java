@@ -1,9 +1,6 @@
-package fr.fruityhedgeh0g.services.interfaces;
+package fr.fruityhedgeh0g.services.interfaces.publics;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
-import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
-import fr.fruityhedgeh0g.services.interfaces.publics.PublicPostService;
-import io.vavr.control.Try;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -11,7 +8,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface PostService extends PublicPostService { ;
+public interface PublicPostService {
+
+    List<PostDto> listAll();
+    Optional<PostDto> getById(@NotNull UUID postId);
+    PostDto create(@NotNull @Valid PostDto postDto);
+    PostDto update(@NotNull @Valid PostDto postDto);
+    void delete(@NotNull UUID postId);
 
 //    Try<List<PostDto>> getAllPosts();
 //    Try<PostDto> getPostById(@NotNull UUID postId);

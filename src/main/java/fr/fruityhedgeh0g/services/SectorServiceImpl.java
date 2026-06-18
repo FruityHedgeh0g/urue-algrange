@@ -10,6 +10,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.smallrye.common.annotation.Identifier;
@@ -25,20 +26,13 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class SectorServiceImpl implements SectorService {
-    @Inject
-    SectorRepository sectorRepository;
 
-    @Inject
-    GroupService groupService;
-
-    @Inject
-    SectorMapper sectorMapper;
-
-    @Inject
-    GroupMapper groupMapper;
+    @Inject SectorRepository sectorRepository;
+    @Inject SectorMapper sectorMapper;
+    @Inject GroupMapper groupMapper;
+    @Inject InternalGroupService internalGroupService;
 
     @Override
     public List<SectorDto> listAll() {
@@ -93,15 +87,13 @@ public class SectorServiceImpl implements SectorService {
         SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
                 .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
-        GroupDto groupDto = groupService.getById(groupId)
+        GroupEntity groupEntity = internalGroupService.getEntityById(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
 
-        if (groupDto.getSector() != null) {
-            if (groupDto.getSector().sectorId().equals(sectorId)) return;
+        if (groupEntity.getSector() != null) {
+            if (groupEntity.getSector().getSectorId().equals(sectorId)) return;
             throw new DuplicateResourceException("Group already assigned to another sector");
         }
-
-        GroupEntity groupEntity = groupMapper.toEntity(groupDto);
 
         sectorEntity.addGroup(groupEntity);
 

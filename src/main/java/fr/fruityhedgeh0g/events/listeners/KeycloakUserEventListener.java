@@ -10,16 +10,16 @@ import lombok.AllArgsConstructor;
 @ApplicationScoped
 public class KeycloakUserEventListener {
 
-    private final RabbitMqConnector rabbitMqConnector;
-    private final UserService userService;
-
-    KeycloakUserEventListener(
-            RabbitMqConnector rabbitMqConnector,
-            @Identifier("serviceImpl") UserService userService
-    ) {
-        this.rabbitMqConnector = rabbitMqConnector;
-        this.userService = userService;
-    }
+//    private final RabbitMqConnector rabbitMqConnector;
+//    private final UserService userService;
+//
+//    KeycloakUserEventListener(
+//            RabbitMqConnector rabbitMqConnector,
+//            @Identifier("serviceImpl") UserService userService
+//    ) {
+//        this.rabbitMqConnector = rabbitMqConnector;
+//        this.userService = userService;
+//    }
 
 
 }

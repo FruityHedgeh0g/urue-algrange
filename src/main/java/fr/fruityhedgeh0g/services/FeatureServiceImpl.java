@@ -19,7 +19,6 @@ import java.util.Optional;
 
 @AllArgsConstructor
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class FeatureServiceImpl implements FeatureService {
     @Inject

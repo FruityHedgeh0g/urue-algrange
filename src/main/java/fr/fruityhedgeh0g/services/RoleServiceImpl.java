@@ -21,7 +21,6 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class RoleServiceImpl implements RoleService {
     @Inject

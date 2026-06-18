@@ -4,6 +4,8 @@ import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicGroupService;
 import io.vavr.control.Try;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -13,25 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public interface GroupService {
+public interface GroupService extends PublicGroupService, InternalGroupService {
 
-    List<GroupDto> listAll();
-    Optional<GroupDto> getById(@NotNull UUID groupId);
-    GroupDto create(@NotNull @Valid GroupDto groupDto );
-    GroupDto update(@NotNull @Valid GroupDto groupDto );
-    void delete(@NotNull UUID groupId);
-    Optional<GroupEntity> getEntityById(@NotNull UUID groupId);
-
-
-//    Try<List<GroupDto>> getAllGroups();
-//    Try<GroupDto> getGroupById(@NotNull UUID groupId);
-//    Try<GroupDto> createGroup(@NotNull @Valid GroupDto groupDto);
-//    Try<GroupDto> updateGroup(@NotNull @Valid GroupDto groupDto);
-//    Try<Void> deleteGroup(@NotNull UUID groupId);
-//    Try<GroupDto> assignUserToGroup(@NotNull UUID userId, @NotNull UUID groupId);
-//    Try<GroupDto> unassignUserFromGroup(@NotNull UUID userId, @NotNull UUID groupId);
-//    Try<GroupEntity> internalGetEntityById(@NotNull UUID groupId);
-//    Try<Boolean> internalExistsById(@NotNull UUID groupId);
-//    Try<Set<GroupEntity>> internalGetBySectorId(@NotNull UUID sectorId);
-//    Try<Set<GroupDto>> getGroupsBySectorId(@NotNull UUID sectorId);
 }

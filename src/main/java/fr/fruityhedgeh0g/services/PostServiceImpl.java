@@ -17,7 +17,6 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class PostServiceImpl implements PostService {
     @Inject

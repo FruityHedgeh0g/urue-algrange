@@ -17,7 +17,6 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class EventServiceImpl implements EventService {
 

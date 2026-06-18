@@ -21,16 +21,11 @@ import java.util.stream.Stream;
 
 @AllArgsConstructor
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class UserServiceImpl implements UserService {
 
     @Inject
     UserRepository userRepository;
-
-    @Inject
-    @Identifier("serviceImpl")
-    RoleService roleService;
 
     @Inject
     UserMapper userMapper;

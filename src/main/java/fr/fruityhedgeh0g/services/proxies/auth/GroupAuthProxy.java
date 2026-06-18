@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.services.proxies.auth;
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -57,4 +58,8 @@ public class GroupAuthProxy implements GroupService {
         groupService.delete(groupId);
     }
 
+    @Override
+    public Optional<GroupEntity> getEntityById(UUID groupId) {
+        return Optional.empty();
+    }
 }
