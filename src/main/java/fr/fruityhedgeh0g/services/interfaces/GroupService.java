@@ -4,8 +4,6 @@ import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
-import fr.fruityhedgeh0g.services.interfaces.publics.PublicGroupService;
 import io.vavr.control.Try;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
