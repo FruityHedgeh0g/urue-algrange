@@ -24,7 +24,7 @@ public class ConfigurationLogProxy implements ConfigurationService{
 
     @Override
     public List<ConfigurationDto> listAll() {
-        Log.debugf("Trying to retrieve all configurations.");
+        Log.debugf("Retrieving all configurations...");
         return Try.of(configurationService::listAll)
                 .onSuccess(configs -> Log.debugf("%d configurations retrieved.",configs.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving configurations."))
@@ -33,12 +33,12 @@ public class ConfigurationLogProxy implements ConfigurationService{
 
     @Override
     public Optional<ConfigurationDto> getByName(String name) {
-        Log.debugf("Trying to retrieve configuration by name %s.",name);
+        Log.debugf("Retrieving configuration by name %s...",name);
         return Try.of(() -> configurationService.getByName(name))
                 .onSuccess(configuration -> {
                     if (configuration.isPresent())
-                        Log.debugf("Configuration retrieved.");
-                    else Log.debugf("There is no configuration with name %s.",name);
+                        Log.debugf("Configuration retrieved: "+configuration.toString());
+                    else Log.debugf("Configuration with name %s not found.",name);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving configuration."))
                 .get();
@@ -46,12 +46,12 @@ public class ConfigurationLogProxy implements ConfigurationService{
 
     @Override
     public ConfigurationDto update(ConfigurationDto configurationDto) {
-        Log.debugf("Trying to update an existing configuration : %s", configurationDto.toString());
+        Log.debugf("Updating an existing configuration: %s", configurationDto.toString());
         return Try.of(() -> configurationService.update(configurationDto))
                 .onSuccess(config -> Log.debugf("Configuration updated."))
                 .onFailure(t -> {
                     switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"There is no configuration with name %s.", configurationDto.getName());
+                        case UnknownResourceException ex -> Log.errorf(ex,"Configuration %s not found.", configurationDto.getName());
                         default -> Log.errorf(t,"An error occurred while updating configuration.");
                     }
                 })

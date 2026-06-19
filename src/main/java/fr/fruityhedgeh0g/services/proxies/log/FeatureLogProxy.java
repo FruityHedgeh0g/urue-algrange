@@ -23,7 +23,7 @@ public class FeatureLogProxy implements FeatureService{
 
     @Override
     public List<FeatureDto> listAll() {
-        Log.debugf("Trying to retrieve all features.");
+        Log.debugf("Retrieving all features...");
         return Try.of(featureService::listAll)
                 .onSuccess(features -> Log.debugf("%d features retrieved.",features.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving features."))
@@ -32,12 +32,12 @@ public class FeatureLogProxy implements FeatureService{
 
     @Override
     public Optional<FeatureDto> getByName(String name) {
-        Log.debugf("Trying to retrieve feature by name %s.",name);
+        Log.debugf("Retrieving feature by name %s...",name);
         return Try.of(() -> featureService.getByName(name))
                 .onSuccess(feature -> {
                     if (feature.isPresent())
-                        Log.debugf("Feature retrieved.");
-                    else Log.debugf("There is no feature with name %s.",name);
+                        Log.debugf("Feature retrieved: "+feature.toString());
+                    else Log.debugf("Feature with name %s not found.",name);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving feature."))
                 .get();
@@ -45,12 +45,12 @@ public class FeatureLogProxy implements FeatureService{
 
     @Override
     public FeatureDto update(FeatureDto featureDto) {
-        Log.debugf("Trying to update an existing feature : %s", featureDto.toString());
+        Log.debugf("Updating an existing feature: %s", featureDto.toString());
         return Try.of(() -> featureService.update(featureDto))
                 .onSuccess(feature -> Log.debugf("Feature updated."))
                 .onFailure(t -> {
                     switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"There is no feature with name %s.", featureDto.getName());
+                        case UnknownResourceException ex -> Log.errorf(ex,"Feature %s not found.", featureDto.getName());
                         default -> Log.errorf(t,"An error occurred while updating feature.");
                     }
                 })

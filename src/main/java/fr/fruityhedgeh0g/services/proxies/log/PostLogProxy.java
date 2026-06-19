@@ -23,7 +23,7 @@ public class PostLogProxy implements PostService {
 
     @Override
     public List<PostDto> listAll() {
-        Log.debugf("Trying to retrieve all posts.");
+        Log.debugf("Retrieving all posts...");
         return Try.of(postService::listAll)
                 .onSuccess(posts -> Log.debugf("%d posts retrieved.",posts.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving posts."))
@@ -32,12 +32,12 @@ public class PostLogProxy implements PostService {
 
     @Override
     public Optional<PostDto> getById(UUID postId) {
-        Log.debugf("Trying to retrieve post by id %s.",postId);
+        Log.debugf("Retrieving post by id %s...",postId);
         return Try.of(() -> postService.getById(postId))
                 .onSuccess(post -> {
                     if (post.isPresent())
-                        Log.debugf("Post retrieved.");
-                    else Log.debugf("There is no post with id %s.",postId);
+                        Log.debugf("Post retrieved: "+post.toString());
+                    else Log.debugf("Post with id %s not found.",postId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving post."))
                 .get();

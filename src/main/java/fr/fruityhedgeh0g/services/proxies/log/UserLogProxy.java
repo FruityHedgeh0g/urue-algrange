@@ -26,7 +26,7 @@ public class UserLogProxy implements UserService{
 
     @Override
     public List<UserDto> listAll() {
-        Log.debugf("Trying to retrieve all users.");
+        Log.debugf("Retrieving all users...");
         return Try.of(userService::listAll)
                 .onSuccess(users -> Log.debugf("%d users retrieved.",users.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving users."))
@@ -35,12 +35,12 @@ public class UserLogProxy implements UserService{
 
     @Override
     public Optional<UserDto> getById(UUID userId) {
-        Log.debugf("Trying to retrieve user by id %s.",userId);
+        Log.debugf("Retrieving user by id %s...",userId);
         return Try.of(() -> userService.getById(userId))
                 .onSuccess(user -> {
                     if (user.isPresent())
-                        Log.debugf("User retrieved.");
-                    else Log.debugf("There is no user with id %s.",userId);
+                        Log.debugf("User retrieved: "+user.toString());
+                    else Log.debugf("User with id %s not found.",userId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving user."))
                 .get();
@@ -48,12 +48,12 @@ public class UserLogProxy implements UserService{
 
     @Override
     public UserDto create(UserDto userDto) {
-        Log.debugf("Trying to create a new user : %s", userDto.toString());
+        Log.debugf("Creating new user: %s", userDto.toString());
         return Try.of(() -> userService.create(userDto))
                 .onSuccess(user -> Log.debugf("User created."))
                 .onFailure(t -> {
                     switch(t){
-                        case DuplicateResourceException ex -> Log.errorf(ex,"A user already exists for the id provided [%s].", userDto.getUserId());
+                        case DuplicateResourceException ex -> Log.errorf(ex,"User %s already existing.", userDto.getUserId());
                         default -> Log.errorf(t,"An error occurred while creating user.");
                     }
                 })
@@ -62,12 +62,12 @@ public class UserLogProxy implements UserService{
 
     @Override
     public UserDto update(UserDto userDto) {
-        Log.debugf("Trying to update an existing user : %s", userDto.toString());
+        Log.debugf("Updating an existing user: %s", userDto.toString());
         return Try.of(() -> userService.update(userDto))
                 .onSuccess(user -> Log.debugf("User updated."))
                 .onFailure(t -> {
                     switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"There is no user with id %s.", userDto.getUserId());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", userDto.getUserId());
                         default -> Log.errorf(t,"An error occurred while updating user.");
                     }
                 })
@@ -77,7 +77,7 @@ public class UserLogProxy implements UserService{
     @Override
     public void delete(UUID userId) {
 
-        Log.debugf("Trying to delete user by id %s.",userId);
+        Log.debugf("Deleting user by id %s...",userId);
         Try.run(() -> userService.delete(userId))
                 .onSuccess(v -> Log.debugf("User deleted."))
                 .onFailure(t -> Log.errorf(t,"An error occurred during user deletion."))
@@ -86,12 +86,12 @@ public class UserLogProxy implements UserService{
 
     @Override
     public Optional<UserEntity> getEntityById(UUID userId) {
-        Log.debugf("[INTERNAL] Trying to retrieve user by id %s.",userId);
+        Log.debugf("[INTERNAL] Retrieve user by id %s...",userId);
         return Try.of(() -> userService.getEntityById(userId))
                 .onSuccess(user -> {
                     if (user.isPresent())
                         Log.debugf("User retrieved.");
-                    else Log.debugf("There is no user with id %s.",userId);
+                    else Log.debugf("User %s not found.",userId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving user."))
                 .get();

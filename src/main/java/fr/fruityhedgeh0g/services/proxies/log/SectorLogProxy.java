@@ -25,7 +25,7 @@ public class SectorLogProxy implements SectorService {
 
     @Override
     public List<SectorDto> listAll() {
-        Log.debugf("Trying to retrieve all sectors.");
+        Log.debugf("Retrieving all sectors...");
         return Try.of(sectorService::listAll)
                 .onSuccess(sectors -> Log.debugf("%d sectors retrieved.",sectors.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving sectors."))
@@ -34,12 +34,12 @@ public class SectorLogProxy implements SectorService {
 
     @Override
     public Optional<SectorDto> getById(UUID sectorId) {
-        Log.debugf("Trying to retrieve sector by id %s.",sectorId);
+        Log.debugf("Retrieving sector by id %s...",sectorId);
         return Try.of(() -> sectorService.getById(sectorId))
                 .onSuccess(sector -> {
                     if (sector.isPresent())
-                        Log.debugf("Sector retrieved.");
-                    else Log.debugf("There is no sector with id %s.",sectorId);
+                        Log.debugf("Sector retrieved: "+sector.toString());
+                    else Log.debugf("Sector with id %s not found.",sectorId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving sector."))
                 .get();
@@ -47,12 +47,12 @@ public class SectorLogProxy implements SectorService {
 
     @Override
     public SectorDto create(SectorDto sectorDto) {
-        Log.debugf("Trying to create a new sector : %s", sectorDto.toString());
+        Log.debugf("Creating new sector: %s", sectorDto.toString());
         return Try.of(() -> sectorService.create(sectorDto))
                 .onSuccess(sector -> Log.debugf("Sector created."))
                 .onFailure(t -> {
                     switch(t){
-                        case DuplicateResourceException ex -> Log.errorf(ex,"A sector already exists for the id provided [%s].", sectorDto.getSectorId());
+                        case DuplicateResourceException ex -> Log.errorf(ex,"Sector %s already existing.", sectorDto.getSectorId());
                         default -> Log.errorf(t,"An error occurred while creating sector.");
                     }
                 })
@@ -61,12 +61,12 @@ public class SectorLogProxy implements SectorService {
 
     @Override
     public SectorDto update(SectorDto sectorDto) {
-        Log.debugf("Trying to update an existing sector : %s", sectorDto.toString());
+        Log.debugf("Updating an existing sector: %s", sectorDto.toString());
         return Try.of(() -> sectorService.update(sectorDto))
                 .onSuccess(sector -> Log.debugf("Sector updated."))
                 .onFailure(t -> {
                     switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"There is no sector with id %s.", sectorDto.getSectorId());
+                        case UnknownResourceException ex -> Log.errorf(ex,"Sector %s not found.", sectorDto.getSectorId());
                         case DuplicateResourceException ex -> Log.errorf(ex, "A sector already exists with this name [%s].", sectorDto.getName());
                         default -> Log.errorf(t,"An error occurred while updating sector.");
                     }
@@ -76,7 +76,7 @@ public class SectorLogProxy implements SectorService {
 
     @Override
     public void delete(UUID sectorId) {
-        Log.debugf("Trying to delete sector by id %s.",sectorId);
+        Log.debugf("Deleting sector by id %s...",sectorId);
         Try.run(() -> sectorService.delete(sectorId))
                 .onSuccess(v -> Log.debugf("Sector deleted."))
                 .onFailure(t -> Log.errorf(t,"An error occurred during sector deletion."))

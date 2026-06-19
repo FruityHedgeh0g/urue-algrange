@@ -23,7 +23,7 @@ public class MediaLogProxy implements MediaService {
 
     @Override
     public List<MediaDto> listAll() {
-        Log.debugf("Trying to retrieve all medias.");
+        Log.debugf("Retrieving all medias...");
         return Try.of(mediaService::listAll)
                 .onSuccess(medias -> Log.debugf("%d medias retrieved.",medias.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving medias."))
@@ -32,12 +32,12 @@ public class MediaLogProxy implements MediaService {
 
     @Override
     public Optional<MediaDto> getById(UUID mediaId) {
-        Log.debugf("Trying to retrieve media by id %s.",mediaId);
+        Log.debugf("Retrieving media by id %s...",mediaId);
         return Try.of(() -> mediaService.getById(mediaId))
                 .onSuccess(media -> {
                     if (media.isPresent())
-                        Log.debugf("Media retrieved.");
-                    else Log.debugf("There is no media with id %s.",mediaId);
+                        Log.debugf("Media retrieved: "+media.toString());
+                    else Log.debugf("Media with id %s not found.",mediaId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving media."))
                 .get();

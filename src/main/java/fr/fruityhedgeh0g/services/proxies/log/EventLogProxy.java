@@ -23,7 +23,7 @@ public class EventLogProxy implements EventService{
 
     @Override
     public List<EventDto> listAll() {
-        Log.debugf("Trying to retrieve all events.");
+        Log.debugf("Retrieving all events...");
         return Try.of(eventService::listAll)
                 .onSuccess(events -> Log.debugf("%d events retrieved.",events.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving events."))
@@ -32,12 +32,12 @@ public class EventLogProxy implements EventService{
 
     @Override
     public Optional<EventDto> getById(UUID eventId) {
-        Log.debugf("Trying to retrieve event by id %s.",eventId);
+        Log.debugf("Retrieving event by id %s...",eventId);
         return Try.of(() -> eventService.getById(eventId))
                 .onSuccess(event -> {
                     if (event.isPresent())
-                        Log.debugf("Event retrieved.");
-                    else Log.debugf("There is no event with id %s.",eventId);
+                        Log.debugf("Event retrieved: "+event.toString());
+                    else Log.debugf("Event with id %s not found.",eventId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving event."))
                 .get();

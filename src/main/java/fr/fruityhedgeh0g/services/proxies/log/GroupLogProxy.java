@@ -28,7 +28,7 @@ public class GroupLogProxy implements GroupService {
 
     @Override
     public List<GroupDto> listAll() {
-        Log.debugf("Trying to retrieve all groups.");
+        Log.debugf("Retrieving all groups...");
         return Try.of(groupService::listAll)
                 .onSuccess(groups -> Log.debugf("%d groups retrieved.",groups.size()))
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving groups."))
@@ -37,12 +37,12 @@ public class GroupLogProxy implements GroupService {
 
     @Override
     public Optional<GroupDto> getById(UUID groupId) {
-        Log.debugf("Trying to retrieve group by id %s.",groupId);
+        Log.debugf("Retrieving group by id %s...",groupId);
         return Try.of(() -> groupService.getById(groupId))
                 .onSuccess(group -> {
                     if (group.isPresent())
-                        Log.debugf("Group retrieved.");
-                    else Log.debugf("There is no group with id %s.",groupId);
+                        Log.debugf("Group retrieved: "+group.toString());
+                    else Log.debugf("Group with id %s not found.",groupId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
                 .get();
@@ -50,12 +50,12 @@ public class GroupLogProxy implements GroupService {
 
     @Override
     public GroupDto create(GroupDto groupDto) {
-        Log.debugf("Trying to create a new group : %s", groupDto.toString());
+        Log.debugf("Creating new group: %s", groupDto.toString());
         return Try.of(() -> groupService.create(groupDto))
                 .onSuccess(group -> Log.debugf("Group created."))
                 .onFailure(t -> {
                     switch(t){
-                        case DuplicateResourceException ex -> Log.errorf(ex,"A group already exists for the id provided [%s].", groupDto.getGroupId());
+                        case DuplicateResourceException ex -> Log.errorf(ex,"Group %s already existing.", groupDto.getGroupId());
                         default -> Log.errorf(t,"An error occurred while creating group.");
                     }
                 })
@@ -64,12 +64,12 @@ public class GroupLogProxy implements GroupService {
 
     @Override
     public GroupDto update(GroupDto groupDto) {
-        Log.debugf("Trying to update an existing group : %s", groupDto.toString());
+        Log.debugf("Updating an existing group: %s", groupDto.toString());
         return Try.of(() -> groupService.update(groupDto))
                 .onSuccess(group -> Log.debugf("Group updated."))
                 .onFailure(t -> {
                     switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"There is no group with id %s.", groupDto.getGroupId());
+                        case UnknownResourceException ex -> Log.errorf(ex,"Group %s not found.", groupDto.getGroupId());
                         case DuplicateResourceException ex -> Log.errorf(ex, "A group already exists with this name [%s].", groupDto.getName());
                         default -> Log.errorf(t,"An error occurred while updating group.");
                     }
@@ -79,7 +79,7 @@ public class GroupLogProxy implements GroupService {
 
     @Override
     public void delete(UUID groupId) {
-        Log.debugf("Trying to delete group by id %s.",groupId);
+        Log.debugf("Deleting group by id %s...",groupId);
         Try.run(() -> groupService.delete(groupId))
                 .onSuccess(v -> Log.debugf("Group deleted."))
                 .onFailure(t -> Log.errorf(t,"An error occurred during group deletion."))
@@ -98,12 +98,12 @@ public class GroupLogProxy implements GroupService {
 
     @Override
     public Optional<GroupEntity> getEntityById(UUID groupId) {
-        Log.debugf("[INTERNAL] Trying to retrieve group by id %s.",groupId);
+        Log.debugf("[INTERNAL] Retrieving group by id %s...",groupId);
         return Try.of(() -> groupService.getEntityById(groupId))
                 .onSuccess(group -> {
                     if (group.isPresent())
                         Log.debugf("Group retrieved.");
-                    else Log.debugf("There is no group with id %s.",groupId);
+                    else Log.debugf("Group %s not found.",groupId);
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
                 .get();
