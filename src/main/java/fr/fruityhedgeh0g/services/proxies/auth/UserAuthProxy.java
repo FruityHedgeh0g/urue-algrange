@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services.proxies.auth;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
@@ -58,5 +59,10 @@ public class UserAuthProxy implements UserService {
     @Override
     public void delete(UUID userId) {
         userService.delete(userId);
+    }
+
+    @Override
+    public Optional<UserEntity> getEntityById(UUID userId) {
+        return userService.getEntityById(userId);
     }
 }

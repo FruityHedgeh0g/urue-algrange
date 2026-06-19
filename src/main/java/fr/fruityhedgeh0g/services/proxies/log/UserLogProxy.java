@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services.proxies.log;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
@@ -80,6 +81,19 @@ public class UserLogProxy implements UserService{
         Try.run(() -> userService.delete(userId))
                 .onSuccess(v -> Log.debugf("User deleted."))
                 .onFailure(t -> Log.errorf(t,"An error occurred during user deletion."))
+                .get();
+    }
+
+    @Override
+    public Optional<UserEntity> getEntityById(UUID userId) {
+        Log.debugf("[INTERNAL] Trying to retrieve user by id %s.",userId);
+        return Try.of(() -> userService.getEntityById(userId))
+                .onSuccess(user -> {
+                    if (user.isPresent())
+                        Log.debugf("User retrieved.");
+                    else Log.debugf("There is no user with id %s.",userId);
+                })
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving user."))
                 .get();
     }
 }

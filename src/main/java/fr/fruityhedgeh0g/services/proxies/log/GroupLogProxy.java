@@ -98,7 +98,7 @@ public class GroupLogProxy implements GroupService {
 
     @Override
     public Optional<GroupEntity> getEntityById(UUID groupId) {
-        Log.debugf("[INTERNAL] trying to retrieve group by id %s.",groupId);
+        Log.debugf("[INTERNAL] Trying to retrieve group by id %s.",groupId);
         return Try.of(() -> groupService.getEntityById(groupId))
                 .onSuccess(group -> {
                     if (group.isPresent())

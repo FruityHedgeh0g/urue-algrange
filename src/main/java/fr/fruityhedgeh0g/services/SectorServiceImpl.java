@@ -90,9 +90,6 @@ public class SectorServiceImpl implements SectorService {
     @Override
     @Transactional
     public void assignGroup(UUID sectorId, UUID groupId) {
-        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
-                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
-
         GroupEntity groupEntity = internalGroupService.getEntityById(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
 
@@ -100,6 +97,9 @@ public class SectorServiceImpl implements SectorService {
             if (groupEntity.getSector().getSectorId().equals(sectorId)) return;
             throw new DuplicateResourceException("Group already assigned to another sector");
         }
+
+        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
         sectorEntity.addGroup(groupEntity);
 
@@ -111,16 +111,16 @@ public class SectorServiceImpl implements SectorService {
     @Override
     @Transactional
     public void unassignGroup(UUID sectorId, UUID groupId) {
-        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
-                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
-
         GroupEntity groupEntity = internalGroupService.getEntityById(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
 
         if (groupEntity.getSector() == null) return ;
 
         if (!groupEntity.getSector().getSectorId().equals(sectorId))
-            throw new InvalidResourceException("This group is assigned to another to another sector");
+            throw new InvalidResourceException("This group is assigned to another sector");
+
+        SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
 
         sectorEntity.removeGroup(groupEntity);
 

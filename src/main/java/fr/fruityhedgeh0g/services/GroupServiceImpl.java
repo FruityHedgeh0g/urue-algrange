@@ -2,19 +2,24 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 import lombok.AllArgsConstructor;
+import org.hibernate.validator.internal.engine.groups.Group;
 
 import java.util.*;
 
@@ -22,11 +27,9 @@ import java.util.*;
 @ApplicationScoped
 @Default
 public class GroupServiceImpl implements GroupService, InternalGroupService {
-    @Inject
-    GroupRepository groupRepository;
-
-    @Inject
-    GroupMapper groupMapper;
+    @Inject GroupRepository groupRepository;
+    @Inject InternalUserService internalUserService;
+    @Inject GroupMapper groupMapper;
 
     @Override
     public List<GroupDto> listAll() {
@@ -79,12 +82,38 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Override
     @Transactional
     public void assignUser(UUID groupId, UUID userId) {
+        UserEntity userEntity = internalUserService.getEntityById(userId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
+
+        if (userEntity.getGroup() != null) {
+            if (userEntity.getGroup().getGroupId().equals(groupId)) return;
+            throw new DuplicateResourceException("User already assigned to a group");
+        }
+
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        groupEntity.addMember(userEntity);
+        groupRepository.persist(groupEntity);
 
     }
 
     @Override
     @Transactional
     public void unassignUser(UUID groupId, UUID userId) {
+        UserEntity userEntity = internalUserService.getEntityById(userId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
+
+        if (userEntity.getGroup() == null) return;
+
+        if (!userEntity.getGroup().getGroupId().equals(groupId))
+            throw new InvalidResourceException("This user is assigned to another group.");
+
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        groupEntity.removeMember(userEntity);
+        groupRepository.persist(groupEntity);
 
     }
 

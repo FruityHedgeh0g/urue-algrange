@@ -78,6 +78,11 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
     }
 
+    @Override
+    public Optional<UserEntity> getEntityById(UUID userId) {
+        return userRepository.findByIdOptional(userId);
+    }
+
 //
 //    @Override
 //    @Transactional
