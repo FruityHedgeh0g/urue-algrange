@@ -1,37 +1,119 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
 @TestTransaction
 public class SectorServiceTest {
 
-    @InjectMock
-    SectorRepository sectorRepository;
-
-    @InjectMock
-    GroupRepository groupRepository;
-
-    @InjectMock
-    GroupServiceImpl groupService;
-
     @Inject
     SectorServiceImpl sectorService;
 
     @BeforeEach
     public void setUp() {
-        reset(sectorRepository, groupService,groupRepository);
+        
     }
 
-//    /** @see SectorServiceImpl#getAllSectors() **/
+    /** @see SectorServiceImpl#listAll() **/
+
+    @Test
+    public void listAllSectors_Success(){
+        
+    }
+
+    @Test
+    public void getAllSectors_NotFound(){
+        
+    }
+
+    /** @see SectorServiceImpl#getById(UUID) () **/
+
+    @Test
+    public void getById_Success(){
+
+    }
+
+    @Test
+    public void getById_NotFound(){
+
+    }
+
+    @Test
+    public void getById_NullId(){
+
+    }
+
+    /** @see SectorServiceImpl#create(SectorDto) () **/
+
+    @Test
+    public void create_NullDto(){
+
+    }
+
+    @Test
+    public void create_Success(){
+
+    }
+
+    @Test
+    public void create_Duplicate(){
+
+    }
+
+    /** @see SectorServiceImpl#update(SectorDto) () **/
+
+    @Test
+    public void update_Success(){
+
+    }
+
+    @Test
+    public void update_NotFound(){
+
+    }
+
+    @Test
+    public void update_NullDto(){
+
+    }
+
+    @Test
+    public void update_Duplicate(){
+
+    }
+
+    /** @see SectorServiceImpl#delete(UUID) () **/
+
+    @Test
+    public void delete_NotFound(){
+
+    }
+
+    @Test
+    public void delete_Success(){
+
+    }
+
+    /** @see SectorServiceImpl#assignGroup(UUID, UUID) () **/
+
+    /** @see SectorServiceImpl#unassignGroup(UUID, UUID) () **/
 //
 //    @Test
 //    public void GetAllSectors_Success(){
