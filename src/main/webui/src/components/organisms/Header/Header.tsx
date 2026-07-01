@@ -56,6 +56,11 @@ export const Header: React.FC = () => {
               { label: "Devenir bénévole", to: "/#benevolat" },
             ]}
           />
+          {isAuthenticated && (
+            <Link className={styles.navLink} to="/mon-compte">
+              Mon espace
+            </Link>
+          )}
         </nav>
       </div>
 
