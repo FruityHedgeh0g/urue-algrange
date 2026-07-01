@@ -6,10 +6,10 @@ import SectionTeaser from "../../components/molecules/SectionTeaser/SectionTease
 import Spinner from "../../components/atoms/Spinner/Spinner";
 import { useActiveCarouselItems } from "../../features/carousel/useCarousel";
 import { useMedias } from "../../features/medias/useMedias";
+import { assetUrl } from "../../lib/assetUrl";
 import styles from "./HomePage.module.css";
 
-const base = import.meta.env.BASE_URL;
-const logoSrc = `${base}logo_asso_transparent.png`;
+const logoSrc = assetUrl("logo_asso_transparent.png");
 
 const HeroCarousel: React.FC = () => {
   const { data: items, isLoading: itemsLoading } = useActiveCarouselItems();

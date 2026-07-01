@@ -10,11 +10,11 @@ import Button from "../../components/atoms/Button/Button";
 import Badge from "../../components/atoms/Badge/Badge";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 import ConfirmDialog from "../../components/molecules/ConfirmDialog/ConfirmDialog";
+import { assetUrl } from "../../lib/assetUrl";
 import styles from "./CarouselAdminPage.module.css";
 
 const LOGO_OPTION_VALUE = "";
-const base = import.meta.env.BASE_URL;
-const logoSrc = `${base}logo_asso_transparent.png`;
+const logoSrc = assetUrl("logo_asso_transparent.png");
 
 interface Draft {
   title: string;
