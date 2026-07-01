@@ -1,0 +1,15 @@
+.section {
+  padding: 64px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.sectionAlt {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.muted {
+  color: var(--color-muted);
+}

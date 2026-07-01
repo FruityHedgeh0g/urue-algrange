@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import "./DropdownMenu.css";
+import React, { useEffect, useRef, useState } from "react";
+import styles from "./DropdownMenu.module.css";
 
 export interface DropdownItem {
   label: string;
@@ -36,41 +36,31 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, items }) => {
 
   return (
     <div
-      className="nav-dropdown"
+      className={styles.dropdown}
       ref={ref}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
       <button
-        className="nav-btn"
+        className={styles.trigger}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         type="button"
       >
         {label}
-        <span className="caret" aria-hidden>▾</span>
+        <span className={styles.caret} aria-hidden>▾</span>
       </button>
       {open && (
-        <ul className="dropdown-menu" role="menu">
+        <ul className={styles.menu} role="menu">
           {items.map((item, idx) => (
             <li key={idx} role="none">
               {item.href ? (
-                <a
-                  className="dropdown-item"
-                  role="menuitem"
-                  href={item.href}
-                  onClick={item.onClick}
-                >
+                <a className={styles.item} role="menuitem" href={item.href} onClick={item.onClick}>
                   {item.label}
                 </a>
               ) : (
-                <button
-                  className="dropdown-item"
-                  role="menuitem"
-                  onClick={item.onClick}
-                  type="button"
-                >
+                <button className={styles.item} role="menuitem" onClick={item.onClick} type="button">
                   {item.label}
                 </button>
               )}
