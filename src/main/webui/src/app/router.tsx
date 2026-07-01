@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import PublicLayout from "../components/templates/PublicLayout/PublicLayout";
 import AccountLayout from "../components/templates/AccountLayout/AccountLayout";
+import AdminLayout from "../components/templates/AdminLayout/AdminLayout";
 import RequireRole from "../auth/RequireRole";
 import { RoleId } from "../auth/roles";
 import HomePage from "../pages/HomePage/HomePage";
@@ -23,6 +24,7 @@ import SectorsAdminPage from "../pages/SectorsAdminPage/SectorsAdminPage";
 import EventsAdminPage from "../pages/EventsAdminPage/EventsAdminPage";
 import RolesAdminPage from "../pages/RolesAdminPage/RolesAdminPage";
 import FeatureRequestsPage from "../pages/FeatureRequestsPage/FeatureRequestsPage";
+import CarouselAdminPage from "../pages/CarouselAdminPage/CarouselAdminPage";
 import ConfigurationPage from "../pages/ConfigurationPage/ConfigurationPage";
 import FeatureFlagsPage from "../pages/FeatureFlagsPage/FeatureFlagsPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
@@ -63,13 +65,21 @@ export const router = createBrowserRouter(
             { index: true, element: <ProfilePage /> },
             { path: "evenements", element: <MyEventsPage /> },
             { path: "secteur", element: guarded("chef_de_groupe", <SectorPage />) },
-            { path: "membres", element: guarded("bureau", <MembersAdminPage />) },
-            { path: "secteurs", element: guarded("bureau", <SectorsAdminPage />) },
-            { path: "gestion-evenements", element: guarded("bureau", <EventsAdminPage />) },
-            { path: "roles", element: guarded("bureau", <RolesAdminPage />) },
-            { path: "demandes-fonctionnalites", element: guarded("bureau", <FeatureRequestsPage />) },
-            { path: "configuration", element: guarded("admin", <ConfigurationPage />) },
-            { path: "fonctionnalites", element: guarded("admin", <FeatureFlagsPage />) },
+            {
+              path: "administration",
+              element: guarded("bureau", <AdminLayout />),
+              children: [
+                { index: true, element: <Navigate to="membres" replace /> },
+                { path: "membres", element: <MembersAdminPage /> },
+                { path: "secteurs", element: <SectorsAdminPage /> },
+                { path: "evenements", element: <EventsAdminPage /> },
+                { path: "roles", element: <RolesAdminPage /> },
+                { path: "demandes", element: <FeatureRequestsPage /> },
+                { path: "carrousel", element: <CarouselAdminPage /> },
+                { path: "configuration", element: guarded("admin", <ConfigurationPage />) },
+                { path: "fonctionnalites", element: guarded("admin", <FeatureFlagsPage />) },
+              ],
+            },
           ],
         },
         { path: "*", element: <NotFoundPage /> },

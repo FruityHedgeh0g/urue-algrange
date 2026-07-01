@@ -6,8 +6,12 @@ export interface AdminListItemProps {
   title: string;
   subtitle?: string;
   badge?: React.ReactNode;
+  /** Visuel affiché avant le titre (ex : miniature d'image). */
+  leading?: React.ReactNode;
   /** Contenu additionnel affiché sous le sous-titre, toujours visible (ex : badges de permissions). */
   footer?: React.ReactNode;
+  /** Actions supplémentaires affichées avant le bouton Modifier (ex : réorganisation). */
+  actions?: React.ReactNode;
   editing?: boolean;
   onToggleEdit?: () => void;
   editDisabled?: boolean;
@@ -19,7 +23,9 @@ export const AdminListItem: React.FC<AdminListItemProps> = ({
   title,
   subtitle,
   badge,
+  leading,
   footer,
+  actions,
   editing,
   onToggleEdit,
   editDisabled,
@@ -28,6 +34,7 @@ export const AdminListItem: React.FC<AdminListItemProps> = ({
 }) => (
   <li className={styles.item}>
     <div className={styles.row}>
+      {leading && <div className={styles.leading}>{leading}</div>}
       <div className={styles.info}>
         <div className={styles.titleLine}>
           <span className={styles.title}>{title}</span>
@@ -36,12 +43,15 @@ export const AdminListItem: React.FC<AdminListItemProps> = ({
         {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
-      {onToggleEdit &&
-        (editDisabled ? (
-          <span className={styles.disabledNote}>{editDisabledReason}</span>
-        ) : (
-          <Button label={editing ? "Fermer" : "Modifier"} variant="outline" onClick={onToggleEdit} />
-        ))}
+      <div className={styles.rowActions}>
+        {actions}
+        {onToggleEdit &&
+          (editDisabled ? (
+            <span className={styles.disabledNote}>{editDisabledReason}</span>
+          ) : (
+            <Button label={editing ? "Fermer" : "Modifier"} variant="outline" onClick={onToggleEdit} />
+          ))}
+      </div>
     </div>
     {editing && !editDisabled && <div className={styles.form}>{children}</div>}
   </li>

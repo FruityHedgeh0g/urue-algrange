@@ -1,40 +1,41 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Carousel from "../../components/organisms/Carousel/Carousel";
+import Carousel, { CarouselSlide } from "../../components/organisms/Carousel/Carousel";
 import EventList from "../../components/organisms/EventList/EventList";
 import SectionTeaser from "../../components/molecules/SectionTeaser/SectionTeaser";
-import { placeholderImage } from "../../lib/placeholderImage";
+import Spinner from "../../components/atoms/Spinner/Spinner";
+import { useActiveCarouselItems } from "../../features/carousel/useCarousel";
+import { useMedias } from "../../features/medias/useMedias";
 import styles from "./HomePage.module.css";
 
 const base = import.meta.env.BASE_URL;
+const logoSrc = `${base}logo_asso_transparent.png`;
 
-const slides = [
-  {
-    src: `${base}logo_asso_transparent.png`,
-    alt: "Une Rose Un Espoir Algrange",
-    title: "Bienvenue à Une Rose Un Espoir - Algrange",
-    caption: "Ensemble contre le cancer",
-  },
-  {
-    src: placeholderImage("home-slide-benevolat", "Devenir bénévole"),
-    alt: "Collecte 2025",
-    title: "Collecte 2025",
-    caption: "Rejoignez l'aventure et devenez bénévole.",
-    to: "/#benevolat",
-  },
-  {
-    src: placeholderImage("home-slide-events", "Actualités & Événements"),
-    alt: "Nos événements",
-    title: "Actualités & Événements",
-    caption: "Suivez nos dernières publications et actions.",
-    to: "/evenements",
-  },
-];
+const HeroCarousel: React.FC = () => {
+  const { data: items, isLoading: itemsLoading } = useActiveCarouselItems();
+  const { data: medias, isLoading: mediasLoading } = useMedias();
+
+  if (itemsLoading || mediasLoading) return <Spinner label="Chargement du carrousel..." />;
+  if (!items || items.length === 0) return null;
+
+  const slides: CarouselSlide[] = items.map((item) => {
+    const media = item.mediaId ? medias?.find((m) => m.mediaId === item.mediaId) : undefined;
+    return {
+      src: media?.url ?? logoSrc,
+      alt: media?.alt ?? item.title,
+      title: item.title,
+      caption: item.caption,
+      to: item.linkTo ?? undefined,
+    };
+  });
+
+  return <Carousel slides={slides} interval={4000} />;
+};
 
 export const HomePage: React.FC = () => (
   <>
     <h1 className="sr-only">Une Rose Un Espoir - Algrange</h1>
-    <Carousel slides={slides} interval={4000} />
+    <HeroCarousel />
 
     <SectionTeaser
       id="about"
