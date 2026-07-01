@@ -24,33 +24,9 @@ export const AccountLayout: React.FC = () => {
           </NavLink>
         )}
         {hasAtLeastRole("bureau") && (
-          <>
-            <NavLink className={navLinkClass} to="/mon-compte/membres">
-              Inscrits
-            </NavLink>
-            <NavLink className={navLinkClass} to="/mon-compte/secteurs">
-              Secteurs
-            </NavLink>
-            <NavLink className={navLinkClass} to="/mon-compte/gestion-evenements">
-              Gestion événements
-            </NavLink>
-            <NavLink className={navLinkClass} to="/mon-compte/roles">
-              Rôles
-            </NavLink>
-            <NavLink className={navLinkClass} to="/mon-compte/demandes-fonctionnalites">
-              Demandes
-            </NavLink>
-          </>
-        )}
-        {hasAtLeastRole("admin") && (
-          <>
-            <NavLink className={navLinkClass} to="/mon-compte/configuration">
-              Configuration
-            </NavLink>
-            <NavLink className={navLinkClass} to="/mon-compte/fonctionnalites">
-              Fonctionnalités
-            </NavLink>
-          </>
+          <NavLink className={navLinkClass} to="/mon-compte/administration">
+            Administration
+          </NavLink>
         )}
       </nav>
       <Outlet />

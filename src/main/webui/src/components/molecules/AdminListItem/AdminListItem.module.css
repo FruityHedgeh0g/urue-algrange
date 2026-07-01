@@ -12,8 +12,20 @@
   gap: 16px;
 }
 
+.leading {
+  flex-shrink: 0;
+}
+
 .info {
+  flex: 1;
   min-width: 0;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .titleLine {

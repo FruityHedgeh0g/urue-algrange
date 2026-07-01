@@ -4,6 +4,7 @@ import { useSectors } from "../../features/sectors/useSector";
 import AdminListItem from "../../components/molecules/AdminListItem/AdminListItem";
 import FormField from "../../components/molecules/FormField/FormField";
 import Button from "../../components/atoms/Button/Button";
+import Select from "../../components/atoms/Select/Select";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 import styles from "./MembersAdminPage.module.css";
 
@@ -53,16 +54,12 @@ export const MembersAdminPage: React.FC = () => {
               <form className={styles.form} onSubmit={handleSave(member.userId)} noValidate>
                 <FormField label="Prénom" value={draft.firstName} onChange={(e) => setDraft({ ...draft, firstName: e.target.value })} required />
                 <FormField label="Nom" value={draft.lastName} onChange={(e) => setDraft({ ...draft, lastName: e.target.value })} required />
-                <label className={styles.selectLabel}>
-                  Groupe
-                  <select className={styles.select} value={draft.groupId} onChange={(e) => setDraft({ ...draft, groupId: e.target.value })}>
-                    {groupOptions.map((g) => (
-                      <option key={g.groupId} value={g.groupId}>
-                        {g.name} ({g.sectorName})
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <Select
+                  label="Groupe"
+                  value={draft.groupId}
+                  onChange={(groupId) => setDraft({ ...draft, groupId })}
+                  options={groupOptions.map((g) => ({ value: g.groupId, label: `${g.name} (${g.sectorName})` }))}
+                />
                 <Button type="submit" label="Enregistrer" disabled={updateMember.isPending} />
               </form>
             )}
