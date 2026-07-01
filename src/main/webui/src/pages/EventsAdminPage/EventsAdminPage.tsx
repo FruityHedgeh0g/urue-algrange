@@ -7,6 +7,7 @@ import AdminListItem from "../../components/molecules/AdminListItem/AdminListIte
 import FormField from "../../components/molecules/FormField/FormField";
 import Button from "../../components/atoms/Button/Button";
 import Spinner from "../../components/atoms/Spinner/Spinner";
+import ConfirmDialog from "../../components/molecules/ConfirmDialog/ConfirmDialog";
 import styles from "./EventsAdminPage.module.css";
 
 const emptyDraft: EventInput = {
@@ -26,9 +27,10 @@ interface EventFormProps {
   onSubmit: (e: React.FormEvent) => void;
   submitLabel: string;
   pending: boolean;
+  onDelete?: () => void;
 }
 
-const EventForm: React.FC<EventFormProps> = ({ value, onChange, onSubmit, submitLabel, pending }) => (
+const EventForm: React.FC<EventFormProps> = ({ value, onChange, onSubmit, submitLabel, pending, onDelete }) => (
   <form className={styles.form} onSubmit={onSubmit} noValidate>
     <FormField label="Nom" value={value.name} onChange={(e) => onChange({ ...value, name: e.target.value })} required />
     <FormField label="Description" multiline rows={3} value={value.description} onChange={(e) => onChange({ ...value, description: e.target.value })} required />
@@ -49,18 +51,22 @@ const EventForm: React.FC<EventFormProps> = ({ value, onChange, onSubmit, submit
     <FormField label="Adresse" value={value.address} onChange={(e) => onChange({ ...value, address: e.target.value })} />
     <FormField label="Ville" value={value.city} onChange={(e) => onChange({ ...value, city: e.target.value })} />
     <FormField label="Code postal" value={value.postalCode} onChange={(e) => onChange({ ...value, postalCode: e.target.value })} />
-    <Button type="submit" label={submitLabel} disabled={pending} />
+    <div className={styles.formActions}>
+      <Button type="submit" label={submitLabel} disabled={pending} />
+      {onDelete && <Button type="button" label="Supprimer" variant="danger" onClick={onDelete} disabled={pending} />}
+    </div>
   </form>
 );
 
 export const EventsAdminPage: React.FC = () => {
   const { user } = useAuth();
   const { data: events, isLoading } = useEvents();
-  const { update, create } = useEventMutations();
+  const { update, create, remove } = useEventMutations();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<EventInput>(emptyDraft);
   const [creating, setCreating] = useState(false);
   const [newEvent, setNewEvent] = useState<EventInput>(emptyDraft);
+  const [toDeleteId, setToDeleteId] = useState<string | null>(null);
 
   if (isLoading) return <Spinner label="Chargement des événements..." />;
 
@@ -99,9 +105,14 @@ export const EventsAdminPage: React.FC = () => {
     );
   };
 
+  const toDelete = events?.find((e) => e.eventId === toDeleteId);
+
   return (
     <div className={styles.wrapper}>
-      <Button label={creating ? "Annuler" : "Nouvel événement"} variant={creating ? "outline" : "accent"} onClick={() => setCreating((v) => !v)} />
+      <div className={styles.toolbar}>
+        <h2 className={styles.title}>Gestion des événements</h2>
+        <Button label={creating ? "Annuler" : "+ Nouvel événement"} variant={creating ? "outline" : "primary"} onClick={() => setCreating((v) => !v)} />
+      </div>
 
       {creating && <EventForm value={newEvent} onChange={setNewEvent} onSubmit={handleCreate} submitLabel="Créer l'événement" pending={create.isPending} />}
 
@@ -114,10 +125,34 @@ export const EventsAdminPage: React.FC = () => {
             editing={editingId === event.eventId}
             onToggleEdit={() => (editingId === event.eventId ? setEditingId(null) : startEdit(event.eventId))}
           >
-            <EventForm value={draft} onChange={setDraft} onSubmit={handleSave(event.eventId)} submitLabel="Enregistrer" pending={update.isPending} />
+            <EventForm
+              value={draft}
+              onChange={setDraft}
+              onSubmit={handleSave(event.eventId)}
+              submitLabel="Enregistrer"
+              pending={update.isPending}
+              onDelete={() => setToDeleteId(event.eventId)}
+            />
           </AdminListItem>
         ))}
       </ul>
+
+      <ConfirmDialog
+        isOpen={toDeleteId !== null}
+        title="Supprimer cet événement ?"
+        message={toDelete ? `L'événement « ${toDelete.name} » sera définitivement supprimé, y compris pour les personnes déjà inscrites.` : ""}
+        pending={remove.isPending}
+        onCancel={() => setToDeleteId(null)}
+        onConfirm={() => {
+          if (!toDeleteId) return;
+          remove.mutate(toDeleteId, {
+            onSuccess: () => {
+              setToDeleteId(null);
+              setEditingId(null);
+            },
+          });
+        }}
+      />
     </div>
   );
 };

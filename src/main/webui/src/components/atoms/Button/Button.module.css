@@ -37,6 +37,15 @@
   background: var(--color-accent-hover);
 }
 
+.danger {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+  border-color: var(--color-danger-hover);
+}
+.danger:hover:not(:disabled) {
+  background: var(--color-danger-hover);
+}
+
 .outline {
   background: transparent;
   color: var(--color-primary);

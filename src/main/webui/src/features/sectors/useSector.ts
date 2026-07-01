@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createSector, fetchSectorById, fetchSectors, updateSector } from "./sectorsApi";
+import { createSector, deleteSector, fetchSectorById, fetchSectors, updateSector } from "./sectorsApi";
 
 const LIST_KEY = ["sectors"];
 
@@ -40,5 +40,10 @@ export function useSectorMutations() {
     onSuccess: invalidate,
   });
 
-  return { update, create };
+  const remove = useMutation({
+    mutationFn: deleteSector,
+    onSuccess: invalidate,
+  });
+
+  return { update, create, remove };
 }

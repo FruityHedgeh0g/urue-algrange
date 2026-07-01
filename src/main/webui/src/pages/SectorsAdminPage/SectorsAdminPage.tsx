@@ -4,6 +4,7 @@ import AdminListItem from "../../components/molecules/AdminListItem/AdminListIte
 import FormField from "../../components/molecules/FormField/FormField";
 import Button from "../../components/atoms/Button/Button";
 import Spinner from "../../components/atoms/Spinner/Spinner";
+import ConfirmDialog from "../../components/molecules/ConfirmDialog/ConfirmDialog";
 import styles from "./SectorsAdminPage.module.css";
 
 interface Draft {
@@ -15,11 +16,12 @@ const emptyDraft: Draft = { name: "", description: "" };
 
 export const SectorsAdminPage: React.FC = () => {
   const { data: sectors, isLoading } = useSectors();
-  const { update, create } = useSectorMutations();
+  const { update, create, remove } = useSectorMutations();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [creating, setCreating] = useState(false);
   const [newSector, setNewSector] = useState<Draft>(emptyDraft);
+  const [toDeleteId, setToDeleteId] = useState<string | null>(null);
 
   if (isLoading) return <Spinner label="Chargement des secteurs..." />;
 
@@ -45,9 +47,14 @@ export const SectorsAdminPage: React.FC = () => {
     });
   };
 
+  const toDelete = sectors?.find((s) => s.sectorId === toDeleteId);
+
   return (
     <div className={styles.wrapper}>
-      <Button label={creating ? "Annuler" : "Nouveau secteur"} variant={creating ? "outline" : "accent"} onClick={() => setCreating((v) => !v)} />
+      <div className={styles.toolbar}>
+        <h2 className={styles.title}>Secteurs</h2>
+        <Button label={creating ? "Annuler" : "+ Nouveau secteur"} variant={creating ? "outline" : "primary"} onClick={() => setCreating((v) => !v)} />
+      </div>
 
       {creating && (
         <form className={styles.form} onSubmit={handleCreate} noValidate>
@@ -81,11 +88,41 @@ export const SectorsAdminPage: React.FC = () => {
                 value={draft.description}
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
               />
-              <Button type="submit" label="Enregistrer" disabled={update.isPending} />
+              <div className={styles.formActions}>
+                <Button type="submit" label="Enregistrer" disabled={update.isPending} />
+                <Button
+                  type="button"
+                  label="Supprimer"
+                  variant="danger"
+                  onClick={() => setToDeleteId(sector.sectorId)}
+                  disabled={update.isPending}
+                />
+              </div>
             </form>
           </AdminListItem>
         ))}
       </ul>
+
+      <ConfirmDialog
+        isOpen={toDeleteId !== null}
+        title="Supprimer ce secteur ?"
+        message={
+          toDelete
+            ? `Le secteur « ${toDelete.name} » et son rattachement aux groupes seront supprimés. Cette action est irréversible.`
+            : ""
+        }
+        pending={remove.isPending}
+        onCancel={() => setToDeleteId(null)}
+        onConfirm={() => {
+          if (!toDeleteId) return;
+          remove.mutate(toDeleteId, {
+            onSuccess: () => {
+              setToDeleteId(null);
+              setEditingId(null);
+            },
+          });
+        }}
+      />
     </div>
   );
 };

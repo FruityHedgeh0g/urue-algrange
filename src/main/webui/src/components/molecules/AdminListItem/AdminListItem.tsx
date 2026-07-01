@@ -6,6 +6,8 @@ export interface AdminListItemProps {
   title: string;
   subtitle?: string;
   badge?: React.ReactNode;
+  /** Contenu additionnel affiché sous le sous-titre, toujours visible (ex : badges de permissions). */
+  footer?: React.ReactNode;
   editing?: boolean;
   onToggleEdit?: () => void;
   editDisabled?: boolean;
@@ -17,6 +19,7 @@ export const AdminListItem: React.FC<AdminListItemProps> = ({
   title,
   subtitle,
   badge,
+  footer,
   editing,
   onToggleEdit,
   editDisabled,
@@ -31,6 +34,7 @@ export const AdminListItem: React.FC<AdminListItemProps> = ({
           {badge}
         </div>
         {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        {footer && <div className={styles.footer}>{footer}</div>}
       </div>
       {onToggleEdit &&
         (editDisabled ? (

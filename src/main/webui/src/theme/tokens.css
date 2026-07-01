@@ -14,6 +14,7 @@
   /* Sémantique */
   --color-danger: #dc3545;
   --color-danger-hover: #bb2d3b;
+  --color-on-danger: #ffffff;          /* couleur de texte sur une surface --color-danger */
   --color-success: #1f9d55;
   --color-white: #ffffff;
 
@@ -58,6 +59,7 @@
 
   --color-danger: #ff6b7a;
   --color-danger-hover: #ff5163;
+  --color-on-danger: #0b1220;          /* --color-danger est clair en mode nuit : texte sombre par-dessus */
   --color-success: #3ddc84;
 
   --color-bg: #0b1220;
@@ -88,6 +90,7 @@
 
     --color-danger: #ff6b7a;
     --color-danger-hover: #ff5163;
+    --color-on-danger: #0b1220;
     --color-success: #3ddc84;
 
     --color-bg: #0b1220;

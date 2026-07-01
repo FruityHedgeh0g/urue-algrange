@@ -26,6 +26,12 @@ function writeJson(key: string, value: unknown) {
   }
 }
 
+export interface RoleInput {
+  name: string;
+  description: string;
+  permissions: string[];
+}
+
 export async function fetchRoles(): Promise<Role[]> {
   const overrides = readJson<Record<string, Partial<Role>>>(OVERRIDES_KEY, {});
   const created = readJson<Role[]>(CREATED_KEY, []);
@@ -33,14 +39,14 @@ export async function fetchRoles(): Promise<Role[]> {
   return Promise.resolve([...base, ...created]);
 }
 
-export async function updateRole(roleId: string, patch: { name: string; description: string }): Promise<void> {
+export async function updateRole(roleId: string, patch: RoleInput): Promise<void> {
   const overrides = readJson<Record<string, Partial<Role>>>(OVERRIDES_KEY, {});
   overrides[roleId] = { ...overrides[roleId], ...patch };
   writeJson(OVERRIDES_KEY, overrides);
   return Promise.resolve();
 }
 
-export async function createRole(input: { name: string; description: string }): Promise<void> {
+export async function createRole(input: RoleInput): Promise<void> {
   const created = readJson<Role[]>(CREATED_KEY, []);
   created.push({ roleId: `role-${Date.now()}`, roleType: "organizational_role", ...input });
   writeJson(CREATED_KEY, created);

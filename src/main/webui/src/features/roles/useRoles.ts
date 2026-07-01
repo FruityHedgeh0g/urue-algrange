@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createRole, fetchRoles, updateRole } from "./rolesApi";
+import { createRole, fetchRoles, RoleInput, updateRole } from "./rolesApi";
 
 const QUERY_KEY = ["roles"];
 
@@ -12,7 +12,7 @@ export function useRoleMutations() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: QUERY_KEY });
 
   const update = useMutation({
-    mutationFn: (input: { roleId: string; name: string; description: string }) => updateRole(input.roleId, input),
+    mutationFn: (input: { roleId: string } & RoleInput) => updateRole(input.roleId, input),
     onSuccess: invalidate,
   });
 
