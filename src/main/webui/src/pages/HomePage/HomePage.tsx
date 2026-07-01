@@ -43,6 +43,9 @@ export const HomePage: React.FC = () => (
         contre le cancer du sein. Nous soutenons les patients, leurs familles, et participons
         activement aux campagnes de sensibilisation et de collecte de fonds pour la recherche.
       </p>
+      <Link to="/qui-sommes-nous">
+        <Button label="En savoir plus" />
+      </Link>
     </section>
 
     <div className={styles.sectionAlt}>

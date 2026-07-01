@@ -5,6 +5,7 @@ import AccountLayout from "../components/templates/AccountLayout/AccountLayout";
 import RequireRole from "../auth/RequireRole";
 import { RoleId } from "../auth/roles";
 import HomePage from "../pages/HomePage/HomePage";
+import AboutPage from "../pages/AboutPage/AboutPage";
 import NewsPage from "../pages/NewsPage/NewsPage";
 import NewsDetailPage from "../pages/NewsDetailPage/NewsDetailPage";
 import GalleryPage from "../pages/GalleryPage/GalleryPage";
@@ -41,6 +42,7 @@ export const router = createBrowserRouter(
       element: <PublicLayout />,
       children: [
         { index: true, element: <HomePage /> },
+        { path: "qui-sommes-nous", element: <AboutPage /> },
         { path: "actualites", element: <NewsPage /> },
         { path: "actualites/:postId", element: <NewsDetailPage /> },
         { path: "galerie", element: <GalleryPage /> },
