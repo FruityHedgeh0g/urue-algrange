@@ -40,7 +40,7 @@ export const Header: React.FC = () => {
           <DropdownMenu
             label="Association"
             items={[
-              { label: "Qui sommes-nous ?", to: "/#about" },
+              { label: "Qui sommes-nous ?", to: "/qui-sommes-nous" },
               { label: "Actualités", to: "/actualites" },
               { label: "Galerie photos", to: "/galerie" },
               { label: "Contact", to: "/contact" },
