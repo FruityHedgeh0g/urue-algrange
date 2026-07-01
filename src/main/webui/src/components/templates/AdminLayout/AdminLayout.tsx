@@ -25,9 +25,6 @@ export const AdminLayout: React.FC = () => {
         <NavLink className={navLinkClass} to="/administration/roles">
           Rôles
         </NavLink>
-        <NavLink className={navLinkClass} to="/administration/demandes">
-          Demandes
-        </NavLink>
         <NavLink className={navLinkClass} to="/administration/carrousel">
           Carrousel
         </NavLink>

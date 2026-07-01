@@ -9,7 +9,7 @@ import styles from "./Header.module.css";
 
 export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, setRole, hasAtLeastRole } = useAuth();
+  const { isAuthenticated, setRole, hasAtLeastRole, role } = useAuth();
   const navigate = useNavigate();
 
   const handleAuthClick = () => {
@@ -65,6 +65,12 @@ export const Header: React.FC = () => {
             <Link className={styles.navLink} to="/administration">
               Administration
             </Link>
+          )}
+          {role === "bureau" && (
+            <DropdownMenu
+              label="Support"
+              items={[{ label: "Demande de fonctionnalités", to: "/demandes-fonctionnalites" }]}
+            />
           )}
         </nav>
       </div>

@@ -29,27 +29,30 @@ export const FeatureRequestsPage: React.FC = () => {
   };
 
   return (
-    <div className={styles.wrapper}>
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <FormField label="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <FormField label="Description" multiline rows={3} value={description} onChange={(e) => setDescription(e.target.value)} required />
-        <Button type="submit" label="Soumettre la demande" variant="accent" disabled={createRequest.isPending} />
-      </form>
+    <div className="container">
+      <h1>Demandes de fonctionnalités</h1>
+      <div className={styles.wrapper}>
+        <form className={styles.form} onSubmit={handleSubmit} noValidate>
+          <FormField label="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <FormField label="Description" multiline rows={3} value={description} onChange={(e) => setDescription(e.target.value)} required />
+          <Button type="submit" label="Soumettre la demande" variant="accent" disabled={createRequest.isPending} />
+        </form>
 
-      {isLoading && <Spinner label="Chargement des demandes..." />}
-      {requests && (
-        <ul className={styles.list}>
-          {requests.map((request) => (
-            <li key={request.id} className={styles.item}>
-              <h3 className={styles.title}>{request.title}</h3>
-              <p className={styles.meta}>
-                Proposé par {request.requestedBy} le {formatDate(request.createdAt)}
-              </p>
-              <p>{request.description}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+        {isLoading && <Spinner label="Chargement des demandes..." />}
+        {requests && (
+          <ul className={styles.list}>
+            {requests.map((request) => (
+              <li key={request.id} className={styles.item}>
+                <h2 className={styles.title}>{request.title}</h2>
+                <p className={styles.meta}>
+                  Proposé par {request.requestedBy} le {formatDate(request.createdAt)}
+                </p>
+                <p>{request.description}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };
