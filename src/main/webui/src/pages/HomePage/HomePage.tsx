@@ -20,14 +20,14 @@ const slides = [
     alt: "Collecte 2025",
     title: "Collecte 2025",
     caption: "Rejoignez l'aventure et devenez bénévole.",
-    href: "#benevolat",
+    to: "/#benevolat",
   },
   {
     src: placeholderImage("home-slide-events", "Actualités & Événements"),
     alt: "Nos événements",
     title: "Actualités & Événements",
     caption: "Suivez nos dernières publications et actions.",
-    href: "/evenements",
+    to: "/evenements",
   },
 ];
 
