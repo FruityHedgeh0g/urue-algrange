@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { useEvent } from "../../features/events/useEvents";
 import { isUpcoming } from "../../features/events/eventsApi";
+import { useMyEventIds, useEventRegistration } from "../../features/events/useMyRegistrations";
 import { useAuth } from "../../auth/AuthContext";
 import { formatDateRange } from "../../lib/formatDate";
 import Spinner from "../../components/atoms/Spinner/Spinner";
@@ -13,6 +14,11 @@ export const EventDetailPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const { data: event, isLoading, isError } = useEvent(eventId);
   const { isAuthenticated } = useAuth();
+  const { data: myEventIds } = useMyEventIds();
+  const { register, unregister } = useEventRegistration();
+
+  const isRegistered = Boolean(eventId && myEventIds?.includes(eventId));
+  const isPending = register.isPending || unregister.isPending;
 
   return (
     <div className="container">
@@ -39,10 +45,21 @@ export const EventDetailPage: React.FC = () => {
           {isUpcoming(event) && (
             <div className={styles.actions}>
               {isAuthenticated ? (
-                <>
-                  <Button label="M'inscrire à cet événement" variant="accent" disabled />
-                  <p className={styles.soon}>Inscription en ligne disponible prochainement.</p>
-                </>
+                isRegistered ? (
+                  <Button
+                    label="Me désinscrire"
+                    variant="outline"
+                    disabled={isPending}
+                    onClick={() => unregister.mutate(event.eventId)}
+                  />
+                ) : (
+                  <Button
+                    label="M'inscrire à cet événement"
+                    variant="accent"
+                    disabled={isPending}
+                    onClick={() => register.mutate(event.eventId)}
+                  />
+                )
               ) : (
                 <Link to="/connexion">
                   <Button label="Se connecter pour m'inscrire" />

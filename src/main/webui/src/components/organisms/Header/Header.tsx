@@ -9,7 +9,7 @@ import styles from "./Header.module.css";
 
 export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, setRole } = useAuth();
+  const { isAuthenticated, setRole, hasAtLeastRole } = useAuth();
   const navigate = useNavigate();
 
   const handleAuthClick = () => {
@@ -40,7 +40,7 @@ export const Header: React.FC = () => {
           <DropdownMenu
             label="Association"
             items={[
-              { label: "Qui sommes-nous ?", to: "/#about" },
+              { label: "Qui sommes-nous ?", to: "/qui-sommes-nous" },
               { label: "Actualités", to: "/actualites" },
               { label: "Galerie photos", to: "/galerie" },
               { label: "Contact", to: "/contact" },
@@ -56,6 +56,16 @@ export const Header: React.FC = () => {
               { label: "Devenir bénévole", to: "/#benevolat" },
             ]}
           />
+          {isAuthenticated && (
+            <Link className={styles.navLink} to="/mon-compte">
+              Mon espace
+            </Link>
+          )}
+          {hasAtLeastRole("bureau") && (
+            <Link className={styles.navLink} to="/administration">
+              Administration
+            </Link>
+          )}
         </nav>
       </div>
 
@@ -64,7 +74,11 @@ export const Header: React.FC = () => {
       </div>
 
       <div className={styles.right}>
-        {import.meta.env.DEV && <RoleSwitcher />}
+        {import.meta.env.DEV && (
+          <div className={styles.devOnly}>
+            <RoleSwitcher />
+          </div>
+        )}
         <ThemeToggle />
         <button type="button" className={styles.loginBtn} onClick={handleAuthClick}>
           {isAuthenticated ? "Se déconnecter" : "Se connecter"}

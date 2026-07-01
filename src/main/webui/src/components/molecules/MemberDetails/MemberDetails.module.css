@@ -1,0 +1,40 @@
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.term {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.value {
+  margin: 0;
+}
+
+.value a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.value a:hover {
+  text-decoration: underline;
+}

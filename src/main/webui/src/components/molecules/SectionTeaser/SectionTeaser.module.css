@@ -1,0 +1,31 @@
+.teaser {
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.teaser:hover,
+.teaser:focus-within {
+  background: var(--color-hover);
+}
+
+.inner {
+  padding: 64px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.link {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Étend la zone cliquable du lien à toute la largeur de la bande (motif "stretched link") */
+.link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}

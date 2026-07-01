@@ -15,6 +15,22 @@
   transform: translateY(-2px);
 }
 
+/*
+ * Signale un contenu qui n'est plus disponible (ex : événement passé).
+ * Volontairement pas d'opacity sur toute la carte : ça atténue le texte
+ * sous le seuil de contraste WCAG AA. On grise l'image et on repasse le
+ * texte sur --color-muted (déjà conforme au contraste).
+ */
+.dimmed .image {
+  filter: grayscale(1) brightness(0.92);
+}
+
+.dimmed .title,
+.dimmed .subtitle,
+.dimmed .excerpt {
+  color: var(--color-muted);
+}
+
 .imageWrapper {
   position: relative;
   aspect-ratio: 16 / 9;

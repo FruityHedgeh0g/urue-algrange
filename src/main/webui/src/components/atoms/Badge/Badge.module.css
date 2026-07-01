@@ -14,7 +14,7 @@
 
 .accent {
   background: color-mix(in oklab, var(--color-accent) 15%, transparent);
-  color: var(--color-accent);
+  color: var(--color-accent-emphasis);
 }
 
 .muted {

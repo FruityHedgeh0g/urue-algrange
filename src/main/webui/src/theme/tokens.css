@@ -4,13 +4,17 @@
   --color-primary: #145d9e;            /* bleu moto du logo */
   --color-primary-hover: #1a6fba;
   --color-primary-dark: #0d3f6c;
-  --color-accent: #ea4a2e;             /* rouge-orangé de la rose / typo */
+  --color-on-primary: #ffffff;         /* couleur de texte sur une surface --color-primary */
+  --color-accent: #d1391a;             /* rouge-orangé de la rose / typo (contraste AA sur fond blanc) */
   --color-accent-hover: #ff5c3c;
   --color-accent-dark: #b93a22;
+  --color-on-accent: #ffffff;          /* couleur de texte sur une surface --color-accent */
+  --color-accent-emphasis: var(--color-accent-dark); /* texte accent sur fond clair (ex : badge teinté) */
 
   /* Sémantique */
   --color-danger: #dc3545;
   --color-danger-hover: #bb2d3b;
+  --color-on-danger: #ffffff;          /* couleur de texte sur une surface --color-danger */
   --color-success: #1f9d55;
   --color-white: #ffffff;
 
@@ -20,7 +24,7 @@
   --color-surface-elev: #ffffff;
   --color-border: #e5e7eb;
   --color-text: #1f2937;
-  --color-muted: #6b7280;
+  --color-muted: #5f6773;
   --color-hover: #fdeee9;              /* léger lavis rose au survol */
 
   /* Échelle d'espacement */
@@ -46,12 +50,16 @@
   --color-primary: #5aa9e6;
   --color-primary-hover: #7dbff0;
   --color-primary-dark: #3e86c4;
+  --color-on-primary: #0b1220;         /* --color-primary est clair en mode nuit : texte sombre par-dessus */
   --color-accent: #ff7a54;
   --color-accent-hover: #ff9270;
   --color-accent-dark: #e85f3a;
+  --color-on-accent: #0b1220;          /* --color-accent est clair en mode nuit : texte sombre par-dessus */
+  --color-accent-emphasis: var(--color-accent); /* accent clair déjà lisible sur fond teinté sombre */
 
   --color-danger: #ff6b7a;
   --color-danger-hover: #ff5163;
+  --color-on-danger: #0b1220;          /* --color-danger est clair en mode nuit : texte sombre par-dessus */
   --color-success: #3ddc84;
 
   --color-bg: #0b1220;
@@ -73,12 +81,16 @@
     --color-primary: #5aa9e6;
     --color-primary-hover: #7dbff0;
     --color-primary-dark: #3e86c4;
+    --color-on-primary: #0b1220;
     --color-accent: #ff7a54;
     --color-accent-hover: #ff9270;
     --color-accent-dark: #e85f3a;
+    --color-on-accent: #0b1220;
+    --color-accent-emphasis: var(--color-accent); /* accent clair déjà lisible sur fond teinté sombre */
 
     --color-danger: #ff6b7a;
     --color-danger-hover: #ff5163;
+    --color-on-danger: #0b1220;
     --color-success: #3ddc84;
 
     --color-bg: #0b1220;
@@ -124,4 +136,35 @@ body{
   max-width: 520px;
   margin: 0 auto;
   padding: 56px 24px;
+}
+
+/* Lien d'évitement, visible uniquement au focus clavier */
+.skip-link{
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 10px 16px;
+  border-radius: 0 0 var(--radius) 0;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip-link:focus{
+  left: 0;
+}
+
+/* Contenu réservé aux technologies d'assistance (structure sémantique) */
+.sr-only{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
