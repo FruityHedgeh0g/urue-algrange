@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,6 +38,11 @@ public class SectorEntity extends AuditTemplate {
     public void removeGroup(GroupEntity group) {
         groups.remove(group);
         group.setSector(null);
+    }
+
+    public Set<GroupEntity> getGroups() {
+        if (groups == null) groups = new HashSet<>();
+        return groups;
     }
 
     @PreRemove

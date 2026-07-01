@@ -2,29 +2,35 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.SectorEntity;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-@TestTransaction
 public class SectorServiceTest {
 
     @Inject
     SectorServiceImpl sectorService;
+
+    @Inject
+    SectorRepository sectorRepository;
 
     @BeforeEach
     public void setUp() {
@@ -34,45 +40,53 @@ public class SectorServiceTest {
     /** @see SectorServiceImpl#listAll() **/
 
     @Test
+    @TestTransaction
     public void listAllSectors_Success(){
-        
     }
 
     @Test
+    @TestTransaction
     public void getAllSectors_NotFound(){
-        
+        List<SectorDto> sectors = new ArrayList<>();
+        Assertions.assertEquals(sectors, sectorService.listAll());
     }
 
     /** @see SectorServiceImpl#getById(UUID) () **/
 
     @Test
+    @TestTransaction
     public void getById_Success(){
 
     }
 
     @Test
+    @TestTransaction
     public void getById_NotFound(){
-
+        Assertions.assertFalse(sectorService.getById(UUID.randomUUID()).isPresent());
     }
 
     @Test
+    @TestTransaction
     public void getById_NullId(){
-
+        Assertions.assertThrows(ConstraintViolationException.class, () -> sectorService.getById(null));
     }
 
     /** @see SectorServiceImpl#create(SectorDto) () **/
 
     @Test
+    @TestTransaction
     public void create_NullDto(){
-
+        Assertions.assertThrows(ConstraintViolationException.class, () -> sectorService.create(null));
     }
 
     @Test
+    @TestTransaction
     public void create_Success(){
 
     }
 
     @Test
+    @TestTransaction
     public void create_Duplicate(){
 
     }
@@ -80,21 +94,25 @@ public class SectorServiceTest {
     /** @see SectorServiceImpl#update(SectorDto) () **/
 
     @Test
+    @TestTransaction
     public void update_Success(){
 
     }
 
     @Test
+    @TestTransaction
     public void update_NotFound(){
 
     }
 
     @Test
+    @TestTransaction
     public void update_NullDto(){
-
+        Assertions.assertThrows(ConstraintViolationException.class, () -> sectorService.update(null));
     }
 
     @Test
+    @TestTransaction
     public void update_Duplicate(){
 
     }
@@ -102,100 +120,38 @@ public class SectorServiceTest {
     /** @see SectorServiceImpl#delete(UUID) () **/
 
     @Test
-    public void delete_NotFound(){
-
+    @TestTransaction
+    public void delete_NullId(){
+        Assertions.assertThrows(ConstraintViolationException.class, () -> sectorService.delete(null));
     }
 
     @Test
+    @TestTransaction
+    public void delete_NotFound(){
+        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.delete(UUID.randomUUID()));
+    }
+
+    @Test
+    @TestTransaction
+    public void delete_GroupAssigned(){
+        //Assertions.assertThrows(InvalidResourceException.class, () -> sectorService.delete(UUID.randomUUID()));
+    }
+
+    @Test
+    @TestTransaction
     public void delete_Success(){
 
+        SectorEntity sectorEntity = new SectorEntity();
+        sectorEntity.setName("Test sector");
+
+        sectorRepository.persist(sectorEntity);
+
+        Assertions.assertDoesNotThrow(() -> sectorService.delete(sectorEntity.getSectorId()));
     }
 
     /** @see SectorServiceImpl#assignGroup(UUID, UUID) () **/
 
     /** @see SectorServiceImpl#unassignGroup(UUID, UUID) () **/
-//
-//    @Test
-//    public void GetAllSectors_Success(){
-//        SectorEntity sectorEntity = SectorEntity.builder().sectorId(UUID.randomUUID())
-//                .name("FirstSector").build();
-//
-//        SectorEntity anotherSector = SectorEntity.builder().sectorId(UUID.randomUUID())
-//                .name("SecondSector").build();
-//
-//        SectorDto sectorDto = SectorDto.builder().sectorId(sectorEntity.getSectorId())
-//                .name(sectorEntity.getName()).build();
-//
-//        SectorDto anotherSectorDto = SectorDto.builder().sectorId(anotherSector.getSectorId())
-//                .name(anotherSector.getName()).build();
-//
-//
-//        List<SectorEntity> sectorEntities = List.of(sectorEntity, anotherSector);
-//
-//        List<SectorDto> sectorDtos = List.of(sectorDto, anotherSectorDto);
-//
-//        PanacheQuery<SectorEntity> mockedPanacheQuery = mock(PanacheQuery.class);
-//        when(mockedPanacheQuery.page(any())).thenReturn(mockedPanacheQuery);
-//        when(mockedPanacheQuery.stream()).thenReturn(sectorEntities.stream());
-//        when(sectorRepository.findAll()).thenReturn(mockedPanacheQuery);
-//
-//        Assertions.assertEquals(sectorService.getAllSectors().get(),
-//                sectorDtos
-//        );
-//    }
-//
-//    @Test
-//    public void GetAllSectors_Failure_NotManagedException() {
-//        when(sectorRepository.findAll()).thenThrow(new RuntimeException("Test exception"));
-//
-//        Assertions.assertThrows(RuntimeException.class, () -> {
-//            sectorService.getAllSectors().get();
-//        });
-//    }
-//
-//    /** @see SectorServiceImpl#getSectorById(UUID) **/
-//
-//    @Test
-//    public void GetSectorById_Success(){
-//
-//    }
-//
-//    @Test
-//    public void GetSectorById_Failure_NotManagedException(){
-//
-//    }
-//
-//    @Test
-//    public void GetSectorById_Failure_UnknownResource(){
-//
-//    }
-//
-//    @Test
-//    public void GetSectorById_Failure_ConstraintViolation(){
-//
-//    }
-//
-//    /** @see SectorServiceImpl#createSector(SectorDto) **/
-//
-//    @Test
-//    public void CreateSector_Success(){
-//
-//    }
-//
-//    @Test
-//    public void CreateSector_Failure_ConstraintViolation(){
-//
-//    }
-//
-//    @Test
-//    public void CreateSector_Failure_DuplicateResource(){
-//
-//    }
-//
-//    @Test
-//    public void CreateSector_Failure_NotManagedException(){
-//
-//    }
 //
 //    /** @see SectorServiceImpl#assignGroupToSector(UUID, UUID) **/
 //
@@ -270,53 +226,4 @@ public class SectorServiceTest {
 //    public void UnassignGroupFromSector_Failure_NotManagedException(){
 //
 //    }
-//
-//    /** @see SectorServiceImpl#updateSector(SectorDto) **/
-//
-//    @Test
-//    public void UpdateSector_Success(){
-//
-//    }
-//
-//    @Test
-//    public void UpdateSector_Failure_ConstraintViolation(){
-//
-//    }
-//
-//    @Test
-//    public void UpdateSector_Failure_UnknownResource(){
-//
-//    }
-//
-//    @Test
-//    public void UpdateSector_Failure_NotManagedException(){
-//
-//    }
-//
-//    /** @see SectorServiceImpl#deleteSector(UUID) **/
-//
-//    @Test
-//    public void DeleteSector_Success(){
-//
-//    }
-//
-//    @Test
-//    public void DeleteSector_Failure_ConstraintViolation(){
-//
-//    }
-//
-//    @Test
-//    public void DeleteSector_Failure_UnknownResource(){
-//
-//    }
-//
-//    @Test
-//    public void DeleteSector_Failure_NotManagedException(){
-//
-//    }
-
-
-
-
-
 }
