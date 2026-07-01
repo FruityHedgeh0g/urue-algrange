@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import styles from "./DropdownMenu.module.css";
 
 export interface DropdownItem {
   label: string;
-  href?: string;
-  onClick?: () => void;
+  /** Chemin interne (route ou ancre "/#section"), résolu via React Router. */
+  to: string;
 }
 
 export interface DropdownMenuProps {
@@ -53,17 +54,11 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, items }) => {
       </button>
       {open && (
         <ul className={styles.menu} role="menu">
-          {items.map((item, idx) => (
-            <li key={idx} role="none">
-              {item.href ? (
-                <a className={styles.item} role="menuitem" href={item.href} onClick={item.onClick}>
-                  {item.label}
-                </a>
-              ) : (
-                <button className={styles.item} role="menuitem" onClick={item.onClick} type="button">
-                  {item.label}
-                </button>
-              )}
+          {items.map((item) => (
+            <li key={item.to} role="none">
+              <Link className={styles.item} role="menuitem" to={item.to} onClick={() => setOpen(false)}>
+                {item.label}
+              </Link>
             </li>
           ))}
         </ul>

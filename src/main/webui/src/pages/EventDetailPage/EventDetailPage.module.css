@@ -1,0 +1,33 @@
+.back {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.meta {
+  color: var(--color-muted);
+  margin: 4px 0;
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.7;
+  white-space: pre-line;
+  margin-top: 16px;
+}
+
+.actions {
+  margin-top: 24px;
+}
+
+.soon {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.error {
+  color: var(--color-danger);
+}

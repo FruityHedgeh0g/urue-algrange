@@ -1,12 +1,25 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../atoms/Logo/Logo";
 import DropdownMenu from "../../molecules/DropdownMenu/DropdownMenu";
 import ThemeToggle from "../../molecules/ThemeToggle/ThemeToggle";
 import RoleSwitcher from "../../molecules/RoleSwitcher/RoleSwitcher";
+import { useAuth } from "../../../auth/AuthContext";
 import styles from "./Header.module.css";
 
 export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isAuthenticated, setRole } = useAuth();
+  const navigate = useNavigate();
+
+  const handleAuthClick = () => {
+    if (isAuthenticated) {
+      setRole("visiteur");
+      navigate("/");
+    } else {
+      navigate("/connexion");
+    }
+  };
 
   return (
     <header className={styles.header}>
@@ -25,26 +38,22 @@ export const Header: React.FC = () => {
 
         <nav className={`${styles.navLinks}${menuOpen ? ` ${styles.open}` : ""}`} aria-label="Principal">
           <DropdownMenu
-            label="Services"
-            items={[
-              { label: "Collecte 2025", href: "#collecte" },
-              { label: "Bénévolat", href: "#benevolat" },
-              { label: "Dons", href: "#don" },
-            ]}
-          />
-          <DropdownMenu
             label="Association"
             items={[
-              { label: "Qui sommes-nous ?", href: "#about" },
-              { label: "Équipe", href: "#team" },
-              { label: "Contact", href: "#contact" },
+              { label: "Qui sommes-nous ?", to: "/#about" },
+              { label: "Actualités", to: "/actualites" },
+              { label: "Galerie photos", to: "/galerie" },
+              { label: "Contact", to: "/contact" },
             ]}
           />
+          <Link className={styles.navLink} to="/evenements">
+            Événements
+          </Link>
           <DropdownMenu
-            label="Actualités"
+            label="Soutenir"
             items={[
-              { label: "Événements", href: "#events" },
-              { label: "Blog", href: "#blog" },
+              { label: "Faire un don", to: "/don" },
+              { label: "Devenir bénévole", to: "/#benevolat" },
             ]}
           />
         </nav>
@@ -57,8 +66,8 @@ export const Header: React.FC = () => {
       <div className={styles.right}>
         {import.meta.env.DEV && <RoleSwitcher />}
         <ThemeToggle />
-        <button type="button" className={styles.loginBtn} onClick={() => alert("Connexion à venir")}>
-          Se connecter
+        <button type="button" className={styles.loginBtn} onClick={handleAuthClick}>
+          {isAuthenticated ? "Se déconnecter" : "Se connecter"}
         </button>
       </div>
     </header>

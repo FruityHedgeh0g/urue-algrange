@@ -13,3 +13,11 @@
 .muted {
   color: var(--color-muted);
 }
+
+.seeAll {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}

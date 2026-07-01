@@ -36,6 +36,22 @@
   gap: 6px;
 }
 
+.navLink {
+  appearance: none;
+  background: transparent;
+  color: var(--color-text);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.navLink:hover {
+  background: var(--color-hover);
+}
+
 .center {
   justify-self: center;
 }
