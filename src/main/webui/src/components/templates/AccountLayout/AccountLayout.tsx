@@ -23,11 +23,6 @@ export const AccountLayout: React.FC = () => {
             Mon secteur
           </NavLink>
         )}
-        {hasAtLeastRole("bureau") && (
-          <NavLink className={navLinkClass} to="/mon-compte/administration">
-            Administration
-          </NavLink>
-        )}
       </nav>
       <Outlet />
     </div>
