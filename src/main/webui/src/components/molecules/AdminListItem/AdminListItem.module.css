@@ -33,6 +33,13 @@
   color: var(--color-muted);
 }
 
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
 .disabledNote {
   font-size: 12px;
   color: var(--color-muted);

@@ -3,6 +3,7 @@ import { Sector } from "./types";
 
 const OVERRIDES_KEY = "urue-sector-overrides";
 const CREATED_KEY = "urue-sector-created";
+const DELETED_KEY = "urue-sector-deleted";
 
 /**
  * Client mocké — le backend a un SectorController mais les endpoints de
@@ -31,11 +32,16 @@ function readOverrides(): Record<string, Partial<Sector>> {
   return readJson(OVERRIDES_KEY, {});
 }
 
+function readDeletedIds(): string[] {
+  return readJson<string[]>(DELETED_KEY, []);
+}
+
 async function fetchAllRaw(): Promise<Sector[]> {
   const overrides = readOverrides();
   const created = readJson<Sector[]>(CREATED_KEY, []);
+  const deleted = readDeletedIds();
   const base = mockSectors.map((sector) => ({ ...sector, ...overrides[sector.sectorId] }));
-  return [...base, ...created];
+  return [...base, ...created].filter((sector) => !deleted.includes(sector.sectorId));
 }
 
 export async function fetchSectors(): Promise<Sector[]> {
@@ -58,5 +64,11 @@ export async function createSector(input: { name: string; description: string })
   const created = readJson<Sector[]>(CREATED_KEY, []);
   created.push({ sectorId: `sector-${Date.now()}`, groups: [], ...input });
   writeJson(CREATED_KEY, created);
+  return Promise.resolve();
+}
+
+export async function deleteSector(sectorId: string): Promise<void> {
+  const deleted = readDeletedIds();
+  if (!deleted.includes(sectorId)) writeJson(DELETED_KEY, [...deleted, sectorId]);
   return Promise.resolve();
 }

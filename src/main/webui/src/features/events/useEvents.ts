@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createEvent, EventInput, fetchEventById, fetchEvents, updateEvent } from "./eventsApi";
+import { createEvent, deleteEvent, EventInput, fetchEventById, fetchEvents, updateEvent } from "./eventsApi";
 import { EventOrganizer } from "./types";
 
 export function useEvents() {
@@ -28,5 +28,10 @@ export function useEventMutations() {
     onSuccess: invalidate,
   });
 
-  return { update, create };
+  const remove = useMutation({
+    mutationFn: deleteEvent,
+    onSuccess: invalidate,
+  });
+
+  return { update, create, remove };
 }

@@ -3,6 +3,7 @@ import { Event, EventOrganizer } from "./types";
 
 const OVERRIDES_KEY = "urue-event-overrides";
 const CREATED_KEY = "urue-event-created";
+const DELETED_KEY = "urue-event-deleted";
 
 /**
  * Client mocké — le EventController backend n'expose que GET /api/events
@@ -26,11 +27,16 @@ function writeJson(key: string, value: unknown) {
   }
 }
 
+function readDeletedIds(): string[] {
+  return readJson<string[]>(DELETED_KEY, []);
+}
+
 async function fetchAllRaw(): Promise<Event[]> {
   const overrides = readJson<Record<string, Partial<Event>>>(OVERRIDES_KEY, {});
   const created = readJson<Event[]>(CREATED_KEY, []);
+  const deleted = readDeletedIds();
   const base = mockEvents.map((event) => ({ ...event, ...overrides[event.eventId] }));
-  return [...base, ...created];
+  return [...base, ...created].filter((event) => !deleted.includes(event.eventId));
 }
 
 export async function fetchEvents(): Promise<Event[]> {
@@ -64,6 +70,12 @@ export async function createEvent(input: EventInput, creator: EventOrganizer): P
   const created = readJson<Event[]>(CREATED_KEY, []);
   created.push({ eventId: `event-${Date.now()}`, status: "PUBLISHED", creator, ...input });
   writeJson(CREATED_KEY, created);
+  return Promise.resolve();
+}
+
+export async function deleteEvent(eventId: string): Promise<void> {
+  const deleted = readDeletedIds();
+  if (!deleted.includes(eventId)) writeJson(DELETED_KEY, [...deleted, eventId]);
   return Promise.resolve();
 }
 
