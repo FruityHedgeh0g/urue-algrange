@@ -20,7 +20,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ to, imageSrc, imageAlt, ti
     </div>
     <div className={styles.body}>
       {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-      <h3 className={styles.title}>{title}</h3>
+      <h2 className={styles.title}>{title}</h2>
       {excerpt && <p className={styles.excerpt}>{excerpt}</p>}
     </div>
   </Link>

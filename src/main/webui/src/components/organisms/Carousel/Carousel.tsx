@@ -131,7 +131,7 @@ export const Carousel: React.FC<CarouselProps> = ({
                 )}
                 {(s.title || s.caption) && (
                   <div className={styles.caption} aria-live="polite">
-                    {s.title && <h3 style={{ margin: 0 }}>{s.title}</h3>}
+                    {s.title && <h2 style={{ margin: 0 }}>{s.title}</h2>}
                     {s.caption && <p style={{ margin: 0 }}>{s.caption}</p>}
                   </div>
                 )}

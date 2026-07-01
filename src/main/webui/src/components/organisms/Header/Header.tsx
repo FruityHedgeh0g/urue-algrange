@@ -69,7 +69,11 @@ export const Header: React.FC = () => {
       </div>
 
       <div className={styles.right}>
-        {import.meta.env.DEV && <RoleSwitcher />}
+        {import.meta.env.DEV && (
+          <div className={styles.devOnly}>
+            <RoleSwitcher />
+          </div>
+        )}
         <ThemeToggle />
         <button type="button" className={styles.loginBtn} onClick={handleAuthClick}>
           {isAuthenticated ? "Se déconnecter" : "Se connecter"}
