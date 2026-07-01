@@ -1,0 +1,20 @@
+.badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+  max-width: 420px;
+}
+
+.saved {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-success);
+}
