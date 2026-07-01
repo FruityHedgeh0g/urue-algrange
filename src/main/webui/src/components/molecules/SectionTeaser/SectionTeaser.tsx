@@ -10,14 +10,21 @@ export interface SectionTeaserProps {
   linkLabel: string;
 }
 
-/** Bloc de section entièrement cliquable (titre + texte + lien flèche), plutôt qu'un gros bouton. */
+/**
+ * Bloc de section entièrement cliquable (titre + texte + lien flèche), plutôt
+ * qu'un gros bouton. La zone cliquable/survolable couvre toute la largeur de
+ * la bande (entre les séparateurs), le contenu texte reste centré à
+ * l'intérieur.
+ */
 export const SectionTeaser: React.FC<SectionTeaserProps> = ({ id, title, description, to, linkLabel }) => (
   <section id={id} className={styles.teaser}>
-    <h2>{title}</h2>
-    <p>{description}</p>
-    <Link className={styles.link} to={to} aria-label={`${title} — ${linkLabel}`}>
-      {linkLabel} →
-    </Link>
+    <div className={styles.inner}>
+      <h2>{title}</h2>
+      <p>{description}</p>
+      <Link className={styles.link} to={to} aria-label={`${title} — ${linkLabel}`}>
+        {linkLabel} →
+      </Link>
+    </div>
   </section>
 );
 
