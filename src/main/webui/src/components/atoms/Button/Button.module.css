@@ -21,7 +21,7 @@
 
 .primary {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-on-primary);
   border-color: var(--color-primary-dark);
 }
 .primary:hover:not(:disabled) {
@@ -30,7 +30,7 @@
 
 .accent {
   background: var(--color-accent);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   border-color: var(--color-accent-dark);
 }
 .accent:hover:not(:disabled) {

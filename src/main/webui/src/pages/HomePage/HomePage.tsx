@@ -33,6 +33,7 @@ const slides = [
 
 export const HomePage: React.FC = () => (
   <>
+    <h1 className="sr-only">Une Rose Un Espoir - Algrange</h1>
     <Carousel slides={slides} interval={4000} />
 
     <section id="about" className={styles.section}>

@@ -10,8 +10,11 @@ export const PublicLayout: React.FC = () => {
 
   return (
     <div className={styles.layout}>
+      <a className="skip-link" href="#main-content">
+        Aller au contenu
+      </a>
       <Header />
-      <main className={styles.main}>
+      <main id="main-content" className={styles.main}>
         <Outlet />
       </main>
       <Footer />
