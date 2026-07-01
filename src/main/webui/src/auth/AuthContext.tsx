@@ -9,6 +9,7 @@ import { RoleId, roleAtLeast } from "./roles";
 export interface MockUserGroup {
   groupId: string;
   name: string;
+  sectorId: string;
   sectorName: string;
 }
 
@@ -32,7 +33,12 @@ interface AuthContextValue {
 const ROLE_STORAGE_KEY = "urue-mock-role";
 const PROFILE_STORAGE_KEY = "urue-mock-profile";
 
-const DEFAULT_GROUP: MockUserGroup = { groupId: "group-1", name: "Groupe Algrange Centre", sectorName: "Secteur Algrange" };
+const DEFAULT_GROUP: MockUserGroup = {
+  groupId: "group-1",
+  name: "Groupe Algrange Centre",
+  sectorId: "sector-1",
+  sectorName: "Secteur Algrange",
+};
 const DEFAULT_PROFILE = { firstName: "Jean", lastName: "Dupont" };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);

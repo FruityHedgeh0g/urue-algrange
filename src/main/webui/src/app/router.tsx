@@ -14,6 +14,7 @@ import LoginPage from "../pages/LoginPage/LoginPage";
 import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import MyEventsPage from "../pages/MyEventsPage/MyEventsPage";
+import SectorPage from "../pages/SectorPage/SectorPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
 // Aligné sur --base=/quinoa (quarkus.quinoa.ui-root-path) pour que les liens
@@ -46,6 +47,14 @@ export const router = createBrowserRouter(
           children: [
             { index: true, element: <ProfilePage /> },
             { path: "evenements", element: <MyEventsPage /> },
+            {
+              path: "secteur",
+              element: (
+                <RequireRole minRole="chef_de_groupe">
+                  <SectorPage />
+                </RequireRole>
+              ),
+            },
           ],
         },
         { path: "*", element: <NotFoundPage /> },
