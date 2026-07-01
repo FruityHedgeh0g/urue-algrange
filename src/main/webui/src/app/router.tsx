@@ -1,7 +1,9 @@
+import { ReactNode } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import PublicLayout from "../components/templates/PublicLayout/PublicLayout";
 import AccountLayout from "../components/templates/AccountLayout/AccountLayout";
 import RequireRole from "../auth/RequireRole";
+import { RoleId } from "../auth/roles";
 import HomePage from "../pages/HomePage/HomePage";
 import NewsPage from "../pages/NewsPage/NewsPage";
 import NewsDetailPage from "../pages/NewsDetailPage/NewsDetailPage";
@@ -15,11 +17,22 @@ import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import MyEventsPage from "../pages/MyEventsPage/MyEventsPage";
 import SectorPage from "../pages/SectorPage/SectorPage";
+import MembersAdminPage from "../pages/MembersAdminPage/MembersAdminPage";
+import SectorsAdminPage from "../pages/SectorsAdminPage/SectorsAdminPage";
+import EventsAdminPage from "../pages/EventsAdminPage/EventsAdminPage";
+import RolesAdminPage from "../pages/RolesAdminPage/RolesAdminPage";
+import FeatureRequestsPage from "../pages/FeatureRequestsPage/FeatureRequestsPage";
+import ConfigurationPage from "../pages/ConfigurationPage/ConfigurationPage";
+import FeatureFlagsPage from "../pages/FeatureFlagsPage/FeatureFlagsPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
 // Aligné sur --base=/quinoa (quarkus.quinoa.ui-root-path) pour que les liens
 // internes et l'historique du navigateur restent cohérents avec le chemin de service.
 const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+
+function guarded(minRole: RoleId, element: ReactNode) {
+  return <RequireRole minRole={minRole}>{element}</RequireRole>;
+}
 
 export const router = createBrowserRouter(
   [
@@ -47,14 +60,14 @@ export const router = createBrowserRouter(
           children: [
             { index: true, element: <ProfilePage /> },
             { path: "evenements", element: <MyEventsPage /> },
-            {
-              path: "secteur",
-              element: (
-                <RequireRole minRole="chef_de_groupe">
-                  <SectorPage />
-                </RequireRole>
-              ),
-            },
+            { path: "secteur", element: guarded("chef_de_groupe", <SectorPage />) },
+            { path: "membres", element: guarded("bureau", <MembersAdminPage />) },
+            { path: "secteurs", element: guarded("bureau", <SectorsAdminPage />) },
+            { path: "gestion-evenements", element: guarded("bureau", <EventsAdminPage />) },
+            { path: "roles", element: guarded("bureau", <RolesAdminPage />) },
+            { path: "demandes-fonctionnalites", element: guarded("bureau", <FeatureRequestsPage />) },
+            { path: "configuration", element: guarded("admin", <ConfigurationPage />) },
+            { path: "fonctionnalites", element: guarded("admin", <FeatureFlagsPage />) },
           ],
         },
         { path: "*", element: <NotFoundPage /> },
