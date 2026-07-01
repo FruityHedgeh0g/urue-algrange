@@ -1,9 +1,5 @@
 .teaser {
   position: relative;
-  padding: 64px 24px;
-  max-width: 960px;
-  margin: 0 auto;
-  border-radius: var(--radius);
   cursor: pointer;
   transition: background 0.15s ease;
 }
@@ -11,6 +7,12 @@
 .teaser:hover,
 .teaser:focus-within {
   background: var(--color-hover);
+}
+
+.inner {
+  padding: 64px 24px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .link {
@@ -21,7 +23,7 @@
   text-decoration: none;
 }
 
-/* Étend la zone cliquable du lien à toute la section (motif "stretched link") */
+/* Étend la zone cliquable du lien à toute la largeur de la bande (motif "stretched link") */
 .link::after {
   content: "";
   position: absolute;

@@ -4,6 +4,18 @@
   gap: 24px;
 }
 
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.groupTitle {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: var(--color-muted);
+}
+
 .error {
   color: var(--color-danger);
 }
