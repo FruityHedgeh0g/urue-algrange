@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import styles from "./Carousel.module.css";
 
 export interface CarouselSlide {
@@ -6,7 +7,8 @@ export interface CarouselSlide {
   alt: string;
   title?: string;
   caption?: string;
-  href?: string;
+  /** Chemin interne (route ou ancre "/#section"), résolu via React Router. */
+  to?: string;
 }
 
 export interface CarouselProps {
@@ -122,10 +124,10 @@ export const Carousel: React.FC<CarouselProps> = ({
             const img = <img src={s.src} alt={s.alt} loading={i === index ? "eager" : "lazy"} />;
             return (
               <div className={styles.slide} role="group" aria-roledescription="slide" aria-label={`Slide ${i + 1} sur ${len}`} key={i}>
-                {s.href ? (
-                  <a href={s.href} aria-label={s.title || s.alt}>
+                {s.to ? (
+                  <Link to={s.to} aria-label={s.title || s.alt}>
                     {img}
-                  </a>
+                  </Link>
                 ) : (
                   img
                 )}
