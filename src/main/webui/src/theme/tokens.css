@@ -1,0 +1,127 @@
+/* Design tokens — thème "Une Rose Un Espoir" (rouge-rose de la rose du logo, bleu du tracé moto) */
+:root{
+  /* Marque */
+  --color-primary: #145d9e;            /* bleu moto du logo */
+  --color-primary-hover: #1a6fba;
+  --color-primary-dark: #0d3f6c;
+  --color-accent: #ea4a2e;             /* rouge-orangé de la rose / typo */
+  --color-accent-hover: #ff5c3c;
+  --color-accent-dark: #b93a22;
+
+  /* Sémantique */
+  --color-danger: #dc3545;
+  --color-danger-hover: #bb2d3b;
+  --color-success: #1f9d55;
+  --color-white: #ffffff;
+
+  /* Surfaces & texte */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-elev: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #1f2937;
+  --color-muted: #6b7280;
+  --color-hover: #fdeee9;              /* léger lavis rose au survol */
+
+  /* Échelle d'espacement */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Forme & élévation */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 6px 20px rgba(0,0,0,.08);
+  --focus-ring: 0 0 0 3px rgba(20,93,158,.25);
+}
+
+/* Mode nuit explicite */
+:root[data-theme="dark"]{
+  --color-primary: #5aa9e6;
+  --color-primary-hover: #7dbff0;
+  --color-primary-dark: #3e86c4;
+  --color-accent: #ff7a54;
+  --color-accent-hover: #ff9270;
+  --color-accent-dark: #e85f3a;
+
+  --color-danger: #ff6b7a;
+  --color-danger-hover: #ff5163;
+  --color-success: #3ddc84;
+
+  --color-bg: #0b1220;
+  --color-surface: #111827;
+  --color-surface-elev: #0f172a;
+  --color-border: #243047;
+  --color-text: #e5e7eb;
+  --color-muted: #9aa3b2;
+  --color-hover: rgba(90,169,230,.14);
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.55);
+  --focus-ring: 0 0 0 3px rgba(90,169,230,.35);
+}
+
+/* Respecte la préférence système tant qu'aucun choix explicite n'est enregistré */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]){
+    --color-primary: #5aa9e6;
+    --color-primary-hover: #7dbff0;
+    --color-primary-dark: #3e86c4;
+    --color-accent: #ff7a54;
+    --color-accent-hover: #ff9270;
+    --color-accent-dark: #e85f3a;
+
+    --color-danger: #ff6b7a;
+    --color-danger-hover: #ff5163;
+    --color-success: #3ddc84;
+
+    --color-bg: #0b1220;
+    --color-surface: #111827;
+    --color-surface-elev: #0f172a;
+    --color-border: #243047;
+    --color-text: #e5e7eb;
+    --color-muted: #9aa3b2;
+    --color-hover: rgba(90,169,230,.14);
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+    --shadow-md: 0 8px 24px rgba(0,0,0,.55);
+    --focus-ring: 0 0 0 3px rgba(90,169,230,.35);
+  }
+}
+
+html, body, #root{
+  height: 100%;
+}
+
+body{
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(button, a, [tabindex="0"], input, select, textarea):focus-visible{
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Utilitaires de mise en page partagés entre les pages */
+.container{
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 56px 24px;
+}
+
+.container-narrow{
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 56px 24px;
+}

@@ -1,0 +1,61 @@
+package fr.fruityhedgeh0g.services.proxies.auth;
+
+import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
+import fr.fruityhedgeh0g.services.interfaces.PostService;
+import io.quarkus.arc.properties.IfBuildProperty;
+import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Inject;
+import lombok.AllArgsConstructor;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Priority(100)
+@Authenticated
+@Decorator
+@IfBuildProperty(name = "quarkus.oidc.enabled", stringValue = "true")
+public class PostAuthProxy implements PostService {
+    @Inject
+    SecurityIdentity identity;
+
+    @Inject
+    JsonWebToken token;
+
+    @Inject
+    @Delegate
+    PostService postService;
+
+
+    @Override
+    public List<PostDto> listAll() {
+        return postService.listAll();
+    }
+
+    @Override
+    public Optional<PostDto> getById(UUID postId) {
+        return postService.getById(postId);
+    }
+
+    @Override
+    public PostDto create(PostDto postDto) {
+        return postService.create(postDto);
+    }
+
+    @Override
+    public PostDto update(PostDto postDto) {
+        return postService.update(postDto);
+    }
+
+    @Override
+    public void delete(UUID postId) {
+        postService.delete(postId);
+    }
+}

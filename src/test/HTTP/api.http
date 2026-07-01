@@ -1,0 +1,191 @@
+###############################################################################
+# CONFIGURATIONS
+###############################################################################
+
+### Get all configurations
+GET {{baseUrl}}/api/configurations
+Accept: {{jsonType}}
+
+###
+
+### Get configuration by name
+GET {{baseUrl}}/api/configurations/example-config
+Accept: {{jsonType}}
+
+###############################################################################
+# EVENTS
+###############################################################################
+
+### Get all events
+GET {{baseUrl}}/api/events
+Accept: {{jsonType}}
+
+###
+
+### Create event
+POST {{baseUrl}}/api/events
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "name": "Une Rose un espoir Algrange 2026",
+  "description": "Grand évènement annuel",
+  "startDateTime": "2026-04-24T12:00:00",
+  "endDateTime": "2026-04-26T18:00:00",
+  "creator": {
+    "userId": "00000000-0000-0000-0000-000000000001"
+  }
+}
+
+###############################################################################
+# GROUPS
+###############################################################################
+
+### Get all groups
+GET {{baseUrl}}/api/groups
+Accept: {{jsonType}}
+
+###
+
+### Create group
+POST {{baseUrl}}/api/groups
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "name": "Groupe bénévoles",
+  "description": "Équipe de bénévoles principaux"
+}
+
+###############################################################################
+# MEDIAS
+###############################################################################
+
+### Get all medias
+GET {{baseUrl}}/api/medias
+Accept: {{jsonType}}
+
+###############################################################################
+# POSTS
+###############################################################################
+
+### Get all posts
+GET {{baseUrl}}/api/posts
+Accept: {{jsonType}}
+
+###############################################################################
+# ROLES
+###############################################################################
+
+### Get all roles
+GET {{baseUrl}}/api/roles
+Accept: {{jsonType}}
+
+###
+
+### Get role by ID
+GET {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
+Accept: {{jsonType}}
+
+###
+
+### Create role
+POST {{baseUrl}}/api/roles
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "name": "Président",
+  "description": "Rôle de président de l'association",
+  "roleType": "ORGANIZATIONAL"
+}
+
+###############################################################################
+# SECTORS
+###############################################################################
+
+### Get all sectors
+GET {{baseUrl}}/api/sectors
+Accept: {{jsonType}}
+
+###
+
+### Create sector
+POST {{baseUrl}}/api/sectors
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "name": "Secteur Nord",
+  "description": "Zone nord de la ville"
+}
+
+###
+
+### Assign group to sector
+PATCH {{baseUrl}}/api/sectors/00000000-0000-0000-0000-000000000001/assign/00000000-0000-0000-0000-000000000002
+Accept: {{jsonType}}
+
+###
+
+### Unassign group from sector
+PATCH {{baseUrl}}/api/sectors/00000000-0000-0000-0000-000000000001/unassign/00000000-0000-0000-0000-000000000002
+Accept: {{jsonType}}
+
+###
+
+### Update sector
+PATCH {{baseUrl}}/api/sectors
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "sectorId": "00000000-0000-0000-0000-000000000001",
+  "name": "Secteur Nord (modifié)",
+  "description": "Zone nord mise à jour"
+}
+
+###
+
+### Delete sector
+DELETE {{baseUrl}}/api/sectors/00000000-0000-0000-0000-000000000001
+
+###############################################################################
+# USERS
+###############################################################################
+
+### Get all users
+GET {{baseUrl}}/api/users
+Accept: {{jsonType}}
+
+###
+
+### Get user by ID
+GET {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
+Accept: {{jsonType}}
+
+###
+
+### Create user
+POST {{baseUrl}}/api/users
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "userId": "00000000-0000-0000-0000-000000000001",
+  "firstName": "Jean",
+  "lastName": "Dupont"
+}
+
+###
+
+### Update user
+PATCH {{baseUrl}}/api/users
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "userId": "00000000-0000-0000-0000-000000000001",
+  "firstName": "Jean",
+  "lastName": "Cule"
+}

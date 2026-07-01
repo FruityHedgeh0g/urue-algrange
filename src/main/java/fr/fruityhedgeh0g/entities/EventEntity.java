@@ -1,0 +1,74 @@
+package fr.fruityhedgeh0g.entities;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
+
+@Entity
+@Table(name = "events")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class EventEntity extends AuditTemplate {
+
+    @Id
+    @Column(name = "event_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID eventId;
+
+    @Column(name = "status", nullable = false)
+    private String status;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "startDateTime", nullable = false)
+    private LocalDateTime startDateTime;
+
+    @Column(name = "endDateTime")
+    private LocalDateTime endDateTime;
+
+    @Column(name = "latitude")
+    private String latitude;
+
+    @Column(name = "longitude")
+    private String longitude;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "postal_code")
+    private String postalCode;
+
+    @Column(name = "address_complement")
+    private String addressComplement;
+
+    //TODO: Gérer les N+1
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "event_participants", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<UserEntity> participants;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "event_organizers", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<UserEntity> organizers;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private UserEntity creator;
+}

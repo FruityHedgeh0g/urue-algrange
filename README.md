@@ -72,3 +72,29 @@ Quinoa codestart added a tiny Vite app in src/main/webui. The page is configured
 Easily start your REST Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+
+
+## Troubleshooting (Windows)
+
+If running the frontend dev server fails with an error similar to:
+
+- "You are using Node.js 20.10.0. Vite requires Node.js version 20.19+ or 22.12+."
+- "TypeError: crypto.hash is not a function" (stack trace inside node_modules/vite)
+
+This happens because Vite 7 depends on a Node crypto API that was added in Node 20.19 and 22.12. Older Node 20.x (e.g., 20.10) do not have `crypto.hash`, so Vite crashes at startup on Windows.
+
+Fix:
+1. Upgrade Node to a supported version (recommended LTS 22.12+ or at least 20.19+).
+   - With NVM for Windows: https://github.com/coreybutler/nvm-windows
+     - nvm install 22.12.0
+     - nvm use 22.12.0
+2. Reinstall dependencies in the frontend folder to ensure native modules and lockfile match your Node version:
+   - cd src\\main\\webui
+   - Remove node_modules and package-lock.json if present
+   - npm install
+3. Start the dev server again:
+   - npm run dev
+
+Notes:
+- The project now declares an engines requirement in src/main/webui/package.json to indicate the minimum Node version. npm will warn if your Node version is out of range.
+- The app is served under the /quinoa base path in dev and build (vite.config.ts and scripts are configured accordingly).
