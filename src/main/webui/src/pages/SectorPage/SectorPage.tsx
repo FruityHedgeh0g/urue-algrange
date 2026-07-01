@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
 import { useSector, useUpdateSector } from "../../features/sectors/useSector";
 import { useMembersByGroupIds } from "../../features/users/useMembers";
+import { Member } from "../../features/users/types";
 import FormField from "../../components/molecules/FormField/FormField";
 import Button from "../../components/atoms/Button/Button";
 import Spinner from "../../components/atoms/Spinner/Spinner";
+import Modal from "../../components/molecules/Modal/Modal";
+import MemberDetails from "../../components/molecules/MemberDetails/MemberDetails";
 import styles from "./SectorPage.module.css";
 
 export const SectorPage: React.FC = () => {
@@ -16,6 +19,7 @@ export const SectorPage: React.FC = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saved, setSaved] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   useEffect(() => {
     if (sector) {
@@ -39,6 +43,8 @@ export const SectorPage: React.FC = () => {
 
   if (isLoading) return <Spinner label="Chargement de votre secteur..." />;
   if (isError || !sector) return <p className={styles.error}>Impossible de charger votre secteur.</p>;
+
+  const selectedGroup = selectedMember ? sector.groups.find((g) => g.groupId === selectedMember.groupId) : undefined;
 
   return (
     <div className={styles.wrapper}>
@@ -80,17 +86,32 @@ export const SectorPage: React.FC = () => {
             {members.map((member) => {
               const group = sector.groups.find((g) => g.groupId === member.groupId);
               return (
-                <li key={member.userId} className={styles.member}>
-                  <span>
-                    {member.firstName} {member.lastName}
-                  </span>
-                  {group && <span className={styles.memberGroup}>{group.name}</span>}
+                <li key={member.userId}>
+                  <button type="button" className={styles.member} onClick={() => setSelectedMember(member)}>
+                    <span>
+                      {member.firstName} {member.lastName}
+                    </span>
+                    <span className={styles.memberMeta}>
+                      {group && <span className={styles.memberGroup}>{group.name}</span>}
+                      <span className={styles.memberArrow} aria-hidden>
+                        ›
+                      </span>
+                    </span>
+                  </button>
                 </li>
               );
             })}
           </ul>
         )}
       </section>
+
+      <Modal
+        isOpen={selectedMember !== null}
+        onClose={() => setSelectedMember(null)}
+        title={selectedMember ? `${selectedMember.firstName} ${selectedMember.lastName}` : ""}
+      >
+        {selectedMember && <MemberDetails member={selectedMember} groupName={selectedGroup?.name} sectorName={sector.name} />}
+      </Modal>
     </div>
   );
 };
