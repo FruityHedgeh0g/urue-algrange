@@ -2,12 +2,9 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.SectorEntity;
-import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
-import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
-import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -15,14 +12,12 @@ import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class SectorServiceTest {
@@ -55,14 +50,17 @@ public class SectorServiceTest {
         List<SectorEntity> comparativeSectors = List.of(firstSector,secondSector);
         List<SectorEntity> gatheredSectors = sectorService.listAll().stream().map(sectorMapper::toEntity).toList();
 
-        Assertions.assertArrayEquals(comparativeSectors.toArray(), gatheredSectors.toArray());
+        Assertions.assertEquals(comparativeSectors.size(), gatheredSectors.size());
+        Assertions.assertIterableEquals(comparativeSectors, gatheredSectors);
     }
 
     @Test
     @TestTransaction
     public void getAllSectors_NotFound(){
         List<SectorDto> sectors = new ArrayList<>();
-        Assertions.assertEquals(sectors, sectorService.listAll());
+        List<SectorDto> gatheredSectors = sectorService.listAll();
+        Assertions.assertEquals(gatheredSectors.size(), 0);
+        Assertions.assertEquals(sectors, gatheredSectors);
     }
 
     /** @see SectorServiceImpl#getById(UUID) () **/
@@ -70,6 +68,11 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void getById_Success(){
+        SectorEntity firstSector = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(firstSector);
+
+        SectorDto retrievedSector = sectorService.getById(firstSector.getSectorId()).orElseThrow();
+        Assertions.assertEquals(firstSector, sectorMapper.toEntity(retrievedSector));
 
     }
 
