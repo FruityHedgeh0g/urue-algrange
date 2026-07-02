@@ -6,6 +6,7 @@ import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
+import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -32,6 +33,9 @@ public class SectorServiceTest {
     @Inject
     SectorRepository sectorRepository;
 
+    @Inject
+    SectorMapper sectorMapper;
+
     @BeforeEach
     public void setUp() {
         
@@ -42,6 +46,16 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void listAllSectors_Success(){
+        SectorEntity firstSector = SectorEntity.builder().name("First sector").build();
+        sectorRepository.persist(firstSector);
+
+        SectorEntity secondSector = SectorEntity.builder().name("Second sector").build();
+        sectorRepository.persist(secondSector);
+
+        List<SectorEntity> comparativeSectors = List.of(firstSector,secondSector);
+        List<SectorEntity> gatheredSectors = sectorService.listAll().stream().map(sectorMapper::toEntity).toList();
+
+        Assertions.assertArrayEquals(comparativeSectors.toArray(), gatheredSectors.toArray());
     }
 
     @Test
@@ -141,12 +155,11 @@ public class SectorServiceTest {
     @TestTransaction
     public void delete_Success(){
 
-        SectorEntity sectorEntity = new SectorEntity();
-        sectorEntity.setName("Test sector");
-
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test sector").build();
         sectorRepository.persist(sectorEntity);
 
         Assertions.assertDoesNotThrow(() -> sectorService.delete(sectorEntity.getSectorId()));
+        Assertions.assertFalse(sectorService.getById(sectorEntity.getSectorId()).isPresent());
     }
 
     /** @see SectorServiceImpl#assignGroup(UUID, UUID) () **/
