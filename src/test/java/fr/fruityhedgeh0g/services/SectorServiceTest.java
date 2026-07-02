@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.SectorEntity;
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -71,14 +73,16 @@ public class SectorServiceTest {
         SectorEntity firstSector = SectorEntity.builder().name("Test Sector").build();
         sectorRepository.persist(firstSector);
 
-        SectorDto retrievedSector = sectorService.getById(firstSector.getSectorId()).orElseThrow();
-        Assertions.assertEquals(firstSector, sectorMapper.toEntity(retrievedSector));
+        Optional<SectorDto> retrievedSector = sectorService.getById(firstSector.getSectorId());
+        Assertions.assertTrue(retrievedSector.isPresent());
+        Assertions.assertEquals(firstSector, sectorMapper.toEntity(retrievedSector.get()));
 
     }
 
     @Test
     @TestTransaction
     public void getById_NotFound(){
+
         Assertions.assertFalse(sectorService.getById(UUID.randomUUID()).isPresent());
     }
 
@@ -99,12 +103,26 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void create_Success(){
+        SectorDto sectorDto = sectorService.create(
+                SectorDto.builder().name("Test Sector").build()
+        );
 
+        Optional<SectorDto> retrievedSector = sectorService.getById(sectorDto.getSectorId());
+        Assertions.assertTrue(retrievedSector.isPresent());
+        Assertions.assertEquals(sectorDto,retrievedSector.get());
     }
 
     @Test
     @TestTransaction
     public void create_Duplicate(){
+        SectorEntity sector = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sector);
+
+        Assertions.assertTrue(sectorRepository.existsByName(sector.getName()));
+
+        Assertions.assertThrows(DuplicateResourceException.class,
+                () -> sectorService.create(sectorMapper.toDto(sector))
+        );
 
     }
 
@@ -113,12 +131,28 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void update_Success(){
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        Assertions.assertTrue(sectorRepository.existsByName(sectorEntity.getName()));
+
+        sectorEntity.setName("Test Sector Updated");
+        Assertions.assertDoesNotThrow(() -> sectorService.update(sectorMapper.toDto(sectorEntity)));
+
+        Assertions.assertTrue(sectorRepository.existsByName(sectorEntity.getName()));
 
     }
 
     @Test
     @TestTransaction
     public void update_NotFound(){
+        SectorDto sectorDto = SectorDto
+                .builder()
+                .name("Test Sector")
+                .sectorId(UUID.randomUUID())
+                .build();
+
+        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.update(sectorDto));
 
     }
 
@@ -131,7 +165,16 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void update_Duplicate(){
-
+//        sectorRepository.persist(SectorEntity.builder().name("Test Sector").build());
+//
+//        SectorEntity SectorToBeRenamed = SectorEntity.builder().name("Sector To Be Renamed").build();
+//        sectorRepository.persist(SectorToBeRenamed);
+//        SectorToBeRenamed.setName("Test Sector");
+//
+//        Assertions.assertThrows(
+//                DuplicateResourceException.class,
+//                () -> sectorService.update(sectorMapper.toDto(SectorToBeRenamed))
+//        );
     }
 
     /** @see SectorServiceImpl#delete(UUID) () **/
