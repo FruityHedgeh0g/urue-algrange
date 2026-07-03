@@ -1,9 +1,12 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
+import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
+import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.TestTransaction;
@@ -29,6 +32,9 @@ public class SectorServiceTest {
 
     @Inject
     SectorRepository sectorRepository;
+
+    @Inject
+    GroupRepository groupRepository;
 
     @Inject
     SectorMapper sectorMapper;
@@ -136,8 +142,12 @@ public class SectorServiceTest {
 
         Assertions.assertTrue(sectorRepository.existsByName(sectorEntity.getName()));
 
-        sectorEntity.setName("Test Sector Updated");
-        Assertions.assertDoesNotThrow(() -> sectorService.update(sectorMapper.toDto(sectorEntity)));
+        SectorDto updatedSectorDto = SectorDto.builder()
+                .name("Updated Sector")
+                .sectorId(sectorEntity.getSectorId())
+                .build();
+
+        Assertions.assertDoesNotThrow(() -> sectorService.update(updatedSectorDto));
 
         Assertions.assertTrue(sectorRepository.existsByName(sectorEntity.getName()));
 
@@ -165,16 +175,22 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void update_Duplicate(){
-//        sectorRepository.persist(SectorEntity.builder().name("Test Sector").build());
-//
-//        SectorEntity SectorToBeRenamed = SectorEntity.builder().name("Sector To Be Renamed").build();
-//        sectorRepository.persist(SectorToBeRenamed);
-//        SectorToBeRenamed.setName("Test Sector");
-//
-//        Assertions.assertThrows(
-//                DuplicateResourceException.class,
-//                () -> sectorService.update(sectorMapper.toDto(SectorToBeRenamed))
-//        );
+        sectorRepository.persist(SectorEntity.builder().name("Test Sector").build());
+
+        SectorEntity sectorEntity = SectorEntity.builder().name("To be renamed Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        Assertions.assertTrue(sectorRepository.existsByName(sectorEntity.getName()));
+
+        SectorDto updatedSectorDto = SectorDto.builder()
+                .name("Test Sector")
+                .sectorId(sectorEntity.getSectorId())
+                .build();
+
+        Assertions.assertThrows(
+                DuplicateResourceException.class,
+                () -> sectorService.update(updatedSectorDto)
+        );
     }
 
     /** @see SectorServiceImpl#delete(UUID) () **/
@@ -194,7 +210,15 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void delete_GroupAssigned(){
-        //Assertions.assertThrows(InvalidResourceException.class, () -> sectorService.delete(UUID.randomUUID()));
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        sectorEntity.addGroup(groupEntity);
+
+        Assertions.assertThrows(InvalidResourceException.class, () -> sectorService.delete(sectorEntity.getSectorId()));
     }
 
     @Test
@@ -210,79 +234,133 @@ public class SectorServiceTest {
 
     /** @see SectorServiceImpl#assignGroup(UUID, UUID) () **/
 
+    @Test
+    @TestTransaction
+    public void assignGroup_NullSectorId(){
+        Assertions.assertThrows(
+                ConstraintViolationException.class,
+                () -> sectorService.assignGroup(null, UUID.randomUUID())
+        );
+    }
+
+    @Test
+    @TestTransaction
+    public void assignGroup_NullGroupId(){
+        Assertions.assertThrows(
+                ConstraintViolationException.class,
+                () -> sectorService.assignGroup(UUID.randomUUID(), null)
+        );
+    }
+
+    @Test
+    @TestTransaction
+    public void assignGroup_GroupNotFound(){
+        Assertions.assertThrows(
+                UnknownResourceException.class,
+                () -> sectorService.assignGroup(UUID.randomUUID(), UUID.randomUUID()));
+    }
+
+    @Test
+    @TestTransaction
+    public void assignGroup_SectorNotFound(){
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        Assertions.assertThrows(UnknownResourceException.class,
+                () -> sectorService.assignGroup(UUID.randomUUID() , groupEntity.getGroupId()));
+    }
+
+    @Test
+    @TestTransaction
+    public void assignGroup_GroupAlreadyAssigned(){
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        SectorEntity anotherSectorEntity = SectorEntity.builder().name("Another Sector").build();
+        sectorRepository.persist(anotherSectorEntity);
+
+        anotherSectorEntity.addGroup(groupEntity);
+
+        Assertions.assertThrows(DuplicateResourceException.class,
+                () -> sectorService.assignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
+    }
+
+    @Test
+    @TestTransaction
+    public void assignGroup_Success(){
+
+    }
+
     /** @see SectorServiceImpl#unassignGroup(UUID, UUID) () **/
-//
-//    /** @see SectorServiceImpl#assignGroupToSector(UUID, UUID) **/
-//
-//    @Test
-//    public void AssignGroupToSector_Success(){
-//
-//    }
-//
-//    @Test
-//    public void AssignGroupToSector_Failure_ConstraintViolation_GroupIdIsNull(){
-//
-//    }
-//
-//    @Test
-//    public void AssignGroupToSector_Failure_ConstraintViolation_SectorIdIsNull(){
-//
-//    }
-//
-//    @Test
-//    public void AssignGroupToSector_Failure_UnknownResource_GroupId(){
-//
-//    }
-//
-//    @Test
-//    public void AssignGroupToSector_Failure_UnknownResource_SectorId(){
-//
-//    }
-//
-//    @Test
-//    public void AssignGroupToSector_Failure_NotManagedException(){
-//
-//    }
-//
-//    @Test
-//    public void AssignGroupToSector_Failure_DuplicateResource_GroupAlreadyAssigned(){
-//
-//    }
-//
-//    @Test
-//    public void AssignGroupToSector_Failure_DuplicateResource_GroupAlreadyAssignedToAnotherSector(){
-//
-//    }
-//
-//    /** @see SectorServiceImpl#unassignGroupFromSector(UUID, UUID) **/
-//
-//    @Test
-//    public void UnassignGroupFromSector_Success(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignGroupFromSector_Failure_ConstraintViolation_GroupIdIsNull(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignGroupFromSector_Failure_ConstraintViolation_SectorIdIsNull(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignGroupFromSector_Failure_UnknownResource_GroupId(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignGroupFromSector_Failure_UnknownResource_SectorId(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignGroupFromSector_Failure_NotManagedException(){
-//
-//    }
+
+    @Test
+    @TestTransaction
+    public void unassignGroup_Success(){
+
+    }
+
+    @Test
+    @TestTransaction
+    public void unassignGroup_GroupNotFound(){
+        Assertions.assertThrows(
+                UnknownResourceException.class,
+                () -> sectorService.unassignGroup(UUID.randomUUID(), UUID.randomUUID()));
+    }
+
+    @Test
+    @TestTransaction
+    public void unassignGroup_SectorNotFound(){
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        sectorEntity.addGroup(groupEntity);
+
+        groupRepository.flush();
+
+        Assertions.assertThrows(UnknownResourceException.class,
+                () -> sectorService.unassignGroup(UUID.randomUUID(), groupEntity.getGroupId()));
+    }
+
+    @Test
+    @TestTransaction
+    public void unassignGroup_NullSectorId(){
+        Assertions.assertThrows(
+                ConstraintViolationException.class,
+                () -> sectorService.unassignGroup(null, UUID.randomUUID())
+        );
+    }
+
+    @Test
+    @TestTransaction
+    public void unassignGroup_NullGroupId(){
+        Assertions.assertThrows(
+                ConstraintViolationException.class,
+                () -> sectorService.unassignGroup(UUID.randomUUID(),null)
+        );
+    }
+
+    @Test
+    @TestTransaction
+    public void unassignGroup_GroupAssignedToAnotherSector(){
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        SectorEntity anotherSectorEntity = SectorEntity.builder().name("Another Sector").build();
+        sectorRepository.persist(anotherSectorEntity);
+
+        anotherSectorEntity.addGroup(groupEntity);
+
+        Assertions.assertThrows(InvalidResourceException.class,
+                () -> sectorService.unassignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
+    }
+
 }

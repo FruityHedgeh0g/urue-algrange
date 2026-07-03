@@ -95,7 +95,7 @@ public class SectorServiceImpl implements SectorService {
 
         if (groupEntity.getSector() != null) {
             if (groupEntity.getSector().getSectorId().equals(sectorId)) return;
-            throw new DuplicateResourceException("Group already assigned to another sector");
+            else throw new DuplicateResourceException("Group already assigned to another sector");
         }
 
         SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
@@ -114,7 +114,7 @@ public class SectorServiceImpl implements SectorService {
         GroupEntity groupEntity = internalGroupService.getEntityById(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
 
-        if (groupEntity.getSector() == null) return ;
+        if (groupEntity.getSector() == null) return;
 
         if (!groupEntity.getSector().getSectorId().equals(sectorId))
             throw new InvalidResourceException("This group is assigned to another sector");

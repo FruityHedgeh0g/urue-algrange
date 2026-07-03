@@ -32,6 +32,7 @@ public class SectorEntity extends AuditTemplate {
     private Set<GroupEntity> groups;
 
     public void addGroup(GroupEntity group) {
+        if (groups == null) groups = new HashSet<>();
         groups.add(group);
         group.setSector(this);
     }
