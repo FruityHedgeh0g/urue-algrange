@@ -5,6 +5,7 @@ import { isUpcoming } from "../../features/events/eventsApi";
 import { useMyEventIds, useEventRegistration } from "../../features/events/useMyRegistrations";
 import { useAuth } from "../../auth/AuthContext";
 import { formatDateRange } from "../../lib/formatDate";
+import { placeholderImage } from "../../lib/placeholderImage";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 import Badge from "../../components/atoms/Badge/Badge";
 import Button from "../../components/atoms/Button/Button";
@@ -32,6 +33,11 @@ export const EventDetailPage: React.FC = () => {
 
       {event && (
         <article>
+          <img
+            className={styles.image}
+            src={event.imageUrl || placeholderImage(event.eventId, event.name)}
+            alt={event.name}
+          />
           <Badge label={isUpcoming(event) ? "À venir" : "Terminé"} tone={isUpcoming(event) ? "accent" : "muted"} />
           <h1>{event.name}</h1>
           <p className={styles.meta}>{formatDateRange(event.startDateTime, event.endDateTime)}</p>

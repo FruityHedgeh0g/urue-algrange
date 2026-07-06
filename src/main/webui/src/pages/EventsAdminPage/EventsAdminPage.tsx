@@ -15,6 +15,7 @@ const emptyDraft: EventInput = {
   description: "",
   startDateTime: "",
   endDateTime: "",
+  imageUrl: "",
   address: "",
   city: "",
   postalCode: "",
@@ -48,6 +49,7 @@ const EventForm: React.FC<EventFormProps> = ({ value, onChange, onSubmit, submit
       onChange={(e) => onChange({ ...value, endDateTime: e.target.value })}
       required
     />
+    <FormField label="Image (URL)" value={value.imageUrl} onChange={(e) => onChange({ ...value, imageUrl: e.target.value })} />
     <FormField label="Adresse" value={value.address} onChange={(e) => onChange({ ...value, address: e.target.value })} />
     <FormField label="Ville" value={value.city} onChange={(e) => onChange({ ...value, city: e.target.value })} />
     <FormField label="Code postal" value={value.postalCode} onChange={(e) => onChange({ ...value, postalCode: e.target.value })} />
@@ -79,6 +81,7 @@ export const EventsAdminPage: React.FC = () => {
       description: event.description,
       startDateTime: event.startDateTime,
       endDateTime: event.endDateTime,
+      imageUrl: event.imageUrl ?? "",
       address: event.address ?? "",
       city: event.city ?? "",
       postalCode: event.postalCode ?? "",

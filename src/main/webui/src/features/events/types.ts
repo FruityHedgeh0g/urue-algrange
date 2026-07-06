@@ -13,6 +13,7 @@ export interface Event {
   startDateTime: string; // ISO 8601
   endDateTime: string; // ISO 8601
   creator: EventOrganizer;
+  imageUrl?: string;
   address?: string;
   addressComplement?: string;
   city?: string;

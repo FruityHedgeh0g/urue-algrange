@@ -33,6 +33,9 @@ public class EventDto {
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
     NestedUserDto creator;
 
+    @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    String imageUrl;
+
     @JsonView({Views.Detailed.class,Views.Update.class})
     String latitude;
 

@@ -53,6 +53,7 @@ export interface EventInput {
   description: string;
   startDateTime: string;
   endDateTime: string;
+  imageUrl?: string;
   address?: string;
   city?: string;
   postalCode?: string;

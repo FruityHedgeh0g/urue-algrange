@@ -59,6 +59,9 @@ public class EventEntity extends AuditTemplate {
     @Column(name = "address_complement")
     private String addressComplement;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     //TODO: Gérer les N+1
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "event_participants", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))

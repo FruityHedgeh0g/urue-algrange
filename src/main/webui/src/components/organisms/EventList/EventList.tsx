@@ -20,7 +20,7 @@ function renderCard(event: Event, options: { headingLevel?: "h2" | "h3"; dimmed?
     <MediaCard
       key={event.eventId}
       to={`/evenements/${event.eventId}`}
-      imageSrc={placeholderImage(event.eventId, event.name)}
+      imageSrc={event.imageUrl || placeholderImage(event.eventId, event.name)}
       imageAlt={event.name}
       title={event.name}
       subtitle={formatDateRange(event.startDateTime, event.endDateTime)}
