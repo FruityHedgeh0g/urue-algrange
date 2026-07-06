@@ -1,13 +1,13 @@
 /* Design tokens — thème "Une Rose Un Espoir" (rouge-rose de la rose du logo, bleu du tracé moto) */
 :root{
   /* Marque */
-  --color-primary: #145d9e;            /* bleu moto du logo */
-  --color-primary-hover: #1a6fba;
-  --color-primary-dark: #0d3f6c;
+  --color-primary: #16345c;            /* bleu marine du logo / nav / footer (aligné sur le site officiel) */
+  --color-primary-hover: #1f4877;
+  --color-primary-dark: #0f2440;
   --color-on-primary: #ffffff;         /* couleur de texte sur une surface --color-primary */
-  --color-accent: #d1391a;             /* rouge-orangé de la rose / typo (contraste AA sur fond blanc) */
-  --color-accent-hover: #ff5c3c;
-  --color-accent-dark: #b93a22;
+  --color-accent: #c8102e;             /* rouge de la rose / bandeau (contraste AA sur fond blanc) */
+  --color-accent-hover: #de1b3a;
+  --color-accent-dark: #a50e27;
   --color-on-accent: #ffffff;          /* couleur de texte sur une surface --color-accent */
   --color-accent-emphasis: var(--color-accent-dark); /* texte accent sur fond clair (ex : badge teinté) */
 
@@ -25,7 +25,7 @@
   --color-border: #e5e7eb;
   --color-text: #1f2937;
   --color-muted: #5f6773;
-  --color-hover: #fdeee9;              /* léger lavis rose au survol */
+  --color-hover: #fbe8ea;              /* léger lavis rose au survol */
 
   /* Échelle d'espacement */
   --space-1: 4px;
@@ -42,7 +42,7 @@
   --radius-sm: 6px;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
   --shadow-md: 0 6px 20px rgba(0,0,0,.08);
-  --focus-ring: 0 0 0 3px rgba(20,93,158,.25);
+  --focus-ring: 0 0 0 3px rgba(22,52,92,.25);
 }
 
 /* Mode nuit explicite */
