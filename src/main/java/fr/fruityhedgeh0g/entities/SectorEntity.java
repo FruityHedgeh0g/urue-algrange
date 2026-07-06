@@ -14,7 +14,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode
 public class SectorEntity extends AuditTemplate {
 
     @Id
@@ -47,8 +46,6 @@ public class SectorEntity extends AuditTemplate {
         return groups;
     }
 
-    @PreRemove
-    private void preRemove() {
-        groups.forEach(group -> group.setSector(null));
-    }
+    //@PreRemove
+    //private void preRemove() {groups.forEach(group -> group.setSector(null));}
 }

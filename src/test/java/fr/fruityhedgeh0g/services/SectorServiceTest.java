@@ -291,7 +291,27 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void assignGroup_Success(){
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
 
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        Assertions.assertDoesNotThrow(() -> sectorService.assignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
+    }
+
+    @Test
+    @TestTransaction
+    public void assignGroup_AlreadyPerformed(){
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        sectorEntity.addGroup(groupEntity);
+
+        Assertions.assertDoesNotThrow(() -> sectorService.assignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
     }
 
     /** @see SectorServiceImpl#unassignGroup(UUID, UUID) () **/
@@ -299,7 +319,29 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void unassignGroup_Success(){
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
 
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        sectorEntity.addGroup(groupEntity);
+
+        Assertions.assertDoesNotThrow(() -> sectorService.unassignGroup(UUID.randomUUID(), groupEntity.getGroupId()));
+    }
+
+    @Test
+    @TestTransaction
+    public void unassignGroup_AlreadyPerformed(){
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        sectorEntity.addGroup(groupEntity);
+
+        Assertions.assertDoesNotThrow(() -> sectorService.unassignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
     }
 
     @Test
@@ -320,8 +362,6 @@ public class SectorServiceTest {
         groupRepository.persist(groupEntity);
 
         sectorEntity.addGroup(groupEntity);
-
-        groupRepository.flush();
 
         Assertions.assertThrows(UnknownResourceException.class,
                 () -> sectorService.unassignGroup(UUID.randomUUID(), groupEntity.getGroupId()));

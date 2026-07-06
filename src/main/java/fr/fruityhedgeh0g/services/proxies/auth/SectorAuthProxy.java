@@ -61,11 +61,11 @@ public class SectorAuthProxy implements SectorService {
 
     @Override
     public void assignGroup(UUID sectorId, UUID groupId) {
-
+        sectorService.assignGroup(sectorId,groupId);
     }
 
     @Override
     public void unassignGroup(UUID sectorId, UUID groupId) {
-
+        sectorService.unassignGroup(sectorId,groupId);
     }
 }
