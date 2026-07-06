@@ -1,5 +1,4 @@
 import React from "react";
-import Button from "../../atoms/Button/Button";
 import styles from "./AdminListItem.module.css";
 
 export interface AdminListItemProps {
@@ -10,7 +9,7 @@ export interface AdminListItemProps {
   leading?: React.ReactNode;
   /** Contenu additionnel affiché sous le sous-titre, toujours visible (ex : badges de permissions). */
   footer?: React.ReactNode;
-  /** Actions supplémentaires affichées avant le bouton Modifier (ex : réorganisation). */
+  /** Actions supplémentaires affichées avant le chevron (ex : réorganisation). */
   actions?: React.ReactNode;
   editing?: boolean;
   onToggleEdit?: () => void;
@@ -34,22 +33,32 @@ export const AdminListItem: React.FC<AdminListItemProps> = ({
 }) => (
   <li className={styles.item}>
     <div className={styles.row}>
-      {leading && <div className={styles.leading}>{leading}</div>}
-      <div className={styles.info}>
-        <div className={styles.titleLine}>
-          <span className={styles.title}>{title}</span>
-          {badge}
+      <button
+        type="button"
+        className={styles.trigger}
+        onClick={onToggleEdit}
+        disabled={!onToggleEdit || editDisabled}
+        aria-expanded={editing}
+      >
+        {leading && <div className={styles.leading}>{leading}</div>}
+        <div className={styles.info}>
+          <div className={styles.titleLine}>
+            <span className={styles.title}>{title}</span>
+            {badge}
+          </div>
+          {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+          {footer && <div className={styles.footer}>{footer}</div>}
         </div>
-        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-        {footer && <div className={styles.footer}>{footer}</div>}
-      </div>
+      </button>
       <div className={styles.rowActions}>
         {actions}
         {onToggleEdit &&
           (editDisabled ? (
             <span className={styles.disabledNote}>{editDisabledReason}</span>
           ) : (
-            <Button label={editing ? "Fermer" : "Modifier"} variant="outline" onClick={onToggleEdit} />
+            <span className={`${styles.chevron} ${editing ? styles.chevronOpen : ""}`} aria-hidden="true">
+              ▾
+            </span>
           ))}
       </div>
     </div>
