@@ -31,15 +31,18 @@ public class FeatureLogProxy implements FeatureService{
     }
 
     @Override
-    public Optional<FeatureDto> getByName(String name) {
+    public FeatureDto getByName(String name) {
         Log.debugf("Retrieving feature by name %s...",name);
         return Try.of(() -> featureService.getByName(name))
                 .onSuccess(feature -> {
-                    if (feature.isPresent())
-                        Log.debugf("Feature retrieved: "+feature.toString());
-                    else Log.debugf("Feature with name %s not found.",name);
+                    Log.debugf("Feature retrieved: "+feature.toString());
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving feature."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex, "Feature not found: %s", name);
+                        default -> Log.errorf(t,"An error occurred while retrieving feature.");
+                    }
+                })
                 .get();
     }
 

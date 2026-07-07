@@ -8,14 +8,10 @@ import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
-import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
-import java.util.Optional;
 
 @Priority(100)
 @Authenticated
@@ -39,7 +35,7 @@ public class FeatureAuthProxy implements FeatureService {
     }
 
     @Override
-    public Optional<FeatureDto> getByName(String name) {
+    public FeatureDto getByName(String name) {
         return featureService.getByName(name);
     }
 

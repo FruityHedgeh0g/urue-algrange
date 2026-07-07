@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface PublicUserService {
     List<UserDto> listAll();
-    Optional<UserDto> getById(@NotNull UUID userId);
+    UserDto getById(@NotNull UUID userId);
     UserDto create(@NotNull @Valid UserDto userDto);
     UserDto update(@NotNull @Valid UserDto userDto);
     void delete(@NotNull UUID userId);

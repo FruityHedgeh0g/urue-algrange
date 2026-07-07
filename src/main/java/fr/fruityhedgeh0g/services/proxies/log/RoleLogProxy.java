@@ -10,10 +10,8 @@ import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
 import jakarta.inject.Inject;
-import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Priority(200)
@@ -33,15 +31,18 @@ public class RoleLogProxy implements RoleService {
     }
 
     @Override
-    public Optional<RoleDto> getById(UUID roleId) {
+    public RoleDto getById(UUID roleId) {
         Log.debugf("Retrieving role by id %s...",roleId);
         return Try.of(() -> roleService.getById(roleId))
                 .onSuccess(role -> {
-                    if (role.isPresent())
                         Log.debugf("Role retrieved: "+role.toString());
-                    else Log.debugf("Role with id %s not found.",roleId);
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving role."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Role with id %s not found.", roleId);
+                        default -> Log.errorf(t,"An error occurred while retrieving role.");
+                    }
+                })
                 .get();
 
     }

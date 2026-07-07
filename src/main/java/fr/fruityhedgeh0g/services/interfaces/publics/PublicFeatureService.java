@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface PublicFeatureService {
     List<FeatureDto> listAll();
-    Optional<FeatureDto> getByName(@NotNull String name);
+    FeatureDto getByName(@NotNull String name);
     FeatureDto update(@NotNull @Valid FeatureDto featureDto );
 
 //    Try<List<FeatureDto>> getAllFeatures();

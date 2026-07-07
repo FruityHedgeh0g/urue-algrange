@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.EventRepository;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
 import fr.fruityhedgeh0g.utilities.mappers.EventMapper;
@@ -35,9 +36,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Optional<EventDto> getById(UUID eventId) {
-        return eventRepository.findByIdOptional(eventId)
-                .map(eventMapper::toDto);
+    public EventDto getById(UUID eventId) {
+        return eventMapper.toDto(
+                eventRepository.findByIdOptional(eventId)
+                        .orElseThrow(() -> new UnknownResourceException("Event not found: " + eventId))
+        );
+
     }
 
     @Override

@@ -1,10 +1,10 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;
-import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -12,7 +12,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -34,9 +33,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Optional<PostDto> getById(UUID postId) {
-        return postRepository.findByIdOptional(postId)
-                .map(postMapper::toDto);
+    public PostDto getById(UUID postId) {
+        return postMapper.toDto(
+                postRepository.findByIdOptional(postId)
+                        .orElseThrow(() -> new UnknownResourceException("Post not found: "+postId))
+        );
+
     }
 
     @Override

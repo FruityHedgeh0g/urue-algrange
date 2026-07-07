@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface PublicSectorService {
     List<SectorDto> listAll();
-    Optional<SectorDto> getById(@NotNull UUID sectorId);
+    SectorDto getById(@NotNull UUID sectorId);
     SectorDto create(@NotNull @Valid SectorDto sectorDto);
     SectorDto update(@NotNull @Valid SectorDto sectorDto);
     void delete(@NotNull UUID sectorId);

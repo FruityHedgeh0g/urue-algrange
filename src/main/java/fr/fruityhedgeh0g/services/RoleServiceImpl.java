@@ -1,14 +1,12 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
-import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.utilities.mappers.RoleMapper;
-import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -16,7 +14,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -38,9 +35,12 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<RoleDto> getById(UUID roleId) {
-        return roleRepository.findByIdOptional(roleId)
-                .map(roleMapper::toDto);
+    public RoleDto getById(UUID roleId) {
+        return roleMapper.toDto(
+                roleRepository.findByIdOptional(roleId)
+                        .orElseThrow(() -> new UnknownResourceException("Role not found: "+roleId))
+        );
+
     }
 
     @Override

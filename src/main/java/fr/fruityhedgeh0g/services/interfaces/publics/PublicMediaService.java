@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface PublicMediaService {
 
     List<MediaDto> listAll();
-    Optional<MediaDto> getById(@NotNull UUID mediaId);
+    MediaDto getById(@NotNull UUID mediaId);
     MediaDto create(@NotNull @Valid MediaDto mediaDto);
     MediaDto update(@NotNull @Valid MediaDto mediaDto);
     void delete(@NotNull UUID mediaId);

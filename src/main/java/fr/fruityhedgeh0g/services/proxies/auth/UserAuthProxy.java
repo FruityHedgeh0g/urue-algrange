@@ -6,14 +6,10 @@ import fr.fruityhedgeh0g.services.interfaces.UserService;
 import io.quarkus.arc.properties.IfBuildProperty;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.common.annotation.Identifier;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
-import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
@@ -42,7 +38,7 @@ public class UserAuthProxy implements UserService {
     }
 
     @Override
-    public Optional<UserDto> getById(UUID userId) {
+    public UserDto getById(UUID userId) {
         return userService.getById(userId);
     }
 

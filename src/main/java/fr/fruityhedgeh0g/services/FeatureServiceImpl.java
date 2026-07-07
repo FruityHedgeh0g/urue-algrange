@@ -36,16 +36,18 @@ public class FeatureServiceImpl implements FeatureService {
     }
 
     @Override
-    public Optional<FeatureDto> getByName(String name) {
-        return featureRepository.findByName(name)
-                .map(featureMapper::toDto);
+    public FeatureDto getByName(String name) {
+        return featureMapper.toDto(
+                featureRepository.findByName(name)
+                .orElseThrow(() -> new UnknownResourceException("Feature not found: " + name))
+        );
     }
 
     @Override
     @Transactional
     public FeatureDto update(FeatureDto featureDto) {
         FeatureEntity featureEntity = featureRepository.findByName(featureDto.getName())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("Feature not found: " + featureDto.getName()));
 
         featureEntity = featureMapper.partialDtoToEntity(featureEntity,featureDto);
         featureRepository.persist(featureEntity);

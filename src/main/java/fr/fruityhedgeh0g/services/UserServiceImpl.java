@@ -5,11 +5,8 @@ import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.UserRepository;
-import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
-import io.smallrye.common.annotation.Identifier;
-import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -17,7 +14,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 @AllArgsConstructor
 @ApplicationScoped
@@ -41,9 +37,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserDto> getById(UUID userId) {
-        return userRepository.findByIdOptional(userId)
-                .map(userMapper::toDto);
+    public UserDto getById(UUID userId) {
+        return userMapper.toDto(
+                userRepository.findByIdOptional(userId)
+                        .orElseThrow(() -> new UnknownResourceException("User not found: "+userId))
+        );
+
     }
 
     @Override

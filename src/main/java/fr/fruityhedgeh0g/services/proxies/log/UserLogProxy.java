@@ -11,7 +11,6 @@ import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
 import jakarta.inject.Inject;
-import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,15 +33,18 @@ public class UserLogProxy implements UserService{
     }
 
     @Override
-    public Optional<UserDto> getById(UUID userId) {
+    public UserDto getById(UUID userId) {
         Log.debugf("Retrieving user by id %s...",userId);
         return Try.of(() -> userService.getById(userId))
                 .onSuccess(user -> {
-                    if (user.isPresent())
                         Log.debugf("User retrieved: "+user.toString());
-                    else Log.debugf("User with id %s not found.",userId);
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving user."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"User with id %s not found.", userId);
+                        default -> Log.errorf(t,"An error occurred while retrieving user.");
+                    }
+                })
                 .get();
     }
 

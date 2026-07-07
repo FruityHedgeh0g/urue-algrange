@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface PublicPostService {
 
     List<PostDto> listAll();
-    Optional<PostDto> getById(@NotNull UUID postId);
+    PostDto getById(@NotNull UUID postId);
     PostDto create(@NotNull @Valid PostDto postDto);
     PostDto update(@NotNull @Valid PostDto postDto);
     void delete(@NotNull UUID postId);

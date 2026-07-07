@@ -38,16 +38,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public Optional<ConfigurationDto> getByName(String name) {
-        return configurationRepository.findByName(name)
-                .map(configurationMapper::toDto);
+    public ConfigurationDto getByName(String name) {
+        return configurationMapper.toDto(
+                configurationRepository.findByName(name)
+                        .orElseThrow(() -> new UnknownResourceException("Configuration not found: " + name))
+        );
+
     }
 
     @Override
     @Transactional
     public ConfigurationDto update(ConfigurationDto configurationDto) {
         ConfigurationEntity configurationEntity = configurationRepository.findByName(configurationDto.getName())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("Configuration not found: " + configurationDto.getName()));
 
         configurationEntity = configurationMapper.partialDtoToEntity(configurationEntity,configurationDto);
         configurationRepository.persist(configurationEntity);

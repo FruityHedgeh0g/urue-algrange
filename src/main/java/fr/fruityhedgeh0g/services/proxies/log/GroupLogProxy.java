@@ -5,7 +5,6 @@ import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
-import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
 import jakarta.annotation.Priority;
@@ -36,15 +35,18 @@ public class GroupLogProxy implements GroupService {
     }
 
     @Override
-    public Optional<GroupDto> getById(UUID groupId) {
+    public GroupDto getById(UUID groupId) {
         Log.debugf("Retrieving group by id %s...",groupId);
         return Try.of(() -> groupService.getById(groupId))
                 .onSuccess(group -> {
-                    if (group.isPresent())
-                        Log.debugf("Group retrieved: "+group.toString());
-                    else Log.debugf("Group with id %s not found.",groupId);
+                    Log.debugf("Group retrieved: "+group.toString());
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Group with id %s not found.", groupId);
+                        default -> Log.errorf(t,"An error occurred while retrieving group.");
+                    }
+                })
                 .get();
     }
 

@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface PublicConfigurationService {
     List<ConfigurationDto> listAll();
-    Optional<ConfigurationDto> getByName(@NotNull String name);
+    ConfigurationDto getByName(@NotNull String name);
     ConfigurationDto update(@NotNull @Valid ConfigurationDto configurationDto);
 
 //    Try<List<ConfigurationDto>> getAllConfigurations();

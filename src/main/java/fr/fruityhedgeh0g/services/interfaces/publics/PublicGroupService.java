@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface PublicGroupService {
     List<GroupDto> listAll();
-    Optional<GroupDto> getById(@NotNull UUID groupId);
+    GroupDto getById(@NotNull UUID groupId);
     GroupDto create(@NotNull @Valid GroupDto groupDto );
     GroupDto update(@NotNull @Valid GroupDto groupDto );
     void delete(@NotNull UUID groupId);

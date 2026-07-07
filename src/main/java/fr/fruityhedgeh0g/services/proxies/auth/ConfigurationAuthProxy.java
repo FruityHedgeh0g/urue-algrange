@@ -39,7 +39,7 @@ public class ConfigurationAuthProxy implements ConfigurationService {
     }
 
     @Override
-    public Optional<ConfigurationDto> getByName(String name) {
+    public ConfigurationDto getByName(String name) {
         return configurationService.getByName(name);
     }
 

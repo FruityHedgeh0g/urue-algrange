@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services.proxies.log;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
@@ -10,7 +11,6 @@ import jakarta.decorator.Delegate;
 import jakarta.inject.Inject;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Priority(200)
@@ -31,15 +31,18 @@ public class PostLogProxy implements PostService {
     }
 
     @Override
-    public Optional<PostDto> getById(UUID postId) {
+    public PostDto getById(UUID postId) {
         Log.debugf("Retrieving post by id %s...",postId);
         return Try.of(() -> postService.getById(postId))
                 .onSuccess(post -> {
-                    if (post.isPresent())
                         Log.debugf("Post retrieved: "+post.toString());
-                    else Log.debugf("Post with id %s not found.",postId);
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving post."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Post with id %s not found.", postId);
+                        default -> Log.errorf(t,"An error occurred while retrieving post.");
+                    }
+                })
                 .get();
     }
 

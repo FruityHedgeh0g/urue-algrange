@@ -8,14 +8,10 @@ import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.Priority;
 import jakarta.decorator.Decorator;
 import jakarta.decorator.Delegate;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
-import lombok.AllArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Priority(100)
@@ -40,7 +36,7 @@ public class RoleAuthProxy implements RoleService {
     }
 
     @Override
-    public Optional<RoleDto> getById(UUID roleId) {
+    public RoleDto getById(UUID roleId) {
         return roleService.getById(roleId);
     }
 

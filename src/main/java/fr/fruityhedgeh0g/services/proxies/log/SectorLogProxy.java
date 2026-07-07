@@ -13,7 +13,6 @@ import jakarta.decorator.Delegate;
 import jakarta.inject.Inject;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Decorator
@@ -34,15 +33,18 @@ public class SectorLogProxy implements SectorService {
     }
 
     @Override
-    public Optional<SectorDto> getById(UUID sectorId) {
+    public SectorDto getById(UUID sectorId) {
         Log.debugf("Retrieving sector by id %s...",sectorId);
         return Try.of(() -> sectorService.getById(sectorId))
                 .onSuccess(sector -> {
-                    if (sector.isPresent())
                         Log.debugf("Sector retrieved: "+sector.toString());
-                    else Log.debugf("Sector with id %s not found.",sectorId);
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving sector."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Sector with id %s not found.", sectorId);
+                        default -> Log.errorf(t,"An error occurred while retrieving sector.");
+                    }
+                })
                 .get();
     }
 

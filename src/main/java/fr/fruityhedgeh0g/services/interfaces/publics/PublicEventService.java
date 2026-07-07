@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface PublicEventService {
     List<EventDto> listAll();
-    Optional<EventDto> getById(@NotNull UUID eventId);
+    EventDto getById(@NotNull UUID eventId);
     EventDto create(@NotNull @Valid EventDto eventDto);
     EventDto update(@NotNull @Valid EventDto eventDto);
     void delete(@NotNull UUID eventId);

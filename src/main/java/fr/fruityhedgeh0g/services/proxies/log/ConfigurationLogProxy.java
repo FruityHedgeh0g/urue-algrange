@@ -32,15 +32,18 @@ public class ConfigurationLogProxy implements ConfigurationService{
     }
 
     @Override
-    public Optional<ConfigurationDto> getByName(String name) {
+    public ConfigurationDto getByName(String name) {
         Log.debugf("Retrieving configuration by name %s...",name);
         return Try.of(() -> configurationService.getByName(name))
                 .onSuccess(configuration -> {
-                    if (configuration.isPresent())
-                        Log.debugf("Configuration retrieved: "+configuration.toString());
-                    else Log.debugf("Configuration with name %s not found.",name);
+                    Log.debugf("Configuration retrieved: "+configuration.toString());
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving configuration."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex, "Configuration not found: %s", name);
+                        default -> Log.errorf(t,"An error occurred while retrieving configuration.");
+                    }
+                })
                 .get();
     }
 

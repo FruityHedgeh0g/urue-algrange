@@ -1,6 +1,8 @@
 package fr.fruityhedgeh0g.services.proxies.log;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
 import io.quarkus.logging.Log;
 import io.vavr.control.Try;
@@ -31,15 +33,18 @@ public class EventLogProxy implements EventService{
     }
 
     @Override
-    public Optional<EventDto> getById(UUID eventId) {
+    public EventDto getById(UUID eventId) {
         Log.debugf("Retrieving event by id %s...",eventId);
         return Try.of(() -> eventService.getById(eventId))
                 .onSuccess(event -> {
-                    if (event.isPresent())
-                        Log.debugf("Event retrieved: "+event.toString());
-                    else Log.debugf("Event with id %s not found.",eventId);
+                    Log.debugf("Event retrieved: "+event.toString());
                 })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving event."))
+                .onFailure(t -> {
+                    switch (t) {
+                        case UnknownResourceException ex -> Log.errorf(ex, "Event with id %s not found.", eventId);
+                        default -> Log.errorf(t, "An error occurred while retrieving event.");
+                    }
+                })
                 .get();
     }
 

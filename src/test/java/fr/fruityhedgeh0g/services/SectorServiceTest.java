@@ -67,7 +67,7 @@ public class SectorServiceTest {
     public void getAllSectors_NotFound(){
         List<SectorDto> sectors = new ArrayList<>();
         List<SectorDto> gatheredSectors = sectorService.listAll();
-        Assertions.assertEquals(gatheredSectors.size(), 0);
+        Assertions.assertEquals(0,gatheredSectors.size());
         Assertions.assertEquals(sectors, gatheredSectors);
     }
 
@@ -79,17 +79,15 @@ public class SectorServiceTest {
         SectorEntity firstSector = SectorEntity.builder().name("Test Sector").build();
         sectorRepository.persist(firstSector);
 
-        Optional<SectorDto> retrievedSector = sectorService.getById(firstSector.getSectorId());
-        Assertions.assertTrue(retrievedSector.isPresent());
-        Assertions.assertEquals(firstSector, sectorMapper.toEntity(retrievedSector.get()));
+        SectorEntity retrievedSector = sectorMapper.toEntity(sectorService.getById(firstSector.getSectorId()));
+        Assertions.assertEquals(firstSector, retrievedSector);
 
     }
 
     @Test
     @TestTransaction
     public void getById_NotFound(){
-
-        Assertions.assertFalse(sectorService.getById(UUID.randomUUID()).isPresent());
+        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.getById(UUID.randomUUID()));
     }
 
     @Test
@@ -113,9 +111,8 @@ public class SectorServiceTest {
                 SectorDto.builder().name("Test Sector").build()
         );
 
-        Optional<SectorDto> retrievedSector = sectorService.getById(sectorDto.getSectorId());
-        Assertions.assertTrue(retrievedSector.isPresent());
-        Assertions.assertEquals(sectorDto,retrievedSector.get());
+        SectorDto retrievedSector = sectorService.getById(sectorDto.getSectorId());
+        Assertions.assertEquals(sectorDto,retrievedSector);
     }
 
     @Test
@@ -229,7 +226,7 @@ public class SectorServiceTest {
         sectorRepository.persist(sectorEntity);
 
         Assertions.assertDoesNotThrow(() -> sectorService.delete(sectorEntity.getSectorId()));
-        Assertions.assertFalse(sectorService.getById(sectorEntity.getSectorId()).isPresent());
+        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.getById(sectorEntity.getSectorId()));
     }
 
     /** @see SectorServiceImpl#assignGroup(UUID, UUID) () **/
@@ -327,7 +324,7 @@ public class SectorServiceTest {
 
         sectorEntity.addGroup(groupEntity);
 
-        Assertions.assertDoesNotThrow(() -> sectorService.unassignGroup(UUID.randomUUID(), groupEntity.getGroupId()));
+        Assertions.assertDoesNotThrow(() -> sectorService.unassignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
     }
 
     @Test

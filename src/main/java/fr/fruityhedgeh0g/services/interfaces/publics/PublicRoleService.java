@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface PublicRoleService {
 
     List<RoleDto> listAll();
-    Optional<RoleDto> getById(@NotNull UUID roleId);
+    RoleDto getById(@NotNull UUID roleId);
     RoleDto create(@NotNull @Valid RoleDto roleDto);
     RoleDto update(@NotNull @Valid RoleDto roleDto);
     void delete(@NotNull UUID roleId);

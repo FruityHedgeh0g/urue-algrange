@@ -8,18 +8,14 @@ import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
-import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
-import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.BadRequestException;
 import lombok.AllArgsConstructor;
-import org.hibernate.validator.internal.engine.groups.Group;
 
 import java.util.*;
 
@@ -40,9 +36,11 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     }
 
     @Override
-    public Optional<GroupDto> getById(UUID groupId) {
-        return groupRepository.findByIdOptional(groupId)
-                .map(groupMapper::toDto);
+    public GroupDto getById(UUID groupId) {
+        return groupMapper.toDto(
+                groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId))
+        );
     }
 
     @Override
@@ -61,7 +59,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Transactional
     public GroupDto update(GroupDto groupDto) {
         GroupEntity groupEntity = groupRepository.findByIdOptional(groupDto.getGroupId())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupDto.getGroupId()));
 
         if (!groupEntity.getName().equals(groupDto.getName()) && groupRepository.existsByName(groupDto.getName()))
             throw new DuplicateResourceException("A group with this name already exists in the system.");
@@ -85,13 +83,15 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
         UserEntity userEntity = internalUserService.getEntityById(userId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
 
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
         if (userEntity.getGroup() != null) {
             if (userEntity.getGroup().getGroupId().equals(groupId)) return;
             throw new DuplicateResourceException("User already assigned to a group");
         }
 
-        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
-                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
 
         groupEntity.addMember(userEntity);
         groupRepository.persist(groupEntity);

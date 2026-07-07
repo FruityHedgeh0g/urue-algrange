@@ -44,9 +44,13 @@ public class SectorServiceImpl implements SectorService {
     }
 
     @Override
-    public Optional<SectorDto> getById(UUID sectorId) {
-        return sectorRepository.findByIdOptional(sectorId)
-                .map(sectorMapper::toDto);
+    public SectorDto getById(UUID sectorId) {
+        return sectorMapper.toDto(
+                sectorRepository.findByIdOptional(sectorId)
+                        .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId))
+        );
+
+
     }
 
     @Override
@@ -65,7 +69,7 @@ public class SectorServiceImpl implements SectorService {
     @Transactional
     public SectorDto update(SectorDto sectorDto) {
         SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorDto.getSectorId())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorDto.getSectorId()));
 
         if (!sectorEntity.getName().equals(sectorDto.getName()) && sectorRepository.existsByName(sectorDto.getName()))
             throw new DuplicateResourceException("A sector with this name already exists in the system.");

@@ -33,7 +33,7 @@ public class SectorController {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{sectorId}")
-    public @JsonView(Views.Detailed.class) Optional<SectorDto> getById(
+    public @JsonView(Views.Detailed.class) SectorDto getById(
             @PathParam("sectorId") UUID sectorId
     ){
         return sectorService.getById(sectorId);
