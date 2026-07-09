@@ -15,6 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
@@ -73,6 +74,15 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Override
     @Transactional
     public void delete(UUID groupId) {
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        if (groupEntity.getSector() != null)
+            throw new InvalidResourceException("Group is assigned to a sector, cannot be deleted");
+
+        if (!groupEntity.getMembers().isEmpty())
+            throw new InvalidResourceException("Group is assigned to users, cannot be deleted");
+
         //todo: développer la suppression.
         groupRepository.deleteById(groupId);
     }
@@ -88,10 +98,8 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
 
         if (userEntity.getGroup() != null) {
             if (userEntity.getGroup().getGroupId().equals(groupId)) return;
-            throw new DuplicateResourceException("User already assigned to a group");
+            throw new DuplicateResourceException("User already assigned to another group");
         }
-
-
 
         groupEntity.addMember(userEntity);
         groupRepository.persist(groupEntity);
@@ -106,11 +114,11 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
 
         if (userEntity.getGroup() == null) return;
 
-        if (!userEntity.getGroup().getGroupId().equals(groupId))
-            throw new InvalidResourceException("This user is assigned to another group.");
-
         GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        if (!userEntity.getGroup().getGroupId().equals(groupId))
+            throw new InvalidResourceException("This user is assigned to another group.");
 
         groupEntity.removeMember(userEntity);
         groupRepository.persist(groupEntity);

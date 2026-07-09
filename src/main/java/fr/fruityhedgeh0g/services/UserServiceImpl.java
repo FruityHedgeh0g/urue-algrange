@@ -69,12 +69,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(userEntity);
     }
 
+
+    //Todo: il va falloir par principe permettre la suppression d'un user. Nous devons permettre à chacun de supprimer ses traces.
     @Override
     @Transactional
     public void delete(UUID userId) {
-        //Todo: non nécéssaire de supprimer des users.
         // On peut cependant imaginer tester si le user est utilisé dans une autre table et le supprimer dans le cas contraire
-        userRepository.deleteById(userId);
+        //userRepository.deleteById(userId);
     }
 
     @Override

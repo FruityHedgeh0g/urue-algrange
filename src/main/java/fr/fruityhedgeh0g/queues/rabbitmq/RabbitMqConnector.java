@@ -1,10 +1,8 @@
-package fr.fruityhedgeh0g.utilities;
+package fr.fruityhedgeh0g.queues.rabbitmq;
 
 import com.rabbitmq.client.ConnectionFactory;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import lombok.Getter;
-import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped

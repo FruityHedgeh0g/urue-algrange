@@ -11,9 +11,7 @@ import java.util.UUID;
 public interface PublicUserService {
     List<UserDto> listAll();
     UserDto getById(@NotNull UUID userId);
-    UserDto create(@NotNull @Valid UserDto userDto);
-    UserDto update(@NotNull @Valid UserDto userDto);
-    void delete(@NotNull UUID userId);
+
 
 
 //    Try<UserDto> getUserById(@NotNull UUID userId);
