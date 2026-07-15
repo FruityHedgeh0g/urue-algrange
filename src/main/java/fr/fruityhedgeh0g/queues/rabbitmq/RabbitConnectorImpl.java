@@ -45,7 +45,8 @@ public class RabbitConnectorImpl implements RabbitConnector {
     }
 
     public Channel openChannel() throws IOException, TimeoutException {
-        return openConnection().createChannel();
+        Connection myConnection = openConnection();
+        return myConnection.createChannel();
 
     }
 

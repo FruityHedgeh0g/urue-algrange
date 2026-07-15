@@ -6,8 +6,10 @@ import com.rabbitmq.client.DefaultConsumer;
 import fr.fruityhedgeh0g.queues.rabbitmq.RabbitConnector;
 import fr.fruityhedgeh0g.queues.rabbitmq.consumers.RabbitUserConsumer;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
+import io.quarkus.runtime.StartupEvent;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -23,8 +25,12 @@ public class RabbitUserListener {
 
     private RabbitUserConsumer consumer;
 
-    @PostConstruct
-    private void init() throws Exception {
+//    @PostConstruct
+//    private void init() throws Exception {
+//
+//    }
+
+    void startup(@Observes StartupEvent event) throws Exception {
         //todo: rendre ce morceau resilient
         String consumerTag = this.getClass().getSimpleName();
         Channel channel = rabbitConnector.openChannel();
