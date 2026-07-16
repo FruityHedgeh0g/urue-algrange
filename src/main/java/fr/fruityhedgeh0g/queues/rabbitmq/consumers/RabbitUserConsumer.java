@@ -1,8 +1,12 @@
 package fr.fruityhedgeh0g.queues.rabbitmq.consumers;
 
 import com.rabbitmq.client.*;
+import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.exceptions.UnknownQueueRoutingKeyException;
+import fr.fruityhedgeh0g.queues.rabbitmq.KeycloakDeserializer;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
+import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -11,10 +15,12 @@ public class RabbitUserConsumer extends DefaultConsumer {
     private final String userUpdateRoute;
     private final String userCreationRoute;
     private final InternalUserService internalUserService;
+    private final KeycloakDeserializer deserializer;
 
     public RabbitUserConsumer(
             Channel channel,
             InternalUserService internalUserService,
+            KeycloakDeserializer deserializer,
             String userDeletionRoute,
             String userUpdateRoute,
             String userCreationRoute
@@ -24,6 +30,7 @@ public class RabbitUserConsumer extends DefaultConsumer {
         this.userDeletionRoute = userDeletionRoute;
         this.userUpdateRoute = userUpdateRoute;
         this.userCreationRoute = userCreationRoute;
+        this.deserializer = deserializer;
     }
 
     @Override
@@ -41,20 +48,19 @@ public class RabbitUserConsumer extends DefaultConsumer {
         try {
             dispatch(routingKey, content);
             getChannel().basicAck(deliveryTag, false);
-        } catch (UnknownQueueRoutingKeyException e) {
-            getChannel().basicNack(deliveryTag, false, false);
         }catch (Exception e){
-            getChannel().basicNack(deliveryTag, false, true);
+            //todo : définir une DLX pour éviter les pertes
+            getChannel().basicNack(deliveryTag, false, false);
         }
     }
 
-    private void dispatch(String routingKey, String content ) throws UnknownQueueRoutingKeyException {
+    private void dispatch(String routingKey, String content ) {
         if (routingKey.equals(userDeletionRoute)){
             handleUserDeletion();
         } else if (routingKey.equals(userUpdateRoute)){
-            handleUserUpdate();
+            handleUserUpdate(content);
         } else if (routingKey.equals(userCreationRoute)){
-            handleUserCreation();
+            handleUserCreation(content);
         }else {
             throw new UnknownQueueRoutingKeyException("Unknown routing key");
         }
@@ -64,11 +70,13 @@ public class RabbitUserConsumer extends DefaultConsumer {
 
     }
 
-    private void handleUserCreation(){
-
+    private void handleUserCreation(String content) {
+        UserDto userDto = deserializer.deserializePayloadToUserDto(content);
+        internalUserService.create(userDto);
     }
 
-    private void handleUserUpdate(){
-
+    private void handleUserUpdate(String content){
+        UserDto userDto = deserializer.deserializePayloadToUserDto(content);
+        internalUserService.update(userDto);
     }
 }
