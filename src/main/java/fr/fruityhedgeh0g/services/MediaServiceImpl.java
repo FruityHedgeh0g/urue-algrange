@@ -5,6 +5,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.services.interfaces.MediaService;
 import fr.fruityhedgeh0g.utilities.mappers.MediaMapper;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -24,6 +25,7 @@ public class MediaServiceImpl implements MediaService {
     @Inject
     MediaMapper mediaMapper;
 
+    @Authenticated
     @Override
     public List<MediaDto> listAll() {
         return mediaRepository.listAll()
@@ -32,6 +34,7 @@ public class MediaServiceImpl implements MediaService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public MediaDto getById(UUID mediaId) {
         return mediaMapper.toDto(
@@ -41,18 +44,21 @@ public class MediaServiceImpl implements MediaService {
 
     }
 
+    @Authenticated
     @Override
     @Transactional
     public MediaDto create(MediaDto mediaDto) {
         return null;
     }
 
+    @Authenticated
     @Override
     @Transactional
     public MediaDto update(MediaDto mediaDto) {
         return null;
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void delete(UUID mediaId) {

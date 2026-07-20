@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.utilities.mappers.RoleMapper;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -26,6 +27,7 @@ public class RoleServiceImpl implements RoleService {
     @Inject
     RoleMapper roleMapper;
 
+    @Authenticated
     @Override
     public List<RoleDto> listAll() {
         return roleRepository.listAll()
@@ -34,6 +36,7 @@ public class RoleServiceImpl implements RoleService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public RoleDto getById(UUID roleId) {
         return roleMapper.toDto(
@@ -43,6 +46,7 @@ public class RoleServiceImpl implements RoleService {
 
     }
 
+    @Authenticated
     @Override
     @Transactional
     public RoleDto create(RoleDto roleDto) {
@@ -55,6 +59,7 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.toDto(roleEntity);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public RoleDto update(RoleDto roleDto) {
@@ -70,6 +75,7 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.toDto(roleEntity);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void delete(UUID roleId) {

@@ -5,6 +5,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -24,6 +25,7 @@ public class PostServiceImpl implements PostService {
     @Inject
     PostMapper postMapper;
 
+    @Authenticated
     @Override
     public List<PostDto> listAll() {
         return postRepository.listAll()
@@ -32,6 +34,7 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public PostDto getById(UUID postId) {
         return postMapper.toDto(
@@ -41,18 +44,21 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    @Authenticated
     @Override
     @Transactional
     public PostDto create(PostDto postDto) {
         return null;
     }
 
+    @Authenticated
     @Override
     @Transactional
     public PostDto update(PostDto postDto) {
         return null;
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void delete(UUID postId) {
