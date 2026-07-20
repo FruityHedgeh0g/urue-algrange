@@ -11,6 +11,7 @@ import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -28,6 +29,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Inject InternalUserService internalUserService;
     @Inject GroupMapper groupMapper;
 
+    @Authenticated
     @Override
     public List<GroupDto> listAll() {
         return groupRepository.listAll()
@@ -36,6 +38,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public GroupDto getById(UUID groupId) {
         return groupMapper.toDto(
@@ -44,6 +47,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
         );
     }
 
+    @Authenticated
     @Override
     @Transactional
     public GroupDto create(GroupDto groupDto) {
@@ -56,6 +60,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
         return groupMapper.toDto(groupEntity);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public GroupDto update(GroupDto groupDto) {
@@ -71,6 +76,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
         return groupMapper.toDto(groupEntity);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void delete(UUID groupId) {
@@ -87,6 +93,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
         groupRepository.deleteById(groupId);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void assignUser(UUID groupId, UUID userId) {
@@ -106,6 +113,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
 
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void unassignUser(UUID groupId, UUID userId) {
@@ -125,6 +133,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
 
     }
 
+    @Authenticated
     @Override
     public Optional<GroupEntity> getEntityById(UUID groupId) {
         return groupRepository.findByIdOptional(groupId);

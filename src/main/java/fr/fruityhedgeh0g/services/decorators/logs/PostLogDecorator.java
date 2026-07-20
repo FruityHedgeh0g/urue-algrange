@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Priority(200)
 @Decorator
-public class PostLogProxy implements PostService {
+public class PostLogDecorator implements PostService {
 
     @Inject
     @Delegate

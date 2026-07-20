@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Decorator
 @Priority(200)
-public class SectorLogProxy implements SectorService {
+public class SectorLogDecorator implements SectorService {
 
     @Inject
     @Delegate

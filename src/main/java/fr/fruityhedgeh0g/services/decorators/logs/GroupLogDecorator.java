@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Priority(200)
 @Decorator
-public class GroupLogProxy implements GroupService {
+public class GroupLogDecorator implements GroupService {
 
     @Inject
     @Delegate

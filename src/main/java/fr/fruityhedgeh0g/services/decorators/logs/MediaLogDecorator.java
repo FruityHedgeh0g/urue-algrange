@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Priority(200)
 @Decorator
-public class MediaLogProxy implements MediaService {
+public class MediaLogDecorator implements MediaService {
 
     @Inject
     @Delegate

@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.featureDtos.FeatureDto;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -11,11 +11,10 @@ import jakarta.decorator.Delegate;
 import jakarta.inject.Inject;
 
 import java.util.List;
-import java.util.Optional;
 
 @Priority(200)
 @Decorator
-public class FeatureLogProxy implements FeatureService{
+public class FeatureLogDecorator implements FeatureService{
 
     @Inject
     @Delegate

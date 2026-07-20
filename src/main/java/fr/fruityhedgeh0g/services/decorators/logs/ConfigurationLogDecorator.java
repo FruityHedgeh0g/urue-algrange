@@ -1,7 +1,6 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
-import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
 import io.quarkus.logging.Log;
@@ -12,11 +11,10 @@ import jakarta.decorator.Delegate;
 import jakarta.inject.Inject;
 
 import java.util.List;
-import java.util.Optional;
 
 @Priority(200)
 @Decorator
-public class ConfigurationLogProxy implements ConfigurationService{
+public class ConfigurationLogDecorator implements ConfigurationService{
 
     @Inject
     @Delegate

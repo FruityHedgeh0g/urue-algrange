@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Priority(200)
 @Decorator
-public class RoleLogProxy implements RoleService {
+public class RoleLogDecorator implements RoleService {
     @Inject
     @Delegate
     RoleService roleService;

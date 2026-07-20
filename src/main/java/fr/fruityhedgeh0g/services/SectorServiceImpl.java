@@ -14,6 +14,7 @@ import fr.fruityhedgeh0g.services.interfaces.SectorService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
+import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -35,6 +36,7 @@ public class SectorServiceImpl implements SectorService {
     @Inject GroupMapper groupMapper;
     @Inject InternalGroupService internalGroupService;
 
+    @Authenticated
     @Override
     public List<SectorDto> listAll() {
         return sectorRepository.listAll()
@@ -43,6 +45,7 @@ public class SectorServiceImpl implements SectorService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public SectorDto getById(UUID sectorId) {
         return sectorMapper.toDto(
@@ -53,6 +56,7 @@ public class SectorServiceImpl implements SectorService {
 
     }
 
+    @Authenticated
     @Override
     @Transactional
     public SectorDto create(SectorDto sectorDto) {
@@ -65,6 +69,7 @@ public class SectorServiceImpl implements SectorService {
         return sectorMapper.toDto(sectorEntity);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public SectorDto update(SectorDto sectorDto) {
@@ -79,6 +84,7 @@ public class SectorServiceImpl implements SectorService {
         return sectorMapper.toDto(sectorEntity);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void delete(UUID sectorId) {
@@ -91,6 +97,7 @@ public class SectorServiceImpl implements SectorService {
         sectorRepository.deleteById(sectorId);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public void assignGroup(UUID sectorId, UUID groupId) {
@@ -112,6 +119,7 @@ public class SectorServiceImpl implements SectorService {
 
 
 
+    @Authenticated
     @Override
     @Transactional
     public void unassignGroup(UUID sectorId, UUID groupId) {

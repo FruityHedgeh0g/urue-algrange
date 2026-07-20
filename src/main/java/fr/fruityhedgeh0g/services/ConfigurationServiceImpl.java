@@ -8,6 +8,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
 import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;
+import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -29,6 +30,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Inject
     ConfigurationMapper configurationMapper;
 
+    @Authenticated
     @Override
     public List<ConfigurationDto> listAll() {
         return configurationRepository.listAll()
@@ -37,6 +39,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public ConfigurationDto getByName(String name) {
         return configurationMapper.toDto(
@@ -46,6 +49,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     }
 
+    @Authenticated
     @Override
     @Transactional
     public ConfigurationDto update(ConfigurationDto configurationDto) {

@@ -1,4 +1,4 @@
-package fr.fruityhedgeh0g.services.proxies.log;
+package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Priority(200)
 @Decorator
-public class UserLogProxy implements UserService{
+public class UserLogDecorator implements UserService{
     @Inject
     @Delegate
     UserService userService;

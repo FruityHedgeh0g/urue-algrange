@@ -7,6 +7,8 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
+import io.quarkus.security.Authenticated;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -28,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     //Using UUID to test the existence of the user is acceptable because it is based on an external system (Keycloak)
 
+    @Authenticated
     @Override
     public List<UserDto> listAll() {
         return userRepository.listAll()
@@ -36,6 +39,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public UserDto getById(UUID userId) {
         return userMapper.toDto(
@@ -45,6 +49,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Authenticated
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
@@ -57,6 +62,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(userEntity);
     }
 
+    @Authenticated
     @Override
     @Transactional
     public UserDto update(UserDto userDto) {
@@ -71,6 +77,7 @@ public class UserServiceImpl implements UserService {
 
 
     //Todo: il va falloir par principe permettre la suppression d'un user. Nous devons permettre à chacun de supprimer ses traces.
+    @Authenticated
     @Override
     @Transactional
     public void delete(UUID userId) {
@@ -78,60 +85,10 @@ public class UserServiceImpl implements UserService {
         //userRepository.deleteById(userId);
     }
 
+    @Authenticated
     @Override
     public Optional<UserEntity> getEntityById(UUID userId) {
         return userRepository.findByIdOptional(userId);
     }
-
-//
-//    @Override
-//    @Transactional
-//    public Try<UserDto> assignRoleToUser(UUID userId, UUID roleId) {
-//        Log.infof("Assigning role with id: %s to user with id: %s", roleId, userId);
-//        return Try.of(() -> {
-//            Log.debugf("Checking if user with id: %s exists and retrieve it", userId);
-//            UserEntity user = internalGetUserById(userId).getOrElseThrow(ex -> ex);
-//
-//            Log.debugf("Checking if user with id: %s already has this role", userId);
-//            if (user.getRoles().stream().anyMatch(e -> e.getRoleId().equals(roleId)))
-//                throw new DuplicateResourceException("User already has this role");
-//
-//            RoleEntity role = roleService.internalGetRoleById(roleId).getOrElseThrow(ex -> ex);
-//
-//            user.addRole(role);
-//
-//            return userMapper.toDto(user);
-//        }).onFailure(ex -> {
-//            switch (ex){
-//                case UnknownResourceException e -> Log.warn(e.getMessage());
-//                case DuplicateResourceException e -> Log.warn(e.getMessage());
-//                default -> Log.errorf(ex,"Error assigning role with id: %s to user with id: %s", roleId, userId);
-//            }
-//        });
-//    }
-//
-//    @Override
-//    @Transactional
-//    public Try<UserDto> unassignRoleFromUser(UUID userId, UUID roleId) {
-//        Log.infof("Unassigning role with id: %s from user with id: %s", roleId, userId);
-//        return Try.of(() -> {
-//            Log.debugf("Checking if user with id: %s exists and retrieve it", userId);
-//            UserEntity user = internalGetUserById(userId).getOrElseThrow(ex -> ex);
-//
-//            Log.debugf("Checking if role with id: %s exists and retrieve it", roleId);
-//            RoleEntity role = user.getRoles().stream().filter(e -> e.getRoleId().equals(roleId)).findFirst()
-//                    .orElseThrow(() -> new UnknownResourceException("Role not found"));
-//
-//            user.removeRole(role);
-//
-//            return userMapper.toDto(user);
-//        }).onFailure(ex -> {
-//            switch(ex) {
-//                case UnknownResourceException e -> Log.warn(e.getMessage());
-//                case DuplicateResourceException e -> Log.warn(e.getMessage());
-//                default -> Log.errorf(ex, "Error unassigning role with id: %s from user with id: %s", roleId, userId);
-//            }
-//        });
-//    }
 
 }

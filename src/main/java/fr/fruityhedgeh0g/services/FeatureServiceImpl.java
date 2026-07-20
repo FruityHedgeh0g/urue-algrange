@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.FeatureRepository;
 import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import fr.fruityhedgeh0g.utilities.mappers.FeatureMapper;
+import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -27,6 +28,7 @@ public class FeatureServiceImpl implements FeatureService {
     @Inject
     FeatureRepository featureRepository;
 
+    @Authenticated
     @Override
     public List<FeatureDto> listAll() {
         return featureRepository.listAll()
@@ -35,6 +37,7 @@ public class FeatureServiceImpl implements FeatureService {
                 .toList();
     }
 
+    @Authenticated
     @Override
     public FeatureDto getByName(String name) {
         return featureMapper.toDto(
@@ -43,6 +46,7 @@ public class FeatureServiceImpl implements FeatureService {
         );
     }
 
+    @Authenticated
     @Override
     @Transactional
     public FeatureDto update(FeatureDto featureDto) {
