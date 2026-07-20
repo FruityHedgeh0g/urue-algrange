@@ -30,7 +30,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Inject
     ConfigurationMapper configurationMapper;
 
-    @Authenticated
     @Override
     public List<ConfigurationDto> listAll() {
         return configurationRepository.listAll()
@@ -39,7 +38,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 .toList();
     }
 
-    @Authenticated
     @Override
     public ConfigurationDto getByName(String name) {
         return configurationMapper.toDto(
@@ -49,7 +47,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     }
 
-    @Authenticated
     @Override
     @Transactional
     public ConfigurationDto update(ConfigurationDto configurationDto) {

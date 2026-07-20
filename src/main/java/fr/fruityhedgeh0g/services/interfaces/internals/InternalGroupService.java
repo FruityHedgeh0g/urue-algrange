@@ -7,5 +7,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface InternalGroupService {
-    Optional<GroupEntity> getEntityById(@NotNull UUID groupId);
+    Optional<GroupEntity> doGetEntityById(@NotNull UUID groupId);
 }

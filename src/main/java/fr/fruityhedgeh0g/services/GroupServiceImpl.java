@@ -97,7 +97,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Override
     @Transactional
     public void assignUser(UUID groupId, UUID userId) {
-        UserEntity userEntity = internalUserService.getEntityById(userId)
+        UserEntity userEntity = internalUserService.doGetEntityById(userId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
 
         GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
@@ -117,7 +117,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Override
     @Transactional
     public void unassignUser(UUID groupId, UUID userId) {
-        UserEntity userEntity = internalUserService.getEntityById(userId)
+        UserEntity userEntity = internalUserService.doGetEntityById(userId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
 
         if (userEntity.getGroup() == null) return;
@@ -135,7 +135,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
 
     @Authenticated
     @Override
-    public Optional<GroupEntity> getEntityById(UUID groupId) {
+    public Optional<GroupEntity> doGetEntityById(UUID groupId) {
         return groupRepository.findByIdOptional(groupId);
     }
 

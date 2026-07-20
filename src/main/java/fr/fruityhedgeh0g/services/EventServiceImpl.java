@@ -28,7 +28,6 @@ public class EventServiceImpl implements EventService {
     @Inject
     EventMapper eventMapper;
 
-    @Authenticated
     @Override
     public List<EventDto> listAll() {
         return eventRepository.listAll()
@@ -37,7 +36,6 @@ public class EventServiceImpl implements EventService {
                 .toList();
     }
 
-    @Authenticated
     @Override
     public EventDto getById(UUID eventId) {
         return eventMapper.toDto(
@@ -47,21 +45,18 @@ public class EventServiceImpl implements EventService {
 
     }
 
-    @Authenticated
     @Override
     @Transactional
     public EventDto create(EventDto eventDto) {
         return null;
     }
 
-    @Authenticated
     @Override
     @Transactional
     public EventDto update(EventDto eventDto) {
         return null;
     }
 
-    @Authenticated
     @Override
     @Transactional
     public void delete(UUID eventId) {

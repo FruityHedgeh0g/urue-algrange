@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
+import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
@@ -25,7 +26,6 @@ public class PostServiceImpl implements PostService {
     @Inject
     PostMapper postMapper;
 
-    @Authenticated
     @Override
     public List<PostDto> listAll() {
         return postRepository.listAll()
@@ -34,7 +34,6 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    @Authenticated
     @Override
     public PostDto getById(UUID postId) {
         return postMapper.toDto(
@@ -44,25 +43,22 @@ public class PostServiceImpl implements PostService {
 
     }
 
-    @Authenticated
     @Override
     @Transactional
     public PostDto create(PostDto postDto) {
-        return null;
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
-    @Authenticated
     @Override
     @Transactional
     public PostDto update(PostDto postDto) {
-        return null;
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
-    @Authenticated
     @Override
     @Transactional
     public void delete(UUID postId) {
-
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
 //    @Override

@@ -72,11 +72,11 @@ public class RabbitUserConsumer extends DefaultConsumer {
 
     private void handleUserCreation(String content) {
         UserDto userDto = deserializer.deserializePayloadToUserDto(content);
-        internalUserService.create(userDto);
+        internalUserService.doCreate(userDto);
     }
 
     private void handleUserUpdate(String content){
         UserDto userDto = deserializer.deserializePayloadToUserDto(content);
-        internalUserService.update(userDto);
+        internalUserService.doUpdate(userDto);
     }
 }

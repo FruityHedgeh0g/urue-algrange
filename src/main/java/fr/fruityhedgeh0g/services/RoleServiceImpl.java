@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.services;
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
@@ -27,7 +28,6 @@ public class RoleServiceImpl implements RoleService {
     @Inject
     RoleMapper roleMapper;
 
-    @Authenticated
     @Override
     public List<RoleDto> listAll() {
         return roleRepository.listAll()
@@ -36,7 +36,6 @@ public class RoleServiceImpl implements RoleService {
                 .toList();
     }
 
-    @Authenticated
     @Override
     public RoleDto getById(UUID roleId) {
         return roleMapper.toDto(
@@ -46,7 +45,6 @@ public class RoleServiceImpl implements RoleService {
 
     }
 
-    @Authenticated
     @Override
     @Transactional
     public RoleDto create(RoleDto roleDto) {
@@ -59,7 +57,6 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.toDto(roleEntity);
     }
 
-    @Authenticated
     @Override
     @Transactional
     public RoleDto update(RoleDto roleDto) {
@@ -75,12 +72,12 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.toDto(roleEntity);
     }
 
-    @Authenticated
     @Override
     @Transactional
     public void delete(UUID roleId) {
         //Todo: tester si le role si le role appartient à des users, refuser la suppression le cas échéant
-        roleRepository.deleteById(roleId);
+        //roleRepository.deleteById(roleId);
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
 //

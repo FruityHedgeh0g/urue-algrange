@@ -36,7 +36,6 @@ public class SectorServiceImpl implements SectorService {
     @Inject GroupMapper groupMapper;
     @Inject InternalGroupService internalGroupService;
 
-    @Authenticated
     @Override
     public List<SectorDto> listAll() {
         return sectorRepository.listAll()
@@ -45,7 +44,6 @@ public class SectorServiceImpl implements SectorService {
                 .toList();
     }
 
-    @Authenticated
     @Override
     public SectorDto getById(UUID sectorId) {
         return sectorMapper.toDto(
@@ -56,7 +54,6 @@ public class SectorServiceImpl implements SectorService {
 
     }
 
-    @Authenticated
     @Override
     @Transactional
     public SectorDto create(SectorDto sectorDto) {
@@ -69,7 +66,6 @@ public class SectorServiceImpl implements SectorService {
         return sectorMapper.toDto(sectorEntity);
     }
 
-    @Authenticated
     @Override
     @Transactional
     public SectorDto update(SectorDto sectorDto) {
@@ -84,7 +80,6 @@ public class SectorServiceImpl implements SectorService {
         return sectorMapper.toDto(sectorEntity);
     }
 
-    @Authenticated
     @Override
     @Transactional
     public void delete(UUID sectorId) {
@@ -97,11 +92,10 @@ public class SectorServiceImpl implements SectorService {
         sectorRepository.deleteById(sectorId);
     }
 
-    @Authenticated
     @Override
     @Transactional
     public void assignGroup(UUID sectorId, UUID groupId) {
-        GroupEntity groupEntity = internalGroupService.getEntityById(groupId)
+        GroupEntity groupEntity = internalGroupService.doGetEntityById(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
 
         SectorEntity sectorEntity = sectorRepository.findByIdOptional(sectorId)
@@ -119,11 +113,10 @@ public class SectorServiceImpl implements SectorService {
 
 
 
-    @Authenticated
     @Override
     @Transactional
     public void unassignGroup(UUID sectorId, UUID groupId) {
-        GroupEntity groupEntity = internalGroupService.getEntityById(groupId)
+        GroupEntity groupEntity = internalGroupService.doGetEntityById(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
 
         if (groupEntity.getSector() == null) return;

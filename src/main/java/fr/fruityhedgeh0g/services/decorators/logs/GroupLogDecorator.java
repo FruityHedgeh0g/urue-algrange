@@ -99,9 +99,9 @@ public class GroupLogDecorator implements GroupService {
     }
 
     @Override
-    public Optional<GroupEntity> getEntityById(UUID groupId) {
+    public Optional<GroupEntity> doGetEntityById(UUID groupId) {
         Log.debugf("[INTERNAL] Retrieving group by id %s...",groupId);
-        return Try.of(() -> groupService.getEntityById(groupId))
+        return Try.of(() -> groupService.doGetEntityById(groupId))
                 .onSuccess(group -> {
                     if (group.isPresent())
                         Log.debugf("Group retrieved.");

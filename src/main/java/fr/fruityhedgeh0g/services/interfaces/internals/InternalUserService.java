@@ -11,8 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface InternalUserService {
-    UserDto create(@NotNull @Valid UserDto userDto);
-    UserDto update(@NotNull @Valid UserDto userDto);
-    void delete(@NotNull UUID userId);
-    Optional<UserEntity> getEntityById(@NotNull UUID userId);
+    UserDto doCreate(@NotNull @Valid UserDto userDto);
+    UserDto doUpdate(@NotNull @Valid UserDto userDto);
+    void doDelete(@NotNull UUID userId);
+    Optional<UserEntity> doGetEntityById(@NotNull UUID userId);
 }

@@ -49,9 +49,9 @@ public class UserLogDecorator implements UserService{
     }
 
     @Override
-    public UserDto create(UserDto userDto) {
+    public UserDto doCreate(UserDto userDto) {
         Log.debugf("Creating new user: %s", userDto.toString());
-        return Try.of(() -> userService.create(userDto))
+        return Try.of(() -> userService.doCreate(userDto))
                 .onSuccess(user -> Log.debugf("User created."))
                 .onFailure(t -> {
                     switch(t){
@@ -63,9 +63,9 @@ public class UserLogDecorator implements UserService{
     }
 
     @Override
-    public UserDto update(UserDto userDto) {
+    public UserDto doUpdate(UserDto userDto) {
         Log.debugf("Updating an existing user: %s", userDto.toString());
-        return Try.of(() -> userService.update(userDto))
+        return Try.of(() -> userService.doUpdate(userDto))
                 .onSuccess(user -> Log.debugf("User updated."))
                 .onFailure(t -> {
                     switch(t){
@@ -77,19 +77,19 @@ public class UserLogDecorator implements UserService{
     }
 
     @Override
-    public void delete(UUID userId) {
+    public void doDelete(UUID userId) {
 
         Log.debugf("Deleting user by id %s...",userId);
-        Try.run(() -> userService.delete(userId))
+        Try.run(() -> userService.doDelete(userId))
                 .onSuccess(v -> Log.debugf("User deleted."))
                 .onFailure(t -> Log.errorf(t,"An error occurred during user deletion."))
                 .get();
     }
 
     @Override
-    public Optional<UserEntity> getEntityById(UUID userId) {
+    public Optional<UserEntity> doGetEntityById(UUID userId) {
         Log.debugf("[INTERNAL] Retrieve user by id %s...",userId);
-        return Try.of(() -> userService.getEntityById(userId))
+        return Try.of(() -> userService.doGetEntityById(userId))
                 .onSuccess(user -> {
                     if (user.isPresent())
                         Log.debugf("User retrieved.");

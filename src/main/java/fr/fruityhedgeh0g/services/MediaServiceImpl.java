@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
+import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.services.interfaces.MediaService;
@@ -25,7 +26,6 @@ public class MediaServiceImpl implements MediaService {
     @Inject
     MediaMapper mediaMapper;
 
-    @Authenticated
     @Override
     public List<MediaDto> listAll() {
         return mediaRepository.listAll()
@@ -34,7 +34,6 @@ public class MediaServiceImpl implements MediaService {
                 .toList();
     }
 
-    @Authenticated
     @Override
     public MediaDto getById(UUID mediaId) {
         return mediaMapper.toDto(
@@ -44,24 +43,23 @@ public class MediaServiceImpl implements MediaService {
 
     }
 
-    @Authenticated
     @Override
     @Transactional
     public MediaDto create(MediaDto mediaDto) {
-        return null;
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
-    @Authenticated
     @Override
     @Transactional
     public MediaDto update(MediaDto mediaDto) {
-        return null;
+
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
-    @Authenticated
     @Override
     @Transactional
     public void delete(UUID mediaId) {
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
 //    @Transactional
