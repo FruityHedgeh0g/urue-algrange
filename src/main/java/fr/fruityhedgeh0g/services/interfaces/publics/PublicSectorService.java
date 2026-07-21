@@ -16,6 +16,7 @@ public interface PublicSectorService {
     void delete(@NotNull UUID sectorId);
     void assignGroup(@NotNull UUID sectorId, @NotNull UUID groupId);
     void unassignGroup(@NotNull UUID sectorId, @NotNull UUID groupId);
+    SectorDto getByUserId(@NotNull UUID userId);
 
 //    Try<List<SectorDto>> getAllSectors();
 //    Try<SectorDto> getSectorById(@NotNull UUID sectorId);

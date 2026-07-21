@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,8 @@ import java.util.UUID;
 
 @Path("/api/sectors")
 public class SectorController {
+    @Inject
+    JsonWebToken token;
 
     @Inject
     PublicSectorService sectorService;
@@ -80,5 +83,13 @@ public class SectorController {
     @Path("/{sectorId}/group/{groupId}")
     public void unassignGroup(@PathParam("sectorId") UUID sectorId, @PathParam("groupId") UUID groupId){
         sectorService.unassignGroup(sectorId,groupId);
+    }
+
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Path("/me")
+    public @JsonView(Views.Detailed.class) SectorDto getCurrentSector(){
+        UUID userId = UUID.fromString(token.getSubject());
+        return sectorService.getByUserId(userId);
     }
 }

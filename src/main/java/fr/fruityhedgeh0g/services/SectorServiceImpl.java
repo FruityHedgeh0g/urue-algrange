@@ -12,6 +12,7 @@ import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.security.Authenticated;
@@ -52,6 +53,16 @@ public class SectorServiceImpl implements SectorService {
         );
 
 
+    }
+
+    @Override
+    public SectorDto getByUserId(UUID userId) {
+        UUID sectorId = internalGroupService
+                .doGetEntityByUserId(userId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found for user: " + userId))
+                .getSector()
+                .getSectorId();
+        return getById(sectorId);
     }
 
     @Override
