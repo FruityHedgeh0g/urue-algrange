@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
 
 @InterceptorBinding
 @Target({ElementType.TYPE, ElementType.METHOD})
-@EnforceAuthentification
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EnforceAuthentification {
 }

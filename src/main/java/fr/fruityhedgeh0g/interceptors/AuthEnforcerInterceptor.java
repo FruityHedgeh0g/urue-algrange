@@ -9,10 +9,10 @@ import jakarta.interceptor.InvocationContext;
 @EnforceAuthentification
 public class AuthEnforcerInterceptor {
 
-
     @AroundInvoke
-    public void intercept(InvocationContext context) {
+    public Object intercept(InvocationContext context) throws Exception {
 
+        return context.proceed();
     }
 
 }

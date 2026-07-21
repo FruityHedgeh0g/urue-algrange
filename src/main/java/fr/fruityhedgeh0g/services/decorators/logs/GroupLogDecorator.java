@@ -111,4 +111,17 @@ public class GroupLogDecorator implements GroupService {
                 .get();
     }
 
+    @Override
+    public Optional<GroupEntity> doGetEntityByUserId(UUID userId) {
+        Log.debugf("[INTERNAL] Retrieving group by user id %s...",userId);
+        return Try.of(() -> groupService.doGetEntityByUserId(userId))
+                .onSuccess(group -> {
+                    if (group.isPresent())
+                        Log.debugf("Group retrieved.");
+                    else Log.debugf("Group not found.");
+                })
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
+                .get();
+    }
+
 }
