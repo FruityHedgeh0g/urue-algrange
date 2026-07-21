@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.queues.rabbitmq.consumers;
 import com.rabbitmq.client.*;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.exceptions.UnknownQueueRoutingKeyException;
+import fr.fruityhedgeh0g.interceptors.bindings.EnforceAuthentification;
 import fr.fruityhedgeh0g.queues.rabbitmq.KeycloakDeserializer;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
@@ -34,6 +35,7 @@ public class RabbitUserConsumer extends DefaultConsumer {
     }
 
     @Override
+    @EnforceAuthentification
     public void handleDelivery(
             String consumerTag,
             Envelope envelope,
