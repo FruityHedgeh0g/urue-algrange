@@ -13,6 +13,7 @@ import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -399,5 +400,7 @@ public class SectorServiceTest {
         Assertions.assertThrows(InvalidResourceException.class,
                 () -> sectorService.unassignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
     }
+
+    /** @see SectorServiceImpl#getByUserId(UUID) () **/
 
 }
