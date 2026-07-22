@@ -11,12 +11,11 @@ import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotNull;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +40,14 @@ public class SectorServiceTest {
     SectorMapper sectorMapper;
 
     @BeforeEach
+    @TestTransaction
     public void setUp() {
-        
+        sectorRepository.deleteAll();
     }
 
     /** @see SectorServiceImpl#listAll() **/
 
+    //Ne marche pas car nécéssite un override de equals et hashCode
     @Test
     @TestTransaction
     public void listAllSectors_Success(){
@@ -74,6 +75,7 @@ public class SectorServiceTest {
 
     /** @see SectorServiceImpl#getById(UUID) () **/
 
+    //Ne marche pas car nécéssite un override de equals et hashCode
     @Test
     @TestTransaction
     public void getById_Success(){
@@ -337,8 +339,6 @@ public class SectorServiceTest {
         GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
         groupRepository.persist(groupEntity);
 
-        sectorEntity.addGroup(groupEntity);
-
         Assertions.assertDoesNotThrow(() -> sectorService.unassignGroup(sectorEntity.getSectorId(), groupEntity.getGroupId()));
     }
 
@@ -353,13 +353,9 @@ public class SectorServiceTest {
     @Test
     @TestTransaction
     public void unassignGroup_SectorNotFound(){
-        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
-        sectorRepository.persist(sectorEntity);
 
         GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
         groupRepository.persist(groupEntity);
-
-        sectorEntity.addGroup(groupEntity);
 
         Assertions.assertThrows(UnknownResourceException.class,
                 () -> sectorService.unassignGroup(UUID.randomUUID(), groupEntity.getGroupId()));

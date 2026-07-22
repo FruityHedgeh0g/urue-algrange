@@ -14,8 +14,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-//Todo: check l'impl de ce truc
-@EqualsAndHashCode
 public class SectorEntity extends AuditTemplate {
 
     @Id
