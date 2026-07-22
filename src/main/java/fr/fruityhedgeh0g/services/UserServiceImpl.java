@@ -66,7 +66,6 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByIdOptional(userDto.getUserId())
                 .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
 
-
         userEntity = userMapper.partialDtoToEntity(userEntity,userDto);
         userRepository.persist(userEntity);
         return userMapper.toDto(userEntity);

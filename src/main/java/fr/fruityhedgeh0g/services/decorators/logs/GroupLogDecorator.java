@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.services.decorators.logs;
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import io.quarkus.logging.Log;
@@ -90,12 +91,32 @@ public class GroupLogDecorator implements GroupService {
 
     @Override
     public void assignUser(UUID groupId, UUID userId) {
-
+        Log.debugf("Assigning user %s to group %s...",userId,groupId);
+        Try.run(() -> groupService.assignUser(groupId,userId))
+                .onSuccess(v -> Log.debugf("User assigned to group."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s or group %s not found.", userId, groupId);
+                        case DuplicateResourceException ex -> Log.errorf(ex, "User %s is already assigned to another group.", userId);
+                        default -> Log.errorf(t,"An error occurred while assigning user to grood.");
+                    }
+                })
+                .get();
     }
 
     @Override
     public void unassignUser(UUID groupId, UUID userId) {
-
+        Log.debugf("Unassigning user %s from group %s...",userId,groupId);
+        Try.run(() -> groupService.unassignUser(groupId,userId))
+                .onSuccess(v -> Log.debugf("User unassigned from group."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s or group %s not found.", userId, groupId);
+                        case InvalidResourceException ex -> Log.errorf(ex, "User %s is assigned to another group.", userId);
+                        default -> Log.errorf(t,"An error occurred while unassigning user from group.");
+                    }
+                })
+                .get();
     }
 
     @Override

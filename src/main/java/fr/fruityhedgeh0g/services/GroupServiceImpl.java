@@ -47,12 +47,12 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
 
     @Override
     public Optional<GroupEntity> doGetEntityByUserId(UUID userId) {
-        UUID groupId = internalUserService.doGetEntityById(userId)
+        GroupEntity groupEntity = internalUserService.doGetEntityById(userId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: "+userId))
-                .getGroup()
-                .getGroupId();
+                .getGroup();
 
-        return doGetEntityById(groupId);
+        if (groupEntity == null) throw new UnknownResourceException("User isn't assigned to any group.");
+        return doGetEntityById(groupEntity.getGroupId());
     }
 
     @Override

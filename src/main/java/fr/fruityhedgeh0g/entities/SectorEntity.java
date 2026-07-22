@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,6 +45,18 @@ public class SectorEntity extends AuditTemplate {
     public Set<GroupEntity> getGroups() {
         if (groups == null) groups = new HashSet<>();
         return groups;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        SectorEntity that = (SectorEntity) o;
+        return Objects.equals(sectorId, that.sectorId) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(groups, that.groups);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(sectorId);
     }
 
     //@PreRemove

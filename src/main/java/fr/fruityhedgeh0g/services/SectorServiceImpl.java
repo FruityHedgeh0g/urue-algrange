@@ -57,12 +57,14 @@ public class SectorServiceImpl implements SectorService {
 
     @Override
     public SectorDto getByUserId(UUID userId) {
-        UUID sectorId = internalGroupService
+        SectorEntity sectorEntity = internalGroupService
                 .doGetEntityByUserId(userId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found for user: " + userId))
-                .getSector()
-                .getSectorId();
-        return getById(sectorId);
+                .getSector();
+
+        if (sectorEntity == null) throw new UnknownResourceException("User group isn't assigned to any sector.");
+
+        return getById(sectorEntity.getSectorId());
     }
 
     @Override

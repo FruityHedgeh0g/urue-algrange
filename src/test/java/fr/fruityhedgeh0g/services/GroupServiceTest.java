@@ -40,14 +40,12 @@ public class GroupServiceTest {
     UserRepository userRepository;
 
     @BeforeEach
-    @TestTransaction
     public void setUp() {
-        groupRepository.deleteAll();
+
     }
 
     /** @see GroupServiceImpl#listAll() () **/
 
-    //Ne marche pas car nécéssite un override de equals et hashCode
     @Test
     @TestTransaction
     public void listAllGroups_Success(){
@@ -276,7 +274,7 @@ public class GroupServiceTest {
         userRepository.persist(userEntity);
 
         Assertions.assertThrows(UnknownResourceException.class,
-                () -> groupService.unassignUser(UUID.randomUUID() , userEntity.getUserId()));
+                () -> groupService.assignUser(UUID.randomUUID() , userEntity.getUserId()));
     }
 
     @Test
@@ -389,6 +387,11 @@ public class GroupServiceTest {
                 .lastName("Pus")
                 .build();
         userRepository.persist(userEntity);
+
+        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
+        groupRepository.persist(groupEntity);
+
+        groupEntity.addMember(userEntity);
 
         Assertions.assertThrows(UnknownResourceException.class,
                 () -> groupService.unassignUser(UUID.randomUUID(), userEntity.getUserId()));

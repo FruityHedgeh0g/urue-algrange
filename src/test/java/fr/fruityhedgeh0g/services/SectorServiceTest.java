@@ -3,11 +3,13 @@ package fr.fruityhedgeh0g.services;
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
+import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -39,10 +41,12 @@ public class SectorServiceTest {
     @Inject
     SectorMapper sectorMapper;
 
+    @Inject
+    UserRepository userRepository;
+
     @BeforeEach
-    @TestTransaction
     public void setUp() {
-        sectorRepository.deleteAll();
+
     }
 
     /** @see SectorServiceImpl#listAll() **/
@@ -357,6 +361,11 @@ public class SectorServiceTest {
         GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
         groupRepository.persist(groupEntity);
 
+        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sectorEntity);
+
+        sectorEntity.addGroup(groupEntity);
+
         Assertions.assertThrows(UnknownResourceException.class,
                 () -> sectorService.unassignGroup(UUID.randomUUID(), groupEntity.getGroupId()));
     }
@@ -398,5 +407,87 @@ public class SectorServiceTest {
     }
 
     /** @see SectorServiceImpl#getByUserId(UUID) () **/
+
+    @Test
+    @TestTransaction
+    public void getByUserId_NullUserId(){
+        Assertions.assertThrows(ConstraintViolationException.class,
+                () -> sectorService.getByUserId(null));
+    }
+
+    @Test
+    @TestTransaction
+    public void getByUserId_UserNotFound(){
+        Assertions.assertThrows(UnknownResourceException.class,
+                () -> sectorService.getByUserId(UUID.randomUUID()));
+    }
+
+    @Test
+    @TestTransaction
+    public void getByUserId_GroupNotFound(){
+        UserEntity userEntity = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(userEntity);
+
+        Assertions.assertThrows(UnknownResourceException.class,
+                () -> sectorService.getByUserId(userEntity.getUserId()));
+    }
+
+    @Test
+    @TestTransaction
+    public void getByUserId_SectorNotFound(){
+        UserEntity userEntity = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(userEntity);
+
+        GroupEntity groupEntity = GroupEntity.builder()
+                .name("Test Group")
+                .build();
+        groupRepository.persist(groupEntity);
+
+        groupEntity.addMember(userEntity);
+
+        Assertions.assertThrows(UnknownResourceException.class,
+                () -> sectorService.getByUserId(userEntity.getUserId()));
+    }
+
+    @Test
+    @TestTransaction
+    public void getByUserId_Success(){
+        UserEntity userEntity = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(userEntity);
+
+        GroupEntity groupEntity = GroupEntity.builder()
+                .name("Test Group")
+                .build();
+        groupRepository.persist(groupEntity);
+
+        SectorEntity sectorEntity = SectorEntity.builder()
+                .name("Test Sector")
+                .build();
+        sectorRepository.persist(sectorEntity);
+
+        groupEntity.addMember(userEntity);
+        sectorEntity.addGroup(groupEntity);
+
+        Assertions.assertDoesNotThrow(() -> sectorService
+                .getByUserId(userEntity.getUserId())
+        );
+
+    }
+
+
+
+
 
 }
