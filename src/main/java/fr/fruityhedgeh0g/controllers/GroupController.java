@@ -6,6 +6,7 @@ import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.publics.PublicGroupService;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -20,6 +21,7 @@ public class GroupController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("groups:read:all")
     public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
         return groupService.listAll();
     }
