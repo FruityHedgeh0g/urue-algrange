@@ -13,7 +13,8 @@ public class GlobalExceptionHandler {
 
     @ServerExceptionMapper
     public RestResponse<Void> mapException(Exception x) {
-        return RestResponse.serverError();
+
+        return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
     @ServerExceptionMapper
@@ -23,7 +24,7 @@ public class GlobalExceptionHandler {
 
     @ServerExceptionMapper
     public RestResponse<Void> mapUnknownResourceException(UnknownResourceException x) {
-        return RestResponse.notFound();
+        return RestResponse.status(Response.Status.NOT_FOUND);
     }
 
     @ServerExceptionMapper
