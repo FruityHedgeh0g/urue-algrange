@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/api/groups")
+@Path("/groups")
 public class GroupController {
 
     @Inject

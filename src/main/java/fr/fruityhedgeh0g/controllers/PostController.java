@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/api/posts")
+@Path("/posts")
 public class PostController {
 
     @Inject

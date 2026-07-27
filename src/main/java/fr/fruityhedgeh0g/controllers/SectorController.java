@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Path("/api/sectors")
+@Path("/sectors")
 public class SectorController {
     @Inject
     JsonWebToken token;
