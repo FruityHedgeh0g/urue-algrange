@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/events")
+@Path("/api/events")
 public class EventController {
 
     @Inject

@@ -19,7 +19,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import java.util.List;
 import java.util.UUID;
 
-@Path("/users")
+@Path("/api/users")
 public class UserController {
     @Inject
     JsonWebToken token;

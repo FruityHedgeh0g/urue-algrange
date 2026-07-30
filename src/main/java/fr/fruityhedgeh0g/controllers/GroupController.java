@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/groups")
+@Path("/api/groups")
 public class GroupController {
 
     @Inject
@@ -23,6 +23,7 @@ public class GroupController {
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("groups:read:all")
     public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
+
         return groupService.listAll();
     }
 

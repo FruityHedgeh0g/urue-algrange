@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.UUID;
 
-@Path("/roles")
+@Path("/api/roles")
 public class RoleController {
 
     @Inject
