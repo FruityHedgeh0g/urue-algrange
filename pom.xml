@@ -19,7 +19,7 @@
         <quarkus.quinoa.version>2.7.2</quarkus.quinoa.version>
         <quarkus.mockito.version>3.30.6</quarkus.mockito.version>
         <mockito.core.version>5.20.0</mockito.core.version>
-        <lombok.version>1.18.38</lombok.version>
+        <lombok.version>1.18.48</lombok.version>
         <quarkus.jdbc.version>3.28.3</quarkus.jdbc.version>
         <vavr.version>0.10.7</vavr.version>
         <lombok.mapstruct.version>0.2.0</lombok.mapstruct.version>
