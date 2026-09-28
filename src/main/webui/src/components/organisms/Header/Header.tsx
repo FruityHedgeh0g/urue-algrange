@@ -22,8 +22,11 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const groups = mainNav();
 
+  // Hystérésis : replier le header réduit sa hauteur (~56px) et décale le scroll.
+  // Un seuil unique ferait osciller l'état ; l'écart entre les deux seuils doit dépasser ce delta.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () =>
+      setScrolled((prev) => (prev ? window.scrollY > 8 : window.scrollY > 96));
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
