@@ -1,5 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
@@ -20,6 +22,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
 @Identifier("serviceImpl")
 @Default

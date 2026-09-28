@@ -1,16 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchConfigurations, updateConfiguration } from "./configurationsApi";
-
-const QUERY_KEY = ["configurations"];
+import { queryKeys } from "../queryKeys";
 
 export function useConfigurations() {
-  return useQuery({ queryKey: QUERY_KEY, queryFn: fetchConfigurations });
+  return useQuery({ queryKey: queryKeys.configurations.all, queryFn: fetchConfigurations });
 }
 
 export function useUpdateConfiguration() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: { name: string; value: string }) => updateConfiguration(input.name, input.value),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.configurations.all }),
   });
 }

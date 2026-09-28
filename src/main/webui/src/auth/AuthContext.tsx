@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { RoleId, roleAtLeast } from "./roles";
+import { ROLE_HIERARCHY, RoleId, roleAtLeast } from "./roles";
 
 /**
  * Authentification mockée : tant que le backend n'expose pas de flux de
@@ -46,7 +46,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 function readStoredRole(): RoleId {
   try {
     const saved = localStorage.getItem(ROLE_STORAGE_KEY);
-    return (saved as RoleId) ?? "visiteur";
+    return ROLE_HIERARCHY.find((r) => r === saved) ?? "visiteur";
   } catch {
     return "visiteur";
   }

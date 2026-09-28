@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import FormField from "../../components/molecules/FormField/FormField";
 import Button from "../../components/atoms/Button/Button";
-import styles from "./LoginPage.module.css";
+import SplitPanel from "../../components/organisms/SplitPanel/SplitPanel";
+import forms from "../../theme/forms.module.css";
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -23,9 +24,13 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="container-narrow">
-      <h1>Connexion</h1>
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+    <SplitPanel
+      eyebrow="Espace membres"
+      title="Heureux de vous revoir"
+      aside={<p>Retrouvez vos inscriptions aux événements, votre profil et, pour les chefs de groupe, la vie de votre secteur.</p>}
+      heading="Connexion"
+    >
+      <form className={forms.form} onSubmit={handleSubmit} noValidate>
         <FormField
           label="E-mail"
           type="email"
@@ -42,12 +47,14 @@ export const LoginPage: React.FC = () => {
           error={error && !password ? error : undefined}
           required
         />
-        <Button type="submit" label="Se connecter" />
+        <div className={forms.actions}>
+          <Button type="submit" label="Se connecter" variant="accent" />
+        </div>
       </form>
-      <p className={styles.footer}>
+      <p className={forms.footer}>
         Pas encore de compte ? <Link to="/inscription">Inscrivez-vous</Link>
       </p>
-    </div>
+    </SplitPanel>
   );
 };
 

@@ -1,16 +1,51 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../../atoms/Logo/Logo";
+import Icon from "../../atoms/Icon/Icon";
+import ButtonLink from "../../atoms/ButtonLink/ButtonLink";
 import DropdownMenu from "../../molecules/DropdownMenu/DropdownMenu";
 import ThemeToggle from "../../molecules/ThemeToggle/ThemeToggle";
 import RoleSwitcher from "../../molecules/RoleSwitcher/RoleSwitcher";
 import { useAuth } from "../../../auth/AuthContext";
+import { useAccess } from "../../../auth/useAccess";
+import { entry } from "../../../auth/access";
 import styles from "./Header.module.css";
+
+const navLinkClass = ({ isActive }: { isActive: boolean }) => `${styles.navLink}${isActive ? ` ${styles.active}` : ""}`;
 
 export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, setRole, hasAtLeastRole, role } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+  const { isAuthenticated, setRole } = useAuth();
+  const { mainNav, canAccess } = useAccess();
   const navigate = useNavigate();
+  const location = useLocation();
+  const groups = mainNav();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Le tiroir mobile se referme à chaque navigation.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -22,74 +57,92 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className={styles.header}>
-      <div className={styles.left}>
-        <button
-          type="button"
-          className={styles.burger}
-          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <nav className={`${styles.navLinks}${menuOpen ? ` ${styles.open}` : ""}`} aria-label="Principal">
-          <DropdownMenu
-            label="Association"
-            items={[
-              { label: "Qui sommes-nous ?", to: "/qui-sommes-nous" },
-              { label: "Actualités", to: "/actualites" },
-              { label: "Galerie photos", to: "/galerie" },
-              { label: "Contact", to: "/contact" },
-            ]}
-          />
-          <Link className={styles.navLink} to="/evenements">
-            Événements
-          </Link>
-          <DropdownMenu
-            label="Soutenir"
-            items={[
-              { label: "Faire un don", to: "/don" },
-              { label: "Devenir bénévole", to: "/#benevolat" },
-            ]}
-          />
-          {isAuthenticated && (
-            <Link className={styles.navLink} to="/mon-compte">
-              Mon espace
-            </Link>
-          )}
-          {hasAtLeastRole("bureau") && (
-            <Link className={styles.navLink} to="/administration">
-              Administration
-            </Link>
-          )}
-          {role === "bureau" && (
-            <DropdownMenu
-              label="Support"
-              items={[{ label: "Demande de fonctionnalités", to: "/demandes-fonctionnalites" }]}
-            />
-          )}
-        </nav>
-      </div>
-
-      <div className={styles.center}>
-        <Logo />
-      </div>
-
-      <div className={styles.right}>
-        {import.meta.env.DEV && (
-          <div className={styles.devOnly}>
-            <RoleSwitcher />
+    <header className={`${styles.header}${scrolled ? ` ${styles.scrolled}` : ""}`}>
+      <div className={styles.topbar}>
+        <div className={styles.inner}>
+          <p className={styles.tagline}>
+            <Icon name="heart" size={14} className={styles.heart} />
+            Tous unis contre le cancer
+          </p>
+          <div className={styles.utils}>
+            {import.meta.env.DEV && <RoleSwitcher />}
+            <button
+              type="button"
+              className={styles.loginBtn}
+              onClick={handleAuthClick}
+              aria-label={isAuthenticated ? "Se déconnecter" : "Se connecter"}
+            >
+              <Icon name="user" size={15} />
+              <span aria-hidden="true">{isAuthenticated ? "Se déconnecter" : "Se connecter"}</span>
+            </button>
+            <ThemeToggle />
           </div>
-        )}
-        <ThemeToggle />
-        <button type="button" className={styles.loginBtn} onClick={handleAuthClick}>
-          {isAuthenticated ? "Se déconnecter" : "Se connecter"}
-        </button>
+        </div>
       </div>
+
+      <div className={styles.bar}>
+        <div className={styles.inner}>
+          <Logo />
+
+          <nav className={styles.nav} aria-label="Principal">
+            {groups.map((group) =>
+              group.kind === "menu" ? (
+                <DropdownMenu key={group.label} label={group.label} items={group.entries.map((e) => ({ label: e.label, to: e.path }))} />
+              ) : (
+                <NavLink key={group.entry.id} className={navLinkClass} to={group.entry.path} end={group.entry.end}>
+                  {group.entry.label}
+                </NavLink>
+              )
+            )}
+          </nav>
+
+          <div className={styles.actions}>
+            {canAccess("donation") && (
+              <ButtonLink className={styles.donate} to={entry("donation").path} label="Faire un don" variant="accent" />
+            )}
+            <button
+              type="button"
+              className={styles.burger}
+              aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <Icon name={menuOpen ? "close" : "menu"} size={24} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {menuOpen && (
+        <>
+          <div className={styles.scrim} onClick={() => setMenuOpen(false)} aria-hidden="true" />
+          <nav id="mobile-nav" className={styles.drawer} aria-label="Principal">
+            <button type="button" className={styles.drawerClose} aria-label="Fermer le menu" onClick={() => setMenuOpen(false)}>
+              <Icon name="close" size={26} />
+            </button>
+            {groups.map((group) =>
+              group.kind === "menu" ? (
+                <div key={group.label} className={styles.drawerGroup}>
+                  <p className={styles.drawerLabel}>{group.label}</p>
+                  {group.entries.map((e) => (
+                    <NavLink key={e.id} className={styles.drawerLink} to={e.path}>
+                      {e.label}
+                    </NavLink>
+                  ))}
+                </div>
+              ) : (
+                <NavLink key={group.entry.id} className={`${styles.drawerLink} ${styles.drawerTop}`} to={group.entry.path}>
+                  {group.entry.label}
+                </NavLink>
+              )
+            )}
+            {canAccess("donation") && (
+              <ButtonLink className={styles.drawerCta} to={entry("donation").path} label="Faire un don" variant="accent" arrow />
+            )}
+          </nav>
+        </>
+      )}
     </header>
   );
 };

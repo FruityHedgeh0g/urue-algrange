@@ -1,14 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createEvent, deleteEvent, EventInput, fetchEventById, fetchEvents, updateEvent } from "./eventsApi";
 import { EventOrganizer } from "./types";
+import { queryKeys } from "../queryKeys";
 
 export function useEvents() {
-  return useQuery({ queryKey: ["events"], queryFn: fetchEvents });
+  return useQuery({ queryKey: queryKeys.events.all, queryFn: fetchEvents });
 }
 
 export function useEvent(eventId: string | undefined) {
   return useQuery({
-    queryKey: ["events", eventId],
+    queryKey: queryKeys.events.detail(eventId),
     queryFn: () => fetchEventById(eventId as string),
     enabled: Boolean(eventId),
   });
@@ -16,7 +17,7 @@ export function useEvent(eventId: string | undefined) {
 
 export function useEventMutations() {
   const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["events"] });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.events.all });
 
   const update = useMutation({
     mutationFn: (input: { eventId: string } & EventInput) => updateEvent(input.eventId, input),

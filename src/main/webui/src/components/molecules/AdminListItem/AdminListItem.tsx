@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "../../atoms/Icon/Icon";
 import styles from "./AdminListItem.module.css";
 
 export interface AdminListItemProps {
@@ -57,7 +58,7 @@ export const AdminListItem: React.FC<AdminListItemProps> = ({
             <span className={styles.disabledNote}>{editDisabledReason}</span>
           ) : (
             <span className={`${styles.chevron} ${editing ? styles.chevronOpen : ""}`} aria-hidden="true">
-              ▾
+              <Icon name="chevronDown" size={16} strokeWidth={2.5} />
             </span>
           ))}
       </div>

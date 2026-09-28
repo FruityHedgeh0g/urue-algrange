@@ -1,5 +1,6 @@
 import { mockFeatureFlags } from "./fixtures";
-import { FeatureFlag } from "./types";
+import { FeatureFlag, FeatureName } from "./types";
+import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
 
 const OVERRIDES_KEY = "urue-feature-flag-overrides";
 
@@ -8,31 +9,17 @@ const OVERRIDES_KEY = "urue-feature-flag-overrides";
  * (service et entité présents, pas de contrôleur REST). Signature alignée
  * sur un futur GET/PATCH.
  */
-function readOverrides(): Record<string, boolean> {
-  try {
-    const saved = localStorage.getItem(OVERRIDES_KEY);
-    return saved ? JSON.parse(saved) : {};
-  } catch {
-    return {};
-  }
+export function createFeatureFlagsApi(store: JsonStore = localJsonStore) {
+  const readOverrides = () => store.read<Partial<Record<FeatureName, boolean>>>(OVERRIDES_KEY, {});
+  return {
+    fetchFeatureFlags: async (): Promise<FeatureFlag[]> => {
+      const overrides = readOverrides();
+      return mockFeatureFlags.map((f) => ({ ...f, isActive: overrides[f.name] ?? f.isActive }));
+    },
+    setFeatureFlagActive: async (name: FeatureName, isActive: boolean): Promise<void> => {
+      store.write(OVERRIDES_KEY, { ...readOverrides(), [name]: isActive });
+    },
+  };
 }
 
-function writeOverrides(overrides: Record<string, boolean>) {
-  try {
-    localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
-  } catch {
-    // stockage indisponible : la modification reste active pour la session
-  }
-}
-
-export async function fetchFeatureFlags(): Promise<FeatureFlag[]> {
-  const overrides = readOverrides();
-  return Promise.resolve(mockFeatureFlags.map((f) => ({ ...f, isActive: overrides[f.name] ?? f.isActive })));
-}
-
-export async function setFeatureFlagActive(name: string, isActive: boolean): Promise<void> {
-  const overrides = readOverrides();
-  overrides[name] = isActive;
-  writeOverrides(overrides);
-  return Promise.resolve();
-}
+export const { fetchFeatureFlags, setFeatureFlagActive } = createFeatureFlagsApi();

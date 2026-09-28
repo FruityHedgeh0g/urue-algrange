@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import Icon from "../../atoms/Icon/Icon";
 import styles from "./Modal.module.css";
 
 export interface ModalProps {
@@ -49,7 +50,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             {title}
           </h2>
           <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Fermer">
-            ×
+            <Icon name="close" size={20} />
           </button>
         </div>
         <div className={styles.body}>{children}</div>
