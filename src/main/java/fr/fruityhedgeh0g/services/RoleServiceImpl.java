@@ -1,5 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
 @Identifier("serviceImpl")
 @Default

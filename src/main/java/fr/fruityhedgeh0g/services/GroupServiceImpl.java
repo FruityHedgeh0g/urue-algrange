@@ -1,5 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
@@ -19,6 +21,7 @@ import lombok.AllArgsConstructor;
 import java.util.*;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
 @Identifier("serviceImpl")
 @Default

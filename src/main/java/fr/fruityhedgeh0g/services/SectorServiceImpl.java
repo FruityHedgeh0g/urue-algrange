@@ -1,5 +1,7 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
@@ -25,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
 @Identifier("serviceImpl")
 @Default
