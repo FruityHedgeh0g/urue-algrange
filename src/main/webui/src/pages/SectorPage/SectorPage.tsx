@@ -8,6 +8,7 @@ import Button from "../../components/atoms/Button/Button";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 import Modal from "../../components/molecules/Modal/Modal";
 import MemberDetails from "../../components/molecules/MemberDetails/MemberDetails";
+import Icon from "../../components/atoms/Icon/Icon";
 import styles from "./SectorPage.module.css";
 
 export const SectorPage: React.FC = () => {
@@ -49,7 +50,7 @@ export const SectorPage: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <section>
+      <section className={styles.panel}>
         <h2>Informations du secteur</h2>
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <FormField
@@ -76,7 +77,7 @@ export const SectorPage: React.FC = () => {
         </form>
       </section>
 
-      <section>
+      <section className={styles.panel}>
         <h2>Inscrits de mon secteur</h2>
         {membersLoading && <Spinner label="Chargement des inscrits..." />}
         {!membersLoading && (!members || members.length === 0) && (
@@ -89,14 +90,16 @@ export const SectorPage: React.FC = () => {
               return (
                 <li key={member.userId}>
                   <button type="button" className={styles.member} onClick={() => setSelectedMember(member)}>
-                    <span>
+                    <span className={styles.memberName}>
+                      <span className={styles.memberInitials} aria-hidden="true">
+                        {member.firstName.charAt(0)}
+                        {member.lastName.charAt(0)}
+                      </span>
                       {member.firstName} {member.lastName}
                     </span>
                     <span className={styles.memberMeta}>
                       {group && <span className={styles.memberGroup}>{group.name}</span>}
-                      <span className={styles.memberArrow} aria-hidden>
-                        ›
-                      </span>
+                      <Icon name="chevronRight" size={18} strokeWidth={2.5} className={styles.memberArrow} />
                     </span>
                   </button>
                 </li>

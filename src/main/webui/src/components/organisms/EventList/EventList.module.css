@@ -1,19 +1,33 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 28px;
 }
 
 .groups {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 64px;
 }
 
 .groupTitle {
-  margin: 0 0 16px;
-  font-size: 18px;
-  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 24px;
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+/* Filet qui prolonge le titre de groupe jusqu'au bord */
+.groupTitle::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
 }
 
 .error {
@@ -21,5 +35,8 @@
 }
 
 .empty {
+  padding: 28px;
+  border: 2px dashed var(--color-border);
   color: var(--color-muted);
+  text-align: center;
 }

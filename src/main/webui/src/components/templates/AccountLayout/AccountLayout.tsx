@@ -1,25 +1,16 @@
 import React from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { useAccess } from "../../../auth/useAccess";
-import styles from "./AccountLayout.module.css";
-
-const navLinkClass = ({ isActive }: { isActive: boolean }) => `${styles.tab}${isActive ? ` ${styles.active}` : ""}`;
+import { useAuth } from "../../../auth/AuthContext";
+import SpaceLayout from "../SpaceLayout/SpaceLayout";
 
 export const AccountLayout: React.FC = () => {
-  const { navFor } = useAccess();
-
+  const { user } = useAuth();
   return (
-    <div className="container">
-      <h1>Mon espace</h1>
-      <nav className={styles.tabs} aria-label="Mon espace">
-        {navFor("account").map((e) => (
-          <NavLink key={e.id} className={navLinkClass} to={e.path} end={e.end}>
-            {e.label}
-          </NavLink>
-        ))}
-      </nav>
-      <Outlet />
-    </div>
+    <SpaceLayout
+      section="account"
+      eyebrow="Espace membres"
+      title="Mon espace"
+      lead={user ? `Bonjour ${user.firstName}, retrouvez ici votre profil et vos inscriptions.` : undefined}
+    />
   );
 };
 

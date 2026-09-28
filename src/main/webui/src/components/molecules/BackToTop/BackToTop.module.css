@@ -1,0 +1,33 @@
+.button {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2.5px solid var(--brand-red);
+  background: var(--color-surface);
+  color: var(--brand-red);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: opacity var(--duration) var(--ease-out), transform var(--duration) var(--ease-out),
+    background var(--duration) var(--ease-out), color var(--duration) var(--ease-out);
+}
+
+.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.button:hover {
+  background: var(--brand-red);
+  color: #ffffff;
+}
