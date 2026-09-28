@@ -1,5 +1,6 @@
 import React from "react";
 import { useTheme } from "../../../theme/ThemeContext";
+import Icon from "../../atoms/Icon/Icon";
 import styles from "./ThemeToggle.module.css";
 
 export const ThemeToggle: React.FC = () => {
@@ -15,7 +16,7 @@ export const ThemeToggle: React.FC = () => {
       aria-label={isDark ? "Passer en mode clair" : "Passer en mode sombre"}
       title={isDark ? "Mode clair" : "Mode sombre"}
     >
-      <span className={styles.icon} aria-hidden>{isDark ? "☀️" : "🌙"}</span>
+      <Icon name={isDark ? "sun" : "moon"} size={16} />
     </button>
   );
 };

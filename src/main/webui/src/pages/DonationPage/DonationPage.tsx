@@ -1,28 +1,43 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import Button from "../../components/atoms/Button/Button";
+import PageHero from "../../components/organisms/PageHero/PageHero";
+import ButtonLink from "../../components/atoms/ButtonLink/ButtonLink";
+import Icon from "../../components/atoms/Icon/Icon";
+import styles from "./DonationPage.module.css";
 
 export const DonationPage: React.FC = () => (
-  <div className="container-narrow">
-    <h1>Faire un don</h1>
-    <p>
-      Une Rose Un Espoir agit grâce à la générosité de ses donateurs et partenaires. Chaque don, quel
-      que soit son montant, contribue directement au financement de la recherche contre le cancer et à
-      l'accompagnement des malades et de leurs proches.
-    </p>
-    <p>
-      L'association est éligible à la réduction d'impôt pour les dons aux associations d'intérêt général.
-      Un reçu fiscal vous est adressé pour tout don.
-    </p>
-    <h2>Mécénat &amp; partenariats entreprises</h2>
-    <p>
-      Vous représentez une entreprise et souhaitez soutenir nos actions ? Contactez-nous pour échanger sur
-      les modalités de mécénat.
-    </p>
-    <Link to="/contact">
-      <Button label="Nous contacter" variant="accent" />
-    </Link>
-  </div>
+  <>
+    <PageHero eyebrow="Nous soutenir" title="Faire un don" />
+    <div className="container">
+      <div className={styles.layout}>
+        <div className={styles.body}>
+          <p className={styles.lead}>
+            Une Rose Un Espoir agit grâce à la générosité de ses donateurs et partenaires. Chaque don, quel que soit son
+            montant, contribue directement au financement de la recherche contre le cancer et à l'accompagnement des
+            malades et de leurs proches.
+          </p>
+          <div className={styles.note}>
+            <span className={styles.noteIcon} aria-hidden="true">
+              <Icon name="check" size={22} strokeWidth={3} />
+            </span>
+            <p>
+              L'association est éligible à la réduction d'impôt pour les dons aux associations d'intérêt général. Un reçu
+              fiscal vous est adressé pour tout don.
+            </p>
+          </div>
+        </div>
+
+        <aside className={styles.card}>
+          <p className="eyebrow">Entreprises</p>
+          <h2 className={styles.cardTitle}>Mécénat &amp; partenariats entreprises</h2>
+          <p>
+            Vous représentez une entreprise et souhaitez soutenir nos actions ? Contactez-nous pour échanger sur les
+            modalités de mécénat.
+          </p>
+          <ButtonLink to="/contact" label="Nous contacter" variant="accent" arrow />
+        </aside>
+      </div>
+    </div>
+  </>
 );
 
 export default DonationPage;

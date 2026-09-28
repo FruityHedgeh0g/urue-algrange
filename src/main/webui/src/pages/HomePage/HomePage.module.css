@@ -1,19 +1,299 @@
-.section {
-  padding: 64px 24px;
-  max-width: 960px;
-  margin: 0 auto;
+/* Réserve la hauteur du carrousel pendant son chargement (pas de saut de mise en page) */
+.heroPlaceholder {
+  height: clamp(460px, 76vh, 760px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--band-bg) 0%, var(--band-bg-deep) 100%);
+  --color-muted: var(--band-muted);
 }
 
-.sectionAlt {
-  background: var(--color-surface);
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Qui sommes-nous ───────────────────────────────────────────────── */
+.about {
+  padding: var(--section-y) 0;
+  overflow: hidden;
+}
+
+.aboutInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  align-items: center;
+  gap: clamp(40px, 6vw, 96px);
+}
+
+.aboutLead {
+  margin: 0 0 32px;
+  font-size: var(--text-lg);
+  line-height: 1.8;
+}
+
+.aboutVisual {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+}
+
+/* Aplat rouge décalé derrière le cadre */
+.aboutBlock {
+  position: absolute;
+  inset: 12% -6% -6% 12%;
+  background: var(--brand-red);
+}
+
+.aboutFrame {
+  position: absolute;
+  inset: 0 12% 12% 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+}
+
+.aboutFrame img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  transition: transform .8s var(--ease-out);
+}
+
+.aboutVisual:hover .aboutFrame img {
+  transform: rotate(-6deg) scale(1.04);
+}
+
+.aboutQuote {
+  position: absolute;
+  right: -6%;
+  bottom: 4%;
+  margin: 0;
+  padding: 14px 18px;
+  background: var(--brand-navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Agir avec nous ────────────────────────────────────────────────── */
+.act {
+  padding: var(--section-y) 0;
+  background: var(--color-bg-soft);
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
 
-.seeAll {
-  display: inline-block;
-  margin-top: 20px;
-  color: var(--color-primary);
-  font-weight: 600;
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 40px 32px 32px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  overflow: hidden;
+  transition: transform var(--duration) var(--ease-out), box-shadow var(--duration) var(--ease-out);
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+
+/* Toute la tuile est cliquable (motif "stretched link") */
+.tile:hover,
+.tile:focus-within {
+  transform: translateY(-6px);
+  box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-lg);
+}
+
+.tile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--color-accent);
+  transform: scaleX(.18);
+  transform-origin: left;
+  transition: transform .4s var(--ease-out);
+}
+
+.tile:hover::before,
+.tile:focus-within::before {
+  transform: scaleX(1);
+}
+
+.tileIndex {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--color-bg-soft);
+  -webkit-text-stroke: 1px var(--color-border);
+}
+
+.tileIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  transition: background var(--duration) var(--ease-out), color var(--duration) var(--ease-out);
+}
+
+.tile:hover .tileIcon {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.tileTitle {
+  margin: 8px 0 0;
+  font-size: var(--text-xl);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tileText {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.tileLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
   text-decoration: none;
+  color: var(--color-primary);
+}
+
+.tileLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.tileLink svg {
+  transition: transform var(--duration) var(--ease-out);
+}
+
+.tile:hover .tileLink svg {
+  transform: translateX(5px);
+}
+
+/* ── Événements ────────────────────────────────────────────────────── */
+.events {
+  padding: var(--section-y) 0;
+}
+
+.eventsHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin-bottom: clamp(28px, 3vw, 44px);
+}
+
+.eventsHeader > :first-child {
+  margin-bottom: 0;
+}
+
+/* ── Bandeau final ─────────────────────────────────────────────────── */
+.banner {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(120deg, var(--band-bg) 0%, var(--band-bg-deep) 100%);
+  color: var(--band-text);
+}
+
+.bannerRibbon {
+  position: absolute;
+  z-index: -1;
+  top: -40%;
+  bottom: -40%;
+  right: 12%;
+  width: 180px;
+  background: var(--brand-red);
+  transform: rotate(18deg);
+  box-shadow: -40px 0 0 0 rgba(255, 255, 255, .05), 40px 0 0 0 rgba(208, 23, 41, .35);
+}
+
+.bannerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(64px, 7vw, 112px) 24px;
+}
+
+.bannerEyebrow {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #ff9aa4;
+}
+
+.bannerTitle {
+  max-width: 14ch;
+  margin: 0;
+  color: #fff;
+  font-size: var(--text-3xl);
+  font-weight: 900;
+  line-height: 1.02;
+}
+
+.bannerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 36px;
+}
+
+@media (max-width: 960px) {
+  .aboutInner {
+    grid-template-columns: 1fr;
+  }
+
+  .aboutVisual {
+    width: min(80%, 360px);
+  }
+
+  .tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .bannerRibbon {
+    right: -20%;
+    opacity: .6;
+  }
 }

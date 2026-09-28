@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useEvents } from "../../features/events/useEvents";
 import { useMyEventIds } from "../../features/events/useMyRegistrations";
 import { isUpcoming } from "../../features/events/eventsApi";
@@ -7,6 +6,8 @@ import { formatDateRange } from "../../lib/formatDate";
 import MediaCard from "../../components/molecules/MediaCard/MediaCard";
 import Badge from "../../components/atoms/Badge/Badge";
 import Spinner from "../../components/atoms/Spinner/Spinner";
+import Icon from "../../components/atoms/Icon/Icon";
+import ButtonLink from "../../components/atoms/ButtonLink/ButtonLink";
 import { placeholderImage } from "../../lib/placeholderImage";
 import styles from "./MyEventsPage.module.css";
 
@@ -20,9 +21,13 @@ export const MyEventsPage: React.FC = () => {
 
   if (myEvents.length === 0) {
     return (
-      <p className={styles.empty}>
-        Vous n'êtes inscrit à aucun événement pour le moment. <Link to="/evenements">Découvrir les événements</Link>
-      </p>
+      <div className={styles.empty}>
+        <span className={styles.emptyIcon} aria-hidden="true">
+          <Icon name="calendar" size={30} />
+        </span>
+        <p>Vous n'êtes inscrit à aucun événement pour le moment.</p>
+        <ButtonLink to="/evenements" label="Découvrir les événements" variant="accent" arrow />
+      </div>
     );
   }
 
@@ -32,7 +37,7 @@ export const MyEventsPage: React.FC = () => {
         <MediaCard
           key={event.eventId}
           to={`/evenements/${event.eventId}`}
-          imageSrc={placeholderImage(event.eventId, event.name)}
+          imageSrc={event.imageUrl || placeholderImage(event.eventId, event.name)}
           imageAlt={event.name}
           title={event.name}
           subtitle={formatDateRange(event.startDateTime, event.endDateTime)}
