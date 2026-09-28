@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Header from "../../organisms/Header/Header";
 import Footer from "../../organisms/Footer/Footer";
+import BackToTop from "../../molecules/BackToTop/BackToTop";
 import { useScrollToHash } from "../../../app/useScrollToHash";
 import styles from "./PublicLayout.module.css";
 
@@ -18,6 +19,7 @@ export const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
+      <BackToTop />
     </div>
   );
 };

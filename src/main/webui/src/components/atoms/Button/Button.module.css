@@ -1,13 +1,41 @@
+/* Boutons de la charte : capitales grasses, filet de 2px, angles francs */
 .button {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  font-weight: 600;
+  justify-content: center;
+  border: 2px solid transparent;
+  border-radius: 0;
+  padding: .8rem 1.5rem;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
   cursor: pointer;
-  transition: transform 0.02s ease-in-out, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  isolation: isolate;
+  overflow: hidden;
+  transition: color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out),
+    background-color var(--duration) var(--ease-out), transform .1s ease;
   user-select: none;
+}
+
+/* Remplissage qui glisse de gauche à droite au survol */
+.button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration) var(--ease-out);
+}
+
+.button:hover:not(:disabled)::before {
+  transform: scaleX(1);
 }
 
 .button:active:not(:disabled) {
@@ -15,34 +43,37 @@
 }
 
 .button:disabled {
-  opacity: 0.6;
+  opacity: .55;
   cursor: not-allowed;
 }
 
 .primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
-  border-color: var(--color-primary-dark);
+  border-color: var(--color-primary);
 }
-.primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+.primary::before {
+  background: var(--color-primary-dark);
 }
 
 .accent {
   background: var(--color-accent);
   color: var(--color-on-accent);
-  border-color: var(--color-accent-dark);
+  border-color: var(--color-accent);
+}
+.accent::before {
+  background: var(--color-accent-dark);
 }
 .accent:hover:not(:disabled) {
-  background: var(--color-accent-hover);
+  border-color: var(--color-accent-dark);
 }
 
 .danger {
   background: var(--color-danger);
   color: var(--color-on-danger);
-  border-color: var(--color-danger-hover);
+  border-color: var(--color-danger);
 }
-.danger:hover:not(:disabled) {
+.danger::before {
   background: var(--color-danger-hover);
 }
 
@@ -51,8 +82,11 @@
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
+.outline::before {
+  background: var(--color-primary);
+}
 .outline:hover:not(:disabled) {
-  background: var(--color-hover);
+  color: var(--color-on-primary);
 }
 
 .ghost {
@@ -60,14 +94,35 @@
   color: var(--color-text);
   border-color: transparent;
 }
-.ghost:hover:not(:disabled) {
+.ghost::before {
   background: var(--color-hover);
+}
+
+/* Variante pour les bandeaux marine */
+.inverse {
+  background: transparent;
+  color: var(--band-text);
+  border-color: var(--band-text);
+}
+.inverse::before {
+  background: var(--band-text);
+}
+.inverse:hover:not(:disabled) {
+  color: var(--band-bg);
+}
+
+/* Sur petit écran, un libellé long peut passer à la ligne plutôt que déborder */
+@media (max-width: 480px) {
+  .button {
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 .content {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .icon {

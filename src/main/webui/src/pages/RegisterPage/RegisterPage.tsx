@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import FormField from "../../components/molecules/FormField/FormField";
 import Button from "../../components/atoms/Button/Button";
-import styles from "./RegisterPage.module.css";
+import SplitPanel from "../../components/organisms/SplitPanel/SplitPanel";
+import forms from "../../theme/forms.module.css";
 
 interface FormState {
   firstName: string;
@@ -29,7 +30,7 @@ export const RegisterPage: React.FC = () => {
   const { setRole } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValues((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
@@ -43,11 +44,22 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="container-narrow">
-      <h1>Inscription</h1>
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <FormField label="Prénom" value={values.firstName} onChange={handleChange("firstName")} error={errors.firstName} required />
-        <FormField label="Nom" value={values.lastName} onChange={handleChange("lastName")} error={errors.lastName} required />
+    <SplitPanel
+      eyebrow="Rejoindre l'association"
+      title="Le cœur des motards"
+      aside={
+        <p>
+          Membre, bénévole ou sympathisant : créez votre compte pour suivre nos actions et vous inscrire aux
+          événements.
+        </p>
+      }
+      heading="Inscription"
+    >
+      <form className={forms.form} onSubmit={handleSubmit} noValidate>
+        <div className={forms.row}>
+          <FormField label="Prénom" value={values.firstName} onChange={handleChange("firstName")} error={errors.firstName} required />
+          <FormField label="Nom" value={values.lastName} onChange={handleChange("lastName")} error={errors.lastName} required />
+        </div>
         <FormField
           label="E-mail"
           type="email"
@@ -64,12 +76,14 @@ export const RegisterPage: React.FC = () => {
           error={errors.password}
           required
         />
-        <Button type="submit" label="Créer mon compte" variant="accent" />
+        <div className={forms.actions}>
+          <Button type="submit" label="Créer mon compte" variant="accent" />
+        </div>
       </form>
-      <p className={styles.footer}>
+      <p className={forms.footer}>
         Déjà inscrit ? <Link to="/connexion">Connectez-vous</Link>
       </p>
-    </div>
+    </SplitPanel>
   );
 };
 

@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import Icon from "../../atoms/Icon/Icon";
+import buttonStyles from "../../atoms/Button/Button.module.css";
 import styles from "./Carousel.module.css";
 
 export interface CarouselSlide {
@@ -9,6 +11,8 @@ export interface CarouselSlide {
   caption?: string;
   /** Chemin interne (route ou ancre "/#section"), résolu via React Router. */
   to?: string;
+  /** "contain" pour une image à ne pas recadrer (ex : logo par défaut). */
+  fit?: "cover" | "contain";
 }
 
 export interface CarouselProps {
@@ -25,6 +29,9 @@ const clampIndex = (idx: number, len: number) => {
   return r < 0 ? r + len : r;
 };
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Carrousel plein écran de l'accueil : fondu enchaîné, voile marine, progression par barres. */
 export const Carousel: React.FC<CarouselProps> = ({
   slides,
   autoPlay = true,
@@ -34,36 +41,20 @@ export const Carousel: React.FC<CarouselProps> = ({
 }) => {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
   const len = slides.length;
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const focusWithin = useRef(false);
+  const delay = Math.max(1800, interval);
+  const running = autoPlay && len > 1 && !paused && !focusWithin;
 
-  const goTo = (i: number) => setIndex((prev) => clampIndex(i, len));
+  const goTo = (i: number) => setIndex(clampIndex(i, len));
   const next = () => setIndex((prev) => clampIndex(prev + 1, len));
   const prev = () => setIndex((prev) => clampIndex(prev - 1, len));
 
   useEffect(() => {
-    if (!autoPlay || len <= 1) return;
-    if (paused || focusWithin.current) return;
-    const id = window.setInterval(() => {
-      setIndex((i) => clampIndex(i + 1, len));
-    }, Math.max(1800, interval));
-    return () => window.clearInterval(id);
-  }, [autoPlay, interval, paused, len]);
-
-  const onMouseEnter = () => {
-    if (pauseOnHover) setPaused(true);
-  };
-  const onMouseLeave = () => {
-    if (pauseOnHover) setPaused(false);
-  };
-
-  const onFocusIn = () => {
-    focusWithin.current = true;
-  };
-  const onFocusOut = () => {
-    focusWithin.current = false;
-  };
+    if (!running) return;
+    const id = window.setTimeout(() => setIndex((i) => clampIndex(i + 1, len)), delay);
+    return () => window.clearTimeout(id);
+  }, [running, delay, len, index]);
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key === "ArrowRight") {
@@ -84,26 +75,23 @@ export const Carousel: React.FC<CarouselProps> = ({
     if (start == null) return;
     const dx = e.changedTouches[0].clientX - start;
     const threshold = 40; // px
-    if (dx > threshold) {
-      prev();
-    } else if (dx < -threshold) {
-      next();
-    }
+    if (dx > threshold) prev();
+    else if (dx < -threshold) next();
     touchStartX.current = null;
   };
-
-  const transform = useMemo(() => `translateX(${-index * 100}%)`, [index]);
 
   return (
     <section
       className={styles.carousel}
       aria-roledescription="carousel"
       aria-label="Carrousel"
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={() => pauseOnHover && setPaused(true)}
+      onMouseLeave={() => pauseOnHover && setPaused(false)}
       onKeyDown={onKeyDown}
-      onFocus={onFocusIn}
-      onBlur={onFocusOut}
+      onFocus={() => setFocusWithin(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocusWithin(false);
+      }}
     >
       <div
         className={styles.viewport}
@@ -113,53 +101,78 @@ export const Carousel: React.FC<CarouselProps> = ({
         onTouchEnd={onTouchEnd}
         tabIndex={0}
       >
-        {showArrows && len > 1 && (
-          <button type="button" className={`${styles.arrow} ${styles.left}`} aria-label="Précédent" onClick={prev}>
-            ‹
-          </button>
-        )}
-
-        <div className={styles.track} ref={trackRef} style={{ transform }}>
-          {slides.map((s, i) => {
-            const img = <img src={s.src} alt={s.alt} loading={i === index ? "eager" : "lazy"} />;
-            return (
-              <div className={styles.slide} role="group" aria-roledescription="slide" aria-label={`Slide ${i + 1} sur ${len}`} key={i}>
-                {s.to ? (
-                  <Link to={s.to} aria-label={s.title || s.alt}>
-                    {img}
-                  </Link>
-                ) : (
-                  img
-                )}
-                {(s.title || s.caption) && (
-                  <div className={styles.caption} aria-live="polite">
-                    {s.title && <h2 style={{ margin: 0 }}>{s.title}</h2>}
-                    {s.caption && <p style={{ margin: 0 }}>{s.caption}</p>}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {showArrows && len > 1 && (
-          <button type="button" className={`${styles.arrow} ${styles.right}`} aria-label="Suivant" onClick={next}>
-            ›
-          </button>
-        )}
+        {slides.map((s, i) => {
+          const active = i === index;
+          return (
+            <div
+              key={i}
+              className={`${styles.slide}${active ? ` ${styles.active}` : ""}${s.fit === "contain" ? ` ${styles.contain}` : ""}`}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`Slide ${i + 1} sur ${len}`}
+              aria-hidden={!active}
+              inert={!active}
+            >
+              <img className={styles.image} src={s.src} alt={s.alt} loading={i === 0 ? "eager" : "lazy"} />
+              <div className={styles.overlay} aria-hidden="true" />
+              {(s.title || s.caption || s.to) && (
+                <div className={styles.content}>
+                  <p className={styles.kicker}>
+                    <span>{pad(i + 1)}</span> Une rose, un espoir
+                  </p>
+                  {s.title && <h2 className={styles.title}>{s.title}</h2>}
+                  {s.caption && <p className={styles.caption}>{s.caption}</p>}
+                  {s.to && (
+                    <Link
+                      className={`${buttonStyles.button} ${buttonStyles.accent} ${styles.cta}`}
+                      to={s.to}
+                      aria-label={`${s.title || s.alt} — Voir plus`}
+                    >
+                      <span className={buttonStyles.content}>
+                        <span className={buttonStyles.label}>Voir plus</span>
+                        <Icon name="arrowRight" size={18} />
+                      </span>
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {len > 1 && (
-          <div className={styles.dots} aria-label="Navigation des slides">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                className={`${styles.dot}${i === index ? ` ${styles.active}` : ""}`}
-                aria-label={`Slide ${i + 1}`}
-                aria-current={i === index ? true : undefined}
-                onClick={() => goTo(i)}
-              />
-            ))}
+          <div className={styles.controls}>
+            <p className={styles.counter} aria-hidden="true">
+              <strong>{pad(index + 1)}</strong> / {pad(len)}
+            </p>
+            <div className={styles.bars} aria-label="Navigation des slides">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`${styles.bar}${i === index ? ` ${styles.barActive}` : ""}${i < index ? ` ${styles.barDone}` : ""}`}
+                  aria-label={`Slide ${i + 1}`}
+                  aria-current={i === index ? true : undefined}
+                  onClick={() => goTo(i)}
+                >
+                  <span
+                    key={i === index ? `run-${index}` : "idle"}
+                    className={styles.progress}
+                    style={{ animationDuration: `${delay}ms`, animationPlayState: running ? "running" : "paused" }}
+                  />
+                </button>
+              ))}
+            </div>
+            {showArrows && (
+              <div className={styles.arrows}>
+                <button type="button" className={styles.arrow} aria-label="Précédent" onClick={prev}>
+                  <Icon name="arrowLeft" size={20} />
+                </button>
+                <button type="button" className={styles.arrow} aria-label="Suivant" onClick={next}>
+                  <Icon name="arrowRight" size={20} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

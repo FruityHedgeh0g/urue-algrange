@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import Icon from "../../atoms/Icon/Icon";
 import styles from "./DropdownMenu.module.css";
 
 export interface DropdownItem {
@@ -16,6 +17,8 @@ export interface DropdownMenuProps {
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, items }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { pathname } = useLocation();
+  const isActive = items.some((item) => !item.to.includes("#") && pathname.startsWith(item.to));
 
   useEffect(() => {
     if (!open) return;
@@ -43,14 +46,14 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, items }) => {
       onMouseLeave={() => setOpen(false)}
     >
       <button
-        className={styles.trigger}
+        className={`${styles.trigger}${isActive ? ` ${styles.active}` : ""}`}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         type="button"
       >
         {label}
-        <span className={styles.caret} aria-hidden>▾</span>
+        <Icon name="chevronDown" size={14} strokeWidth={2.5} className={styles.caret} />
       </button>
       {open && (
         <ul className={styles.menu} role="menu">

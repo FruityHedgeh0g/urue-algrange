@@ -1,13 +1,26 @@
 .field {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
+  padding: 12px 14px;
+  border-radius: 0;
+  border: 1.5px solid var(--color-border-strong);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--text-base);
   font-family: inherit;
+  transition: border-color var(--duration) var(--ease-out), box-shadow var(--duration) var(--ease-out);
+}
+
+.field:hover {
+  border-color: var(--color-primary);
+}
+
+.field:focus-visible {
+  border-color: var(--color-accent);
+}
+
+.field[aria-invalid="true"] {
+  border-color: var(--color-danger);
 }
 
 .field::placeholder {
@@ -16,5 +29,6 @@
 
 .textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 140px;
+  line-height: 1.55;
 }

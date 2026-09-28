@@ -14,7 +14,7 @@ export const FeatureFlagsPage: React.FC = () => {
   return (
     <ul className={styles.list}>
       {flags?.map((flag) => (
-        <li key={flag.name} className={styles.item}>
+        <li key={flag.name} className={`${styles.item}${flag.isActive ? ` ${styles.active}` : ""}`}>
           <div>
             <div className={styles.titleLine}>
               <span className={styles.title}>{flag.name}</span>
