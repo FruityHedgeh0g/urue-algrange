@@ -5,11 +5,13 @@ import DropdownMenu from "../../molecules/DropdownMenu/DropdownMenu";
 import ThemeToggle from "../../molecules/ThemeToggle/ThemeToggle";
 import RoleSwitcher from "../../molecules/RoleSwitcher/RoleSwitcher";
 import { useAuth } from "../../../auth/AuthContext";
+import { useAccess } from "../../../auth/useAccess";
 import styles from "./Header.module.css";
 
 export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, setRole, hasAtLeastRole, role } = useAuth();
+  const { isAuthenticated, setRole } = useAuth();
+  const { mainNav } = useAccess();
   const navigate = useNavigate();
 
   const handleAuthClick = () => {
@@ -37,40 +39,14 @@ export const Header: React.FC = () => {
         </button>
 
         <nav className={`${styles.navLinks}${menuOpen ? ` ${styles.open}` : ""}`} aria-label="Principal">
-          <DropdownMenu
-            label="Association"
-            items={[
-              { label: "Qui sommes-nous ?", to: "/qui-sommes-nous" },
-              { label: "Actualités", to: "/actualites" },
-              { label: "Galerie photos", to: "/galerie" },
-              { label: "Contact", to: "/contact" },
-            ]}
-          />
-          <Link className={styles.navLink} to="/evenements">
-            Événements
-          </Link>
-          <DropdownMenu
-            label="Soutenir"
-            items={[
-              { label: "Faire un don", to: "/don" },
-              { label: "Devenir bénévole", to: "/#benevolat" },
-            ]}
-          />
-          {isAuthenticated && (
-            <Link className={styles.navLink} to="/mon-compte">
-              Mon espace
-            </Link>
-          )}
-          {hasAtLeastRole("bureau") && (
-            <Link className={styles.navLink} to="/administration">
-              Administration
-            </Link>
-          )}
-          {role === "bureau" && (
-            <DropdownMenu
-              label="Support"
-              items={[{ label: "Demande de fonctionnalités", to: "/demandes-fonctionnalites" }]}
-            />
+          {mainNav().map((group) =>
+            group.kind === "menu" ? (
+              <DropdownMenu key={group.label} label={group.label} items={group.entries.map((e) => ({ label: e.label, to: e.path }))} />
+            ) : (
+              <Link key={group.entry.id} className={styles.navLink} to={group.entry.path}>
+                {group.entry.label}
+              </Link>
+            )
           )}
         </nav>
       </div>

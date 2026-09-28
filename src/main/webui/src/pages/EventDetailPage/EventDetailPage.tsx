@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useEvent } from "../../features/events/useEvents";
 import { isUpcoming } from "../../features/events/eventsApi";
 import { useMyEventIds, useEventRegistration } from "../../features/events/useMyRegistrations";
+import { useFeature } from "../../features/featureFlags/useFeatureFlags";
 import { useAuth } from "../../auth/AuthContext";
 import { formatDateRange } from "../../lib/formatDate";
 import { placeholderImage } from "../../lib/placeholderImage";
@@ -17,6 +18,7 @@ export const EventDetailPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { data: myEventIds } = useMyEventIds();
   const { register, unregister } = useEventRegistration();
+  const registrationOpen = useFeature("inscription-evenements");
 
   const isRegistered = Boolean(eventId && myEventIds?.includes(eventId));
   const isPending = register.isPending || unregister.isPending;
@@ -48,7 +50,7 @@ export const EventDetailPage: React.FC = () => {
           )}
           <p className={styles.description}>{event.description}</p>
 
-          {isUpcoming(event) && (
+          {isUpcoming(event) && registrationOpen && (
             <div className={styles.actions}>
               {isAuthenticated ? (
                 isRegistered ? (
