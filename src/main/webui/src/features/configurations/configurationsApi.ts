@@ -1,5 +1,6 @@
 import { mockConfigurations } from "./fixtures";
 import { Configuration } from "./types";
+import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
 
 const OVERRIDES_KEY = "urue-configuration-overrides";
 
@@ -7,31 +8,17 @@ const OVERRIDES_KEY = "urue-configuration-overrides";
  * Client mocké — le ConfigurationController backend n'expose que GET
  * /api/configurations (l'accès par nom et l'édition sont commentés / absents).
  */
-function readOverrides(): Record<string, string> {
-  try {
-    const saved = localStorage.getItem(OVERRIDES_KEY);
-    return saved ? JSON.parse(saved) : {};
-  } catch {
-    return {};
-  }
+export function createConfigurationsApi(store: JsonStore = localJsonStore) {
+  const readOverrides = () => store.read<Record<string, string>>(OVERRIDES_KEY, {});
+  return {
+    fetchConfigurations: async (): Promise<Configuration[]> => {
+      const overrides = readOverrides();
+      return mockConfigurations.map((c) => ({ ...c, value: overrides[c.name] ?? c.value }));
+    },
+    updateConfiguration: async (name: string, value: string): Promise<void> => {
+      store.write(OVERRIDES_KEY, { ...readOverrides(), [name]: value });
+    },
+  };
 }
 
-function writeOverrides(overrides: Record<string, string>) {
-  try {
-    localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
-  } catch {
-    // stockage indisponible : la modification reste active pour la session
-  }
-}
-
-export async function fetchConfigurations(): Promise<Configuration[]> {
-  const overrides = readOverrides();
-  return Promise.resolve(mockConfigurations.map((c) => ({ ...c, value: overrides[c.name] ?? c.value })));
-}
-
-export async function updateConfiguration(name: string, value: string): Promise<void> {
-  const overrides = readOverrides();
-  overrides[name] = value;
-  writeOverrides(overrides);
-  return Promise.resolve();
-}
+export const { fetchConfigurations, updateConfiguration } = createConfigurationsApi();

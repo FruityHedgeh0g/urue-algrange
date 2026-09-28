@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
-import { useSector, useUpdateSector } from "../../features/sectors/useSector";
+import { useSector, useSectorMutations } from "../../features/sectors/useSector";
 import { useMembersByGroupIds } from "../../features/users/useMembers";
 import { Member } from "../../features/users/types";
 import FormField from "../../components/molecules/FormField/FormField";
@@ -14,7 +14,7 @@ export const SectorPage: React.FC = () => {
   const { user } = useAuth();
   const sectorId = user?.group.sectorId;
   const { data: sector, isLoading, isError } = useSector(sectorId);
-  const updateSector = useUpdateSector(sectorId);
+  const { update: updateSector } = useSectorMutations();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -33,8 +33,9 @@ export const SectorPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!sectorId) return;
     updateSector.mutate(
-      { name, description },
+      { sectorId, name, description },
       {
         onSuccess: () => setSaved(true),
       }
