@@ -6,10 +6,8 @@ import SectionTeaser from "../../components/molecules/SectionTeaser/SectionTease
 import Spinner from "../../components/atoms/Spinner/Spinner";
 import { useActiveCarouselItems } from "../../features/carousel/useCarousel";
 import { useMedias } from "../../features/medias/useMedias";
-import { assetUrl } from "../../lib/assetUrl";
+import { mediaImage } from "../../features/medias/mediaImage";
 import styles from "./HomePage.module.css";
-
-const logoSrc = assetUrl("logo_asso_transparent.png");
 
 const HeroCarousel: React.FC = () => {
   const { data: items, isLoading: itemsLoading } = useActiveCarouselItems();
@@ -19,14 +17,8 @@ const HeroCarousel: React.FC = () => {
   if (!items || items.length === 0) return null;
 
   const slides: CarouselSlide[] = items.map((item) => {
-    const media = item.mediaId ? medias?.find((m) => m.mediaId === item.mediaId) : undefined;
-    return {
-      src: media?.url ?? logoSrc,
-      alt: media?.alt ?? item.title,
-      title: item.title,
-      caption: item.caption,
-      to: item.linkTo ?? undefined,
-    };
+    const { src, alt } = mediaImage(item.mediaId, medias, item.title);
+    return { src, alt, title: item.title, caption: item.caption, to: item.linkTo ?? undefined };
   });
 
   return <Carousel slides={slides} interval={4000} />;
