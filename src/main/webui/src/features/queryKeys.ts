@@ -11,7 +11,6 @@ export const queryKeys = {
     list: ["members", "list"] as const,
     byGroups: (groupIds: string[]) => ["members", "byGroups", ...groupIds] as const,
   },
-  roles: { all: ["roles"] as const },
   posts: { all: ["posts"] as const, detail: (postId: string | undefined) => ["posts", "detail", postId] as const },
   medias: { all: ["medias"] as const },
   carousel: { all: ["carousel-items"] as const, active: ["carousel-items", "active"] as const },

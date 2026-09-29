@@ -7,7 +7,7 @@ Site and member space of the association: public pages, a member space ("Mon esp
 ### Access
 
 **Role**: a person's single access level, ordered `visiteur` < `bénévole` < `membre` < `chef_de_groupe` < `bureau` < `admin` < `super_admin` (`RoleEnum` in the back end, stored per person; mirrored in `webui/src/auth/roles.ts`). A role grants everything the lower roles grant.
-_Avoid_: permission (Role permissions exist in the roles admin screen but control nothing yet).
+_Avoid_: permission, legal role, organizational role.
 
 **Access map**: the single declaration of every navigable entry (path, label, minimum Role, space, optional Feature) (`webui/src/auth/access.ts`). Route guards, the header and the space tabs all derive from it, so a visible link always leads to an accessible page.
 

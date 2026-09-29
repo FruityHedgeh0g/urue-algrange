@@ -8,14 +8,11 @@ import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
-import fr.fruityhedgeh0g.entities.roles.LegalRoleEntity;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.UserRepository;
-import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.test.InjectMock;
@@ -40,9 +37,6 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
     @Inject
     UserRepository userRepository;
-
-    @Inject
-    RoleService roleService;
 
     @Inject
     UserServiceImpl userService;

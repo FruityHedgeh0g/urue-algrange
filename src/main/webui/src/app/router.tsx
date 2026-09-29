@@ -22,7 +22,6 @@ import SectorPage from "../pages/SectorPage/SectorPage";
 import MembersAdminPage from "../pages/MembersAdminPage/MembersAdminPage";
 import SectorsAdminPage from "../pages/SectorsAdminPage/SectorsAdminPage";
 import EventsAdminPage from "../pages/EventsAdminPage/EventsAdminPage";
-import RolesAdminPage from "../pages/RolesAdminPage/RolesAdminPage";
 import FeatureRequestsPage from "../pages/FeatureRequestsPage/FeatureRequestsPage";
 import CarouselAdminPage from "../pages/CarouselAdminPage/CarouselAdminPage";
 import ConfigurationPage from "../pages/ConfigurationPage/ConfigurationPage";
@@ -71,7 +70,6 @@ export const router = createBrowserRouter(
           route("adminMembers", <MembersAdminPage />, "administration"),
           route("adminSectors", <SectorsAdminPage />, "administration"),
           route("adminEvents", <EventsAdminPage />, "administration"),
-          route("adminRoles", <RolesAdminPage />, "administration"),
           route("adminCarousel", <CarouselAdminPage />, "administration"),
           route("adminConfiguration", <ConfigurationPage />, "administration"),
           route("adminFeatureFlags", <FeatureFlagsPage />, "administration"),

@@ -55,7 +55,14 @@ describe("access map", () => {
     expect(ids(navFor("account", ctx("benevole")))).toEqual(["accountProfile", "accountEvents"]);
     expect(ids(navFor("account", ctx("chef_de_groupe")))).toContain("accountSector");
     expect(ids(navFor("admin", ctx("bureau")))).not.toContain("adminConfiguration");
-    expect(ids(navFor("admin", ctx("admin")))).toContain("adminFeatureFlags");
+    expect(ids(navFor("admin", ctx("admin")))).toEqual([
+      "adminMembers",
+      "adminSectors",
+      "adminEvents",
+      "adminCarousel",
+      "adminConfiguration",
+      "adminFeatureFlags",
+    ]);
   });
 
   it("derives nested route paths from the map", () => {

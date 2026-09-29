@@ -27,7 +27,7 @@ src/
     templates/    PublicLayout, SpaceLayout (Mon espace / Administration)
   pages/          une page = une route
   features/       un dossier par domaine métier (events, posts, medias, sectors,
-                   groups, users, roles, configurations, featureFlags,
+                   groups, users, configurations, featureFlags,
                    featureRequests) : hooks TanStack Query + client API
   lib/            utilitaires partagés (dates, images de substitution)
 ```

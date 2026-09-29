@@ -4,7 +4,6 @@ import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
 import fr.fruityhedgeh0g.entities.configurations.ConfigurationEntity;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;

@@ -74,33 +74,6 @@ GET {{baseUrl}}/api/posts
 Accept: {{jsonType}}
 
 ###############################################################################
-# ROLES
-###############################################################################
-
-### Get all roles
-GET {{baseUrl}}/api/roles
-Accept: {{jsonType}}
-
-###
-
-### Get role by ID
-GET {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
-Accept: {{jsonType}}
-
-###
-
-### Create role
-POST {{baseUrl}}/api/roles
-Content-Type: {{jsonType}}
-Accept: {{jsonType}}
-
-{
-  "name": "Président",
-  "description": "Rôle de président de l'association",
-  "roleType": "ORGANIZATIONAL"
-}
-
-###############################################################################
 # SECTORS
 ###############################################################################
 

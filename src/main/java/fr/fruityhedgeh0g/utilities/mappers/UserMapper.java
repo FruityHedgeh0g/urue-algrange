@@ -8,18 +8,16 @@ import fr.fruityhedgeh0g.entities.UserEntity;
 import io.vertx.core.json.Json;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
+@Mapper(componentModel = "jakarta-cdi", uses = {EventMapper.class, GroupMapper.class})
 public interface UserMapper {
     static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writer();
 
-    @Mapping(target = "roles",ignore = true)
     UserEntity toEntity(UserDto dto);
 
     UserDto toDto(UserEntity entity);
 
     NestedUserDto toNestedDto(UserEntity entity);
 
-    @Mapping(target = "roles",ignore = true)
     @Mapping(target = "role",ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     UserEntity partialDtoToEntity(@MappingTarget UserEntity userEntity, UserDto userDto);

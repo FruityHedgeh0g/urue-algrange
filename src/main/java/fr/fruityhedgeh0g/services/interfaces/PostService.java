@@ -1,7 +1,6 @@
 package fr.fruityhedgeh0g.services.interfaces;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
-import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
 import fr.fruityhedgeh0g.services.interfaces.publics.PublicPostService;
 import io.vavr.control.Try;
 import jakarta.validation.Valid;
