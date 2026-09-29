@@ -148,4 +148,9 @@ public class SectorServiceImpl implements SectorService {
         sectorRepository.persist(sectorEntity);
     }
 
+    @Override
+    public Optional<SectorEntity> doGetEntityById(UUID sectorId) {
+        return sectorRepository.findByIdOptional(sectorId);
+    }
+
 }

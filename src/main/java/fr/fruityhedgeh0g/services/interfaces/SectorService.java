@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.services.interfaces;
 
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalSectorService;
 import fr.fruityhedgeh0g.services.interfaces.publics.PublicSectorService;
 import io.vavr.control.Try;
 import jakarta.validation.Valid;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SectorService extends PublicSectorService {
+public interface SectorService extends PublicSectorService, InternalSectorService {
 
 //    Try<List<SectorDto>> getAllSectors();
 //    Try<SectorDto> getSectorById(@NotNull UUID sectorId);

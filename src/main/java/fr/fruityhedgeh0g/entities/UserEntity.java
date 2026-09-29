@@ -46,14 +46,8 @@ public class UserEntity extends AuditTemplate{
     private GroupEntity group;
 
     //TODO : Gérer le N+1
-    @ManyToMany(mappedBy = "organizers", fetch = FetchType.LAZY)
-    private Set<EventEntity> organizedEvents;
-
     @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
     private Set<EventEntity> participatedEvents;
-
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
-    private Set<EventEntity> createdEvents;
 
     /** Changes the Role; only a Bureau member can stay Président. */
     public void changeRole(RoleEnum role) {
@@ -66,7 +60,7 @@ public class UserEntity extends AuditTemplate{
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(group, that.group) && Objects.equals(organizedEvents, that.organizedEvents) && Objects.equals(participatedEvents, that.participatedEvents) && Objects.equals(createdEvents, that.createdEvents);
+        return Objects.equals(userId, that.userId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(group, that.group) && Objects.equals(participatedEvents, that.participatedEvents);
     }
 
     @Override

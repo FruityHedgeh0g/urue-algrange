@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { useEvent } from "../../features/events/useEvents";
-import { isUpcoming } from "../../features/events/eventsApi";
+import { acceptsSignUps, EVENT_STATUS_LABELS, statusTone } from "../../features/events/status";
 import { useMyEventIds, useEventRegistration } from "../../features/events/useMyRegistrations";
 import { useFeature } from "../../features/featureFlags/useFeatureFlags";
 import { useAuth } from "../../auth/AuthContext";
@@ -43,12 +43,12 @@ export const EventDetailPage: React.FC = () => {
     );
   }
 
-  const upcoming = isUpcoming(event);
+  const signUpsOpen = acceptsSignUps(event.status);
 
   return (
     <article>
       <PageHero eyebrow="Événement" title={event.name} imageSrc={event.imageUrl || undefined}>
-        <Badge label={upcoming ? "À venir" : "Terminé"} tone={upcoming ? "accent" : "muted"} />
+        <Badge label={EVENT_STATUS_LABELS[event.status]} tone={statusTone(event.status)} />
         <span className={styles.heroMeta}>
           <Icon name="calendar" size={18} />
           {formatDateRange(event.startDateTime, event.endDateTime)}
@@ -84,7 +84,7 @@ export const EventDetailPage: React.FC = () => {
               )}
             </ul>
 
-            {upcoming && registrationOpen && (
+            {signUpsOpen && registrationOpen && (
               <div className={styles.actions}>
                 {isAuthenticated ? (
                   isRegistered ? (

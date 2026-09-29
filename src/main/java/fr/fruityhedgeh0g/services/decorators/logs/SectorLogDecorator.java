@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services.decorators.logs;
 
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
@@ -13,6 +14,7 @@ import jakarta.decorator.Delegate;
 import jakarta.inject.Inject;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Decorator
@@ -131,6 +133,13 @@ public class SectorLogDecorator implements SectorService {
                         default -> Log.errorf(t,"An error occurred while retrieving sector.");
                     }
                 })
+                .get();
+    }
+    @Override
+    public Optional<SectorEntity> doGetEntityById(UUID sectorId) {
+        Log.debugf("[INTERNAL] Retrieving sector by id %s...", sectorId);
+        return Try.of(() -> sectorService.doGetEntityById(sectorId))
+                .onFailure(t -> Log.errorf(t, "An error occurred while retrieving sector."))
                 .get();
     }
 }

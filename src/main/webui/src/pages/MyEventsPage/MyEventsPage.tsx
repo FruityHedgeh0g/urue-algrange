@@ -1,7 +1,7 @@
 import React from "react";
 import { useEvents } from "../../features/events/useEvents";
 import { useMyEventIds } from "../../features/events/useMyRegistrations";
-import { isUpcoming } from "../../features/events/eventsApi";
+import { EVENT_STATUS_LABELS, statusTone } from "../../features/events/status";
 import { formatDateRange } from "../../lib/formatDate";
 import MediaCard from "../../components/molecules/MediaCard/MediaCard";
 import Badge from "../../components/atoms/Badge/Badge";
@@ -41,7 +41,7 @@ export const MyEventsPage: React.FC = () => {
           imageAlt={event.name}
           title={event.name}
           subtitle={formatDateRange(event.startDateTime, event.endDateTime)}
-          badge={<Badge label={isUpcoming(event) ? "À venir" : "Terminé"} tone={isUpcoming(event) ? "accent" : "muted"} />}
+          badge={<Badge label={EVENT_STATUS_LABELS[event.status]} tone={statusTone(event.status)} />}
         />
       ))}
     </div>

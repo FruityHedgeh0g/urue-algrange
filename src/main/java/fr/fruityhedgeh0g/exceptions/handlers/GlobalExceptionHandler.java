@@ -5,6 +5,7 @@ import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
@@ -16,6 +17,12 @@ public class GlobalExceptionHandler {
     public RestResponse<Void> mapException(Exception x) {
 
         return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    /** Framework errors (404 unknown path, 405 method, 415...) keep their own status. */
+    @ServerExceptionMapper
+    public Response mapWebApplicationException(WebApplicationException x) {
+        return x.getResponse();
     }
 
     @ServerExceptionMapper

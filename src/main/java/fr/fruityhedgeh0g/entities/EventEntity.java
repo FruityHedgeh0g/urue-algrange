@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.entities;
 
+import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,8 +25,14 @@ public class EventEntity extends AuditTemplate {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID eventId;
 
+    /** Manual status (Planification, Ouvert, Complet, Annulé); see {@link #currentStatus()}. */
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private String status;
+    private EventStatusEnum status = EventStatusEnum.PLANIFICATION;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sector_id")
+    private SectorEntity sector;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -67,11 +75,11 @@ public class EventEntity extends AuditTemplate {
     @JoinTable(name = "event_participants", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<UserEntity> participants;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "event_organizers", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<UserEntity> organizers;
+    /** Dates are entered and read in the association's local time, whatever the server's zone. */
+    public static final ZoneId ZONE = ZoneId.of("Europe/Paris");
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id", nullable = false)
-    private UserEntity creator;
+    /** Status as of now: an Ouvert or Complet Event reads En cours, then Archivé, from its dates. */
+    public EventStatusEnum currentStatus() {
+        return status.at(startDateTime, endDateTime, LocalDateTime.now(ZONE));
+    }
 }

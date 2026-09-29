@@ -55,7 +55,7 @@ _Avoid_: join request, candidature
 
 **Event**: a gathering organised by the Bureau for a Secteur. Never deleted: cancelled instead.
 
-**Event status**: where an Event stands in its lifecycle: `Planification` → `Ouvert` ⇄ `Complet` (set by hand by the Bureau), then `En cours` and `Archivé` (follow the Event's dates). `Annulé` is set by hand from any status before `Archivé`. Only the Bureau sees an Event in `Planification`.
+**Event status**: where an Event stands in its lifecycle: `Planification` → `Ouvert` ⇄ `Complet` (set by hand by the Bureau), then `En cours` and `Archivé` (follow the dates of an `Ouvert` or `Complet` Event; one still in `Planification` stays there, hidden). `Annulé` is set by hand from any status before `Archivé`. Only the Bureau sees an Event in `Planification`.
 _Avoid_: Publié (for Events)
 
 **Participant**: a Bénévole with a confirmed place at an Event (someone on a Liste d'attente is not yet a Participant), either as `pilote` or `passager` (chosen per Event). A `passager` is a registered Bénévole too and rides with the Groupe of their `pilote`. Signing up is possible while the Event is `Ouvert` or `Complet`; while `Complet`, or once a maximum is reached, a sign-up goes onto the Liste d'attente. A Participant can withdraw at any time before the Event is `Archivé`. The Bureau can remove a Participant from an Event; the Chef de groupe can only take them out of their Groupe, leaving them a Participant without a Groupe.
