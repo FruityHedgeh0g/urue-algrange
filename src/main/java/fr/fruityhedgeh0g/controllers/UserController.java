@@ -55,6 +55,14 @@ public class UserController {
     public @JsonView(Views.Detailed.class) UserDto changeRole(@PathParam("userId") UUID userId, @Valid @NotNull RoleChangeDto change){
         return userService.changeRole(UUID.fromString(token.getSubject()), userId, change.role());
     }
+
+    @PUT
+    @Path("/{userId}/president")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("admin")
+    public @JsonView(Views.Detailed.class) UserDto appointPresident(@PathParam("userId") UUID userId){
+        return userService.appointPresident(userId);
+    }
 //
 //    @POST
 //    @Produces(MediaType.APPLICATION_JSON)

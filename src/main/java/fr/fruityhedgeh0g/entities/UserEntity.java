@@ -34,6 +34,12 @@ public class UserEntity extends AuditTemplate{
     @Column(name = "role", nullable = false)
     private RoleEnum role = RoleEnum.BENEVOLE;
 
+    /** The one Bureau member presiding over the association; grants no access. */
+    @Builder.Default
+    @ColumnDefault("false")
+    @Column(name = "president", nullable = false)
+    private boolean president = false;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "group_id")
@@ -48,6 +54,13 @@ public class UserEntity extends AuditTemplate{
 
     @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     private Set<EventEntity> createdEvents;
+
+    /** Changes the Role; only a Bureau member can stay Président. */
+    public void changeRole(RoleEnum role) {
+        this.role = role;
+        if (role != RoleEnum.BUREAU)
+            this.president = false;
+    }
 
     @Override
     public boolean equals(Object o) {

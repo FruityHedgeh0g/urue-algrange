@@ -5,6 +5,7 @@ import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import io.quarkus.logging.Log;
@@ -60,6 +61,21 @@ public class UserLogDecorator implements UserService{
                         case ForbiddenRoleChangeException ex -> Log.warnf("Role change refused: %s", ex.getMessage());
                         case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
                         default -> Log.errorf(t,"An error occurred while changing a Role.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto appointPresident(UUID personId) {
+        Log.debugf("Flagging %s as Président...", personId);
+        return Try.of(() -> userService.appointPresident(personId))
+                .onSuccess(user -> Log.infof("%s is now Président.", personId))
+                .onFailure(t -> {
+                    switch(t){
+                        case InvalidResourceException ex -> Log.warnf("Président refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
+                        default -> Log.errorf(t,"An error occurred while flagging the Président.");
                     }
                 })
                 .get();

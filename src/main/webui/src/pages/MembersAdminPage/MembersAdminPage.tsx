@@ -1,15 +1,16 @@
 import React from "react";
-import { useAllMembers, useChangeRole, useUpdateMember } from "../../features/users/useMembers";
+import { useAllMembers, useAppointPresident, useChangeRole, useUpdateMember } from "../../features/users/useMembers";
 import { MemberInput } from "../../features/users/usersApi";
 import { useSectors } from "../../features/sectors/useSector";
 import { useAuth } from "../../auth/AuthContext";
-import { assignableRoles, ROLE_LABELS, RoleId } from "../../auth/roles";
+import { assignableRoles, ROLE_LABELS, RoleId, roleAtLeast } from "../../auth/roles";
 import AdminCrudList from "../../components/organisms/AdminCrudList/AdminCrudList";
 import FormField from "../../components/molecules/FormField/FormField";
 import Select from "../../components/atoms/Select/Select";
+import Checkbox from "../../components/atoms/Checkbox/Checkbox";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 
-type MemberDraft = MemberInput & { role: RoleId };
+type MemberDraft = MemberInput & { role: RoleId; president: boolean };
 
 export const MembersAdminPage: React.FC = () => {
   const { data: members, isLoading } = useAllMembers();
@@ -17,16 +18,23 @@ export const MembersAdminPage: React.FC = () => {
   const { role: viewerRole, user } = useAuth();
   const updateMember = useUpdateMember();
   const changeRole = useChangeRole();
+  const appointPresident = useAppointPresident();
 
   const groupOptions = (sectors ?? []).flatMap((sector) => sector.groups.map((g) => ({ ...g, sectorName: sector.name })));
 
   /** Rôles proposés pour une personne : aucun sur soi-même (chaîne de promotion). */
   const rolesFor = (userId: string, current: RoleId) => (userId === user?.userId ? [] : assignableRoles(viewerRole, current));
 
-  const save = async (userId: string, { role, ...profile }: MemberDraft) => {
+  /** Seul un Admin désigne le Président, parmi les membres du Bureau qui ne le sont pas déjà. */
+  const canAppointPresident = (member: { role: RoleId; president?: boolean }) =>
+    roleAtLeast(viewerRole, "admin") && member.role === "bureau" && !member.president;
+
+  const save = async (userId: string, { role, president, ...profile }: MemberDraft) => {
     await updateMember.mutateAsync({ userId, ...profile });
-    const current = members?.find((m) => m.userId === userId)?.role;
-    if (role !== current) await changeRole.mutateAsync({ userId, role });
+    const currentMember = members?.find((m) => m.userId === userId);
+    // Un changement de rôle fait quitter le Bureau : le titre de Président ne s'applique plus
+    if (role !== currentMember?.role) await changeRole.mutateAsync({ userId, role });
+    else if (president && !currentMember?.president) await appointPresident.mutateAsync(userId);
   };
 
   if (isLoading) return <Spinner label="Chargement des inscrits..." />;
@@ -39,10 +47,18 @@ export const MembersAdminPage: React.FC = () => {
         const group = groupOptions.find((g) => g.groupId === member.groupId);
         return {
           title: `${member.firstName} ${member.lastName}`,
-          subtitle: [ROLE_LABELS[member.role], group && `${group.name} · ${group.sectorName}`].filter(Boolean).join(" · "),
+          subtitle: [ROLE_LABELS[member.role], member.president && "Président", group && `${group.name} · ${group.sectorName}`]
+            .filter(Boolean)
+            .join(" · "),
         };
       }}
-      toDraft={(m): MemberDraft => ({ firstName: m.firstName, lastName: m.lastName, groupId: m.groupId, role: m.role })}
+      toDraft={(m): MemberDraft => ({
+        firstName: m.firstName,
+        lastName: m.lastName,
+        groupId: m.groupId,
+        role: m.role,
+        president: Boolean(m.president),
+      })}
       renderFields={(draft, setDraft, member) => {
         const roles = member ? rolesFor(member.userId, member.role) : [];
         return (
@@ -62,6 +78,9 @@ export const MembersAdminPage: React.FC = () => {
                 onChange={(role) => setDraft({ ...draft, role: role as RoleId })}
                 options={roles.map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
               />
+            )}
+            {member && canAppointPresident(member) && (
+              <Checkbox label="Président" checked={draft.president} onChange={(president) => setDraft({ ...draft, president })} />
             )}
           </>
         );

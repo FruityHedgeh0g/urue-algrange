@@ -7,6 +7,7 @@ import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.keycloak.KeycloakRoleMirror;
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
             if (!actorRole.maySetRole(person.getRole(), role))
                 throw new ForbiddenRoleChangeException(actorRole.id() + " cannot set " + person.getRole().id() + " to " + role.id());
 
-            person.setRole(role);
+            person.changeRole(role);
             return userMapper.toDto(person);
         });
 
@@ -85,6 +86,19 @@ public class UserServiceImpl implements UserService {
             Log.warnf(e, "Could not mirror Role %s of %s to Keycloak", role.id(), personId);
         }
         return changed;
+    }
+
+    @Override
+    @Transactional
+    public UserDto appointPresident(UUID personId) {
+        UserEntity person = userRepository.findByIdOptional(personId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
+        if (person.getRole() != RoleEnum.BUREAU)
+            throw new InvalidResourceException("Only a Bureau member can be Président: " + personId);
+
+        userRepository.findPresidents().forEach(previous -> previous.setPresident(false));
+        person.setPresident(true);
+        return userMapper.toDto(person);
     }
 
     @Override

@@ -12,6 +12,8 @@ export interface Member {
   lastName: string;
   groupId: string;
   role: RoleId;
+  /** Le membre du Bureau qui préside l'association (un seul à la fois). */
+  president?: boolean;
   email: string;
   phone: string;
   memberSince: string; // date ISO

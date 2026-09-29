@@ -16,6 +16,9 @@ public interface PublicUserService {
     /** Promotion chain: see {@link fr.fruityhedgeh0g.enums.RoleEnum#maySetRole}. The database Role applies even if the Keycloak mirror fails. */
     UserDto changeRole(@NotNull UUID actorId, @NotNull UUID personId, @NotNull RoleEnum role);
 
+    /** Flags a Bureau member as Président, clearing the previous one. */
+    UserDto appointPresident(@NotNull UUID personId);
+
 
 
 //    Try<UserDto> getUserById(@NotNull UUID userId);

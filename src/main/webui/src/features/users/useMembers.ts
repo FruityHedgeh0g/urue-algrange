@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { changeRole, fetchAllMembers, fetchMembersByGroupIds, MemberInput, updateMember } from "./usersApi";
+import { appointPresident, changeRole, fetchAllMembers, fetchMembersByGroupIds, MemberInput, updateMember } from "./usersApi";
 import { RoleId } from "../../auth/roles";
 import { queryKeys } from "../queryKeys";
 
@@ -27,6 +27,14 @@ export function useChangeRole() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: { userId: string; role: RoleId }) => changeRole(input.userId, input.role),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.members.all }),
+  });
+}
+
+export function useAppointPresident() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => appointPresident(userId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.members.all }),
   });
 }

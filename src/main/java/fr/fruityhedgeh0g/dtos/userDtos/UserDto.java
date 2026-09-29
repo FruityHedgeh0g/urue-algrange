@@ -34,6 +34,9 @@ public class UserDto {
     @JsonView(Views.Basic.class)
     RoleEnum role;
 
+    @JsonView(Views.Basic.class)
+    Boolean president;
+
     @JsonView(Views.Detailed.class)
     NestedGroupDto group;
 
