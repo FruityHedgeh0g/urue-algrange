@@ -29,10 +29,8 @@ const values: { title: string; description: string; icon: IconName }[] = [
 ];
 
 const actions = [
-  "Organisation de balades et de collectes solidaires",
-  "Campagnes de sensibilisation au dépistage",
+  "Organisation de collectes solidaires",
   "Reversement des fonds récoltés à la recherche contre le cancer",
-  "Accompagnement des patients et de leurs proches en lien avec les établissements de santé locaux",
   "Actions de mécénat avec les entreprises du territoire",
 ];
 
