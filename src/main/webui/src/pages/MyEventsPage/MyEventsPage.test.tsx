@@ -7,6 +7,9 @@ import { createEventsApi } from "../../features/events/eventsApi";
 import { createRegistrationsApi } from "../../features/events/registrationsApi";
 import MyEventsPage from "./MyEventsPage";
 
+/** Utilisateur de l'authentification mockée (AuthContext). */
+const ME = { userId: "mock-user", firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" };
+
 const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 19);
 
 describe("MyEventsPage", () => {
@@ -17,12 +20,12 @@ describe("MyEventsPage", () => {
 
     const open = await events.createEvent({ ...base, name: "Test Balade" });
     await events.changeStatus(open.eventId, "ouvert");
-    await registrations.signUp(open.eventId, "06 12 34 56 78");
+    await registrations.signUp(open.eventId, ME);
 
     const full = await events.createEvent({ ...base, name: "Test Loto" });
     await events.changeStatus(full.eventId, "ouvert");
     await events.changeStatus(full.eventId, "complet");
-    await registrations.signUp(full.eventId, "06 12 34 56 78");
+    await registrations.signUp(full.eventId, ME);
 
     localStorage.setItem("urue-mock-role", "benevole");
   });

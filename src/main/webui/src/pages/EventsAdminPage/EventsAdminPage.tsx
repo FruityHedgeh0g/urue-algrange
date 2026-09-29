@@ -9,6 +9,7 @@ import AdminCrudList from "../../components/organisms/AdminCrudList/AdminCrudLis
 import FormField from "../../components/molecules/FormField/FormField";
 import Select from "../../components/atoms/Select/Select";
 import Spinner from "../../components/atoms/Spinner/Spinner";
+import EventRoster from "./EventRoster";
 
 /** Le statut n'est modifiable qu'à l'édition, vers les seules transitions permises. */
 /** `maxParticipants` vide : pas de maximum. */
@@ -123,6 +124,7 @@ export const EventsAdminPage: React.FC = () => {
             <FormField label="Adresse" value={value.address} onChange={(e) => onChange({ ...value, address: e.target.value })} />
             <FormField label="Ville" value={value.city} onChange={(e) => onChange({ ...value, city: e.target.value })} />
             <FormField label="Code postal" value={value.postalCode} onChange={(e) => onChange({ ...value, postalCode: e.target.value })} />
+            {event && <EventRoster eventId={event.eventId} editable={event.status !== "archive"} />}
           </>
         );
       }}

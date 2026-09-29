@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../../auth/AuthContext";
 import { createEventsApi } from "../../features/events/eventsApi";
+import { createRegistrationsApi } from "../../features/events/registrationsApi";
 import EventsAdminPage from "./EventsAdminPage";
 
 const inDays = (days: number, hour: number) => {
@@ -19,6 +20,11 @@ const seed = async () => {
   await api.createEvent({ ...base, name: "Test Préparation", startDateTime: inDays(30, 9), endDateTime: inDays(30, 18) });
   const open = await api.createEvent({ ...base, name: "Test Ouvert", startDateTime: inDays(40, 9), endDateTime: inDays(40, 18) });
   await api.changeStatus(open.eventId, "ouvert");
+  await api.updateEvent(open.eventId, { ...base, name: "Test Ouvert", startDateTime: inDays(40, 9), endDateTime: inDays(40, 18), maxParticipants: 1 });
+  const registrations = createRegistrationsApi();
+  for (const [userId, lastName] of [["p-1", "Weber"], ["p-2", "Kremer"]]) {
+    await registrations.signUp(open.eventId, { userId, firstName: "Test", lastName, phone: "06 00 00 00 00" });
+  }
 };
 
 const renderPage = () => {
@@ -62,9 +68,37 @@ describe("EventsAdminPage", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: /Test Préparation/ })).toHaveTextContent("Ouvert"));
   });
 
+  it("shows the roster: Participants and Liste d'attente in sign-up order", async () => {
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+    const participants = await screen.findByRole("list", { name: "Participants" });
+    expect(within(participants).getByText(/Weber/)).toBeInTheDocument();
+    const waiting = screen.getByRole("list", { name: "Liste d'attente" });
+    expect(within(waiting).getByText(/Kremer/)).toBeInTheDocument();
+    expect(within(waiting).getByRole("button", { name: "Faire monter" })).toBeDisabled();
+  });
+
+  it("removes a Participant, then moves someone up by hand", async () => {
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+    const participants = await screen.findByRole("list", { name: "Participants" });
+    await userEvent.click(within(participants).getByRole("button", { name: "Retirer" }));
+
+    // La place libérée ne profite à personne automatiquement
+    await waitFor(() => expect(screen.getByText("Aucun participant.")).toBeInTheDocument());
+    const waiting = screen.getByRole("list", { name: "Liste d'attente" });
+    await userEvent.click(within(waiting).getByRole("button", { name: "Faire monter" }));
+
+    await waitFor(() =>
+      expect(within(screen.getByRole("list", { name: "Participants" })).getByText(/Kremer/)).toBeInTheDocument()
+    );
+    expect(screen.getByText("Personne en attente.")).toBeInTheDocument();
+  });
+
   it("sets and clears the maximum number of Participants", async () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+    await userEvent.clear(screen.getByLabelText("Participants maximum"));
     await userEvent.type(screen.getByLabelText("Participants maximum"), "40");
     await userEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
     await waitFor(() => expect(screen.getByRole("button", { name: /Test Ouvert/ })).toHaveTextContent("40 places"));

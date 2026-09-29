@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.PhoneRequiredException;
@@ -129,6 +130,49 @@ public class EventLogDecorator implements EventService{
         Log.debugf("Retrieving the sign-ups of %s...", personId);
         return Try.of(() -> eventService.registrationsOf(personId))
                 .onFailure(t -> Log.errorf(t, "An error occurred while retrieving sign-ups."))
+                .get();
+    }
+
+    @Override
+    public RosterDto roster(UUID eventId) {
+        Log.debugf("Retrieving the roster of event %s...", eventId);
+        return Try.of(() -> eventService.roster(eventId))
+                .onFailure(t -> {
+                    switch (t) {
+                        case UnknownResourceException ex -> Log.warnf("Event %s not found.", eventId);
+                        default -> Log.errorf(t, "An error occurred while retrieving a roster.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public RosterDto promote(UUID eventId, UUID personId) {
+        Log.debugf("Moving %s up on event %s...", personId, eventId);
+        return Try.of(() -> eventService.promote(eventId, personId))
+                .onSuccess(r -> Log.infof("%s moved up to Participant of event %s.", personId, eventId))
+                .onFailure(t -> {
+                    switch (t) {
+                        case InvalidResourceException ex -> Log.warnf("Move up refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.warnf("Move up refused: %s", ex.getMessage());
+                        default -> Log.errorf(t, "An error occurred while moving someone up.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public RosterDto removeFromRoster(UUID eventId, UUID personId) {
+        Log.debugf("Removing %s from event %s...", personId, eventId);
+        return Try.of(() -> eventService.removeFromRoster(eventId, personId))
+                .onSuccess(r -> Log.infof("%s removed from event %s.", personId, eventId))
+                .onFailure(t -> {
+                    switch (t) {
+                        case InvalidResourceException ex -> Log.warnf("Removal refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.warnf("Removal refused: %s", ex.getMessage());
+                        default -> Log.errorf(t, "An error occurred while removing someone from an event.");
+                    }
+                })
                 .get();
     }
 }

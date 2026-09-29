@@ -4,7 +4,11 @@
  */
 export const queryKeys = {
   events: { all: ["events"] as const, detail: (eventId: string | undefined) => ["events", "detail", eventId] as const },
-  myRegistrations: { all: ["my-event-registrations"] as const },
+  /** Inscriptions : les siennes et, pour le Bureau, la liste d'un Événement. */
+  myRegistrations: {
+    all: ["my-event-registrations"] as const,
+    roster: (eventId: string) => ["my-event-registrations", "roster", eventId] as const,
+  },
   groups: { all: ["groups"] as const },
   sectors: { all: ["sectors"] as const, detail: (sectorId: string | undefined) => ["sectors", "detail", sectorId] as const },
   members: {

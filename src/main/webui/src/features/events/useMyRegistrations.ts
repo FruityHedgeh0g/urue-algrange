@@ -4,10 +4,15 @@ import { queryKeys } from "../queryKeys";
 import { useAuth } from "../../auth/AuthContext";
 
 export function useMyRegistrations() {
-  return useQuery({ queryKey: queryKeys.myRegistrations.all, queryFn: fetchMyRegistrations });
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: [...queryKeys.myRegistrations.all, user?.userId],
+    queryFn: () => fetchMyRegistrations(user?.userId ?? ""),
+    enabled: Boolean(user),
+  });
 }
 
-/** Inscription comme pilote et désinscription ; l'inscription utilise le téléphone du profil. */
+/** Inscription comme pilote et désinscription de la personne connectée. */
 export function useEventRegistration() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -15,12 +20,15 @@ export function useEventRegistration() {
 
   const register = useMutation({
     /** `phone` : numéro tout juste saisi, avant que le profil ne soit relu. */
-    mutationFn: (input: { eventId: string; phone?: string }) => signUp(input.eventId, input.phone ?? user?.phone),
+    mutationFn: (input: { eventId: string; phone?: string }) => {
+      if (!user) throw new Error("Connectez-vous pour vous inscrire.");
+      return signUp(input.eventId, { ...user, phone: input.phone ?? user.phone });
+    },
     onSuccess: invalidate,
   });
 
   const unregister = useMutation({
-    mutationFn: withdraw,
+    mutationFn: (eventId: string) => withdraw(eventId, user?.userId ?? ""),
     onSuccess: invalidate,
   });
 

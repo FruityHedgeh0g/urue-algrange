@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.services.interfaces.publics;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -29,4 +30,11 @@ public interface PublicEventService {
     /** Withdraws a Participant or someone on the Liste d'attente, until Archivé; nobody moves up. */
     void withdraw(@NotNull UUID eventId, @NotNull UUID personId);
     List<RegistrationDto> registrationsOf(@NotNull UUID personId);
+
+    /** The Bureau's view of an Event's Participants and Liste d'attente. */
+    RosterDto roster(@NotNull UUID eventId);
+    /** Moves someone up from the Liste d'attente, only while under the overall maximum. */
+    RosterDto promote(@NotNull UUID eventId, @NotNull UUID personId);
+    /** Removes someone from the Event; the freed place is not given to anyone. */
+    RosterDto removeFromRoster(@NotNull UUID eventId, @NotNull UUID personId);
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventStatusChangeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.publics.PublicEventService;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -67,6 +68,30 @@ public class EventController {
     @RolesAllowed("benevole")
     public void withdraw(@PathParam("eventId") UUID eventId){
         eventService.withdraw(eventId, me());
+    }
+
+    @GET
+    @Path("/{eventId}/roster")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public RosterDto getRoster(@PathParam("eventId") UUID eventId){
+        return eventService.roster(eventId);
+    }
+
+    @POST
+    @Path("/{eventId}/roster/{personId}/promote")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public RosterDto promote(@PathParam("eventId") UUID eventId, @PathParam("personId") UUID personId){
+        return eventService.promote(eventId, personId);
+    }
+
+    @DELETE
+    @Path("/{eventId}/roster/{personId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public RosterDto removeFromRoster(@PathParam("eventId") UUID eventId, @PathParam("personId") UUID personId){
+        return eventService.removeFromRoster(eventId, personId);
     }
 
     @GET

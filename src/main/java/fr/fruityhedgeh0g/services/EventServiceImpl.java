@@ -4,6 +4,8 @@ import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterEntryDto;
 import fr.fruityhedgeh0g.entities.EventEntity;
 import fr.fruityhedgeh0g.entities.EventRegistrationEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
@@ -110,9 +112,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public RegistrationDto signUp(UUID eventId, UUID personId) {
-        // Locks the Event so concurrent sign-ups cannot both take the last place
-        EventEntity event = eventRepository.findByIdOptional(eventId, LockModeType.PESSIMISTIC_WRITE)
-                .orElseThrow(() -> new UnknownResourceException("Event not found: " + eventId));
+        EventEntity event = lockedEventOrThrow(eventId);
         UserEntity person = internalUserService.doGetEntityById(personId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
 
@@ -125,9 +125,7 @@ public class EventServiceImpl implements EventService {
         if (!person.hasPhone())
             throw new PhoneRequiredException("A phone number is required to sign up: " + personId);
 
-        boolean placeLeft = event.getMaxParticipants() == null
-                || registrationRepository.countParticipants(eventId) < event.getMaxParticipants();
-        EventRegistrationEntity registration = current == EventStatusEnum.OUVERT && placeLeft
+        EventRegistrationEntity registration = current == EventStatusEnum.OUVERT && placeLeft(event)
                 ? registrationRepository.persistConfirmed(event, person)
                 : registrationRepository.persistWaiting(event, person);
         return toDto(registration);
@@ -137,16 +135,82 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public void withdraw(UUID eventId, UUID personId) {
         EventEntity event = eventOrThrow(eventId);
-        EventRegistrationEntity registration = registrationRepository.findByEventAndPerson(eventId, personId)
-                .orElseThrow(() -> new UnknownResourceException("No sign-up of " + personId + " for " + eventId));
-        if (event.currentStatus() == EventStatusEnum.ARCHIVE)
-            throw new InvalidResourceException("An archived Event keeps its Participants.");
+        EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        refuseOnArchived(event);
         registrationRepository.delete(registration);
     }
 
     @Override
     public List<RegistrationDto> registrationsOf(UUID personId) {
         return registrationRepository.listByPerson(personId).stream().map(EventServiceImpl::toDto).toList();
+    }
+
+    @Override
+    public RosterDto roster(UUID eventId) {
+        return rosterOf(eventOrThrow(eventId));
+    }
+
+    @Override
+    @Transactional
+    public RosterDto promote(UUID eventId, UUID personId) {
+        EventEntity event = lockedEventOrThrow(eventId);
+        EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        refuseOnArchived(event);
+        if (!registration.isWaiting())
+            throw new InvalidResourceException(personId + " is already a Participant.");
+        if (!placeLeft(event))
+            throw new InvalidResourceException("The Event is at its maximum of " + event.getMaxParticipants() + " Participants.");
+        registration.setWaiting(false);
+        return rosterOf(event);
+    }
+
+    @Override
+    @Transactional
+    public RosterDto removeFromRoster(UUID eventId, UUID personId) {
+        EventEntity event = eventOrThrow(eventId);
+        EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        refuseOnArchived(event);
+        registrationRepository.delete(registration);
+        registrationRepository.flush();
+        return rosterOf(event);
+    }
+
+    private RosterDto rosterOf(EventEntity event) {
+        List<EventRegistrationEntity> all = registrationRepository.listByEvent(event.getEventId());
+        return new RosterDto(
+                event.getEventId(),
+                event.getMaxParticipants(),
+                all.stream().filter(r -> !r.isWaiting()).map(EventServiceImpl::toRosterEntry).toList(),
+                all.stream().filter(EventRegistrationEntity::isWaiting).map(EventServiceImpl::toRosterEntry).toList()
+        );
+    }
+
+    private static RosterEntryDto toRosterEntry(EventRegistrationEntity registration) {
+        UserEntity person = registration.getPerson();
+        return new RosterEntryDto(person.getUserId(), person.getFirstName(), person.getLastName(), person.getPhone(),
+                registration.getMode(), registration.getSignedUpAt());
+    }
+
+    /** true when the Event has no maximum or is still under it. */
+    private boolean placeLeft(EventEntity event) {
+        return event.getMaxParticipants() == null
+                || registrationRepository.countParticipants(event.getEventId()) < event.getMaxParticipants();
+    }
+
+    private void refuseOnArchived(EventEntity event) {
+        if (event.currentStatus() == EventStatusEnum.ARCHIVE)
+            throw new InvalidResourceException("An archived Event keeps its roster.");
+    }
+
+    private EventRegistrationEntity registrationOrThrow(UUID eventId, UUID personId) {
+        return registrationRepository.findByEventAndPerson(eventId, personId)
+                .orElseThrow(() -> new UnknownResourceException("No sign-up of " + personId + " for " + eventId));
+    }
+
+    /** Locks the Event so concurrent sign-ups and moves up cannot both take the last place. */
+    private EventEntity lockedEventOrThrow(UUID eventId) {
+        return eventRepository.findByIdOptional(eventId, LockModeType.PESSIMISTIC_WRITE)
+                .orElseThrow(() -> new UnknownResourceException("Event not found: " + eventId));
     }
 
     private static RegistrationDto toDto(EventRegistrationEntity registration) {
