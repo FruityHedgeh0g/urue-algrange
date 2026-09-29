@@ -14,13 +14,17 @@ describe("access map", () => {
   it.each<[AccessId, RoleId, boolean]>([
     ["events", "visiteur", true],
     ["account", "visiteur", false],
-    ["account", "membre", true],
+    ["account", "benevole", true],
+    ["accountProfile", "benevole", true],
+    ["accountEvents", "benevole", true],
+    ["accountEvents", "visiteur", false],
     ["accountSector", "benevole", false],
     ["accountSector", "chef_de_groupe", true],
     ["administration", "chef_de_groupe", false],
     ["administration", "bureau", true],
     ["adminConfiguration", "bureau", false],
     ["adminConfiguration", "admin", true],
+    ["adminConfiguration", "super_admin", true],
     ["featureRequests", "bureau", true],
     ["featureRequests", "admin", true],
   ])("%s for %s → %s", (id, role, expected) => {
@@ -48,7 +52,7 @@ describe("access map", () => {
   });
 
   it("lists section tabs by role", () => {
-    expect(ids(navFor("account", ctx("membre")))).toEqual(["accountProfile", "accountEvents"]);
+    expect(ids(navFor("account", ctx("benevole")))).toEqual(["accountProfile", "accountEvents"]);
     expect(ids(navFor("account", ctx("chef_de_groupe")))).toContain("accountSector");
     expect(ids(navFor("admin", ctx("bureau")))).not.toContain("adminConfiguration");
     expect(ids(navFor("admin", ctx("admin")))).toContain("adminFeatureFlags");

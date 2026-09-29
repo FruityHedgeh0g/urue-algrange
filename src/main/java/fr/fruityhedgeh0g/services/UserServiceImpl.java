@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -58,6 +59,7 @@ public class UserServiceImpl implements UserService {
                 throw new DuplicateResourceException("This resource already exists in the system.");
 
         UserEntity userEntity = userMapper.toEntity(userDto);
+        userEntity.setRole(RoleEnum.BENEVOLE);
         userRepository.persist(userEntity);
 
         return userMapper.toDto(userEntity);

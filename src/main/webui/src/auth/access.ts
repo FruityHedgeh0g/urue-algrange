@@ -39,7 +39,7 @@ export const ACCESS = {
   events: { path: "/evenements", label: "Événements", minRole: "visiteur", section: "main" },
   donation: { path: "/don", label: "Faire un don", minRole: "visiteur", section: "main", menu: "Soutenir" },
   volunteer: { path: "/#benevolat", label: "Devenir bénévole", minRole: "visiteur", section: "main", menu: "Soutenir" },
-  account: { path: "/mon-compte", label: "Mon espace", minRole: "membre", section: "main" },
+  account: { path: "/mon-compte", label: "Mon espace", minRole: "benevole", section: "main" },
   administration: { path: "/administration", label: "Administration", minRole: "bureau", section: "main" },
   featureRequests: {
     path: "/demandes-fonctionnalites",
@@ -49,8 +49,8 @@ export const ACCESS = {
     menu: "Support",
   },
 
-  accountProfile: { path: "/mon-compte", label: "Mon profil", minRole: "membre", section: "account", end: true },
-  accountEvents: { path: "/mon-compte/evenements", label: "Mes événements", minRole: "membre", section: "account" },
+  accountProfile: { path: "/mon-compte", label: "Mon profil", minRole: "benevole", section: "account", end: true },
+  accountEvents: { path: "/mon-compte/evenements", label: "Mes événements", minRole: "benevole", section: "account" },
   accountSector: { path: "/mon-compte/secteur", label: "Mon secteur", minRole: "chef_de_groupe", section: "account" },
 
   adminMembers: { path: "/administration/membres", label: "Inscrits", minRole: "bureau", section: "admin" },

@@ -40,7 +40,7 @@ describe("RequireAccess", () => {
   });
 
   it("renders the children when the role is sufficient", () => {
-    localStorage.setItem("urue-mock-role", "membre");
+    localStorage.setItem("urue-mock-role", "benevole");
     renderProtected("account");
     expect(screen.getByText("Contenu protégé")).toBeInTheDocument();
   });

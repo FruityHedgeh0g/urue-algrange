@@ -20,6 +20,7 @@ public interface UserMapper {
     NestedUserDto toNestedDto(UserEntity entity);
 
     @Mapping(target = "roles",ignore = true)
+    @Mapping(target = "role",ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     UserEntity partialDtoToEntity(@MappingTarget UserEntity userEntity, UserDto userDto);
 

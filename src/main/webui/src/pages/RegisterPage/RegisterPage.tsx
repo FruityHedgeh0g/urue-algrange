@@ -39,7 +39,7 @@ export const RegisterPage: React.FC = () => {
     const validationErrors = validate(values);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
-    setRole("membre");
+    setRole("benevole");
     navigate("/");
   };
 

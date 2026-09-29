@@ -1,8 +1,10 @@
 package fr.fruityhedgeh0g.entities;
 
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.enums.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Objects;
 import java.util.Set;
@@ -26,6 +28,12 @@ public class UserEntity extends AuditTemplate{
 
     @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'BENEVOLE'")
+    @Column(name = "role", nullable = false)
+    private RoleEnum role = RoleEnum.BENEVOLE;
 
     //TODO: faire une estimation de l'utilité de garder les rôles en EAGER
     @ManyToMany(fetch = FetchType.EAGER)

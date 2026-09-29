@@ -11,6 +11,7 @@ import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -29,6 +30,7 @@ public class UserController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
     public @JsonView(Views.Basic.class) List<UserDto> getAllUsers(){
         return userService.listAll();
     }

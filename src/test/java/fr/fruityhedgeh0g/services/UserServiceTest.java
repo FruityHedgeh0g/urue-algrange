@@ -10,6 +10,7 @@ import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
 import fr.fruityhedgeh0g.entities.roles.LegalRoleEntity;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -143,6 +144,21 @@ class UserServiceTest {
 
     @Test
     @TestTransaction
+    public void create_NewPersonIsBenevole(){
+        UserDto userDto = userService.doCreate(
+                UserDto.builder()
+                        .userId(UUID.randomUUID())
+                        .firstName("Platy")
+                        .lastName("Pus")
+                        .role(RoleEnum.ADMIN)
+                        .build()
+        );
+
+        Assertions.assertEquals(RoleEnum.BENEVOLE, userService.getById(userDto.getUserId()).getRole());
+    }
+
+    @Test
+    @TestTransaction
     public void create_Duplicate(){
         UserEntity user = UserEntity.builder()
                 .userId(UUID.randomUUID())
@@ -183,6 +199,22 @@ class UserServiceTest {
 
         Assertions.assertEquals(userRepository.findById(user.getUserId()).getFirstName(), updatedUser.getFirstName());
 
+    }
+
+    @Test
+    @TestTransaction
+    public void update_KeepsRole(){
+        UserEntity user = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .role(RoleEnum.MEMBRE)
+                .build();
+        userRepository.persist(user);
+
+        userService.doUpdate(UserDto.builder().userId(user.getUserId()).firstName("Hedge").role(RoleEnum.ADMIN).build());
+
+        Assertions.assertEquals(RoleEnum.MEMBRE, userRepository.findById(user.getUserId()).getRole());
     }
 
     @Test
