@@ -1,3 +1,5 @@
+import { RoleId } from "../../auth/roles";
+
 /**
  * Reflète NestedUserDto côté backend, complété du groupe d'appartenance et
  * d'informations de fiche (rôle, contact, ancienneté). Ces derniers champs
@@ -9,7 +11,7 @@ export interface Member {
   firstName: string;
   lastName: string;
   groupId: string;
-  role: string;
+  role: RoleId;
   email: string;
   phone: string;
   memberSince: string; // date ISO

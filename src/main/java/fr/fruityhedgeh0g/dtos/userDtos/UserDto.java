@@ -31,7 +31,7 @@ public class UserDto {
     @JsonAlias({"last_name","updated_last_name"})
     String lastName;
 
-    @JsonView(Views.Detailed.class)
+    @JsonView(Views.Basic.class)
     RoleEnum role;
 
     @JsonView(Views.Detailed.class)

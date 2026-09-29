@@ -2,7 +2,9 @@ package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import io.quarkus.logging.Log;
@@ -43,6 +45,21 @@ public class UserLogDecorator implements UserService{
                     switch(t){
                         case UnknownResourceException ex -> Log.errorf(ex,"User with id %s not found.", userId);
                         default -> Log.errorf(t,"An error occurred while retrieving user.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto changeRole(UUID actorId, UUID personId, RoleEnum role) {
+        Log.debugf("User %s sets the Role of %s to %s...", actorId, personId, role.id());
+        return Try.of(() -> userService.changeRole(actorId, personId, role))
+                .onSuccess(user -> Log.infof("Role of %s set to %s by %s.", personId, role.id(), actorId))
+                .onFailure(t -> {
+                    switch(t){
+                        case ForbiddenRoleChangeException ex -> Log.warnf("Role change refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
+                        default -> Log.errorf(t,"An error occurred while changing a Role.");
                     }
                 })
                 .get();

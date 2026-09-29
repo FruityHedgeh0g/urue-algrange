@@ -36,3 +36,15 @@ export const ROLE_LABELS: Record<RoleId, string> = {
 export function roleAtLeast(current: RoleId, required: RoleId): boolean {
   return ROLE_HIERARCHY.indexOf(current) >= ROLE_HIERARCHY.indexOf(required);
 }
+
+/**
+ * Rôles qu'`actor` peut donner à une personne qui a `current` (chaîne de
+ * promotion, miroir de RoleEnum.maySetRole) : à partir du Bureau, une personne
+ * inscrite placée sous l'acteur passe de `benevole` au rôle juste sous le sien. Vide si
+ * l'acteur ne peut pas modifier ce rôle. Personne ne change son propre rôle.
+ */
+export function assignableRoles(actor: RoleId, current: RoleId): RoleId[] {
+  const below = (role: RoleId) => roleAtLeast(role, "benevole") && !roleAtLeast(role, actor);
+  if (!roleAtLeast(actor, "bureau") || !below(current)) return [];
+  return ROLE_HIERARCHY.filter(below);
+}

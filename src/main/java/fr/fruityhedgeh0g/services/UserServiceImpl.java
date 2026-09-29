@@ -6,11 +6,15 @@ import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
 import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
+import fr.fruityhedgeh0g.keycloak.KeycloakRoleMirror;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
+import io.quarkus.logging.Log;
+import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -33,6 +37,9 @@ public class UserServiceImpl implements UserService {
     @Inject
     UserMapper userMapper;
 
+    @Inject
+    KeycloakRoleMirror keycloakRoleMirror;
+
     //Using UUID to test the existence of the user is acceptable because it is based on an external system (Keycloak)
 
     @Override
@@ -50,6 +57,34 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new UnknownResourceException("User not found: "+userId))
         );
 
+    }
+
+    @Override
+    public UserDto changeRole(UUID actorId, UUID personId, RoleEnum role) {
+        // Committed on its own before the Keycloak call, so a mirror failure cannot roll it back (ADR 0002)
+        UserDto changed = QuarkusTransaction.requiringNew().call(() -> {
+            RoleEnum actorRole = userRepository.findByIdOptional(actorId)
+                    .map(UserEntity::getRole)
+                    .orElseThrow(() -> new ForbiddenRoleChangeException("Unknown actor: " + actorId));
+            if (actorId.equals(personId))
+                throw new ForbiddenRoleChangeException("Nobody changes their own Role.");
+
+            UserEntity person = userRepository.findByIdOptional(personId)
+                    .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
+            if (!actorRole.maySetRole(person.getRole(), role))
+                throw new ForbiddenRoleChangeException(actorRole.id() + " cannot set " + person.getRole().id() + " to " + role.id());
+
+            person.setRole(role);
+            return userMapper.toDto(person);
+        });
+
+        try {
+            keycloakRoleMirror.setRoleGroup(personId, role);
+        } catch (RuntimeException e) {
+            // ADR 0002: the database Role still applies; the group is repaired on the next Role change
+            Log.warnf(e, "Could not mirror Role %s of %s to Keycloak", role.id(), personId);
+        }
+        return changed;
     }
 
     @Override

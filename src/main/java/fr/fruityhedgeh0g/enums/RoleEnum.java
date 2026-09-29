@@ -29,6 +29,19 @@ public enum RoleEnum {
         return compareTo(required) >= 0;
     }
 
+    /**
+     * Promotion chain: from the Bureau up, a person moves any registered person
+     * below them between {@code benevole} and the Role just below their own. So
+     * the Bureau handles membre and chef_de_groupe, an Admin bureau, the Super admin admin.
+     */
+    public boolean maySetRole(RoleEnum current, RoleEnum next) {
+        return isAtLeast(BUREAU)
+                && current.isAtLeast(BENEVOLE)
+                && current.compareTo(this) < 0
+                && next.compareTo(this) < 0
+                && next.isAtLeast(BENEVOLE);
+    }
+
     /** This Role and every Role below it, as {@code @RolesAllowed} names. */
     public Set<String> grantedRoleIds() {
         return Arrays.stream(values())

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ROLE_HIERARCHY, roleAtLeast } from "./roles";
+import { assignableRoles, ROLE_HIERARCHY, roleAtLeast } from "./roles";
 
 describe("roleAtLeast", () => {
   it("ranks every Role on the ladder, lowest first", () => {
@@ -22,5 +22,31 @@ describe("roleAtLeast", () => {
     expect(roleAtLeast("benevole", "membre")).toBe(false);
     expect(roleAtLeast("membre", "bureau")).toBe(false);
     expect(roleAtLeast("admin", "super_admin")).toBe(false);
+  });
+});
+
+describe("assignableRoles", () => {
+  it("lets the Bureau move membre and chef_de_groupe", () => {
+    expect(assignableRoles("bureau", "benevole")).toEqual(["benevole", "membre", "chef_de_groupe"]);
+    expect(assignableRoles("bureau", "chef_de_groupe")).toEqual(["benevole", "membre", "chef_de_groupe"]);
+  });
+
+  it("lets an Admin grant bureau and the Super admin grant admin", () => {
+    expect(assignableRoles("admin", "membre")).toEqual(["benevole", "membre", "chef_de_groupe", "bureau"]);
+    expect(assignableRoles("super_admin", "admin")).toEqual(["benevole", "membre", "chef_de_groupe", "bureau", "admin"]);
+  });
+
+  it("offers nothing on a person at or above the viewer's level", () => {
+    expect(assignableRoles("bureau", "bureau")).toEqual([]);
+    expect(assignableRoles("admin", "super_admin")).toEqual([]);
+  });
+
+  it("offers nothing below the Bureau", () => {
+    expect(assignableRoles("chef_de_groupe", "benevole")).toEqual([]);
+    expect(assignableRoles("membre", "benevole")).toEqual([]);
+  });
+
+  it("offers nothing on a visiteur, who holds no Role to change", () => {
+    expect(assignableRoles("bureau", "visiteur")).toEqual([]);
   });
 });

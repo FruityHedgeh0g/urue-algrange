@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.exceptions.handlers;
 
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -25,6 +26,11 @@ public class GlobalExceptionHandler {
     @ServerExceptionMapper
     public RestResponse<Void> mapUnknownResourceException(UnknownResourceException x) {
         return RestResponse.status(Response.Status.NOT_FOUND);
+    }
+
+    @ServerExceptionMapper
+    public RestResponse<Void> mapForbiddenRoleChangeException(ForbiddenRoleChangeException x) {
+        return RestResponse.status(Response.Status.FORBIDDEN);
     }
 
     @ServerExceptionMapper

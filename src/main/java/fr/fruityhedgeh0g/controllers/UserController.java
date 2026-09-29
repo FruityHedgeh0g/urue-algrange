@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import fr.fruityhedgeh0g.dtos.userDtos.RoleChangeDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
@@ -13,6 +14,8 @@ import io.smallrye.common.annotation.Identifier;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -42,6 +45,15 @@ public class UserController {
     public @JsonView(Views.Detailed.class) UserDto getCurrentUser(){
         UUID userId = UUID.fromString(token.getSubject());
         return userService.getById(userId);
+    }
+
+    @PUT
+    @Path("/{userId}/role")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public @JsonView(Views.Detailed.class) UserDto changeRole(@PathParam("userId") UUID userId, @Valid @NotNull RoleChangeDto change){
+        return userService.changeRole(UUID.fromString(token.getSubject()), userId, change.role());
     }
 //
 //    @POST
