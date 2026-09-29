@@ -13,6 +13,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.keycloak.KeycloakRoleMirror;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.logging.Log;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -40,6 +41,9 @@ public class UserServiceImpl implements UserService {
 
     @Inject
     KeycloakRoleMirror keycloakRoleMirror;
+
+    @Inject
+    InternalGroupService internalGroupService;
 
     //Using UUID to test the existence of the user is acceptable because it is based on an external system (Keycloak)
 
@@ -76,6 +80,8 @@ public class UserServiceImpl implements UserService {
                 throw new ForbiddenRoleChangeException(actorRole.id() + " cannot set " + person.getRole().id() + " to " + role.id());
 
             person.changeRole(role);
+            if (!role.canLeadGroupe())
+                internalGroupService.doEndAffectationOf(personId);
             return userMapper.toDto(person);
         });
 

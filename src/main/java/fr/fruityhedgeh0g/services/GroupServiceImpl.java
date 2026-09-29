@@ -140,6 +140,47 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     }
 
     @Override
+    @Transactional
+    public GroupDto setChef(UUID groupId, UUID userId) {
+        GroupEntity groupEntity = groupOrThrow(groupId);
+        UserEntity chef = internalUserService.doGetEntityById(userId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
+
+        if (!chef.getRole().canLeadGroupe())
+            throw new InvalidResourceException("Only a Chef de groupe or above can lead a Groupe: "+userId);
+
+        groupRepository.findByChef(userId)
+                .filter(previous -> !previous.getGroupId().equals(groupId))
+                .ifPresent(previous -> {
+                    previous.setChef(null);
+                    // Frees the unique chef_id before it is given to this Groupe
+                    groupRepository.flush();
+                });
+
+        groupEntity.setChef(chef);
+        return groupMapper.toDto(groupEntity);
+    }
+
+    @Override
+    @Transactional
+    public GroupDto clearChef(UUID groupId) {
+        GroupEntity groupEntity = groupOrThrow(groupId);
+        groupEntity.setChef(null);
+        return groupMapper.toDto(groupEntity);
+    }
+
+    @Override
+    @Transactional
+    public void doEndAffectationOf(UUID userId) {
+        groupRepository.findByChef(userId).ifPresent(group -> group.setChef(null));
+    }
+
+    private GroupEntity groupOrThrow(UUID groupId) {
+        return groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+    }
+
+    @Override
     public Optional<GroupEntity> doGetEntityById(UUID groupId) {
         return groupRepository.findByIdOptional(groupId);
     }

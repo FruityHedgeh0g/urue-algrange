@@ -21,6 +21,7 @@ import MyEventsPage from "../pages/MyEventsPage/MyEventsPage";
 import SectorPage from "../pages/SectorPage/SectorPage";
 import MembersAdminPage from "../pages/MembersAdminPage/MembersAdminPage";
 import SectorsAdminPage from "../pages/SectorsAdminPage/SectorsAdminPage";
+import GroupsAdminPage from "../pages/GroupsAdminPage/GroupsAdminPage";
 import EventsAdminPage from "../pages/EventsAdminPage/EventsAdminPage";
 import FeatureRequestsPage from "../pages/FeatureRequestsPage/FeatureRequestsPage";
 import CarouselAdminPage from "../pages/CarouselAdminPage/CarouselAdminPage";
@@ -69,6 +70,7 @@ export const router = createBrowserRouter(
           { index: true, element: <Navigate to={relativePath("adminMembers", "administration")} replace /> },
           route("adminMembers", <MembersAdminPage />, "administration"),
           route("adminSectors", <SectorsAdminPage />, "administration"),
+          route("adminGroups", <GroupsAdminPage />, "administration"),
           route("adminEvents", <EventsAdminPage />, "administration"),
           route("adminCarousel", <CarouselAdminPage />, "administration"),
           route("adminConfiguration", <ConfigurationPage />, "administration"),

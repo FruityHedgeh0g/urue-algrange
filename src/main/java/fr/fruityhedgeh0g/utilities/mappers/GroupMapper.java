@@ -20,8 +20,10 @@ public interface GroupMapper {
 //            @Mapping(target = "members", qualifiedByName = "UserDtoToNestedEntity"),
 //            @Mapping(target = "sector", qualifiedByName = "SectorDtoToNestedEntity")
 //    })
+    @Mapping(target = "chef", ignore = true)
     GroupEntity toEntity(GroupDto dto);
 
+    @Mapping(target = "chef", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     GroupEntity partialDtoToEntity(@MappingTarget GroupEntity groupEntity, GroupDto groupDto);
 

@@ -37,6 +37,11 @@ export function roleAtLeast(current: RoleId, required: RoleId): boolean {
   return ROLE_HIERARCHY.indexOf(current) >= ROLE_HIERARCHY.indexOf(required);
 }
 
+/** Un Chef de groupe, ou tout rôle au-dessus (Bureau compris), peut recevoir une Affectation. */
+export function canLeadGroupe(role: RoleId): boolean {
+  return roleAtLeast(role, "chef_de_groupe");
+}
+
 /**
  * Rôles qu'`actor` peut donner à une personne qui a `current` (chaîne de
  * promotion, miroir de RoleEnum.maySetRole) : à partir du Bureau, une personne

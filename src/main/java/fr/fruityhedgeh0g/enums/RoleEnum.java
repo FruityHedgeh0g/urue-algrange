@@ -42,6 +42,11 @@ public enum RoleEnum {
                 && next.isAtLeast(BENEVOLE);
     }
 
+    /** A Chef de groupe, or anyone above (Bureau included), can receive an Affectation. */
+    public boolean canLeadGroupe() {
+        return isAtLeast(CHEF_DE_GROUPE);
+    }
+
     /** This Role and every Role below it, as {@code @RolesAllowed} names. */
     public Set<String> grantedRoleIds() {
         return Arrays.stream(values())

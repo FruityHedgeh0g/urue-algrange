@@ -55,6 +55,7 @@ export const ACCESS = {
 
   adminMembers: { path: "/administration/membres", label: "Inscrits", minRole: "bureau", section: "admin" },
   adminSectors: { path: "/administration/secteurs", label: "Secteurs", minRole: "bureau", section: "admin" },
+  adminGroups: { path: "/administration/groupes", label: "Groupes", minRole: "bureau", section: "admin" },
   adminEvents: { path: "/administration/evenements", label: "Gestion événements", minRole: "bureau", section: "admin" },
   adminCarousel: { path: "/administration/carrousel", label: "Carrousel", minRole: "bureau", section: "admin" },
   adminConfiguration: { path: "/administration/configuration", label: "Configuration", minRole: "admin", section: "admin" },

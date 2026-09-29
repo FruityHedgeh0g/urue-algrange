@@ -58,6 +58,7 @@ describe("access map", () => {
     expect(ids(navFor("admin", ctx("admin")))).toEqual([
       "adminMembers",
       "adminSectors",
+      "adminGroups",
       "adminEvents",
       "adminCarousel",
       "adminConfiguration",

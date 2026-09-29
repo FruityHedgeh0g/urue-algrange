@@ -1,6 +1,7 @@
 import { mockMembers } from "./fixtures";
 import { Member } from "./types";
-import { RoleId } from "../../auth/roles";
+import { canLeadGroupe, RoleId } from "../../auth/roles";
+import { clearChef, fetchGroups } from "../groups/groupsApi";
 import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
 import { createOverlayCollection } from "../../lib/storage/overlayCollection";
 
@@ -21,8 +22,14 @@ export function createUsersApi(store: JsonStore = localJsonStore) {
     fetchMembersByGroupIds: async (groupIds: string[]) => (await members.list()).filter((m) => groupIds.includes(m.groupId)),
     updateMember: (userId: string, patch: MemberInput) => members.update(userId, patch),
     /** Même contrat que PUT /api/users/{userId}/role (chaîne de promotion vérifiée côté backend). */
-    changeRole: (userId: string, role: RoleId) =>
-      members.update(userId, role === "bureau" ? { role } : { role, president: false }),
+    changeRole: async (userId: string, role: RoleId) => {
+      await members.update(userId, role === "bureau" ? { role } : { role, president: false });
+      // Comme le backend : perdre le titre de Chef de groupe met fin à l'Affectation
+      if (!canLeadGroupe(role)) {
+        const led = (await fetchGroups()).find((g) => g.chef?.userId === userId);
+        if (led) await clearChef(led.groupId);
+      }
+    },
     /** Même contrat que PUT /api/users/{userId}/president : le Président précédent perd le titre. */
     appointPresident: async (userId: string) => {
       for (const previous of (await members.list()).filter((m) => m.president)) {

@@ -120,6 +120,44 @@ public class GroupLogDecorator implements GroupService {
     }
 
     @Override
+    public GroupDto setChef(UUID groupId, UUID userId) {
+        Log.debugf("Affectation of %s to group %s...", userId, groupId);
+        return Try.of(() -> groupService.setChef(groupId, userId))
+                .onSuccess(group -> Log.infof("%s now leads group %s.", userId, groupId))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s or group %s not found.", userId, groupId);
+                        case InvalidResourceException ex -> Log.warnf("Affectation refused: %s", ex.getMessage());
+                        default -> Log.errorf(t,"An error occurred during the Affectation.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public GroupDto clearChef(UUID groupId) {
+        Log.debugf("Clearing the Chef of group %s...", groupId);
+        return Try.of(() -> groupService.clearChef(groupId))
+                .onSuccess(group -> Log.infof("Group %s has no Chef.", groupId))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Group %s not found.", groupId);
+                        default -> Log.errorf(t,"An error occurred while clearing the Chef.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public void doEndAffectationOf(UUID userId) {
+        Log.debugf("[INTERNAL] Ending the Affectation of %s...", userId);
+        Try.run(() -> groupService.doEndAffectationOf(userId))
+                .onSuccess(v -> Log.debugf("Affectation of %s ended.", userId))
+                .onFailure(t -> Log.errorf(t,"An error occurred while ending the Affectation of %s.", userId))
+                .get();
+    }
+
+    @Override
     public Optional<GroupEntity> doGetEntityById(UUID groupId) {
         Log.debugf("[INTERNAL] Retrieving group by id %s...",groupId);
         return Try.of(() -> groupService.doGetEntityById(groupId))

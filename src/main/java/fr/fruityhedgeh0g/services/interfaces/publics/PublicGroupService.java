@@ -16,4 +16,8 @@ public interface PublicGroupService {
     void delete(@NotNull UUID groupId);
     void assignUser(@NotNull UUID groupId, @NotNull UUID userId);
     void unassignUser(@NotNull UUID groupId, @NotNull UUID userId);
+
+    /** Affectation: the person (Role at least chef_de_groupe) leads this Groupe and leaves any other. */
+    GroupDto setChef(@NotNull UUID groupId, @NotNull UUID userId);
+    GroupDto clearChef(@NotNull UUID groupId);
 }

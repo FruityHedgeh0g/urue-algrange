@@ -25,6 +25,15 @@ public class GroupEntity extends AuditTemplate {
     @Column(name = "description")
     private String description;
 
+    /** The part of the Secteur this Groupe covers. */
+    @Column(name = "area")
+    private String area;
+
+    /** Current Affectation: at most one Chef per Groupe, one Groupe per Chef. */
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "chef_id", unique = true)
+    private UserEntity chef;
+
     @OneToMany(mappedBy = "group",fetch = FetchType.EAGER)
     private Set<UserEntity> members;
 
