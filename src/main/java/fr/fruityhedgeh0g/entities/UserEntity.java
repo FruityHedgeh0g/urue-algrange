@@ -28,6 +28,10 @@ public class UserEntity extends AuditTemplate{
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    /** Required before signing up for an Event. */
+    @Column(name = "phone")
+    private String phone;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'BENEVOLE'")
@@ -45,9 +49,6 @@ public class UserEntity extends AuditTemplate{
             name = "group_id")
     private GroupEntity group;
 
-    //TODO : Gérer le N+1
-    @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
-    private Set<EventEntity> participatedEvents;
 
     /** Changes the Role; only a Bureau member can stay Président. */
     public void changeRole(RoleEnum role) {
@@ -56,11 +57,16 @@ public class UserEntity extends AuditTemplate{
             this.president = false;
     }
 
+    /** A phone number is required before signing up for an Event. */
+    public boolean hasPhone() {
+        return phone != null && !phone.isBlank();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(group, that.group) && Objects.equals(participatedEvents, that.participatedEvents);
+        return Objects.equals(userId, that.userId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(group, that.group);
     }
 
     @Override

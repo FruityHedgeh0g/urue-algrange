@@ -19,6 +19,8 @@ export interface MockUser {
   lastName: string;
   role: RoleId;
   group: MockUserGroup;
+  /** Nécessaire pour s'inscrire à un Événement. */
+  phone?: string;
 }
 
 interface AuthContextValue {
@@ -27,7 +29,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   setRole: (role: RoleId) => void;
   hasAtLeastRole: (required: RoleId) => boolean;
-  updateProfile: (profile: { firstName: string; lastName: string }) => void;
+  updateProfile: (profile: Profile) => void;
 }
 
 const ROLE_STORAGE_KEY = "urue-mock-role";
@@ -39,7 +41,13 @@ const DEFAULT_GROUP: MockUserGroup = {
   sectorId: "sector-1",
   sectorName: "Secteur Algrange",
 };
-const DEFAULT_PROFILE = { firstName: "Jean", lastName: "Dupont" };
+interface Profile {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}
+
+const DEFAULT_PROFILE: Profile = { firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -52,7 +60,7 @@ function readStoredRole(): RoleId {
   }
 }
 
-function readStoredProfile(): { firstName: string; lastName: string } {
+function readStoredProfile(): Profile {
   try {
     const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
     return saved ? JSON.parse(saved) : DEFAULT_PROFILE;

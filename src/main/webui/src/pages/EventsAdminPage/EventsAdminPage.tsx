@@ -11,7 +11,8 @@ import Select from "../../components/atoms/Select/Select";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 
 /** Le statut n'est modifiable qu'à l'édition, vers les seules transitions permises. */
-type EventDraft = EventInput & { status: EventStatus };
+/** `maxParticipants` vide : pas de maximum. */
+type EventDraft = Omit<EventInput, "maxParticipants"> & { status: EventStatus; maxParticipants: string };
 
 const toDraft = (event: Event): EventDraft => ({
   name: event.name,
@@ -20,6 +21,7 @@ const toDraft = (event: Event): EventDraft => ({
   endDateTime: event.endDateTime,
   sectorId: event.sectorId,
   status: event.status,
+  maxParticipants: event.maxParticipants ? String(event.maxParticipants) : "",
   imageUrl: event.imageUrl ?? "",
   address: event.address ?? "",
   city: event.city ?? "",
@@ -40,6 +42,7 @@ export const EventsAdminPage: React.FC = () => {
     endDateTime: "",
     sectorId: sectorOptions[0]?.value ?? "",
     status: "planification",
+    maxParticipants: "",
     imageUrl: "",
     address: "",
     city: "",
@@ -47,8 +50,8 @@ export const EventsAdminPage: React.FC = () => {
     country: "France",
   };
 
-  const save = async (eventId: string, { status, sectorId: _sectorId, ...patch }: EventDraft) => {
-    await update.mutateAsync({ eventId, ...patch });
+  const save = async (eventId: string, { status, sectorId: _sectorId, maxParticipants, ...patch }: EventDraft) => {
+    await update.mutateAsync({ eventId, ...patch, maxParticipants: Number(maxParticipants) || 0 });
     const current = events?.find((e) => e.eventId === eventId)?.status;
     if (status !== current) await moveTo.mutateAsync({ eventId, status });
   };
@@ -63,7 +66,13 @@ export const EventsAdminPage: React.FC = () => {
       idOf={(e) => e.eventId}
       display={(e) => ({
         title: e.name,
-        subtitle: `${EVENT_STATUS_LABELS[e.status]} · ${formatDateRange(e.startDateTime, e.endDateTime)}`,
+        subtitle: [
+          EVENT_STATUS_LABELS[e.status],
+          formatDateRange(e.startDateTime, e.endDateTime),
+          e.maxParticipants ? `${e.maxParticipants} places` : undefined,
+        ]
+          .filter(Boolean)
+          .join(" · "),
       })}
       toDraft={toDraft}
       renderFields={(value, onChange, event) => {
@@ -92,6 +101,13 @@ export const EventsAdminPage: React.FC = () => {
               onChange={(e) => onChange({ ...value, endDateTime: e.target.value })}
               required
             />
+            <FormField
+              label="Participants maximum"
+              type="number"
+              min={1}
+              value={value.maxParticipants}
+              onChange={(e) => onChange({ ...value, maxParticipants: e.target.value })}
+            />
             {!event && (
               <Select label="Secteur" value={value.sectorId} onChange={(sectorId) => onChange({ ...value, sectorId })} options={sectorOptions} />
             )}
@@ -115,7 +131,8 @@ export const EventsAdminPage: React.FC = () => {
         buttonLabel: "+ Nouvel événement",
         submitLabel: "Créer l'événement",
         emptyDraft,
-        onCreate: ({ status: _status, ...input }) => create.mutateAsync(input),
+        onCreate: ({ status: _status, maxParticipants, ...input }) =>
+          create.mutateAsync({ ...input, maxParticipants: Number(maxParticipants) || undefined }),
       }}
     />
   );

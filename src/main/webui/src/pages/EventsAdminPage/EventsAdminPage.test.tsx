@@ -62,6 +62,19 @@ describe("EventsAdminPage", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: /Test Préparation/ })).toHaveTextContent("Ouvert"));
   });
 
+  it("sets and clears the maximum number of Participants", async () => {
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+    await userEvent.type(screen.getByLabelText("Participants maximum"), "40");
+    await userEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /Test Ouvert/ })).toHaveTextContent("40 places"));
+
+    await userEvent.click(screen.getByRole("button", { name: /Test Ouvert/ }));
+    await userEvent.clear(screen.getByLabelText("Participants maximum"));
+    await userEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /Test Ouvert/ })).not.toHaveTextContent("places"));
+  });
+
   it("offers no delete: Events are cancelled instead", async () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));

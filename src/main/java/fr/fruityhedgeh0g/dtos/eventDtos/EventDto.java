@@ -2,14 +2,12 @@ package fr.fruityhedgeh0g.dtos.eventDtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.sectorDtos.NestedSectorDto;
-import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import lombok.Builder;
 import lombok.Value;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Value
@@ -66,7 +64,8 @@ public class EventDto {
     @JsonView({Views.Detailed.class,Views.Creation.class,Views.Update.class})
     String addressComplement;
 
-    @JsonView({Views.Detailed.class})
-    Set<NestedUserDto> participants;
+    /** Optional overall maximum; 0 on an update removes it. */
+    @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    Integer maxParticipants;
 
 }

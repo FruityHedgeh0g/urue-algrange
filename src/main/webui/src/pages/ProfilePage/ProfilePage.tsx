@@ -11,13 +11,14 @@ export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
   const [firstName, setFirstName] = useState(user?.firstName ?? "");
   const [lastName, setLastName] = useState(user?.lastName ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
   const [saved, setSaved] = useState(false);
 
   if (!user) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({ firstName, lastName });
+    updateProfile({ firstName, lastName, phone: phone.trim() });
     setSaved(true);
   };
 
@@ -62,6 +63,17 @@ export const ProfilePage: React.FC = () => {
               required
             />
           </div>
+          <FormField
+            label="Téléphone"
+            type="tel"
+            autoComplete="tel"
+            value={phone}
+            onChange={(e) => {
+              setPhone(e.target.value);
+              setSaved(false);
+            }}
+          />
+          <p className={styles.hint}>Nécessaire pour vous inscrire à un événement.</p>
           <div className={styles.actions}>
             <Button type="submit" label="Enregistrer" />
             {saved && (

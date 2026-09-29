@@ -15,6 +15,8 @@ export interface EventInput {
   startDateTime: string;
   endDateTime: string;
   sectorId: string;
+  /** 0 retire le maximum, comme côté backend. */
+  maxParticipants?: number;
   imageUrl?: string;
   address?: string;
   city?: string;
@@ -34,7 +36,8 @@ export function createEventsApi(store: JsonStore = localJsonStore) {
       const event = await events.get(eventId);
       return event && (seesPlanification || event.status !== "planification") ? withCurrentStatus(event) : undefined;
     },
-    updateEvent: (eventId: string, patch: Omit<EventInput, "sectorId">) => events.update(eventId, patch),
+    updateEvent: (eventId: string, patch: Omit<EventInput, "sectorId">) =>
+      events.update(eventId, { ...patch, maxParticipants: patch.maxParticipants ? patch.maxParticipants : null }),
     createEvent: async (input: EventInput): Promise<Event> => {
       const event: Event = { eventId: `event-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, status: "planification", ...input };
       await events.create(event);

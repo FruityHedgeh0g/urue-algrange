@@ -1,12 +1,6 @@
 import { EventStatus } from "./status";
 
 /** Reflète EventDto côté backend (vue Detailed). */
-export interface EventParticipant {
-  userId: string;
-  firstName: string;
-  lastName: string;
-}
-
 export interface Event {
   eventId: string;
   /** Statut courant (calculé par l'API à partir du statut enregistré et des dates). */
@@ -17,11 +11,12 @@ export interface Event {
   endDateTime: string; // ISO 8601
   /** Secteur auquel appartient l'Événement. */
   sectorId: string;
+  /** Maximum global de Participants ; au-delà, les inscriptions vont en liste d'attente. */
+  maxParticipants?: number | null;
   imageUrl?: string;
   address?: string;
   addressComplement?: string;
   city?: string;
   postalCode?: string;
   country?: string;
-  participants?: EventParticipant[];
 }

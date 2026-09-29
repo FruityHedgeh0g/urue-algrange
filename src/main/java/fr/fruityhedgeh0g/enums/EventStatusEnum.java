@@ -38,6 +38,11 @@ public enum EventStatusEnum {
         return this;
     }
 
+    /** Sign-ups are taken while Ouvert, and onto the Liste d'attente while Complet. */
+    public boolean acceptsSignUps() {
+        return this == OUVERT || this == COMPLET;
+    }
+
     /** Archivé or Annulé: the Event is over and is no longer edited. */
     public boolean isFinal() {
         return this == ARCHIVE || this == ANNULE;

@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services.decorators.logs;
 
+import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
@@ -61,6 +62,21 @@ public class UserLogDecorator implements UserService{
                         case ForbiddenRoleChangeException ex -> Log.warnf("Role change refused: %s", ex.getMessage());
                         case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
                         default -> Log.errorf(t,"An error occurred while changing a Role.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto updateProfile(UUID personId, ProfileDto profile) {
+        Log.debugf("%s updates their profile...", personId);
+        return Try.of(() -> userService.updateProfile(personId, profile))
+                .onSuccess(user -> Log.debugf("Profile of %s updated.", personId))
+                .onFailure(t -> {
+                    switch(t){
+                        case InvalidResourceException ex -> Log.warnf("Profile refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
+                        default -> Log.errorf(t,"An error occurred while updating a profile.");
                     }
                 })
                 .get();

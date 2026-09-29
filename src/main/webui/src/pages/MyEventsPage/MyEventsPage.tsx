@@ -1,7 +1,8 @@
 import React from "react";
 import { useEvents } from "../../features/events/useEvents";
-import { useMyEventIds } from "../../features/events/useMyRegistrations";
-import { EVENT_STATUS_LABELS, statusTone } from "../../features/events/status";
+import { useMyRegistrations } from "../../features/events/useMyRegistrations";
+import { REGISTRATION_STATUS_LABELS } from "../../features/events/registrationsApi";
+import { EVENT_STATUS_LABELS } from "../../features/events/status";
 import { formatDateRange } from "../../lib/formatDate";
 import MediaCard from "../../components/molecules/MediaCard/MediaCard";
 import Badge from "../../components/atoms/Badge/Badge";
@@ -13,11 +14,14 @@ import styles from "./MyEventsPage.module.css";
 
 export const MyEventsPage: React.FC = () => {
   const { data: events, isLoading: eventsLoading } = useEvents();
-  const { data: myEventIds, isLoading: idsLoading } = useMyEventIds();
+  const { data: registrations, isLoading: registrationsLoading } = useMyRegistrations();
 
-  if (eventsLoading || idsLoading) return <Spinner label="Chargement de vos événements..." />;
+  if (eventsLoading || registrationsLoading) return <Spinner label="Chargement de vos événements..." />;
 
-  const myEvents = (events ?? []).filter((e) => myEventIds?.includes(e.eventId));
+  const myEvents = (events ?? []).flatMap((event) => {
+    const registration = registrations?.find((r) => r.eventId === event.eventId);
+    return registration ? [{ event, registration }] : [];
+  });
 
   if (myEvents.length === 0) {
     return (
@@ -33,15 +37,20 @@ export const MyEventsPage: React.FC = () => {
 
   return (
     <div className={styles.grid}>
-      {myEvents.map((event) => (
+      {myEvents.map(({ event, registration }) => (
         <MediaCard
           key={event.eventId}
           to={`/evenements/${event.eventId}`}
           imageSrc={event.imageUrl || placeholderImage(event.eventId, event.name)}
           imageAlt={event.name}
           title={event.name}
-          subtitle={formatDateRange(event.startDateTime, event.endDateTime)}
-          badge={<Badge label={EVENT_STATUS_LABELS[event.status]} tone={statusTone(event.status)} />}
+          subtitle={`${EVENT_STATUS_LABELS[event.status]} · ${formatDateRange(event.startDateTime, event.endDateTime)}`}
+          badge={
+            <Badge
+              label={REGISTRATION_STATUS_LABELS[registration.status]}
+              tone={registration.status === "participant" ? "accent" : "muted"}
+            />
+          }
         />
       ))}
     </div>

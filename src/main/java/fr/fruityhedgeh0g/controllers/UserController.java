@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
 import fr.fruityhedgeh0g.dtos.userDtos.RoleChangeDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.dtos.Views;
@@ -45,6 +46,15 @@ public class UserController {
     public @JsonView(Views.Detailed.class) UserDto getCurrentUser(){
         UUID userId = UUID.fromString(token.getSubject());
         return userService.getById(userId);
+    }
+
+    @PATCH
+    @Path("/me")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Authenticated
+    public @JsonView(Views.Detailed.class) UserDto updateMyProfile(@NotNull ProfileDto profile){
+        return userService.updateProfile(UUID.fromString(token.getSubject()), profile);
     }
 
     @PUT

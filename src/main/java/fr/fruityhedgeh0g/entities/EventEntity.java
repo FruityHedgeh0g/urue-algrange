@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -70,10 +69,9 @@ public class EventEntity extends AuditTemplate {
     @Column(name = "image_url")
     private String imageUrl;
 
-    //TODO: Gérer les N+1
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "event_participants", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<UserEntity> participants;
+    /** Optional overall maximum of Participants; beyond it, sign-ups go onto the Liste d'attente. */
+    @Column(name = "max_participants")
+    private Integer maxParticipants;
 
     /** Dates are entered and read in the association's local time, whatever the server's zone. */
     public static final ZoneId ZONE = ZoneId.of("Europe/Paris");

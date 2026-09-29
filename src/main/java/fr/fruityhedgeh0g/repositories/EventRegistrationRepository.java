@@ -1,0 +1,41 @@
+package fr.fruityhedgeh0g.repositories;
+
+import fr.fruityhedgeh0g.entities.EventEntity;
+import fr.fruityhedgeh0g.entities.EventRegistrationEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@ApplicationScoped
+public class EventRegistrationRepository implements PanacheRepositoryBase<EventRegistrationEntity, UUID> {
+
+    public Optional<EventRegistrationEntity> findByEventAndPerson(UUID eventId, UUID personId) {
+        return find("event.eventId = ?1 and person.userId = ?2", eventId, personId).firstResultOptional();
+    }
+
+    public long countParticipants(UUID eventId) {
+        return count("event.eventId = ?1 and waiting = false", eventId);
+    }
+
+    public List<EventRegistrationEntity> listByPerson(UUID personId) {
+        return list("person.userId = ?1 order by event.startDateTime", personId);
+    }
+
+    public EventRegistrationEntity persistConfirmed(EventEntity event, UserEntity person) {
+        return persistSignUp(event, person, false);
+    }
+
+    public EventRegistrationEntity persistWaiting(EventEntity event, UserEntity person) {
+        return persistSignUp(event, person, true);
+    }
+
+    private EventRegistrationEntity persistSignUp(EventEntity event, UserEntity person, boolean waiting) {
+        EventRegistrationEntity registration = EventRegistrationEntity.pilote(event, person, waiting);
+        persist(registration);
+        return registration;
+    }
+}

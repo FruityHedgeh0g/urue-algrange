@@ -1,8 +1,10 @@
 package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
+import fr.fruityhedgeh0g.exceptions.PhoneRequiredException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
 import io.quarkus.logging.Log;
@@ -88,6 +90,45 @@ public class EventLogDecorator implements EventService{
                         default -> Log.errorf(t, "An error occurred while changing the event status.");
                     }
                 })
+                .get();
+    }
+
+    @Override
+    public RegistrationDto signUp(UUID eventId, UUID personId) {
+        Log.debugf("%s signs up for event %s...", personId, eventId);
+        return Try.of(() -> eventService.signUp(eventId, personId))
+                .onSuccess(r -> Log.infof("%s signed up for event %s: %s.", personId, eventId, r.status().id()))
+                .onFailure(t -> {
+                    switch (t) {
+                        case InvalidResourceException ex -> Log.warnf("Sign-up refused: %s", ex.getMessage());
+                        case PhoneRequiredException ex -> Log.debugf("Sign-up waiting for a phone number: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.warnf("Sign-up refused: %s", ex.getMessage());
+                        default -> Log.errorf(t, "An error occurred during a sign-up.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public void withdraw(UUID eventId, UUID personId) {
+        Log.debugf("%s withdraws from event %s...", personId, eventId);
+        Try.run(() -> eventService.withdraw(eventId, personId))
+                .onSuccess(v -> Log.infof("%s withdrew from event %s.", personId, eventId))
+                .onFailure(t -> {
+                    switch (t) {
+                        case InvalidResourceException ex -> Log.warnf("Withdrawal refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.warnf("Withdrawal refused: %s", ex.getMessage());
+                        default -> Log.errorf(t, "An error occurred during a withdrawal.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public List<RegistrationDto> registrationsOf(UUID personId) {
+        Log.debugf("Retrieving the sign-ups of %s...", personId);
+        return Try.of(() -> eventService.registrationsOf(personId))
+                .onFailure(t -> Log.errorf(t, "An error occurred while retrieving sign-ups."))
                 .get();
     }
 }

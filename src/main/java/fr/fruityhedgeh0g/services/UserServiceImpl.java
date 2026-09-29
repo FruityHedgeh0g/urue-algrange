@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.utilities.logging.Logged;
 
+import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
@@ -92,6 +93,24 @@ public class UserServiceImpl implements UserService {
             Log.warnf(e, "Could not mirror Role %s of %s to Keycloak", role.id(), personId);
         }
         return changed;
+    }
+
+    @Override
+    @Transactional
+    public UserDto updateProfile(UUID personId, ProfileDto profile) {
+        UserEntity person = userRepository.findByIdOptional(personId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
+        if (isBlank(profile.firstName()) || isBlank(profile.lastName()))
+            throw new InvalidResourceException("A profile has a first and a last name.");
+
+        person.setFirstName(profile.firstName().trim());
+        person.setLastName(profile.lastName().trim());
+        person.setPhone(isBlank(profile.phone()) ? null : profile.phone().trim());
+        return userMapper.toDto(person);
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     @Override

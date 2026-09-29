@@ -11,7 +11,6 @@ public interface EventMapper {
     @Mapping(target = "eventId", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "sector", ignore = true)
-    @Mapping(target = "participants", ignore = true)
     EventEntity toEntity(EventDto dto);
 
     @Mapping(target = "status", expression = "java(entity.currentStatus())")
@@ -21,7 +20,6 @@ public interface EventMapper {
     @Mapping(target = "eventId", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "sector", ignore = true)
-    @Mapping(target = "participants", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     EventEntity partialDtoToEntity(@MappingTarget EventEntity eventEntity, EventDto eventDto);
 }
