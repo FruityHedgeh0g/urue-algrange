@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.utilities.logging;
 
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.services.interfaces.SectorService;
@@ -14,7 +15,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +33,10 @@ class LoggingInterceptorTest {
         when(sectorRepository.listAll()).thenReturn(List.of());
         assertEquals(List.of(), sectorService.listAll());
 
-        when(sectorRepository.findByIdOptional(any())).thenReturn(Optional.empty());
-        assertTrue(sectorService.getById(UUID.randomUUID()).isEmpty());
+        UUID sectorId = UUID.randomUUID();
+        SectorEntity sector = SectorEntity.builder().sectorId(sectorId).name("Nord").build();
+        when(sectorRepository.findByIdOptional(sectorId)).thenReturn(Optional.of(sector));
+        assertEquals(sectorId, sectorService.getById(sectorId).getSectorId());
     }
 
     @Test

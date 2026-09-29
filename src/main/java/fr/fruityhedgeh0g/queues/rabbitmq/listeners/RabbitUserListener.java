@@ -22,6 +22,7 @@ public class RabbitUserListener {
     @ConfigProperty(name ="rabbitmq.routing.user-created") String userCreationRoute;
 
     @ConfigProperty(name ="rabbitmq.queue.user-listener") String queue;
+    @ConfigProperty(name ="rabbitmq.enabled", defaultValue = "true") boolean enabled;
     @Inject RabbitConnector rabbitConnector;
     @Inject InternalUserService internalUserService;
     @Inject KeycloakDeserializer deserializer;
@@ -33,6 +34,7 @@ public class RabbitUserListener {
 //    }
 
     void startup(@Observes StartupEvent event) throws Exception {
+        if (!enabled) return;
         //todo: rendre ce morceau resilient
         String consumerTag = this.getClass().getSimpleName();
         Channel channel = rabbitConnector.openChannel();
