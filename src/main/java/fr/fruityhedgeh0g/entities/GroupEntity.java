@@ -3,8 +3,7 @@ package fr.fruityhedgeh0g.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "groups")
@@ -34,6 +33,7 @@ public class GroupEntity extends AuditTemplate {
     private SectorEntity sector;
 
     public void addMember(UserEntity member) {
+        if (members == null) members = new HashSet<>();
         members.add(member);
         member.setGroup(this);
     }
@@ -43,9 +43,25 @@ public class GroupEntity extends AuditTemplate {
         member.setGroup(null);
     }
 
-    @PreRemove
-    private void preRemove() {
-        members.forEach(member -> member.setGroup(null));
+    public Set<UserEntity> getMembers() {
+        if (members == null) members = new HashSet<>();
+        return members;
+    }
+//    @PreRemove
+//    private void preRemove() {
+//        members.forEach(member -> member.setGroup(null));
+//    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        GroupEntity that = (GroupEntity) o;
+        return Objects.equals(groupId, that.groupId) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(members, that.members) && Objects.equals(sector, that.sector);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(groupId);
+    }
 }

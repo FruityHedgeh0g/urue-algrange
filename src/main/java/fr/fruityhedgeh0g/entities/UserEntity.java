@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -60,4 +61,15 @@ public class UserEntity extends AuditTemplate{
         role.removeUser(this);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(userId, that.userId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(roles, that.roles) && Objects.equals(group, that.group) && Objects.equals(organizedEvents, that.organizedEvents) && Objects.equals(participatedEvents, that.participatedEvents) && Objects.equals(createdEvents, that.createdEvents);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(userId);
+    }
 }

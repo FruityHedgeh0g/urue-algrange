@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicRoleService;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class RoleController {
 
     @Inject
-    RoleService roleService;
+    PublicRoleService roleService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

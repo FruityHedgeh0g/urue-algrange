@@ -4,18 +4,21 @@ import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
-import fr.fruityhedgeh0g.services.interfaces.UserService;
-import fr.fruityhedgeh0g.services.interfaces.internal.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
-import io.smallrye.common.annotation.Identifier;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
@@ -23,14 +26,11 @@ import java.util.*;
 @AllArgsConstructor
 @Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
-public class GroupServiceImpl implements InternalGroupService, GroupService {
-    @Inject
-    GroupRepository groupRepository;
-
-    @Inject
-    GroupMapper groupMapper;
+public class GroupServiceImpl implements GroupService, InternalGroupService {
+    @Inject GroupRepository groupRepository;
+    @Inject InternalUserService internalUserService;
+    @Inject GroupMapper groupMapper;
 
     @Override
     public List<GroupDto> listAll() {
@@ -41,9 +41,21 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
     }
 
     @Override
-    public Optional<GroupDto> getById(UUID groupId) {
-        return groupRepository.findByIdOptional(groupId)
-                .map(groupMapper::toDto);
+    public GroupDto getById(UUID groupId) {
+        return groupMapper.toDto(
+                groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId))
+        );
+    }
+
+    @Override
+    public Optional<GroupEntity> doGetEntityByUserId(UUID userId) {
+        GroupEntity groupEntity = internalUserService.doGetEntityById(userId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: "+userId))
+                .getGroup();
+
+        if (groupEntity == null) throw new UnknownResourceException("User isn't assigned to any group.");
+        return doGetEntityById(groupEntity.getGroupId());
     }
 
     @Override
@@ -62,7 +74,7 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
     @Transactional
     public GroupDto update(GroupDto groupDto) {
         GroupEntity groupEntity = groupRepository.findByIdOptional(groupDto.getGroupId())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupDto.getGroupId()));
 
         if (!groupEntity.getName().equals(groupDto.getName()) && groupRepository.existsByName(groupDto.getName()))
             throw new DuplicateResourceException("A group with this name already exists in the system.");
@@ -76,13 +88,60 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
     @Override
     @Transactional
     public void delete(UUID groupId) {
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        if (groupEntity.getSector() != null)
+            throw new InvalidResourceException("Group is assigned to a sector, cannot be deleted");
+
+        if (!groupEntity.getMembers().isEmpty())
+            throw new InvalidResourceException("Group is assigned to users, cannot be deleted");
+
         //todo: développer la suppression.
         groupRepository.deleteById(groupId);
     }
 
     @Override
-    public Optional<GroupEntity> getInternalEntityById(UUID groupId) {
-        return Optional.empty();
+    @Transactional
+    public void assignUser(UUID groupId, UUID userId) {
+        UserEntity userEntity = internalUserService.doGetEntityById(userId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
+
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        if (userEntity.getGroup() != null) {
+            if (userEntity.getGroup().getGroupId().equals(groupId)) return;
+            throw new DuplicateResourceException("User already assigned to another group");
+        }
+
+        groupEntity.addMember(userEntity);
+        groupRepository.persist(groupEntity);
+
+    }
+
+    @Override
+    @Transactional
+    public void unassignUser(UUID groupId, UUID userId) {
+        UserEntity userEntity = internalUserService.doGetEntityById(userId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
+
+        if (userEntity.getGroup() == null) return;
+
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        if (!userEntity.getGroup().getGroupId().equals(groupId))
+            throw new InvalidResourceException("This user is assigned to another group.");
+
+        groupEntity.removeMember(userEntity);
+        groupRepository.persist(groupEntity);
+
+    }
+
+    @Override
+    public Optional<GroupEntity> doGetEntityById(UUID groupId) {
+        return groupRepository.findByIdOptional(groupId);
     }
 
 

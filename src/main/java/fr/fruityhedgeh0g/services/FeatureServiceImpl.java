@@ -9,6 +9,7 @@ import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.FeatureRepository;
 import fr.fruityhedgeh0g.services.interfaces.FeatureService;
 import fr.fruityhedgeh0g.utilities.mappers.FeatureMapper;
+import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -22,7 +23,6 @@ import java.util.Optional;
 @AllArgsConstructor
 @Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class FeatureServiceImpl implements FeatureService {
     @Inject
@@ -40,16 +40,18 @@ public class FeatureServiceImpl implements FeatureService {
     }
 
     @Override
-    public Optional<FeatureDto> getByName(String name) {
-        return featureRepository.findByName(name)
-                .map(featureMapper::toDto);
+    public FeatureDto getByName(String name) {
+        return featureMapper.toDto(
+                featureRepository.findByName(name)
+                .orElseThrow(() -> new UnknownResourceException("Feature not found: " + name))
+        );
     }
 
     @Override
     @Transactional
     public FeatureDto update(FeatureDto featureDto) {
         FeatureEntity featureEntity = featureRepository.findByName(featureDto.getName())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("Feature not found: " + featureDto.getName()));
 
         featureEntity = featureMapper.partialDtoToEntity(featureEntity,featureDto);
         featureRepository.persist(featureEntity);

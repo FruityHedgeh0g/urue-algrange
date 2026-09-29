@@ -3,9 +3,11 @@ package fr.fruityhedgeh0g.services;
 import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.EventRepository;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
 import fr.fruityhedgeh0g.utilities.mappers.EventMapper;
+import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -20,7 +22,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class EventServiceImpl implements EventService {
 
@@ -39,9 +40,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Optional<EventDto> getById(UUID eventId) {
-        return eventRepository.findByIdOptional(eventId)
-                .map(eventMapper::toDto);
+    public EventDto getById(UUID eventId) {
+        return eventMapper.toDto(
+                eventRepository.findByIdOptional(eventId)
+                        .orElseThrow(() -> new UnknownResourceException("Event not found: " + eventId))
+        );
+
     }
 
     @Override

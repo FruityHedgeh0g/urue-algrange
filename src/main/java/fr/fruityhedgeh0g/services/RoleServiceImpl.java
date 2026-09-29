@@ -3,14 +3,14 @@ package fr.fruityhedgeh0g.services;
 import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.roleDtos.RoleDto;
-import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.RoleRepository;
 import fr.fruityhedgeh0g.services.interfaces.RoleService;
 import fr.fruityhedgeh0g.utilities.mappers.RoleMapper;
-import io.smallrye.common.annotation.Identifier;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -18,13 +18,11 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
 @Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class RoleServiceImpl implements RoleService {
     @Inject
@@ -42,9 +40,12 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<RoleDto> getById(UUID roleId) {
-        return roleRepository.findByIdOptional(roleId)
-                .map(roleMapper::toDto);
+    public RoleDto getById(UUID roleId) {
+        return roleMapper.toDto(
+                roleRepository.findByIdOptional(roleId)
+                        .orElseThrow(() -> new UnknownResourceException("Role not found: "+roleId))
+        );
+
     }
 
     @Override
@@ -78,7 +79,8 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void delete(UUID roleId) {
         //Todo: tester si le role si le role appartient à des users, refuser la suppression le cas échéant
-        roleRepository.deleteById(roleId);
+        //roleRepository.deleteById(roleId);
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
 //

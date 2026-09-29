@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicGroupService;
 import io.smallrye.common.annotation.Identifier;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,20 +17,22 @@ import java.util.List;
 public class GroupController {
 
     @Inject
-    GroupService groupService;
+    PublicGroupService groupService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("groups:read:all")
     public @JsonView(Views.Basic.class) List<GroupDto> getAllGroups(){
+
         return groupService.listAll();
     }
 
-//    @POST
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    public @JsonView(Views.CreationResponse.class) GroupDto addGroup(@JsonView(Views.Creation.class) GroupDto groupDto){
-//        return groupService.createGroup(groupDto).get();
-//    }
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public @JsonView(Views.CreationResponse.class) GroupDto addGroup(@JsonView(Views.Creation.class) GroupDto groupDto){
+        return groupService.create(groupDto);
+    }
 }
 
 

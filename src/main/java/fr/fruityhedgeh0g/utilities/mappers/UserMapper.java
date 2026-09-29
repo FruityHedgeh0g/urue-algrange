@@ -1,12 +1,16 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
+import io.vertx.core.json.Json;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
 public interface UserMapper {
+    static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writer();
 
     @Mapping(target = "roles",ignore = true)
     UserEntity toEntity(UserDto dto);

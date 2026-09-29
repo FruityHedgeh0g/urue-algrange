@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.dtos.userDtos;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.groupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.dtos.roleDtos.NestedRoleDto;
@@ -18,14 +19,17 @@ public class UserDto {
 
     @NotNull
     @JsonView({Views.Minimal.class,Views.Creation.class,Views.Update.class})
+    @JsonAlias("user_id")
     UUID userId;
 
-    @NotBlank
+    @NotBlank(groups={Views.Creation.class})
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    @JsonAlias({"first_name","updated_first_name"})
     String firstName;
 
-    @NotBlank
+    @NotBlank(groups={Views.Creation.class})
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    @JsonAlias({"last_name","updated_last_name"})
     String lastName;
 
     @JsonView(Views.Detailed.class)

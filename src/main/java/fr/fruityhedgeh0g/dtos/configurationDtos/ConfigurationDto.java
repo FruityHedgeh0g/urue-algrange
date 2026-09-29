@@ -7,6 +7,7 @@ import lombok.Value;
 
 @Value
 @Builder
+
 public class ConfigurationDto {
 
     @JsonView({Views.Basic.class, Views.UpdateResponse.class})
