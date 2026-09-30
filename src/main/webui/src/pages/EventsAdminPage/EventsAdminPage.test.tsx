@@ -118,6 +118,28 @@ describe("EventsAdminPage", () => {
     await waitFor(() => expect(within(screen.getByRole("list", { name: "Liste d'attente" })).getByText(/Meyer/).closest("li")).toHaveTextContent("Groupe : Groupe Algrange Centre"));
   });
 
+  it("sets a Groupe's maximum and shows the Groupe's Liste d'attente in sign-up order", async () => {
+    const eventId = (await createEventsApi().fetchEvents(true)).find((e) => e.name === "Test Ouvert")!.eventId;
+    const registrations = createRegistrationsApi();
+    for (const [userId, lastName] of [["p-3", "Meyer"], ["p-4", "Klein"]]) {
+      await registrations.signUp(eventId, { userId, firstName: "Test", lastName, phone: "06 00 00 00 00" }, "group-1");
+    }
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+
+    const groupes = await screen.findByRole("list", { name: "Groupes" });
+    const centre = within(groupes).getByText("Groupe Algrange Centre").closest("li") as HTMLElement;
+    await userEvent.type(within(centre).getByLabelText("Maximum"), "1");
+    await userEvent.click(within(centre).getByRole("button", { name: "Appliquer" }));
+
+    await waitFor(() => expect(centre).toHaveTextContent("0 / 1"));
+    const waiting = within(centre).getByRole("list", { name: "Liste d'attente de Groupe Algrange Centre" });
+    expect(within(waiting).getAllByRole("listitem").map((li) => li.textContent)).toEqual([
+      expect.stringContaining("Meyer"),
+      expect.stringContaining("Klein"),
+    ]);
+  });
+
   it("sets and clears the maximum number of Participants", async () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));

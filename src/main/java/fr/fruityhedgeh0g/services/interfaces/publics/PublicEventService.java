@@ -30,10 +30,15 @@ public interface PublicEventService {
     RegistrationDto signUp(@NotNull UUID eventId, @NotNull UUID personId, UUID groupId);
     /** A new Demande de groupe, for someone signed up and not yet riding with a Groupe. */
     RegistrationDto requestGroup(@NotNull UUID eventId, @NotNull UUID personId, @NotNull UUID groupId);
-    /** Accepts or refuses a pending Demande: the asked Groupe's Chef (by Affectation) or the Bureau. */
+    /**
+     * Accepts or refuses a pending Demande: the asked Groupe's Chef (by Affectation) or the Bureau.
+     * Accepting is refused at the Groupe's maximum; the Demande then stays pending.
+     */
     RegistrationDto decideDemande(@NotNull UUID eventId, @NotNull UUID personId, @NotNull Actor actor, boolean accept);
-    /** The Bureau places a Participant in a Groupe directly. */
+    /** The Bureau places a Participant in a Groupe directly, within the Groupe's maximum. */
     RosterDto placeInGroup(@NotNull UUID eventId, @NotNull UUID personId, @NotNull UUID groupId);
+    /** The Bureau sets a Groupe's maximum at the Event (a Groupe of the Event's Secteur); null or 0 removes it. */
+    RosterDto setGroupMaximum(@NotNull UUID eventId, @NotNull UUID groupId, Integer maximum);
     /** The Groupe's Chef or the Bureau takes the person out of the Groupe; they stay signed up. */
     RegistrationDto takeOutOfGroup(@NotNull UUID eventId, @NotNull UUID personId, @NotNull Actor actor);
     /** Mon groupe for a Chef de groupe: empty without an Affectation. */

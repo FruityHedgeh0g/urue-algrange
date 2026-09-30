@@ -11,6 +11,7 @@ const BUREAU = { personId: "bureau", bureau: true };
 let eventId: string;
 let nord: string;
 let sud: string;
+let elsewhere: string;
 
 const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 19);
 
@@ -83,5 +84,72 @@ describe("registrationsApi: Demande de groupe", () => {
     expect(balade.members).toEqual([]);
 
     expect(await api.fetchMonGroupe("nobody")).toEqual({ group: null, events: [] });
+  });
+});
+
+describe("registrationsApi: Groupe maximum and the Groupe's Liste d'attente", () => {
+  beforeEach(async () => {
+    const events = createEventsApi();
+    const groups = createGroupsApi();
+    await groups.createGroup({ name: "Test Nord", description: "", area: "", sectorId: "sector-1" });
+    await groups.createGroup({ name: "Test Ailleurs", description: "", area: "", sectorId: "sector-2" });
+    const all = await groups.fetchGroups();
+    nord = all.find((g) => g.name === "Test Nord")!.groupId;
+    elsewhere = all.find((g) => g.name === "Test Ailleurs")!.groupId;
+    await groups.setChef(nord, { userId: "chef-nord", firstName: "Chef", lastName: "Nord" });
+
+    const event = await events.createEvent({ name: "Test Balade", description: "", sectorId: "sector-1", startDateTime: inDays(10), endDateTime: inDays(11) });
+    await events.changeStatus(event.eventId, "ouvert");
+    eventId = event.eventId;
+  });
+
+  afterEach(() => localStorage.clear());
+
+  const nordIn = (roster: { groups: { group: { groupId: string } }[] }) => roster.groups.find((g) => g.group.groupId === nord)!;
+
+  it("lets the Bureau set and clear a Groupe's maximum, only for a Groupe of the Event's Secteur", async () => {
+    const api = createRegistrationsApi();
+    expect(nordIn(await api.setGroupMaximum(eventId, nord, 2))).toMatchObject({ maximum: 2 });
+    expect(nordIn(await api.fetchRoster(eventId))).toMatchObject({ maximum: 2 });
+    expect(nordIn(await api.setGroupMaximum(eventId, nord, null))).toMatchObject({ maximum: null });
+    await expect(api.setGroupMaximum(eventId, elsewhere, 2)).rejects.toThrow();
+  });
+
+  it("refuses to accept or place beyond the maximum; the Demande stays pending", async () => {
+    const api = createRegistrationsApi();
+    await api.setGroupMaximum(eventId, nord, 1);
+    await api.signUp(eventId, person("anne"), nord);
+    await api.signUp(eventId, person("bruno"), nord);
+    await api.decideDemande(eventId, "anne", CHEF, true);
+
+    await expect(api.decideDemande(eventId, "bruno", CHEF, true)).rejects.toThrow(/maximum/);
+    await expect(api.placeInGroup(eventId, "bruno", nord)).rejects.toThrow(/maximum/);
+    expect(nordIn(await api.fetchRoster(eventId)).demandes.map((d) => d.personId)).toEqual(["bruno"]);
+  });
+
+  it("shows the Groupe's pending Demandes in sign-up order, in Mon groupe and the Bureau roster", async () => {
+    const api = createRegistrationsApi();
+    await api.setGroupMaximum(eventId, nord, 1);
+    for (const id of ["claire", "anne", "bruno"]) await api.signUp(eventId, person(id), nord);
+
+    const balade = (await api.fetchMonGroupe("chef-nord")).events.find((e) => e.eventId === eventId)!;
+    expect(balade.maximum).toBe(1);
+    expect(balade.demandes.map((d) => d.personId)).toEqual(["claire", "anne", "bruno"]);
+    expect(nordIn(await api.fetchRoster(eventId)).demandes.map((d) => d.personId)).toEqual(["claire", "anne", "bruno"]);
+  });
+
+  it("frees a place when someone is taken out, without accepting anyone", async () => {
+    const api = createRegistrationsApi();
+    await api.setGroupMaximum(eventId, nord, 1);
+    for (const id of ["anne", "bruno", "claire"]) await api.signUp(eventId, person(id), nord);
+    await api.decideDemande(eventId, "anne", CHEF, true);
+
+    await api.takeOutOfGroup(eventId, "anne", CHEF);
+    const nordAfter = nordIn(await api.fetchRoster(eventId));
+    expect(nordAfter.members).toEqual([]);
+    expect(nordAfter.demandes.map((d) => d.personId)).toEqual(["bruno", "claire"]);
+
+    expect((await api.decideDemande(eventId, "claire", CHEF, true)).group?.groupId).toBe(nord);
+    await expect(api.decideDemande(eventId, "bruno", CHEF, true)).rejects.toThrow();
   });
 });

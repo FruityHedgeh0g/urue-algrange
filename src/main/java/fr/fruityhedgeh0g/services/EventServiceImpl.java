@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.DemandeDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.GroupRosterDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupRefDto;
@@ -103,8 +104,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto update(EventDto eventDto) {
         EventEntity event = eventOrThrow(eventDto.getEventId());
-        if (event.currentStatus().isFinal())
-            throw new InvalidResourceException("An archived or cancelled Event is no longer edited.");
+        refuseOnFinal(event);
         eventMapper.partialDtoToEntity(event, eventDto);
         normalizeMaximum(event);
         validate(event);
@@ -157,25 +157,44 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public RegistrationDto decideDemande(UUID eventId, UUID personId, Actor actor, boolean accept) {
-        refuseOnArchived(eventOrThrow(eventId));
+        EventEntity event = lockedEventOrThrow(eventId);
+        refuseOnArchived(event);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         if (!registration.hasPendingDemande())
             throw new InvalidResourceException("No pending Demande de groupe for " + personId);
         requireLeaderOrBureau(actor, registration.getDemandeGroup());
-        if (accept) registration.acceptDemande();
-        else registration.refuseDemande();
+        if (accept) {
+            // Beyond the maximum the Demande stays pending, on the Groupe's Liste d'attente
+            requireRoomIn(event, registration.getDemandeGroup());
+            registration.acceptDemande();
+        } else registration.refuseDemande();
         return toDto(registration);
     }
 
     @Override
     @Transactional
     public RosterDto placeInGroup(UUID eventId, UUID personId, UUID groupId) {
-        EventEntity event = eventOrThrow(eventId);
+        EventEntity event = lockedEventOrThrow(eventId);
         refuseOnArchived(event);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         if (registration.isWaiting())
             throw new InvalidResourceException("Only a Participant is placed in a Groupe.");
-        registration.placeIn(groupOrThrow(groupId));
+        GroupEntity group = groupOrThrow(groupId);
+        if (!registration.ridesWith(group)) requireRoomIn(event, group);
+        registration.placeIn(group);
+        return rosterOf(event);
+    }
+
+    @Override
+    @Transactional
+    public RosterDto setGroupMaximum(UUID eventId, UUID groupId, Integer maximum) {
+        EventEntity event = lockedEventOrThrow(eventId);
+        refuseOnFinal(event);
+        GroupEntity group = groupOrThrow(groupId);
+        if (!event.isOfSectorOf(group))
+            throw new InvalidResourceException("The Groupe " + groupId + " is not of the Event's Secteur.");
+        // Lowering it below the current riders takes nobody out; it only stops new acceptances
+        event.setMaximumOf(group, maximum);
         return rosterOf(event);
     }
 
@@ -208,8 +227,9 @@ public class EventServiceImpl implements EventService {
                 .sorted(Comparator.comparing((Map.Entry<EventEntity, List<EventRegistrationEntity>> e) -> e.getKey().getStartDateTime()))
                 .map(e -> new MonGroupeDto.EventRoster(
                         e.getKey().getEventId(), e.getKey().getName(), e.getKey().getStartDateTime(), e.getKey().currentStatus(),
-                        e.getValue().stream().filter(r -> group.equals(r.getGroup())).map(EventServiceImpl::toRosterEntry).toList(),
-                        e.getValue().stream().filter(EventRegistrationEntity::hasPendingDemande).map(EventServiceImpl::toRosterEntry).toList()))
+                        e.getKey().maximumOf(group),
+                        e.getValue().stream().filter(r -> r.ridesWith(group)).map(EventServiceImpl::toRosterEntry).toList(),
+                        e.getValue().stream().filter(r -> r.asksFor(group)).map(EventServiceImpl::toRosterEntry).toList()))
                 .toList();
         return new MonGroupeDto(GroupRefDto.of(group), events);
     }
@@ -219,6 +239,13 @@ public class EventServiceImpl implements EventService {
         boolean leads = group != null && group.getChef() != null && group.getChef().getUserId().equals(actor.personId());
         if (!actor.bureau() && !leads)
             throw new ForbiddenActionException(actor.personId() + " does not lead this Groupe.");
+    }
+
+    /** Refuses one more rider in the Groupe once its maximum at the Event is reached; no maximum means no limit. */
+    private void requireRoomIn(EventEntity event, GroupEntity group) {
+        Integer maximum = event.maximumOf(group);
+        if (maximum != null && registrationRepository.countInGroup(event.getEventId(), group.getGroupId()) >= maximum)
+            throw new InvalidResourceException("The Groupe is at its maximum of " + maximum + " at this Event.");
     }
 
     private GroupEntity groupOrThrow(UUID groupId) {
@@ -272,11 +299,19 @@ public class EventServiceImpl implements EventService {
 
     private RosterDto rosterOf(EventEntity event) {
         List<EventRegistrationEntity> all = registrationRepository.listByEvent(event.getEventId());
+        List<GroupEntity> groups = event.getSector() == null ? List.of()
+                : internalGroupService.doListEntitiesOfSector(event.getSector().getSectorId());
         return new RosterDto(
                 event.getEventId(),
                 event.getMaxParticipants(),
                 all.stream().filter(r -> !r.isWaiting()).map(EventServiceImpl::toRosterEntry).toList(),
-                all.stream().filter(EventRegistrationEntity::isWaiting).map(EventServiceImpl::toRosterEntry).toList()
+                all.stream().filter(EventRegistrationEntity::isWaiting).map(EventServiceImpl::toRosterEntry).toList(),
+                groups.stream().map(group -> new GroupRosterDto(
+                        GroupRefDto.of(group),
+                        event.maximumOf(group),
+                        all.stream().filter(r -> r.ridesWith(group)).map(EventServiceImpl::toRosterEntry).toList(),
+                        all.stream().filter(r -> r.asksFor(group)).map(EventServiceImpl::toRosterEntry).toList()
+                )).toList()
         );
     }
 
@@ -291,6 +326,11 @@ public class EventServiceImpl implements EventService {
     private boolean placeLeft(EventEntity event) {
         return event.getMaxParticipants() == null
                 || registrationRepository.countParticipants(event.getEventId()) < event.getMaxParticipants();
+    }
+
+    private static void refuseOnFinal(EventEntity event) {
+        if (event.currentStatus().isFinal())
+            throw new InvalidResourceException("An archived or cancelled Event is no longer edited.");
     }
 
     private void refuseOnArchived(EventEntity event) {

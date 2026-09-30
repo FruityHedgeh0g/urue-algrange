@@ -75,6 +75,16 @@ public class EventRegistrationEntity extends AuditTemplate {
         return demandeStatus == DemandeStatusEnum.EN_ATTENTE;
     }
 
+    /** true once accepted in, or placed in, that Groupe at this Event. */
+    public boolean ridesWith(GroupEntity other) {
+        return group != null && group.getGroupId().equals(other.getGroupId());
+    }
+
+    /** true while a pending Demande for that Groupe waits for a decision (its Liste d'attente). */
+    public boolean asksFor(GroupEntity other) {
+        return hasPendingDemande() && demandeGroup.getGroupId().equals(other.getGroupId());
+    }
+
     public void acceptDemande() {
         requirePendingDemande();
         group = demandeGroup;

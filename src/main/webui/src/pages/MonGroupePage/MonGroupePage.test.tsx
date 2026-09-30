@@ -54,6 +54,32 @@ describe("MonGroupePage", () => {
     expect(within(balade).queryByRole("list", { name: "Demandes en attente" })).not.toBeInTheDocument();
   });
 
+  it("shows the Groupe's maximum and, once reached, keeps Demandes waiting in sign-up order", async () => {
+    await seedLedGroupe();
+    const eventId = (await createEventsApi().fetchEvents(true)).find((e) => e.name === "Test Balade")!.eventId;
+    const nord = (await createGroupsApi().fetchGroups()).find((g) => g.name === "Test Nord")!.groupId;
+    const api = createRegistrationsApi();
+    await api.setGroupMaximum(eventId, nord, 1);
+    await api.signUp(eventId, { userId: "p-2", firstName: "Marc", lastName: "Weber", phone: "06 00 00 00 00" }, nord);
+    await api.decideDemande(eventId, "p-2", { personId: "mock-user", bureau: false }, true);
+    await api.signUp(eventId, { userId: "p-3", firstName: "Lea", lastName: "Meyer", phone: "06 00 00 00 00" }, nord);
+    renderPage();
+
+    const balade = await screen.findByRole("region", { name: "Test Balade" });
+    expect(within(balade).getByText("Dans le groupe : 1 / 1")).toBeInTheDocument();
+    const demandes = within(balade).getByRole("list", { name: "Demandes en attente" });
+    expect(within(demandes).getAllByRole("listitem").map((li) => li.textContent)).toEqual([
+      expect.stringContaining("Kremer"),
+      expect.stringContaining("Meyer"),
+    ]);
+    expect(within(demandes).getAllByRole("button", { name: "Accepter" })[0]).toBeDisabled();
+    expect(within(balade).getByText(/Maximum atteint/)).toBeInTheDocument();
+
+    await userEvent.click(within(within(balade).getByRole("list", { name: "Membres du groupe" })).getByRole("button", { name: "Sortir du groupe" }));
+    await waitFor(() => expect(within(balade).getByText("Dans le groupe : 0 / 1")).toBeInTheDocument());
+    expect(within(within(balade).getByRole("list", { name: "Demandes en attente" })).getAllByRole("listitem")).toHaveLength(2);
+  });
+
   it("takes a member out of the Groupe", async () => {
     await seedLedGroupe();
     renderPage();

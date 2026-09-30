@@ -166,6 +166,14 @@ public class GroupLogDecorator implements GroupService {
     }
 
     @Override
+    public List<GroupEntity> doListEntitiesOfSector(UUID sectorId) {
+        Log.debugf("[INTERNAL] Retrieving the groups of sector %s...", sectorId);
+        return Try.of(() -> groupService.doListEntitiesOfSector(sectorId))
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving the groups of sector %s.", sectorId))
+                .get();
+    }
+
+    @Override
     public Optional<GroupEntity> doGetEntityById(UUID groupId) {
         Log.debugf("[INTERNAL] Retrieving group by id %s...",groupId);
         return Try.of(() -> groupService.doGetEntityById(groupId))

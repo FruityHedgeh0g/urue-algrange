@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +17,7 @@ public interface InternalGroupService {
 
     /** The Groupe the person leads through their current Affectation, if any. */
     Optional<GroupEntity> doGetEntityLedBy(@NotNull UUID userId);
+
+    /** The Groupes of a Secteur, by name. */
+    List<GroupEntity> doListEntitiesOfSector(@NotNull UUID sectorId);
 }

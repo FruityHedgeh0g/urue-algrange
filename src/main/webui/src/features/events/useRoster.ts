@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { decideDemande, fetchMonGroupe, fetchRoster, placeInGroup, promote, remove, takeOutOfGroup } from "./registrationsApi";
+import { decideDemande, fetchMonGroupe, fetchRoster, placeInGroup, promote, remove, setGroupMaximum, takeOutOfGroup } from "./registrationsApi";
 import { queryKeys } from "../queryKeys";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -40,8 +40,12 @@ export function useRoster(eventId: string) {
     mutationFn: (input: { personId: string; groupId: string }) => placeInGroup(eventId, input.personId, input.groupId),
     onSuccess: invalidate,
   });
+  const setMaximum = useMutation({
+    mutationFn: (input: { groupId: string; maximum: number | null }) => setGroupMaximum(eventId, input.groupId, input.maximum),
+    onSuccess: invalidate,
+  });
 
-  return { roster, moveUp, removePerson, place };
+  return { roster, moveUp, removePerson, place, setMaximum };
 }
 
 /** Mon groupe : le Groupe mené par la personne connectée et, par Événement, ses membres et Demandes. */

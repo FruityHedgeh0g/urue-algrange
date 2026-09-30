@@ -197,6 +197,12 @@ public class EventLogDecorator implements EventService{
     }
 
     @Override
+    public RosterDto setGroupMaximum(UUID eventId, UUID groupId, Integer maximum) {
+        return logged(() -> eventService.setGroupMaximum(eventId, groupId, maximum),
+                "Maximum " + maximum + " for group " + groupId + " at event " + eventId);
+    }
+
+    @Override
     public RegistrationDto takeOutOfGroup(UUID eventId, UUID personId, Actor actor) {
         return logged(() -> eventService.takeOutOfGroup(eventId, personId, actor),
                 "Removal of " + personId + " from their group at event " + eventId + " by " + actor.personId());

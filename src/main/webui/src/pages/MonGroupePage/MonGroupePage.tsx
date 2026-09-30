@@ -10,7 +10,9 @@ import styles from "./MonGroupePage.module.css";
 /**
  * Mon groupe : pour le Groupe que la personne mène (Affectation), la liste de
  * chaque Événement — membres et Demandes de groupe en attente — avec les
- * actions du Chef : accepter, refuser, sortir du groupe.
+ * actions du Chef : accepter, refuser, sortir du groupe. Au maximum du Groupe,
+ * les Demandes attendent dans l'ordre d'inscription : sortir quelqu'un libère
+ * une place sans accepter personne, le Chef choisit.
  */
 export const MonGroupePage: React.FC = () => {
   const { data, isLoading } = useMonGroupe();
@@ -37,60 +39,70 @@ export const MonGroupePage: React.FC = () => {
       {data.events.length === 0 && <p className={styles.empty}>Aucun événement ne concerne votre groupe pour le moment.</p>}
       {error && <p className={styles.error}>{error.message}</p>}
 
-      {data.events.map((event) => (
-        <section key={event.eventId} className={styles.event} aria-label={event.name}>
-          <h3 className={styles.eventTitle}>
-            {event.name}
-            <span className={styles.meta}>
-              {formatDate(event.startDateTime)} · {EVENT_STATUS_LABELS[event.status]}
-            </span>
-          </h3>
+      {data.events.map((event) => {
+        const full = event.maximum !== null && event.members.length >= event.maximum;
+        return (
+          <section key={event.eventId} className={styles.event} aria-label={event.name}>
+            <h3 className={styles.eventTitle}>
+              {event.name}
+              <span className={styles.meta}>
+                {formatDate(event.startDateTime)} · {EVENT_STATUS_LABELS[event.status]}
+              </span>
+            </h3>
+            <p className={styles.meta}>
+              Dans le groupe : {event.members.length}
+              {event.maximum !== null ? ` / ${event.maximum}` : ""}
+            </p>
 
-          {event.members.length === 0 ? (
-            <p className={styles.empty}>Aucun membre pour cet événement.</p>
-          ) : (
-            <ul className={styles.list} aria-label="Membres du groupe">
-              {event.members.map((m) =>
-                person(
-                  m,
-                  <Button
-                    type="button"
-                    label="Sortir du groupe"
-                    variant="outline"
-                    disabled={pending}
-                    onClick={() => takeOut.mutate({ eventId: event.eventId, personId: m.personId })}
-                  />
-                )
-              )}
-            </ul>
-          )}
-
-          {event.demandes.length > 0 && (
-            <ul className={styles.list} aria-label="Demandes en attente">
-              {event.demandes.map((d) =>
-                person(
-                  d,
-                  <>
+            {event.members.length === 0 ? (
+              <p className={styles.empty}>Aucun membre pour cet événement.</p>
+            ) : (
+              <ul className={styles.list} aria-label="Membres du groupe">
+                {event.members.map((m) =>
+                  person(
+                    m,
                     <Button
                       type="button"
-                      label="Accepter"
-                      disabled={pending}
-                      onClick={() => decide.mutate({ eventId: event.eventId, personId: d.personId, accept: true })}
-                    />
-                    <Button
-                      type="button"
-                      label="Refuser"
+                      label="Sortir du groupe"
                       variant="outline"
                       disabled={pending}
-                      onClick={() => decide.mutate({ eventId: event.eventId, personId: d.personId, accept: false })}
+                      onClick={() => takeOut.mutate({ eventId: event.eventId, personId: m.personId })}
                     />
-                  </>
-                )
-              )}
-            </ul>
-          )}
-        </section>
-      ))}
+                  )
+                )}
+              </ul>
+            )}
+
+            {event.demandes.length > 0 && (
+              <ol className={styles.list} aria-label="Demandes en attente">
+                {event.demandes.map((d) =>
+                  person(
+                    d,
+                    <>
+                      <Button
+                        type="button"
+                        label="Accepter"
+                        disabled={pending || full}
+                        onClick={() => decide.mutate({ eventId: event.eventId, personId: d.personId, accept: true })}
+                      />
+                      <Button
+                        type="button"
+                        label="Refuser"
+                        variant="outline"
+                        disabled={pending}
+                        onClick={() => decide.mutate({ eventId: event.eventId, personId: d.personId, accept: false })}
+                      />
+                    </>
+                  )
+                )}
+              </ol>
+            )}
+            {full && event.demandes.length > 0 && (
+              <p className={styles.empty}>Maximum atteint : sortez quelqu'un du groupe pour libérer une place, puis choisissez qui accepter.</p>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 };

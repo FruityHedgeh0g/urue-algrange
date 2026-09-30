@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventStatusChangeDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.GroupMaximumDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.DemandeRequestDto;
@@ -93,6 +94,17 @@ public class EventController {
     public RosterDto placeInGroup(@PathParam("eventId") UUID eventId, @PathParam("personId") UUID personId,
                                   @PathParam("groupId") UUID groupId){
         return eventService.placeInGroup(eventId, personId, groupId);
+    }
+
+    /** A Groupe's maximum at this Event; null or 0 removes it. */
+    @PUT
+    @Path("/{eventId}/groups/{groupId}/maximum")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public RosterDto setGroupMaximum(@PathParam("eventId") UUID eventId, @PathParam("groupId") UUID groupId,
+                                     @Valid @NotNull GroupMaximumDto maximum){
+        return eventService.setGroupMaximum(eventId, groupId, maximum.maximum());
     }
 
     @DELETE

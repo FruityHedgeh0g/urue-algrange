@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -72,6 +74,29 @@ public class EventEntity extends AuditTemplate {
     /** Optional overall maximum of Participants; beyond it, sign-ups go onto the Liste d'attente. */
     @Column(name = "max_participants")
     private Integer maxParticipants;
+
+    /** Optional maximum per Groupe (by id) at this Event; beyond it, Demandes wait as the Groupe's Liste d'attente. */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "event_group_maximums", joinColumns = @JoinColumn(name = "event_id"))
+    @MapKeyColumn(name = "group_id")
+    @Column(name = "maximum", nullable = false)
+    private Map<UUID, Integer> groupMaximums = new HashMap<>();
+
+    /** true when the Groupe belongs to this Event's Secteur. */
+    public boolean isOfSectorOf(GroupEntity group) {
+        return sector != null && group.getSector() != null && sector.getSectorId().equals(group.getSector().getSectorId());
+    }
+
+    /** The Groupe's maximum at this Event, or null when unlimited. */
+    public Integer maximumOf(GroupEntity group) {
+        return groupMaximums.get(group.getGroupId());
+    }
+
+    /** Sets the Groupe's maximum at this Event; null, 0 or less removes it. */
+    public void setMaximumOf(GroupEntity group, Integer maximum) {
+        if (maximum == null || maximum <= 0) groupMaximums.remove(group.getGroupId());
+        else groupMaximums.put(group.getGroupId(), maximum);
+    }
 
     /** Dates are entered and read in the association's local time, whatever the server's zone. */
     public static final ZoneId ZONE = ZoneId.of("Europe/Paris");

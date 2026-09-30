@@ -5,6 +5,7 @@ import { Group } from "../groups/types";
 import { acceptsSignUps, EventStatus } from "./status";
 
 const ROSTERS_KEY = "urue-event-rosters";
+const MAXIMUMS_KEY = "urue-event-group-maximums";
 
 /** Où en est une inscription : place confirmée (Participant) ou Liste d'attente. */
 export type RegistrationStatus = "participant" | "en_attente";
@@ -47,12 +48,25 @@ export interface RosterEntry {
   demande: Demande | null;
 }
 
-/** Reflète RosterDto : Participants et Liste d'attente, chacun dans l'ordre d'inscription. */
+/**
+ * Reflète GroupRosterDto : un Groupe à un Événement, son maximum (null : sans
+ * limite), qui y roule, et ses Demandes en attente dans l'ordre d'inscription —
+ * la Liste d'attente du Groupe une fois le maximum atteint.
+ */
+export interface GroupRoster {
+  group: GroupRef;
+  maximum: number | null;
+  members: RosterEntry[];
+  demandes: RosterEntry[];
+}
+
+/** Reflète RosterDto : Participants et Liste d'attente, chacun dans l'ordre d'inscription, et chaque Groupe du Secteur. */
 export interface Roster {
   eventId: string;
   maxParticipants: number | null;
   participants: RosterEntry[];
   waiting: RosterEntry[];
+  groups: GroupRoster[];
 }
 
 /** Reflète MonGroupeDto : le Groupe mené (null sans Affectation) et, par Événement, ses membres et Demandes en attente. */
@@ -63,6 +77,8 @@ export interface MonGroupe {
     name: string;
     startDateTime: string;
     status: EventStatus;
+    /** Maximum du Groupe à cet Événement, null : sans limite. */
+    maximum: number | null;
     members: RosterEntry[];
     demandes: RosterEntry[];
   }[];
@@ -120,7 +136,8 @@ interface StoredEntry {
  * nouvelle Demande (PUT .../registration/demande), décision (POST
  * .../demandes/{personId}/accept|refuse), liste du Bureau (GET .../roster,
  * POST .../roster/{personId}/promote, DELETE .../roster/{personId}, PUT et
- * DELETE .../roster/{personId}/group) et Mon groupe (GET /api/events/mon-groupe).
+ * DELETE .../roster/{personId}/group), maximum d'un Groupe (PUT
+ * .../groups/{groupId}/maximum) et Mon groupe (GET /api/events/mon-groupe).
  * Une seule liste par Événement alimente toutes ces vues.
  */
 export function createRegistrationsApi(store: JsonStore = localJsonStore) {
@@ -131,6 +148,8 @@ export function createRegistrationsApi(store: JsonStore = localJsonStore) {
   const write = (eventId: string, entries: StoredEntry[]) => store.write(ROSTERS_KEY, { ...readAll(), [eventId]: entries });
   const update = (eventId: string, personId: string, patch: Partial<StoredEntry>) =>
     write(eventId, read(eventId).map((e) => (e.personId === personId ? { ...e, ...patch } : e)));
+  const readAllMaximums = () => store.read<Record<string, Record<string, number>>>(MAXIMUMS_KEY, {});
+  const maximumsOf = (eventId: string) => readAllMaximums()[eventId] ?? {};
 
   const ref = (all: Group[], groupId: string | null | undefined): GroupRef | null => {
     const group = all.find((g) => g.groupId === groupId);
@@ -176,15 +195,36 @@ export function createRegistrationsApi(store: JsonStore = localJsonStore) {
 
   const bySignUp = (a: StoredEntry, b: StoredEntry) => a.signedUpAt.localeCompare(b.signedUpAt);
 
+  const ridesWith = (groupId: string) => (e: StoredEntry) => e.groupId === groupId;
+  /** Demande en attente pour ce Groupe : sa Liste d'attente une fois le maximum atteint. */
+  const asksFor = (groupId: string) => (e: StoredEntry) => e.demandeGroupId === groupId && e.demandeStatus === "en_attente";
+
+  /** Au maximum du Groupe, personne de plus n'y entre ; sans maximum, pas de limite. */
+  const requireRoomIn = (eventId: string, groupId: string) => {
+    const maximum = maximumsOf(eventId)[groupId];
+    if (maximum && read(eventId).filter(ridesWith(groupId)).length >= maximum)
+      throw new Error(`Le groupe a atteint son maximum de ${maximum} pour cet événement.`);
+  };
+
   const fetchRoster = async (eventId: string): Promise<Roster> => {
     const event = await eventOrThrow(eventId);
     const all = await groups.fetchGroups();
     const entries = [...read(eventId)].sort(bySignUp);
+    const maximums = maximumsOf(eventId);
     return {
       eventId,
       maxParticipants: event.maxParticipants ?? null,
       participants: entries.filter((e) => !e.waiting).map((e) => toEntry(all, e)),
       waiting: entries.filter((e) => e.waiting).map((e) => toEntry(all, e)),
+      groups: all
+        .filter((g) => g.sectorId === event.sectorId)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((g) => ({
+          group: { groupId: g.groupId, name: g.name },
+          maximum: maximums[g.groupId] ?? null,
+          members: entries.filter(ridesWith(g.groupId)).map((e) => toEntry(all, e)),
+          demandes: entries.filter(asksFor(g.groupId)).map((e) => toEntry(all, e)),
+        })),
     };
   };
 
@@ -248,15 +288,29 @@ export function createRegistrationsApi(store: JsonStore = localJsonStore) {
       const entry = entryOrThrow(eventId, personId);
       if (entry.demandeStatus !== "en_attente") throw new Error("Aucune Demande de groupe en attente.");
       await requireLeaderOrBureau(actor, entry.demandeGroupId);
+      // Au-delà du maximum, la Demande reste en attente, sur la Liste d'attente du Groupe
+      if (accept && entry.demandeGroupId) requireRoomIn(eventId, entry.demandeGroupId);
       update(eventId, personId, accept ? { groupId: entry.demandeGroupId, demandeStatus: "acceptee" } : { demandeStatus: "refusee" });
       return toRegistration(eventId, entryOrThrow(eventId, personId));
     },
 
     placeInGroup: async (eventId: string, personId: string, groupId: string): Promise<Roster> => {
       await refuseOnArchived(eventId);
-      if (entryOrThrow(eventId, personId).waiting) throw new Error("Seul un Participant est placé dans un groupe.");
+      const entry = entryOrThrow(eventId, personId);
+      if (entry.waiting) throw new Error("Seul un Participant est placé dans un groupe.");
       await groupOrThrow(groupId);
+      if (entry.groupId !== groupId) requireRoomIn(eventId, groupId);
       update(eventId, personId, { groupId, demandeGroupId: groupId, demandeStatus: "acceptee" });
+      return fetchRoster(eventId);
+    },
+
+    /** Le maximum d'un Groupe du Secteur de l'Événement ; null ou 0 le retire. */
+    setGroupMaximum: async (eventId: string, groupId: string, maximum: number | null): Promise<Roster> => {
+      const event = await eventOrThrow(eventId);
+      if (event.status === "archive" || event.status === "annule") throw new Error("Un événement archivé ou annulé n'est plus modifié.");
+      if ((await groupOrThrow(groupId)).sectorId !== event.sectorId) throw new Error("Ce groupe n'est pas du secteur de l'événement.");
+      const { [groupId]: _previous, ...others } = maximumsOf(eventId);
+      store.write(MAXIMUMS_KEY, { ...readAllMaximums(), [eventId]: maximum && maximum > 0 ? { ...others, [groupId]: maximum } : others });
       return fetchRoster(eventId);
     },
 
@@ -274,7 +328,7 @@ export function createRegistrationsApi(store: JsonStore = localJsonStore) {
       const led = all.find((g) => g.chef?.userId === chefId);
       if (!led) return { group: null, events: [] };
 
-      const concerns = (e: StoredEntry) => e.groupId === led.groupId || (e.demandeGroupId === led.groupId && e.demandeStatus === "en_attente");
+      const concerns = (e: StoredEntry) => ridesWith(led.groupId)(e) || asksFor(led.groupId)(e);
       // Tous les Événements du Secteur que le Chef prépare, même sans personne encore
       const eventsOfSecteur = (await events.fetchEvents(true)).filter(
         (e) => e.sectorId === led.sectorId && (acceptsSignUps(e.status) || e.status === "en_cours")
@@ -295,8 +349,9 @@ export function createRegistrationsApi(store: JsonStore = localJsonStore) {
             name: event!.name,
             startDateTime: event!.startDateTime,
             status: event!.status,
-            members: [...entries].sort(bySignUp).filter((e) => e.groupId === led.groupId).map((e) => toEntry(all, e)),
-            demandes: [...entries].sort(bySignUp).filter((e) => e.demandeGroupId === led.groupId && e.demandeStatus === "en_attente").map((e) => toEntry(all, e)),
+            maximum: maximumsOf(event!.eventId)[led.groupId] ?? null,
+            members: [...entries].sort(bySignUp).filter(ridesWith(led.groupId)).map((e) => toEntry(all, e)),
+            demandes: [...entries].sort(bySignUp).filter(asksFor(led.groupId)).map((e) => toEntry(all, e)),
           }))
           .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime)),
       };
@@ -330,6 +385,7 @@ export const {
   requestGroup,
   decideDemande,
   placeInGroup,
+  setGroupMaximum,
   takeOutOfGroup,
   fetchMonGroupe,
   fetchRoster,

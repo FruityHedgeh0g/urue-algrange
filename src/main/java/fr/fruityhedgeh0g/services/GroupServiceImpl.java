@@ -180,6 +180,11 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
         return groupRepository.findByChef(userId);
     }
 
+    @Override
+    public List<GroupEntity> doListEntitiesOfSector(UUID sectorId) {
+        return groupRepository.list("sector.sectorId = ?1 order by name", sectorId);
+    }
+
     private GroupEntity groupOrThrow(UUID groupId) {
         return groupRepository.findByIdOptional(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));

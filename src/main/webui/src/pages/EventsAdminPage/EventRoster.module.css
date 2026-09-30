@@ -57,3 +57,10 @@
   margin: 0;
   color: var(--color-danger);
 }
+
+.queue {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  font-weight: 400;
+  font-size: var(--text-sm);
+}

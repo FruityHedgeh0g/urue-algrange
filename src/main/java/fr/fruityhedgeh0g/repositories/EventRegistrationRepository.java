@@ -21,6 +21,11 @@ public class EventRegistrationRepository implements PanacheRepositoryBase<EventR
         return count("event.eventId = ?1 and waiting = false", eventId);
     }
 
+    /** Everyone riding with the Groupe at the Event. */
+    public long countInGroup(UUID eventId, UUID groupId) {
+        return count("event.eventId = ?1 and group.groupId = ?2", eventId, groupId);
+    }
+
     /** Every sign-up for the Event, oldest first. */
     public List<EventRegistrationEntity> listByEvent(UUID eventId) {
         return list("event.eventId = ?1 order by signedUpAt, registrationId", eventId);
