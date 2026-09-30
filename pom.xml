@@ -24,6 +24,7 @@
         <vavr.version>0.10.7</vavr.version>
         <lombok.mapstruct.version>0.2.0</lombok.mapstruct.version>
         <rabbitmq.version>5.31.0</rabbitmq.version>
+        <fastexcel.version>0.19.0</fastexcel.version>
     </properties>
 
     <dependencyManagement>
@@ -142,6 +143,18 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Spreadsheet export of an Event's roster (.xlsx) -->
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel</artifactId>
+            <version>${fastexcel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel-reader</artifactId>
+            <version>${fastexcel.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useGroupActions, useRoster } from "../../features/events/useRoster";
-import { GroupRoster, passagerLabel, RosterEntry } from "../../features/events/registrationsApi";
+import { GroupRoster, passagerLabel, RosterEntry, rosterExportUrl } from "../../features/events/registrationsApi";
 import { useGroups } from "../../features/groups/useGroups";
 import Button from "../../components/atoms/Button/Button";
 import Select from "../../components/atoms/Select/Select";
+import ButtonLink from "../../components/atoms/ButtonLink/ButtonLink";
 import FormField from "../../components/molecules/FormField/FormField";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 import styles from "./EventRoster.module.css";
@@ -145,6 +146,7 @@ export const EventRoster: React.FC<EventRosterProps> = ({ eventId, sectorId, edi
 
   return (
     <section className={styles.roster} aria-label="Inscrits">
+      <ButtonLink to={rosterExportUrl(eventId)} label="Télécharger la liste (.xlsx)" variant="outline" className={styles.export} download />
       <h3 className={styles.title}>
         Participants ({participants.length}
         {maxParticipants !== null ? ` / ${maxParticipants}` : ""})

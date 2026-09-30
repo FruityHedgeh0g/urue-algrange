@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterExportDto;
 import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import jakarta.validation.Valid;
@@ -61,6 +62,11 @@ public interface PublicEventService {
 
     /** The Bureau's view of an Event's Participants and Liste d'attente. */
     RosterDto roster(@NotNull UUID eventId);
+    /**
+     * The roster as an .xlsx file: one tab per Groupe of the Secteur, one for Participants without
+     * a Groupe, one for the Liste d'attente (whose people are in no other tab).
+     */
+    RosterExportDto exportRoster(@NotNull UUID eventId);
     /** Moves someone up from the Liste d'attente, only while under the overall maximum. */
     RosterDto promote(@NotNull UUID eventId, @NotNull UUID personId);
     /** Removes someone from the Event, with a pilote's passagers; the freed places are not given to anyone. */

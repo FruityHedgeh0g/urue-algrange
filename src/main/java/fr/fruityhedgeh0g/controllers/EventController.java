@@ -8,9 +8,11 @@ import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.DemandeRequestDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterExportDto;
 import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.publics.PublicEventService;
+import fr.fruityhedgeh0g.utilities.export.RosterSpreadsheet;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -18,6 +20,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
@@ -157,6 +160,18 @@ public class EventController {
     @RolesAllowed("bureau")
     public RosterDto getRoster(@PathParam("eventId") UUID eventId){
         return eventService.roster(eventId);
+    }
+
+    /** The roster as an .xlsx download: one tab per Groupe, one without a Groupe, one for the Liste d'attente. */
+    @GET
+    @Path("/{eventId}/roster/export")
+    @Produces(RosterSpreadsheet.MEDIA_TYPE)
+    @RolesAllowed("bureau")
+    public Response exportRoster(@PathParam("eventId") UUID eventId){
+        RosterExportDto export = eventService.exportRoster(eventId);
+        return Response.ok(export.content())
+                .header("Content-Disposition", "attachment; filename=\"" + export.fileName() + "\"")
+                .build();
     }
 
     @POST

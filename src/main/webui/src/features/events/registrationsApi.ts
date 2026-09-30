@@ -118,6 +118,13 @@ export const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
   en_attente: "En attente",
 };
 
+/**
+ * Le tableur des Participants d'un Événement (GET /api/events/{eventId}/roster/export, Bureau) : un onglet par
+ * Groupe, un pour les Participants sans groupe, un pour la Liste d'attente. Un fichier ne se mocke
+ * pas : le lien vise directement l'API, la session suffit à s'authentifier.
+ */
+export const rosterExportUrl = (eventId: string) => `/api/events/${encodeURIComponent(eventId)}/roster/export`;
+
 /** « Passager de Prénom Nom », pour qui roule avec un pilote. */
 export const passagerLabel = (pilote: PersonRef) => `Passager de ${pilote.firstName} ${pilote.lastName}`;
 

@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterExportDto;
 import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
@@ -216,6 +217,11 @@ public class EventLogDecorator implements EventService{
     @Override
     public List<NestedUserDto> pilotesOf(UUID eventId) {
         return logged(() -> eventService.pilotesOf(eventId), "Pilotes of event " + eventId);
+    }
+
+    @Override
+    public RosterExportDto exportRoster(UUID eventId) {
+        return logged(() -> eventService.exportRoster(eventId), "Spreadsheet export of event " + eventId);
     }
 
     @Override

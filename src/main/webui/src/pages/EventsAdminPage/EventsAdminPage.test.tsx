@@ -140,6 +140,16 @@ describe("EventsAdminPage", () => {
     ]);
   });
 
+  it("offers the Event's spreadsheet for download", async () => {
+    const eventId = (await createEventsApi().fetchEvents(true)).find((e) => e.name === "Test Ouvert")!.eventId;
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+
+    const link = await screen.findByRole("link", { name: "Télécharger la liste (.xlsx)" });
+    expect(link).toHaveAttribute("href", `/api/events/${eventId}/roster/export`);
+    expect(link).toHaveAttribute("download");
+  });
+
   it("sets and clears the maximum number of Participants", async () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));

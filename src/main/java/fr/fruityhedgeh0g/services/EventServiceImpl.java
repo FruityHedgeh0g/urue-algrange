@@ -11,6 +11,7 @@ import fr.fruityhedgeh0g.dtos.groupDtos.GroupRefDto;
 import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterEntryDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.RosterExportDto;
 import fr.fruityhedgeh0g.entities.EventEntity;
 import fr.fruityhedgeh0g.entities.EventRegistrationEntity;
 import fr.fruityhedgeh0g.entities.GroupEntity;
@@ -27,6 +28,7 @@ import fr.fruityhedgeh0g.services.interfaces.EventService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalSectorService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
+import fr.fruityhedgeh0g.utilities.export.RosterSpreadsheet;
 import fr.fruityhedgeh0g.utilities.mappers.EventMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -307,6 +309,13 @@ public class EventServiceImpl implements EventService {
     @Override
     public RosterDto roster(UUID eventId) {
         return rosterOf(eventOrThrow(eventId));
+    }
+
+    @Override
+    public RosterExportDto exportRoster(UUID eventId) {
+        EventEntity event = eventOrThrow(eventId);
+        return new RosterExportDto(RosterSpreadsheet.fileName(event.getName(), event.getStartDateTime().toLocalDate()),
+                RosterSpreadsheet.of(rosterOf(event)));
     }
 
     @Override
