@@ -8,6 +8,7 @@ import fr.fruityhedgeh0g.dtos.eventDtos.GroupRosterDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupRefDto;
+import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterEntryDto;
 import fr.fruityhedgeh0g.entities.EventEntity;
@@ -131,18 +132,52 @@ public class EventServiceImpl implements EventService {
 
         Optional<EventRegistrationEntity> existing = registrationRepository.findByEventAndPerson(eventId, personId);
         if (existing.isPresent()) return toDto(existing.get());
+        requireSignUpOpenTo(event, person);
 
-        EventStatusEnum current = event.currentStatus();
-        if (!current.acceptsSignUps())
-            throw new InvalidResourceException("Sign-up is closed for an Event in " + current.id());
-        if (!person.hasPhone())
-            throw new PhoneRequiredException("A phone number is required to sign up: " + personId);
-
-        EventRegistrationEntity registration = current == EventStatusEnum.OUVERT && placeLeft(event)
+        EventRegistrationEntity registration = event.currentStatus() == EventStatusEnum.OUVERT && placeLeft(event, 1)
                 ? registrationRepository.persistConfirmed(event, person)
                 : registrationRepository.persistWaiting(event, person);
         if (groupId != null) registration.requestGroup(groupOrThrow(groupId));
         return toDto(registration);
+    }
+
+    @Override
+    @Transactional
+    public RegistrationDto signUpAsPassager(UUID eventId, UUID personId, UUID pilotePersonId) {
+        EventEntity event = lockedEventOrThrow(eventId);
+        UserEntity person = internalUserService.doGetEntityById(personId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
+
+        Optional<EventRegistrationEntity> existing = registrationRepository.findByEventAndPerson(eventId, personId);
+        if (existing.isPresent()) {
+            EventRegistrationEntity pilote = existing.get().getPilote();
+            if (pilote == null || !pilote.getPerson().getUserId().equals(pilotePersonId))
+                throw new InvalidResourceException(personId + " is already signed up for " + eventId + " otherwise.");
+            return toDto(existing.get());
+        }
+        requireSignUpOpenTo(event, person);
+
+        EventRegistrationEntity pilote = registrationRepository.findByEventAndPerson(eventId, pilotePersonId)
+                .orElseThrow(() -> new InvalidResourceException("No pilote " + pilotePersonId + " signed up for " + eventId));
+        // The passager takes the pilote's placement: refused rather than separated when no place is left,
+        // including while the Bureau has the Event marked Complet
+        if (!pilote.isWaiting()) {
+            if (event.currentStatus() != EventStatusEnum.OUVERT || !placeLeft(event, 1))
+                throw new InvalidResourceException("No place is left next to " + pilotePersonId + " at " + eventId);
+            if (pilote.getGroup() != null) requireRoomIn(event, pilote.getGroup(), 1);
+        }
+        EventRegistrationEntity passager = EventRegistrationEntity.passager(pilote, person);
+        registrationRepository.persist(passager);
+        return toDto(passager);
+    }
+
+    @Override
+    public List<NestedUserDto> pilotesOf(UUID eventId) {
+        eventOrThrow(eventId);
+        return registrationRepository.listByEvent(eventId).stream()
+                .filter(r -> !r.isPassager())
+                .map(r -> personRef(r.getPerson()))
+                .toList();
     }
 
     @Override
@@ -165,7 +200,7 @@ public class EventServiceImpl implements EventService {
         requireLeaderOrBureau(actor, registration.getDemandeGroup());
         if (accept) {
             // Beyond the maximum the Demande stays pending, on the Groupe's Liste d'attente
-            requireRoomIn(event, registration.getDemandeGroup());
+            requireRoomIn(event, registration.getDemandeGroup(), registration.placesTaken());
             registration.acceptDemande();
         } else registration.refuseDemande();
         return toDto(registration);
@@ -177,10 +212,11 @@ public class EventServiceImpl implements EventService {
         EventEntity event = lockedEventOrThrow(eventId);
         refuseOnArchived(event);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        requireNotPassager(registration);
         if (registration.isWaiting())
             throw new InvalidResourceException("Only a Participant is placed in a Groupe.");
         GroupEntity group = groupOrThrow(groupId);
-        if (!registration.ridesWith(group)) requireRoomIn(event, group);
+        if (!registration.ridesWith(group)) requireRoomIn(event, group, registration.placesTaken());
         registration.placeIn(group);
         return rosterOf(event);
     }
@@ -204,6 +240,7 @@ public class EventServiceImpl implements EventService {
         refuseOnArchived(eventOrThrow(eventId));
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         requireLeaderOrBureau(actor, registration.getGroup());
+        requireNotPassager(registration);
         registration.leaveGroup();
         return toDto(registration);
     }
@@ -241,10 +278,10 @@ public class EventServiceImpl implements EventService {
             throw new ForbiddenActionException(actor.personId() + " does not lead this Groupe.");
     }
 
-    /** Refuses one more rider in the Groupe once its maximum at the Event is reached; no maximum means no limit. */
-    private void requireRoomIn(EventEntity event, GroupEntity group) {
+    /** Refuses {@code needed} more riders in the Groupe beyond its maximum at the Event; no maximum means no limit. */
+    private void requireRoomIn(EventEntity event, GroupEntity group, int needed) {
         Integer maximum = event.maximumOf(group);
-        if (maximum != null && registrationRepository.countInGroup(event.getEventId(), group.getGroupId()) >= maximum)
+        if (maximum != null && registrationRepository.countInGroup(event.getEventId(), group.getGroupId()) + needed > maximum)
             throw new InvalidResourceException("The Groupe is at its maximum of " + maximum + " at this Event.");
     }
 
@@ -278,11 +315,12 @@ public class EventServiceImpl implements EventService {
         EventEntity event = lockedEventOrThrow(eventId);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         refuseOnArchived(event);
+        requireNotPassager(registration);
         if (!registration.isWaiting())
             throw new InvalidResourceException(personId + " is already a Participant.");
-        if (!placeLeft(event))
+        if (!placeLeft(event, registration.placesTaken()))
             throw new InvalidResourceException("The Event is at its maximum of " + event.getMaxParticipants() + " Participants.");
-        registration.setWaiting(false);
+        registration.moveUp();
         return rosterOf(event);
     }
 
@@ -319,13 +357,37 @@ public class EventServiceImpl implements EventService {
         UserEntity person = registration.getPerson();
         return new RosterEntryDto(person.getUserId(), person.getFirstName(), person.getLastName(), person.getPhone(),
                 registration.getMode(), registration.getSignedUpAt(),
-                GroupRefDto.of(registration.getGroup()), DemandeDto.of(registration));
+                GroupRefDto.of(registration.getGroup()), DemandeDto.of(registration), piloteOf(registration),
+                registration.getPassagers().size());
     }
 
-    /** true when the Event has no maximum or is still under it. */
-    private boolean placeLeft(EventEntity event) {
+    /** true when the Event has no maximum or still has {@code needed} places under it (passagers count). */
+    private boolean placeLeft(EventEntity event, int needed) {
         return event.getMaxParticipants() == null
-                || registrationRepository.countParticipants(event.getEventId()) < event.getMaxParticipants();
+                || registrationRepository.countParticipants(event.getEventId()) + needed <= event.getMaxParticipants();
+    }
+
+    /** Sign-up is open while Ouvert or Complet, to someone with a phone number. */
+    private static void requireSignUpOpenTo(EventEntity event, UserEntity person) {
+        EventStatusEnum current = event.currentStatus();
+        if (!current.acceptsSignUps())
+            throw new InvalidResourceException("Sign-up is closed for an Event in " + current.id());
+        if (!person.hasPhone())
+            throw new PhoneRequiredException("A phone number is required to sign up: " + person.getUserId());
+    }
+
+    /** A passager is moved only with their pilote. */
+    private static void requireNotPassager(EventRegistrationEntity registration) {
+        if (registration.isPassager())
+            throw new InvalidResourceException("A passager follows their pilote; act on the pilote instead.");
+    }
+
+    private static NestedUserDto personRef(UserEntity person) {
+        return new NestedUserDto(person.getUserId(), person.getFirstName(), person.getLastName());
+    }
+
+    private static NestedUserDto piloteOf(EventRegistrationEntity registration) {
+        return registration.getPilote() == null ? null : personRef(registration.getPilote().getPerson());
     }
 
     private static void refuseOnFinal(EventEntity event) {
@@ -351,7 +413,7 @@ public class EventServiceImpl implements EventService {
 
     private static RegistrationDto toDto(EventRegistrationEntity registration) {
         return new RegistrationDto(registration.getEvent().getEventId(), registration.getMode(), registration.status(),
-                registration.getSignedUpAt(), GroupRefDto.of(registration.getGroup()), DemandeDto.of(registration));
+                registration.getSignedUpAt(), GroupRefDto.of(registration.getGroup()), DemandeDto.of(registration), piloteOf(registration));
     }
 
     /** A maximum of 0 or less means no maximum. */

@@ -1,7 +1,7 @@
 import React from "react";
 import { useEvents } from "../../features/events/useEvents";
 import { useMyRegistrations } from "../../features/events/useMyRegistrations";
-import { DEMANDE_STATUS_LABELS, Registration, REGISTRATION_STATUS_LABELS } from "../../features/events/registrationsApi";
+import { DEMANDE_STATUS_LABELS, passagerLabel, Registration, REGISTRATION_STATUS_LABELS } from "../../features/events/registrationsApi";
 import { EVENT_STATUS_LABELS } from "../../features/events/status";
 import { formatDateRange } from "../../lib/formatDate";
 import MediaCard from "../../components/molecules/MediaCard/MediaCard";
@@ -14,7 +14,9 @@ import styles from "./MyEventsPage.module.css";
 
 /** Où l'on en est côté Groupe : le Groupe rejoint, ou la dernière Demande et son état. */
 const groupLine = (registration: Registration) => {
-  if (registration.group) return `Groupe : ${registration.group.name}`;
+  const passager = registration.pilote && passagerLabel(registration.pilote);
+  if (registration.group) return [passager, `Groupe : ${registration.group.name}`].filter(Boolean).join(" · ");
+  if (passager) return passager;
   if (registration.demande) return `Demande pour ${registration.demande.group.name} : ${DEMANDE_STATUS_LABELS[registration.demande.status]}`;
   return undefined;
 };

@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
+import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +29,13 @@ public interface PublicEventService {
      * again returns the existing sign-up.
      */
     RegistrationDto signUp(@NotNull UUID eventId, @NotNull UUID personId, UUID groupId);
+    /**
+     * Signs the person up as passager of a pilote already signed up for the Event, with the pilote's
+     * placement and Groupe; refused when that would exceed the Event's or the Groupe's maximum.
+     */
+    RegistrationDto signUpAsPassager(@NotNull UUID eventId, @NotNull UUID personId, @NotNull UUID pilotePersonId);
+    /** The pilotes signed up for the Event, whom a passager can ride with. */
+    List<NestedUserDto> pilotesOf(@NotNull UUID eventId);
     /** A new Demande de groupe, for someone signed up and not yet riding with a Groupe. */
     RegistrationDto requestGroup(@NotNull UUID eventId, @NotNull UUID personId, @NotNull UUID groupId);
     /**
@@ -47,7 +55,7 @@ public interface PublicEventService {
     /** Who acts, for checks that go beyond the Role (a Chef acts only on the Groupe they lead). */
     record Actor(UUID personId, boolean bureau) {
     }
-    /** Withdraws a Participant or someone on the Liste d'attente, until Archivé; nobody moves up. */
+    /** Withdraws a Participant or someone on the Liste d'attente, with a pilote's passagers, until Archivé; nobody moves up. */
     void withdraw(@NotNull UUID eventId, @NotNull UUID personId);
     List<RegistrationDto> registrationsOf(@NotNull UUID personId);
 
@@ -55,6 +63,6 @@ public interface PublicEventService {
     RosterDto roster(@NotNull UUID eventId);
     /** Moves someone up from the Liste d'attente, only while under the overall maximum. */
     RosterDto promote(@NotNull UUID eventId, @NotNull UUID personId);
-    /** Removes someone from the Event; the freed place is not given to anyone. */
+    /** Removes someone from the Event, with a pilote's passagers; the freed places are not given to anyone. */
     RosterDto removeFromRoster(@NotNull UUID eventId, @NotNull UUID personId);
 }

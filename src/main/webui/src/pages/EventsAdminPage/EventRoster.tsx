@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useGroupActions, useRoster } from "../../features/events/useRoster";
-import { GroupRoster, RosterEntry } from "../../features/events/registrationsApi";
+import { GroupRoster, passagerLabel, RosterEntry } from "../../features/events/registrationsApi";
 import { useGroups } from "../../features/groups/useGroups";
 import Button from "../../components/atoms/Button/Button";
 import Select from "../../components/atoms/Select/Select";
@@ -78,7 +78,8 @@ const GroupRow: React.FC<GroupRowProps> = ({ entry, editable, disabled, onMaximu
  * Participants et Liste d'attente d'un Événement, dans l'ordre d'inscription.
  * Le Bureau fait monter à la main (tant que le maximum n'est pas atteint),
  * retire des personnes, décide des Demandes de groupe et place ou sort des
- * Participants d'un Groupe (dans la limite du maximum de chaque Groupe) ;
+ * Participants d'un Groupe (dans la limite du maximum de chaque Groupe) ; un
+ * passager suit son pilote, seul son retrait se fait à part ;
  * personne ne monte automatiquement, ni dans l'Événement ni dans un Groupe.
  */
 export const EventRoster: React.FC<EventRosterProps> = ({ eventId, sectorId, editable }) => {
@@ -100,7 +101,9 @@ export const EventRoster: React.FC<EventRosterProps> = ({ eventId, sectorId, edi
   ];
 
   const groupLine = (entry: RosterEntry) => {
-    if (entry.group) return `Groupe : ${entry.group.name}`;
+    const passager = entry.pilote ? passagerLabel(entry.pilote) : entry.passagers > 0 && `+ ${entry.passagers} passager(s)`;
+    if (entry.group) return [passager, `Groupe : ${entry.group.name}`].filter(Boolean).join(" · ");
+    if (passager) return passager;
     if (entry.demande?.status === "en_attente") return `Demande : ${entry.demande.group.name}`;
     return undefined;
   };
@@ -124,7 +127,7 @@ export const EventRoster: React.FC<EventRosterProps> = ({ eventId, sectorId, edi
           />
         </>
       )}
-      {entry.group && (
+      {entry.group && !entry.pilote && (
         <Button type="button" label="Sortir du groupe" variant="outline" disabled={pending} onClick={() => takeOut.mutate({ eventId, personId: entry.personId })} />
       )}
     </>
@@ -154,7 +157,7 @@ export const EventRoster: React.FC<EventRosterProps> = ({ eventId, sectorId, edi
             row(
               p,
               <>
-                {!p.group && (
+                {!p.group && !p.pilote && (
                   <Select
                     label="Groupe"
                     value=""
@@ -179,7 +182,9 @@ export const EventRoster: React.FC<EventRosterProps> = ({ eventId, sectorId, edi
             row(
               w,
               <>
-                <Button type="button" label="Faire monter" disabled={pending || full} onClick={() => moveUp.mutate(w.personId)} />
+                {!w.pilote && (
+                  <Button type="button" label="Faire monter" disabled={pending || full} onClick={() => moveUp.mutate(w.personId)} />
+                )}
                 {groupActions(w)}
                 {removeButton(w)}
               </>

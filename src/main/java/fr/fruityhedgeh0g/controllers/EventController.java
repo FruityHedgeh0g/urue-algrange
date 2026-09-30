@@ -8,6 +8,7 @@ import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.DemandeRequestDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
+import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.publics.PublicEventService;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -58,13 +59,28 @@ public class EventController {
         return eventService.registrationsOf(me());
     }
 
-    /** Optional {@code ?groupId=} creates a Demande de groupe for that Groupe. */
+    /**
+     * As pilote, optional {@code ?groupId=} creates a Demande de groupe for that Groupe;
+     * {@code ?piloteId=} signs up as passager of that pilote, who chooses the Groupe.
+     */
     @PUT
     @Path("/{eventId}/registration")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("benevole")
-    public RegistrationDto signUp(@PathParam("eventId") UUID eventId, @QueryParam("groupId") UUID groupId){
-        return eventService.signUp(eventId, me(), groupId);
+    public RegistrationDto signUp(@PathParam("eventId") UUID eventId, @QueryParam("groupId") UUID groupId,
+                                  @QueryParam("piloteId") UUID piloteId){
+        if (piloteId == null) return eventService.signUp(eventId, me(), groupId);
+        if (groupId != null) throw new BadRequestException("A passager rides with their pilote's Groupe.");
+        return eventService.signUpAsPassager(eventId, me(), piloteId);
+    }
+
+    /** The pilotes signed up for the Event, for a passager to choose from (names only). */
+    @GET
+    @Path("/{eventId}/pilotes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("benevole")
+    public List<NestedUserDto> getPilotes(@PathParam("eventId") UUID eventId){
+        return eventService.pilotesOf(eventId);
     }
 
     @PUT

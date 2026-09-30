@@ -8,12 +8,15 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
  * A person's sign-up for an Event: a confirmed place (Participant) or a place
- * on the Event's Liste d'attente, ordered by sign-up time.
+ * on the Event's Liste d'attente, ordered by sign-up time. A passager's sign-up
+ * points at their pilote's and follows every change to its placement and Groupe.
  */
 @Entity
 @Table(name = "event_registrations",
@@ -63,8 +66,42 @@ public class EventRegistrationEntity extends AuditTemplate {
     @Column(name = "demande_status")
     private DemandeStatusEnum demandeStatus;
 
+    /** The pilote's sign-up a passager rides with; null for a pilote. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pilote_registration_id")
+    private EventRegistrationEntity pilote;
+
+    /**
+     * A pilote's passagers; removing the pilote's sign-up (through the entity manager) removes theirs.
+     * A bulk JPQL delete bypasses this cascade: delete passagers first.
+     */
+    @OneToMany(mappedBy = "pilote", cascade = CascadeType.REMOVE)
+    @Builder.Default
+    private List<EventRegistrationEntity> passagers = new ArrayList<>();
+
+    public boolean isPassager() {
+        return mode == RideModeEnum.PASSAGER;
+    }
+
+    /** Places this sign-up takes towards a maximum: the pilote and their passagers. */
+    public int placesTaken() {
+        return 1 + passagers.size();
+    }
+
+    /** Moves the pilote and their passagers up from the Liste d'attente. */
+    public void moveUp() {
+        waiting = false;
+        passagers.forEach(p -> p.waiting = false);
+    }
+
+    private void passagersFollowGroup() {
+        passagers.forEach(p -> p.group = group);
+    }
+
     /** A new pending Demande de groupe; only someone outside any Groupe at this Event makes one. */
     public void requestGroup(GroupEntity requested) {
+        if (isPassager())
+            throw new InvalidResourceException("A passager rides with their pilote's Groupe.");
         if (group != null)
             throw new InvalidResourceException("Already riding with a Groupe at this Event.");
         demandeGroup = requested;
@@ -89,6 +126,7 @@ public class EventRegistrationEntity extends AuditTemplate {
         requirePendingDemande();
         group = demandeGroup;
         demandeStatus = DemandeStatusEnum.ACCEPTEE;
+        passagersFollowGroup();
     }
 
     /** The person stays signed up, without a Groupe, and may make a new Demande. */
@@ -102,6 +140,7 @@ public class EventRegistrationEntity extends AuditTemplate {
         group = placed;
         demandeGroup = placed;
         demandeStatus = DemandeStatusEnum.ACCEPTEE;
+        passagersFollowGroup();
     }
 
     /** Takes the person out of their Groupe; they remain signed up for the Event. */
@@ -111,6 +150,7 @@ public class EventRegistrationEntity extends AuditTemplate {
         group = null;
         demandeGroup = null;
         demandeStatus = null;
+        passagersFollowGroup();
     }
 
     private void requirePendingDemande() {
@@ -127,6 +167,23 @@ public class EventRegistrationEntity extends AuditTemplate {
                 .waiting(waiting)
                 .signedUpAt(LocalDateTime.now(EventEntity.ZONE))
                 .build();
+    }
+
+    /** A new passager sign-up with that pilote, dated now, mirroring the pilote's placement and Groupe. */
+    public static EventRegistrationEntity passager(EventRegistrationEntity pilote, UserEntity person) {
+        if (pilote.isPassager())
+            throw new InvalidResourceException("A passager rides with a pilote, not with another passager.");
+        EventRegistrationEntity passager = EventRegistrationEntity.builder()
+                .event(pilote.getEvent())
+                .person(person)
+                .mode(RideModeEnum.PASSAGER)
+                .pilote(pilote)
+                .waiting(pilote.isWaiting())
+                .group(pilote.getGroup())
+                .signedUpAt(LocalDateTime.now(EventEntity.ZONE))
+                .build();
+        pilote.getPassagers().add(passager);
+        return passager;
     }
 
     public RegistrationStatusEnum status() {

@@ -1,6 +1,6 @@
 import React from "react";
 import { useGroupActions, useMonGroupe } from "../../features/events/useRoster";
-import { RosterEntry } from "../../features/events/registrationsApi";
+import { passagerLabel, RosterEntry } from "../../features/events/registrationsApi";
 import { EVENT_STATUS_LABELS } from "../../features/events/status";
 import { formatDate } from "../../lib/formatDate";
 import Button from "../../components/atoms/Button/Button";
@@ -27,7 +27,11 @@ export const MonGroupePage: React.FC = () => {
     <li key={entry.personId} className={styles.row}>
       <span className={styles.person}>
         {entry.firstName} {entry.lastName}
-        <span className={styles.phone}>{entry.phone}</span>
+        <span className={styles.phone}>
+          {[entry.phone, entry.pilote ? passagerLabel(entry.pilote) : entry.passagers > 0 && `+ ${entry.passagers} passager(s)`]
+            .filter(Boolean)
+            .join(" · ")}
+        </span>
       </span>
       <span className={styles.actions}>{actions}</span>
     </li>
@@ -61,13 +65,16 @@ export const MonGroupePage: React.FC = () => {
                 {event.members.map((m) =>
                   person(
                     m,
-                    <Button
-                      type="button"
-                      label="Sortir du groupe"
-                      variant="outline"
-                      disabled={pending}
-                      onClick={() => takeOut.mutate({ eventId: event.eventId, personId: m.personId })}
-                    />
+                    // Un passager sort du groupe avec son pilote
+                    !m.pilote && (
+                      <Button
+                        type="button"
+                        label="Sortir du groupe"
+                        variant="outline"
+                        disabled={pending}
+                        onClick={() => takeOut.mutate({ eventId: event.eventId, personId: m.personId })}
+                      />
+                    )
                   )
                 )}
               </ul>

@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useEvent } from "../../features/events/useEvents";
 import { acceptsSignUps, EVENT_STATUS_LABELS, statusTone } from "../../features/events/status";
-import { useEventRegistration, useMyRegistrations } from "../../features/events/useMyRegistrations";
-import { DEMANDE_STATUS_LABELS, PhoneRequiredError } from "../../features/events/registrationsApi";
+import { useEventRegistration, useMyRegistrations, usePilotes } from "../../features/events/useMyRegistrations";
+import { DEMANDE_STATUS_LABELS, passagerLabel, PhoneRequiredError, Registration, RideMode } from "../../features/events/registrationsApi";
 import { useGroups } from "../../features/groups/useGroups";
 import Select from "../../components/atoms/Select/Select";
 import { useFeature } from "../../features/featureFlags/useFeatureFlags";
@@ -19,6 +19,12 @@ import ButtonLink from "../../components/atoms/ButtonLink/ButtonLink";
 import Icon from "../../components/atoms/Icon/Icon";
 import styles from "./EventDetailPage.module.css";
 
+/** Ce que la personne est à cet Événement : pilote, ou passager de son pilote. */
+const registeredAs = ({ status, pilote }: Registration) => {
+  if (status === "en_attente") return pilote ? `Vous êtes sur la liste d'attente (${passagerLabel(pilote)})` : "Vous êtes sur la liste d'attente";
+  return pilote ? `Vous êtes inscrit comme passager de ${pilote.firstName} ${pilote.lastName}` : "Vous êtes inscrit comme pilote";
+};
+
 export const EventDetailPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const { data: event, isLoading, isError } = useEvent(eventId);
@@ -27,6 +33,9 @@ export const EventDetailPage: React.FC = () => {
   const { register, unregister, askGroup } = useEventRegistration();
   const { data: groups } = useGroups();
   const [groupId, setGroupId] = useState("");
+  const [mode, setMode] = useState<RideMode>("pilote");
+  const [piloteId, setPiloteId] = useState("");
+  const { data: pilotes } = usePilotes(mode === "passager" ? eventId : undefined);
   const registrationOpen = useFeature("inscription-evenements");
   const [askPhone, setAskPhone] = useState(false);
   const [phone, setPhone] = useState("");
@@ -38,7 +47,7 @@ export const EventDetailPage: React.FC = () => {
   const signUp = (withPhone?: string) => {
     if (!eventId) return;
     register.mutate(
-      { eventId, phone: withPhone, groupId },
+      mode === "passager" ? { eventId, phone: withPhone, piloteId } : { eventId, phone: withPhone, groupId },
       {
         onSuccess: () => setAskPhone(false),
         onError: (error) => setAskPhone(error instanceof PhoneRequiredError),
@@ -77,7 +86,15 @@ export const EventDetailPage: React.FC = () => {
     ...(groups ?? []).filter((g) => g.sectorId === event.sectorId).map((g) => ({ value: g.groupId, label: g.name })),
   ];
   const groupSelect = <Select label="Groupe (facultatif)" value={groupId} onChange={setGroupId} options={groupOptions} />;
-  const canAskGroup = registration && !registration.group && registration.demande?.status !== "en_attente" && event.status !== "archive";
+  const canAskGroup =
+    registration?.mode === "pilote" && !registration.group && registration.demande?.status !== "en_attente" && event.status !== "archive";
+  /** Un passager choisit un pilote déjà inscrit ; il roulera avec son Groupe. */
+  const piloteOptions = [
+    { value: "", label: "Choisissez votre pilote" },
+    ...(pilotes ?? []).filter((p) => p.userId !== user?.userId).map((p) => ({ value: p.userId, label: `${p.firstName} ${p.lastName}` })),
+  ];
+  const signUpLabel =
+    event.status === "complet" ? "Rejoindre la liste d'attente" : mode === "passager" ? "M'inscrire comme passager" : "M'inscrire comme pilote";
 
   return (
     <article>
@@ -122,7 +139,7 @@ export const EventDetailPage: React.FC = () => {
               <div className={styles.actions}>
                 <p className={styles.registered}>
                   <Icon name="check" size={18} strokeWidth={3} />
-                  {registration.status === "participant" ? "Vous êtes inscrit comme pilote" : "Vous êtes sur la liste d'attente"}
+                  {registeredAs(registration)}
                 </p>
                 {registration.group && <p>Vous roulez avec {registration.group.name}.</p>}
                 {registration.demande && registration.demande.status !== "acceptee" && (
@@ -171,11 +188,24 @@ export const EventDetailPage: React.FC = () => {
                     </form>
                   ) : (
                     <>
-                      {groupSelect}
+                      <Select
+                        label="Je roule comme"
+                        value={mode}
+                        onChange={(value) => setMode(value as RideMode)}
+                        options={[
+                          { value: "pilote", label: "Pilote" },
+                          { value: "passager", label: "Passager" },
+                        ]}
+                      />
+                      {mode === "pilote" ? (
+                        groupSelect
+                      ) : (
+                        <Select label="Pilote" value={piloteId} onChange={setPiloteId} options={piloteOptions} />
+                      )}
                       <Button
-                        label={event.status === "complet" ? "Rejoindre la liste d'attente" : "M'inscrire comme pilote"}
+                        label={signUpLabel}
                         variant="accent"
-                        disabled={isPending}
+                        disabled={isPending || (mode === "passager" && !piloteId)}
                         onClick={() => signUp()}
                       />
                       {register.isError && !askPhone && <p className={styles.error}>{register.error.message}</p>}

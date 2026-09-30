@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
+import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
@@ -194,6 +195,27 @@ public class EventLogDecorator implements EventService{
     public RosterDto placeInGroup(UUID eventId, UUID personId, UUID groupId) {
         return logged(() -> eventService.placeInGroup(eventId, personId, groupId),
                 "Placement of " + personId + " in group " + groupId + " at event " + eventId);
+    }
+
+    @Override
+    public RegistrationDto signUpAsPassager(UUID eventId, UUID personId, UUID pilotePersonId) {
+        Log.debugf("%s signs up for event %s as passager of %s...", personId, eventId, pilotePersonId);
+        return Try.of(() -> eventService.signUpAsPassager(eventId, personId, pilotePersonId))
+                .onSuccess(r -> Log.infof("%s signed up for event %s as passager: %s.", personId, eventId, r.status().id()))
+                .onFailure(t -> {
+                    switch (t) {
+                        case InvalidResourceException ex -> Log.warnf("Sign-up refused: %s", ex.getMessage());
+                        case PhoneRequiredException ex -> Log.debugf("Sign-up waiting for a phone number: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.warnf("Sign-up refused: %s", ex.getMessage());
+                        default -> Log.errorf(t, "An error occurred during a sign-up.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public List<NestedUserDto> pilotesOf(UUID eventId) {
+        return logged(() -> eventService.pilotesOf(eventId), "Pilotes of event " + eventId);
     }
 
     @Override

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../../auth/AuthContext";
 import { createEventsApi } from "../../features/events/eventsApi";
+import { createRegistrationsApi } from "../../features/events/registrationsApi";
 import EventDetailPage from "./EventDetailPage";
 
 const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 19);
@@ -61,6 +62,20 @@ describe("EventDetailPage sign-up", () => {
     await userEvent.click(screen.getByRole("button", { name: "M'inscrire comme pilote" }));
 
     expect(await screen.findByText("Demande pour Groupe Algrange Centre : en attente")).toBeInTheDocument();
+  });
+
+  it("signs up as passager of a chosen pilote", async () => {
+    await createRegistrationsApi().signUp(eventId, { userId: "p-1", firstName: "Marc", lastName: "Weber", phone: "06 00 00 00 00" });
+    localStorage.setItem("urue-mock-profile", JSON.stringify({ firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" }));
+    renderPage();
+
+    await userEvent.selectOptions(await screen.findByLabelText("Je roule comme"), "passager");
+    expect(screen.queryByLabelText("Groupe (facultatif)")).not.toBeInTheDocument();
+    await userEvent.selectOptions(await screen.findByLabelText("Pilote"), "p-1");
+    await userEvent.click(screen.getByRole("button", { name: "M'inscrire comme passager" }));
+
+    expect(await screen.findByText("Vous êtes inscrit comme passager de Marc Weber")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Demander ce groupe" })).not.toBeInTheDocument();
   });
 
   it("signs up straight away with a phone number, then withdraws", async () => {

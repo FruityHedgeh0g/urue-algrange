@@ -8,6 +8,7 @@ export const queryKeys = {
   myRegistrations: {
     all: ["my-event-registrations"] as const,
     roster: (eventId: string) => ["my-event-registrations", "roster", eventId] as const,
+    pilotes: (eventId: string | undefined) => ["my-event-registrations", "pilotes", eventId] as const,
   },
   groups: { all: ["groups"] as const },
   sectors: { all: ["sectors"] as const, detail: (sectorId: string | undefined) => ["sectors", "detail", sectorId] as const },

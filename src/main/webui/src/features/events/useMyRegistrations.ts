@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMyRegistrations, requestGroup, signUp, withdraw } from "./registrationsApi";
+import { fetchMyRegistrations, fetchPilotes, requestGroup, signUp, withdraw } from "./registrationsApi";
 import { queryKeys } from "../queryKeys";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -12,7 +12,16 @@ export function useMyRegistrations() {
   });
 }
 
-/** Inscription comme pilote et désinscription de la personne connectée. */
+/** Les pilotes inscrits à un Événement, parmi lesquels un passager choisit. */
+export function usePilotes(eventId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.myRegistrations.pilotes(eventId),
+    queryFn: () => fetchPilotes(eventId ?? ""),
+    enabled: Boolean(eventId),
+  });
+}
+
+/** Inscription comme pilote ou passager, et désinscription de la personne connectée. */
 export function useEventRegistration() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -20,9 +29,10 @@ export function useEventRegistration() {
 
   const register = useMutation({
     /** `phone` : numéro tout juste saisi, avant que le profil ne soit relu. */
-    mutationFn: (input: { eventId: string; phone?: string; groupId?: string }) => {
+    /** `piloteId` : s'inscrire comme passager de ce pilote (sans Demande de groupe). */
+    mutationFn: (input: { eventId: string; phone?: string; groupId?: string; piloteId?: string }) => {
       if (!user) throw new Error("Connectez-vous pour vous inscrire.");
-      return signUp(input.eventId, { ...user, phone: input.phone ?? user.phone }, input.groupId || undefined);
+      return signUp(input.eventId, { ...user, phone: input.phone ?? user.phone }, input.groupId || undefined, input.piloteId || undefined);
     },
     onSuccess: invalidate,
   });
