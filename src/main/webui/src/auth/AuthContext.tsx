@@ -6,19 +6,11 @@ import { ROLE_HIERARCHY, RoleId, roleAtLeast } from "./roles";
  * connexion, le rôle courant est piloté localement (voir RoleSwitcher) pour
  * permettre de prévisualiser chaque espace pendant le développement.
  */
-export interface MockUserGroup {
-  groupId: string;
-  name: string;
-  sectorId: string;
-  sectorName: string;
-}
-
 export interface MockUser {
   userId: string;
   firstName: string;
   lastName: string;
   role: RoleId;
-  group: MockUserGroup;
   /** Nécessaire pour s'inscrire à un Événement. */
   phone?: string;
 }
@@ -35,12 +27,6 @@ interface AuthContextValue {
 const ROLE_STORAGE_KEY = "urue-mock-role";
 const PROFILE_STORAGE_KEY = "urue-mock-profile";
 
-const DEFAULT_GROUP: MockUserGroup = {
-  groupId: "group-1",
-  name: "Groupe Algrange Centre",
-  sectorId: "sector-1",
-  sectorName: "Secteur Algrange",
-};
 interface Profile {
   firstName: string;
   lastName: string;
@@ -93,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = useMemo<AuthContextValue>(() => {
     const user: MockUser | null =
-      role === "visiteur" ? null : { userId: "mock-user", role, group: DEFAULT_GROUP, ...profile };
+      role === "visiteur" ? null : { userId: "mock-user", role, ...profile };
     return {
       user,
       role,

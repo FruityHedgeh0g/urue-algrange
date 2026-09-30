@@ -34,39 +34,15 @@ public class GroupEntity extends AuditTemplate {
     @JoinColumn(name = "chef_id", unique = true)
     private UserEntity chef;
 
-    @OneToMany(mappedBy = "group",fetch = FetchType.EAGER)
-    private Set<UserEntity> members;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
-
-    public void addMember(UserEntity member) {
-        if (members == null) members = new HashSet<>();
-        members.add(member);
-        member.setGroup(this);
-    }
-
-    public void removeMember(UserEntity member) {
-        members.remove(member);
-        member.setGroup(null);
-    }
-
-    public Set<UserEntity> getMembers() {
-        if (members == null) members = new HashSet<>();
-        return members;
-    }
-//    @PreRemove
-//    private void preRemove() {
-//        members.forEach(member -> member.setGroup(null));
-//    }
-
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         GroupEntity that = (GroupEntity) o;
-        return Objects.equals(groupId, that.groupId) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(members, that.members) && Objects.equals(sector, that.sector);
+        return Objects.equals(groupId, that.groupId) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(sector, that.sector);
     }
 
     @Override

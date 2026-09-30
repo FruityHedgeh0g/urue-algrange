@@ -15,7 +15,6 @@ export const queryKeys = {
   members: {
     all: ["members"] as const,
     list: ["members", "list"] as const,
-    byGroups: (groupIds: string[]) => ["members", "byGroups", ...groupIds] as const,
   },
   posts: { all: ["posts"] as const, detail: (postId: string | undefined) => ["posts", "detail", postId] as const },
   medias: { all: ["medias"] as const },

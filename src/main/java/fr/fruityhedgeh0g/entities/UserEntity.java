@@ -17,7 +17,6 @@ import java.util.UUID;
 @Getter @Setter
 public class UserEntity extends AuditTemplate{
 
-
     @Id
     @Column(name = "user_id", nullable = false)
     private UUID userId;
@@ -44,12 +43,6 @@ public class UserEntity extends AuditTemplate{
     @Column(name = "president", nullable = false)
     private boolean president = false;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(
-            name = "group_id")
-    private GroupEntity group;
-
-
     /** Changes the Role; only a Bureau member can stay Président. */
     public void changeRole(RoleEnum role) {
         this.role = role;
@@ -66,7 +59,7 @@ public class UserEntity extends AuditTemplate{
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(group, that.group);
+        return Objects.equals(userId, that.userId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName);
     }
 
     @Override

@@ -12,14 +12,12 @@ import { createOverlayCollection } from "../../lib/storage/overlayCollection";
 export interface MemberInput {
   firstName: string;
   lastName: string;
-  groupId: string;
 }
 
 export function createUsersApi(store: JsonStore = localJsonStore) {
   const members = createOverlayCollection<Member>({ store, name: "member", fixtures: mockMembers, idOf: (m) => m.userId });
   return {
     fetchAllMembers: () => members.list(),
-    fetchMembersByGroupIds: async (groupIds: string[]) => (await members.list()).filter((m) => groupIds.includes(m.groupId)),
     updateMember: (userId: string, patch: MemberInput) => members.update(userId, patch),
     /** Même contrat que PUT /api/users/{userId}/role (chaîne de promotion vérifiée côté backend). */
     changeRole: async (userId: string, role: RoleId) => {
@@ -40,4 +38,4 @@ export function createUsersApi(store: JsonStore = localJsonStore) {
   };
 }
 
-export const { fetchAllMembers, fetchMembersByGroupIds, updateMember, changeRole, appointPresident } = createUsersApi();
+export const { fetchAllMembers, updateMember, changeRole, appointPresident } = createUsersApi();

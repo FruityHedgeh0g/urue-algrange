@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface InternalGroupService {
     Optional<GroupEntity> doGetEntityById(@NotNull UUID groupId);
-    Optional<GroupEntity> doGetEntityByUserId(@NotNull UUID userId);
 
     /** Ends the person's Affectation, if any: their Groupe is left without a Chef. */
     void doEndAffectationOf(@NotNull UUID userId);

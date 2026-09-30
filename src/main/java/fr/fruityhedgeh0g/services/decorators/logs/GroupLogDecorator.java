@@ -90,36 +90,6 @@ public class GroupLogDecorator implements GroupService {
     }
 
     @Override
-    public void assignUser(UUID groupId, UUID userId) {
-        Log.debugf("Assigning user %s to group %s...",userId,groupId);
-        Try.run(() -> groupService.assignUser(groupId,userId))
-                .onSuccess(v -> Log.debugf("User assigned to group."))
-                .onFailure(t -> {
-                    switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"User %s or group %s not found.", userId, groupId);
-                        case DuplicateResourceException ex -> Log.errorf(ex, "User %s is already assigned to another group.", userId);
-                        default -> Log.errorf(t,"An error occurred while assigning user to grood.");
-                    }
-                })
-                .get();
-    }
-
-    @Override
-    public void unassignUser(UUID groupId, UUID userId) {
-        Log.debugf("Unassigning user %s from group %s...",userId,groupId);
-        Try.run(() -> groupService.unassignUser(groupId,userId))
-                .onSuccess(v -> Log.debugf("User unassigned from group."))
-                .onFailure(t -> {
-                    switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"User %s or group %s not found.", userId, groupId);
-                        case InvalidResourceException ex -> Log.errorf(ex, "User %s is assigned to another group.", userId);
-                        default -> Log.errorf(t,"An error occurred while unassigning user from group.");
-                    }
-                })
-                .get();
-    }
-
-    @Override
     public GroupDto setChef(UUID groupId, UUID userId) {
         Log.debugf("Affectation of %s to group %s...", userId, groupId);
         return Try.of(() -> groupService.setChef(groupId, userId))
@@ -181,19 +151,6 @@ public class GroupLogDecorator implements GroupService {
                     if (group.isPresent())
                         Log.debugf("Group retrieved.");
                     else Log.debugf("Group %s not found.",groupId);
-                })
-                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
-                .get();
-    }
-
-    @Override
-    public Optional<GroupEntity> doGetEntityByUserId(UUID userId) {
-        Log.debugf("[INTERNAL] Retrieving group by user id %s...",userId);
-        return Try.of(() -> groupService.doGetEntityByUserId(userId))
-                .onSuccess(group -> {
-                    if (group.isPresent())
-                        Log.debugf("Group retrieved.");
-                    else Log.debugf("Group not found.");
                 })
                 .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
                 .get();

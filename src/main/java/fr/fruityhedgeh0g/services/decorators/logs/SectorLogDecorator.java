@@ -121,21 +121,6 @@ public class SectorLogDecorator implements SectorService {
     }
 
     @Override
-    public SectorDto getByUserId(UUID userId) {
-        Log.debugf("Retrieving sector by user id %s...",userId);
-        return Try.of(() -> sectorService.getByUserId(userId))
-                .onSuccess(sector -> {
-                    Log.debugf("Sector retrieved: "+sector.toString());
-                })
-                .onFailure(t -> {
-                    switch(t){
-                        case UnknownResourceException ex -> Log.errorf(ex,"Sector not found.");
-                        default -> Log.errorf(t,"An error occurred while retrieving sector.");
-                    }
-                })
-                .get();
-    }
-    @Override
     public Optional<SectorEntity> doGetEntityById(UUID sectorId) {
         Log.debugf("[INTERNAL] Retrieving sector by id %s...", sectorId);
         return Try.of(() -> sectorService.doGetEntityById(sectorId))

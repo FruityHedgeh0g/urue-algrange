@@ -7,7 +7,6 @@ import fr.fruityhedgeh0g.dtos.Views;
 import lombok.Builder;
 import lombok.Value;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Value
@@ -29,9 +28,6 @@ public class GroupDto {
     /** Set only through an Affectation, never from a create or update body. */
     @JsonView(Views.Basic.class)
     NestedUserDto chef;
-
-    @JsonView(Views.Detailed.class)
-    Set<NestedUserDto> members;
 
     @JsonView(Views.Detailed.class)
     NestedSectorDto sector;

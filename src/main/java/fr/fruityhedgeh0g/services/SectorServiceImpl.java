@@ -59,18 +59,6 @@ public class SectorServiceImpl implements SectorService {
     }
 
     @Override
-    public SectorDto getByUserId(UUID userId) {
-        SectorEntity sectorEntity = internalGroupService
-                .doGetEntityByUserId(userId)
-                .orElseThrow(() -> new UnknownResourceException("Group not found for user: " + userId))
-                .getSector();
-
-        if (sectorEntity == null) throw new UnknownResourceException("User group isn't assigned to any sector.");
-
-        return getById(sectorEntity.getSectorId());
-    }
-
-    @Override
     @Transactional
     public SectorDto create(SectorDto sectorDto) {
         if (sectorRepository.existsByName(sectorDto.getName()))

@@ -20,6 +20,8 @@ import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 
 @QuarkusTest
 @TestHTTPEndpoint(UserController.class)
@@ -60,6 +62,14 @@ public class UserResourceTest {
     @OidcSecurity(claims = @Claim(key = "sub", value = BENEVOLE_ID))
     void currentPersonSeesTheirRole() {
         given().when().get("/me").then().statusCode(200).body("role", equalTo("benevole"));
+    }
+
+    /** Who rides with a Groupe lives on each Event's sign-ups: a person has no Groupe of their own. */
+    @Test
+    @TestSecurity(user = "benevole", augmentors = DatabaseRoleAugmentor.class)
+    @OidcSecurity(claims = @Claim(key = "sub", value = BENEVOLE_ID))
+    void aPersonHasNoGroupeOfTheirOwn() {
+        given().when().get("/me").then().statusCode(200).body("$", not(hasKey("group")));
     }
 
     @Test

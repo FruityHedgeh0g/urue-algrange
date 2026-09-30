@@ -36,6 +36,14 @@ describe("MembersAdminPage", () => {
     expect(roleOptions()).toEqual(["Bénévole", "Membre", "Chef de groupe", "Bureau"]);
   });
 
+  it("gives nobody a permanent Groupe: who rides with a Groupe is decided per Event", async () => {
+    renderAs("bureau");
+    const sophie = await screen.findByRole("button", { name: /Sophie Kremer/ });
+    expect(sophie).not.toHaveTextContent("Groupe Algrange Centre");
+    await userEvent.click(sophie);
+    expect(screen.queryByLabelText("Groupe")).not.toBeInTheDocument();
+  });
+
   it("offers no promotion on a person at the viewer's level", async () => {
     renderAs("bureau");
     await userEvent.click(await screen.findByRole("button", { name: /Claire Hoffmann/ }));

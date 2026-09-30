@@ -1,57 +1,62 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
-import { useSector, useSectorMutations } from "../../features/sectors/useSector";
-import { useMembersByGroupIds } from "../../features/users/useMembers";
-import { Member } from "../../features/users/types";
+import { useSector, useSectorMutations, useSectors } from "../../features/sectors/useSector";
+import { useGroups } from "../../features/groups/useGroups";
 import FormField from "../../components/molecules/FormField/FormField";
+import Select from "../../components/atoms/Select/Select";
 import Button from "../../components/atoms/Button/Button";
 import Spinner from "../../components/atoms/Spinner/Spinner";
-import Modal from "../../components/molecules/Modal/Modal";
-import MemberDetails from "../../components/molecules/MemberDetails/MemberDetails";
-import Icon from "../../components/atoms/Icon/Icon";
 import styles from "./SectorPage.module.css";
 
+/**
+ * Mon secteur (Bureau) : les informations du Secteur — le premier, ou celui
+ * choisi s'il y en a plusieurs — et ses Groupes, avec leur Chef de groupe et la
+ * partie du Secteur qu'ils couvrent. Qui roule avec un Groupe se décide à
+ * chaque Événement, pas ici.
+ */
 export const SectorPage: React.FC = () => {
-  const { user } = useAuth();
-  const sectorId = user?.group.sectorId;
+  const { data: sectors, isLoading: sectorsLoading } = useSectors();
+  const [chosenId, setChosenId] = useState<string>();
+  const sectorId = chosenId ?? sectors?.[0]?.sectorId;
   const { data: sector, isLoading, isError } = useSector(sectorId);
+  const { data: groups, isLoading: groupsLoading } = useGroups();
   const { update: updateSector } = useSectorMutations();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saved, setSaved] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   useEffect(() => {
     if (sector) {
       setName(sector.name);
       setDescription(sector.description);
+      setSaved(false);
     }
   }, [sector]);
-
-  const groupIds = sector?.groups.map((g) => g.groupId) ?? [];
-  const { data: members, isLoading: membersLoading } = useMembersByGroupIds(groupIds);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!sectorId) return;
-    updateSector.mutate(
-      { sectorId, name, description },
-      {
-        onSuccess: () => setSaved(true),
-      }
-    );
+    updateSector.mutate({ sectorId, name, description }, { onSuccess: () => setSaved(true) });
   };
 
-  if (isLoading) return <Spinner label="Chargement de votre secteur..." />;
-  if (isError || !sector) return <p className={styles.error}>Impossible de charger votre secteur.</p>;
+  if (sectorsLoading || isLoading) return <Spinner label="Chargement du secteur..." />;
+  if (!sectorId) return <p className={styles.empty}>Aucun secteur pour le moment.</p>;
+  if (isError || !sector) return <p className={styles.error}>Impossible de charger le secteur.</p>;
 
-  const selectedGroup = selectedMember ? sector.groups.find((g) => g.groupId === selectedMember.groupId) : undefined;
+  const sectorGroups = (groups ?? []).filter((g) => g.sectorId === sector.sectorId);
 
   return (
     <div className={styles.wrapper}>
       <section className={styles.panel}>
         <h2>Informations du secteur</h2>
+        {(sectors?.length ?? 0) > 1 && (
+          <Select
+            label="Secteur"
+            value={sector.sectorId}
+            onChange={setChosenId}
+            options={(sectors ?? []).map((s) => ({ value: s.sectorId, label: s.name }))}
+          />
+        )}
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <FormField
             label="Nom du secteur"
@@ -78,44 +83,26 @@ export const SectorPage: React.FC = () => {
       </section>
 
       <section className={styles.panel}>
-        <h2>Inscrits de mon secteur</h2>
-        {membersLoading && <Spinner label="Chargement des inscrits..." />}
-        {!membersLoading && (!members || members.length === 0) && (
-          <p className={styles.empty}>Aucun inscrit dans ce secteur pour le moment.</p>
-        )}
-        {members && members.length > 0 && (
-          <ul className={styles.memberList}>
-            {members.map((member) => {
-              const group = sector.groups.find((g) => g.groupId === member.groupId);
-              return (
-                <li key={member.userId}>
-                  <button type="button" className={styles.member} onClick={() => setSelectedMember(member)}>
-                    <span className={styles.memberName}>
-                      <span className={styles.memberInitials} aria-hidden="true">
-                        {member.firstName.charAt(0)}
-                        {member.lastName.charAt(0)}
-                      </span>
-                      {member.firstName} {member.lastName}
-                    </span>
-                    <span className={styles.memberMeta}>
-                      {group && <span className={styles.memberGroup}>{group.name}</span>}
-                      <Icon name="chevronRight" size={18} strokeWidth={2.5} className={styles.memberArrow} />
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+        <h2>Groupes du secteur</h2>
+        {groupsLoading ? (
+          <Spinner label="Chargement des groupes..." />
+        ) : sectorGroups.length === 0 ? (
+          <p className={styles.empty}>Aucun groupe dans ce secteur pour le moment.</p>
+        ) : (
+          <ul className={styles.groupList} aria-label="Groupes du secteur">
+            {sectorGroups.map((group) => (
+              <li key={group.groupId} className={styles.group}>
+                <span className={styles.groupName}>{group.name}</span>
+                <span className={styles.groupMeta}>
+                  {[group.area, group.chef ? `Chef : ${group.chef.firstName} ${group.chef.lastName}` : "Sans chef de groupe"]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </li>
+            ))}
           </ul>
         )}
       </section>
-
-      <Modal
-        isOpen={selectedMember !== null}
-        onClose={() => setSelectedMember(null)}
-        title={selectedMember ? `${selectedMember.firstName} ${selectedMember.lastName}` : ""}
-      >
-        {selectedMember && <MemberDetails member={selectedMember} groupName={selectedGroup?.name} sectorName={sector.name} />}
-      </Modal>
     </div>
   );
 };

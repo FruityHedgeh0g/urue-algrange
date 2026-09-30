@@ -2,7 +2,6 @@ package fr.fruityhedgeh0g.dtos.userDtos;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.groupDtos.NestedGroupDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import jakarta.validation.constraints.NotBlank;
@@ -39,9 +38,6 @@ public class UserDto {
 
     @JsonView(Views.Basic.class)
     Boolean president;
-
-    @JsonView(Views.Detailed.class)
-    NestedGroupDto group;
 
     //INFO : Retrait des Sets au profit d'une méthode dans EventServiceImpl retournant ces infos pour un couple Utilisateur/EventType
 //    @JsonView(Views.Detailed.class)
