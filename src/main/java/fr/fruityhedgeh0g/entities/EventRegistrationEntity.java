@@ -1,7 +1,9 @@
 package fr.fruityhedgeh0g.entities;
 
+import fr.fruityhedgeh0g.enums.DemandeStatusEnum;
 import fr.fruityhedgeh0g.enums.RegistrationStatusEnum;
 import fr.fruityhedgeh0g.enums.RideModeEnum;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,6 +48,65 @@ public class EventRegistrationEntity extends AuditTemplate {
 
     @Column(name = "signed_up_at", nullable = false)
     private LocalDateTime signedUpAt;
+
+    /** The Groupe this person rides with at this Event, once accepted or placed there. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "group_id")
+    private GroupEntity group;
+
+    /** The Groupe asked for by the latest Demande de groupe, if any. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "demande_group_id")
+    private GroupEntity demandeGroup;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "demande_status")
+    private DemandeStatusEnum demandeStatus;
+
+    /** A new pending Demande de groupe; only someone outside any Groupe at this Event makes one. */
+    public void requestGroup(GroupEntity requested) {
+        if (group != null)
+            throw new InvalidResourceException("Already riding with a Groupe at this Event.");
+        demandeGroup = requested;
+        demandeStatus = DemandeStatusEnum.EN_ATTENTE;
+    }
+
+    public boolean hasPendingDemande() {
+        return demandeStatus == DemandeStatusEnum.EN_ATTENTE;
+    }
+
+    public void acceptDemande() {
+        requirePendingDemande();
+        group = demandeGroup;
+        demandeStatus = DemandeStatusEnum.ACCEPTEE;
+    }
+
+    /** The person stays signed up, without a Groupe, and may make a new Demande. */
+    public void refuseDemande() {
+        requirePendingDemande();
+        demandeStatus = DemandeStatusEnum.REFUSEE;
+    }
+
+    /** The Bureau places the person in a Groupe directly, settling any Demande. */
+    public void placeIn(GroupEntity placed) {
+        group = placed;
+        demandeGroup = placed;
+        demandeStatus = DemandeStatusEnum.ACCEPTEE;
+    }
+
+    /** Takes the person out of their Groupe; they remain signed up for the Event. */
+    public void leaveGroup() {
+        if (group == null)
+            throw new InvalidResourceException("Not riding with a Groupe at this Event.");
+        group = null;
+        demandeGroup = null;
+        demandeStatus = null;
+    }
+
+    private void requirePendingDemande() {
+        if (!hasPendingDemande())
+            throw new InvalidResourceException("No pending Demande de groupe.");
+    }
 
     /** A new pilote sign-up, dated now; {@code waiting} puts it on the Liste d'attente. */
     public static EventRegistrationEntity pilote(EventEntity event, UserEntity person, boolean waiting) {

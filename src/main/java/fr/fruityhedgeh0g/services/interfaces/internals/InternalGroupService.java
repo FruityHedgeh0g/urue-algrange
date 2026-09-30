@@ -13,4 +13,7 @@ public interface InternalGroupService {
 
     /** Ends the person's Affectation, if any: their Groupe is left without a Chef. */
     void doEndAffectationOf(@NotNull UUID userId);
+
+    /** The Groupe the person leads through their current Affectation, if any. */
+    Optional<GroupEntity> doGetEntityLedBy(@NotNull UUID userId);
 }

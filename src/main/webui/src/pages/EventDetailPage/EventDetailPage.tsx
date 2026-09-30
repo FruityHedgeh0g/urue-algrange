@@ -3,7 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { useEvent } from "../../features/events/useEvents";
 import { acceptsSignUps, EVENT_STATUS_LABELS, statusTone } from "../../features/events/status";
 import { useEventRegistration, useMyRegistrations } from "../../features/events/useMyRegistrations";
-import { PhoneRequiredError } from "../../features/events/registrationsApi";
+import { DEMANDE_STATUS_LABELS, PhoneRequiredError } from "../../features/events/registrationsApi";
+import { useGroups } from "../../features/groups/useGroups";
+import Select from "../../components/atoms/Select/Select";
 import { useFeature } from "../../features/featureFlags/useFeatureFlags";
 import { useAuth } from "../../auth/AuthContext";
 import { formatDateRange } from "../../lib/formatDate";
@@ -22,19 +24,21 @@ export const EventDetailPage: React.FC = () => {
   const { data: event, isLoading, isError } = useEvent(eventId);
   const { isAuthenticated, user, updateProfile } = useAuth();
   const { data: registrations } = useMyRegistrations();
-  const { register, unregister } = useEventRegistration();
+  const { register, unregister, askGroup } = useEventRegistration();
+  const { data: groups } = useGroups();
+  const [groupId, setGroupId] = useState("");
   const registrationOpen = useFeature("inscription-evenements");
   const [askPhone, setAskPhone] = useState(false);
   const [phone, setPhone] = useState("");
 
   const registration = registrations?.find((r) => r.eventId === eventId);
-  const isPending = register.isPending || unregister.isPending;
+  const isPending = register.isPending || unregister.isPending || askGroup.isPending;
 
   /** Sans téléphone, l'API refuse l'inscription : on le demande, on l'enregistre au profil, puis on réessaie. */
   const signUp = (withPhone?: string) => {
     if (!eventId) return;
     register.mutate(
-      { eventId, phone: withPhone },
+      { eventId, phone: withPhone, groupId },
       {
         onSuccess: () => setAskPhone(false),
         onError: (error) => setAskPhone(error instanceof PhoneRequiredError),
@@ -67,6 +71,13 @@ export const EventDetailPage: React.FC = () => {
   }
 
   const signUpsOpen = acceptsSignUps(event.status);
+  /** Les Groupes du Secteur de l'Événement, pour la Demande de groupe. */
+  const groupOptions = [
+    { value: "", label: "Sans groupe" },
+    ...(groups ?? []).filter((g) => g.sectorId === event.sectorId).map((g) => ({ value: g.groupId, label: g.name })),
+  ];
+  const groupSelect = <Select label="Groupe (facultatif)" value={groupId} onChange={setGroupId} options={groupOptions} />;
+  const canAskGroup = registration && !registration.group && registration.demande?.status !== "en_attente" && event.status !== "archive";
 
   return (
     <article>
@@ -113,6 +124,23 @@ export const EventDetailPage: React.FC = () => {
                   <Icon name="check" size={18} strokeWidth={3} />
                   {registration.status === "participant" ? "Vous êtes inscrit comme pilote" : "Vous êtes sur la liste d'attente"}
                 </p>
+                {registration.group && <p>Vous roulez avec {registration.group.name}.</p>}
+                {registration.demande && registration.demande.status !== "acceptee" && (
+                  <p>
+                    Demande pour {registration.demande.group.name} : {DEMANDE_STATUS_LABELS[registration.demande.status]}
+                  </p>
+                )}
+                {canAskGroup && (
+                  <>
+                    {groupSelect}
+                    <Button
+                      label="Demander ce groupe"
+                      variant="outline"
+                      disabled={isPending || !groupId}
+                      onClick={() => askGroup.mutate({ eventId: event.eventId, groupId })}
+                    />
+                  </>
+                )}
                 {event.status !== "archive" && (
                   <Button
                     label="Me désinscrire"
@@ -143,6 +171,7 @@ export const EventDetailPage: React.FC = () => {
                     </form>
                   ) : (
                     <>
+                      {groupSelect}
                       <Button
                         label={event.status === "complet" ? "Rejoindre la liste d'attente" : "M'inscrire comme pilote"}
                         variant="accent"

@@ -158,6 +158,14 @@ public class GroupLogDecorator implements GroupService {
     }
 
     @Override
+    public Optional<GroupEntity> doGetEntityLedBy(UUID userId) {
+        Log.debugf("[INTERNAL] Retrieving the group led by %s...", userId);
+        return Try.of(() -> groupService.doGetEntityLedBy(userId))
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving the group led by %s.", userId))
+                .get();
+    }
+
+    @Override
     public Optional<GroupEntity> doGetEntityById(UUID groupId) {
         Log.debugf("[INTERNAL] Retrieving group by id %s...",groupId);
         return Try.of(() -> groupService.doGetEntityById(groupId))

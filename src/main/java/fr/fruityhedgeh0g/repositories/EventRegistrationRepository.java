@@ -26,6 +26,12 @@ public class EventRegistrationRepository implements PanacheRepositoryBase<EventR
         return list("event.eventId = ?1 order by signedUpAt, registrationId", eventId);
     }
 
+    /** Sign-ups riding with, or asking for, the Groupe at any Event, oldest first. */
+    public List<EventRegistrationEntity> listByGroup(UUID groupId) {
+        return list("group.groupId = ?1 or (demandeGroup.groupId = ?1 and demandeStatus = ?2) order by signedUpAt, registrationId",
+                groupId, fr.fruityhedgeh0g.enums.DemandeStatusEnum.EN_ATTENTE);
+    }
+
     public List<EventRegistrationEntity> listByPerson(UUID personId) {
         return list("person.userId = ?1 order by event.startDateTime", personId);
     }

@@ -19,6 +19,7 @@ import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import MyEventsPage from "../pages/MyEventsPage/MyEventsPage";
 import SectorPage from "../pages/SectorPage/SectorPage";
+import MonGroupePage from "../pages/MonGroupePage/MonGroupePage";
 import MembersAdminPage from "../pages/MembersAdminPage/MembersAdminPage";
 import SectorsAdminPage from "../pages/SectorsAdminPage/SectorsAdminPage";
 import GroupsAdminPage from "../pages/GroupsAdminPage/GroupsAdminPage";
@@ -64,6 +65,7 @@ export const router = createBrowserRouter(
         route("account", <AccountLayout />, null, [
           route("accountProfile", <ProfilePage />, "account"),
           route("accountEvents", <MyEventsPage />, "account"),
+          route("accountGroup", <MonGroupePage />, "account"),
           route("accountSector", <SectorPage />, "account"),
         ]),
         route("administration", <AdminLayout />, null, [

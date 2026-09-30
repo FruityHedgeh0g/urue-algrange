@@ -1,9 +1,11 @@
 package fr.fruityhedgeh0g.services.decorators.logs;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
+import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.PhoneRequiredException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
@@ -95,9 +97,9 @@ public class EventLogDecorator implements EventService{
     }
 
     @Override
-    public RegistrationDto signUp(UUID eventId, UUID personId) {
+    public RegistrationDto signUp(UUID eventId, UUID personId, UUID groupId) {
         Log.debugf("%s signs up for event %s...", personId, eventId);
-        return Try.of(() -> eventService.signUp(eventId, personId))
+        return Try.of(() -> eventService.signUp(eventId, personId, groupId))
                 .onSuccess(r -> Log.infof("%s signed up for event %s: %s.", personId, eventId, r.status().id()))
                 .onFailure(t -> {
                     switch (t) {
@@ -171,6 +173,51 @@ public class EventLogDecorator implements EventService{
                         case InvalidResourceException ex -> Log.warnf("Removal refused: %s", ex.getMessage());
                         case UnknownResourceException ex -> Log.warnf("Removal refused: %s", ex.getMessage());
                         default -> Log.errorf(t, "An error occurred while removing someone from an event.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public RegistrationDto requestGroup(UUID eventId, UUID personId, UUID groupId) {
+        return logged(() -> eventService.requestGroup(eventId, personId, groupId),
+                "Demande de groupe of " + personId + " for group " + groupId + " at event " + eventId);
+    }
+
+    @Override
+    public RegistrationDto decideDemande(UUID eventId, UUID personId, Actor actor, boolean accept) {
+        return logged(() -> eventService.decideDemande(eventId, personId, actor, accept),
+                (accept ? "Acceptance" : "Refusal") + " of the Demande of " + personId + " at event " + eventId + " by " + actor.personId());
+    }
+
+    @Override
+    public RosterDto placeInGroup(UUID eventId, UUID personId, UUID groupId) {
+        return logged(() -> eventService.placeInGroup(eventId, personId, groupId),
+                "Placement of " + personId + " in group " + groupId + " at event " + eventId);
+    }
+
+    @Override
+    public RegistrationDto takeOutOfGroup(UUID eventId, UUID personId, Actor actor) {
+        return logged(() -> eventService.takeOutOfGroup(eventId, personId, actor),
+                "Removal of " + personId + " from their group at event " + eventId + " by " + actor.personId());
+    }
+
+    @Override
+    public MonGroupeDto monGroupe(UUID chefId) {
+        return logged(() -> eventService.monGroupe(chefId), "Mon groupe of " + chefId);
+    }
+
+    /** Logs a Groupe action at event level: refusals as warnings, anything else as errors. */
+    private <T> T logged(io.vavr.CheckedFunction0<T> action, String what) {
+        Log.debugf("%s...", what);
+        return Try.of(action)
+                .onSuccess(r -> Log.debugf("%s: done.", what))
+                .onFailure(t -> {
+                    switch (t) {
+                        case InvalidResourceException ex -> Log.warnf("%s refused: %s", what, ex.getMessage());
+                        case ForbiddenActionException ex -> Log.warnf("%s forbidden: %s", what, ex.getMessage());
+                        case UnknownResourceException ex -> Log.warnf("%s refused: %s", what, ex.getMessage());
+                        default -> Log.errorf(t, "%s failed.", what);
                     }
                 })
                 .get();

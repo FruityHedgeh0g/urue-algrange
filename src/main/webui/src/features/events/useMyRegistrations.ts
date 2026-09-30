@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMyRegistrations, signUp, withdraw } from "./registrationsApi";
+import { fetchMyRegistrations, requestGroup, signUp, withdraw } from "./registrationsApi";
 import { queryKeys } from "../queryKeys";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -20,9 +20,9 @@ export function useEventRegistration() {
 
   const register = useMutation({
     /** `phone` : numéro tout juste saisi, avant que le profil ne soit relu. */
-    mutationFn: (input: { eventId: string; phone?: string }) => {
+    mutationFn: (input: { eventId: string; phone?: string; groupId?: string }) => {
       if (!user) throw new Error("Connectez-vous pour vous inscrire.");
-      return signUp(input.eventId, { ...user, phone: input.phone ?? user.phone });
+      return signUp(input.eventId, { ...user, phone: input.phone ?? user.phone }, input.groupId || undefined);
     },
     onSuccess: invalidate,
   });
@@ -32,5 +32,11 @@ export function useEventRegistration() {
     onSuccess: invalidate,
   });
 
-  return { register, unregister };
+  /** Nouvelle Demande de groupe, par exemple après un refus. */
+  const askGroup = useMutation({
+    mutationFn: (input: { eventId: string; groupId: string }) => requestGroup(input.eventId, user?.userId ?? "", input.groupId),
+    onSuccess: invalidate,
+  });
+
+  return { register, unregister, askGroup };
 }

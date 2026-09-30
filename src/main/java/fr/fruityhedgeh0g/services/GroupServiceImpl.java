@@ -175,6 +175,11 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
         groupRepository.findByChef(userId).ifPresent(group -> group.setChef(null));
     }
 
+    @Override
+    public Optional<GroupEntity> doGetEntityLedBy(UUID userId) {
+        return groupRepository.findByChef(userId);
+    }
+
     private GroupEntity groupOrThrow(UUID groupId) {
         return groupRepository.findByIdOptional(groupId)
                 .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));

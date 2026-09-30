@@ -18,7 +18,7 @@ export function createGroupsApi(store: JsonStore = localJsonStore) {
   const groups = createOverlayCollection<Group>({ store, name: "group", fixtures: mockGroups, idOf: (g) => g.groupId });
   return {
     fetchGroups: () => groups.list(),
-    createGroup: (input: GroupInput) => groups.create({ groupId: `group-${Date.now()}`, ...input }),
+    createGroup: (input: GroupInput) => groups.create({ groupId: `group-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, ...input }),
     updateGroup: (groupId: string, patch: GroupInput) => groups.update(groupId, patch),
     /** Affectation : le Chef quitte le Groupe qu'il menait éventuellement. */
     setChef: async (groupId: string, chef: GroupChef) => {

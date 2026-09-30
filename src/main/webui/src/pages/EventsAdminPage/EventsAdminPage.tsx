@@ -124,7 +124,7 @@ export const EventsAdminPage: React.FC = () => {
             <FormField label="Adresse" value={value.address} onChange={(e) => onChange({ ...value, address: e.target.value })} />
             <FormField label="Ville" value={value.city} onChange={(e) => onChange({ ...value, city: e.target.value })} />
             <FormField label="Code postal" value={value.postalCode} onChange={(e) => onChange({ ...value, postalCode: e.target.value })} />
-            {event && <EventRoster eventId={event.eventId} editable={event.status !== "archive"} />}
+            {event && <EventRoster eventId={event.eventId} sectorId={event.sectorId} editable={event.status !== "archive"} />}
           </>
         );
       }}

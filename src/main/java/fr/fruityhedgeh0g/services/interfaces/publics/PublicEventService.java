@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services.interfaces.publics;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
@@ -26,7 +27,21 @@ public interface PublicEventService {
      * while Ouvert and under the maximum, otherwise on the Liste d'attente. Signing up
      * again returns the existing sign-up.
      */
-    RegistrationDto signUp(@NotNull UUID eventId, @NotNull UUID personId);
+    RegistrationDto signUp(@NotNull UUID eventId, @NotNull UUID personId, UUID groupId);
+    /** A new Demande de groupe, for someone signed up and not yet riding with a Groupe. */
+    RegistrationDto requestGroup(@NotNull UUID eventId, @NotNull UUID personId, @NotNull UUID groupId);
+    /** Accepts or refuses a pending Demande: the asked Groupe's Chef (by Affectation) or the Bureau. */
+    RegistrationDto decideDemande(@NotNull UUID eventId, @NotNull UUID personId, @NotNull Actor actor, boolean accept);
+    /** The Bureau places a Participant in a Groupe directly. */
+    RosterDto placeInGroup(@NotNull UUID eventId, @NotNull UUID personId, @NotNull UUID groupId);
+    /** The Groupe's Chef or the Bureau takes the person out of the Groupe; they stay signed up. */
+    RegistrationDto takeOutOfGroup(@NotNull UUID eventId, @NotNull UUID personId, @NotNull Actor actor);
+    /** Mon groupe for a Chef de groupe: empty without an Affectation. */
+    MonGroupeDto monGroupe(@NotNull UUID chefId);
+
+    /** Who acts, for checks that go beyond the Role (a Chef acts only on the Groupe they lead). */
+    record Actor(UUID personId, boolean bureau) {
+    }
     /** Withdraws a Participant or someone on the Liste d'attente, until Archivé; nobody moves up. */
     void withdraw(@NotNull UUID eventId, @NotNull UUID personId);
     List<RegistrationDto> registrationsOf(@NotNull UUID personId);

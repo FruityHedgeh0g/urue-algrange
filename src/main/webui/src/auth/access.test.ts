@@ -18,8 +18,11 @@ describe("access map", () => {
     ["accountProfile", "benevole", true],
     ["accountEvents", "benevole", true],
     ["accountEvents", "visiteur", false],
-    ["accountSector", "benevole", false],
-    ["accountSector", "chef_de_groupe", true],
+    ["accountGroup", "membre", false],
+    ["accountGroup", "chef_de_groupe", true],
+    ["accountGroup", "bureau", true],
+    ["accountSector", "chef_de_groupe", false],
+    ["accountSector", "bureau", true],
     ["administration", "chef_de_groupe", false],
     ["administration", "bureau", true],
     ["adminConfiguration", "bureau", false],
@@ -53,7 +56,9 @@ describe("access map", () => {
 
   it("lists section tabs by role", () => {
     expect(ids(navFor("account", ctx("benevole")))).toEqual(["accountProfile", "accountEvents"]);
-    expect(ids(navFor("account", ctx("chef_de_groupe")))).toContain("accountSector");
+    expect(ids(navFor("account", ctx("chef_de_groupe")))).toEqual(["accountProfile", "accountEvents", "accountGroup"]);
+    // Un Chef de groupe qui est aussi au Bureau voit Mon groupe et Mon secteur
+    expect(ids(navFor("account", ctx("bureau")))).toEqual(["accountProfile", "accountEvents", "accountGroup", "accountSector"]);
     expect(ids(navFor("admin", ctx("bureau")))).not.toContain("adminConfiguration");
     expect(ids(navFor("admin", ctx("admin")))).toEqual([
       "adminMembers",

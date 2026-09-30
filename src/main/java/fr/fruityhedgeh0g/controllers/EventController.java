@@ -3,7 +3,9 @@ package fr.fruityhedgeh0g.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.EventStatusChangeDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.DemandeRequestDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.dtos.Views;
 import fr.fruityhedgeh0g.services.interfaces.publics.PublicEventService;
@@ -55,12 +57,63 @@ public class EventController {
         return eventService.registrationsOf(me());
     }
 
+    /** Optional {@code ?groupId=} creates a Demande de groupe for that Groupe. */
     @PUT
     @Path("/{eventId}/registration")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("benevole")
-    public RegistrationDto signUp(@PathParam("eventId") UUID eventId){
-        return eventService.signUp(eventId, me());
+    public RegistrationDto signUp(@PathParam("eventId") UUID eventId, @QueryParam("groupId") UUID groupId){
+        return eventService.signUp(eventId, me(), groupId);
+    }
+
+    @PUT
+    @Path("/{eventId}/registration/demande")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("benevole")
+    public RegistrationDto requestGroup(@PathParam("eventId") UUID eventId, @Valid @NotNull DemandeRequestDto demande){
+        if (demande.groupId() == null) throw new BadRequestException("A Demande de groupe names a Groupe.");
+        return eventService.requestGroup(eventId, me(), demande.groupId());
+    }
+
+    /** {decision}: accept or refuse; the asked Groupe's Chef or the Bureau. */
+    @POST
+    @Path("/{eventId}/demandes/{personId}/{decision: accept|refuse}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("chef_de_groupe")
+    public RegistrationDto decideDemande(@PathParam("eventId") UUID eventId, @PathParam("personId") UUID personId,
+                                         @PathParam("decision") String decision){
+        return eventService.decideDemande(eventId, personId, actor(), "accept".equals(decision));
+    }
+
+    @PUT
+    @Path("/{eventId}/roster/{personId}/group/{groupId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public RosterDto placeInGroup(@PathParam("eventId") UUID eventId, @PathParam("personId") UUID personId,
+                                  @PathParam("groupId") UUID groupId){
+        return eventService.placeInGroup(eventId, personId, groupId);
+    }
+
+    @DELETE
+    @Path("/{eventId}/roster/{personId}/group")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("chef_de_groupe")
+    public RegistrationDto takeOutOfGroup(@PathParam("eventId") UUID eventId, @PathParam("personId") UUID personId){
+        return eventService.takeOutOfGroup(eventId, personId, actor());
+    }
+
+    /** Mon groupe: per Event, the riders and pending Demandes of the Groupe the Chef leads. */
+    @GET
+    @Path("/mon-groupe")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("chef_de_groupe")
+    public MonGroupeDto getMonGroupe(){
+        return eventService.monGroupe(me());
+    }
+
+    private PublicEventService.Actor actor() {
+        return new PublicEventService.Actor(me(), identity.hasRole("bureau"));
     }
 
     @DELETE

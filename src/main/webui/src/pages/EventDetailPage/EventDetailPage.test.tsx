@@ -53,6 +53,16 @@ describe("EventDetailPage sign-up", () => {
     expect(JSON.parse(localStorage.getItem("urue-mock-profile") as string).phone).toBe("06 12 34 56 78");
   });
 
+  it("signs up with a chosen Groupe and shows the pending Demande", async () => {
+    localStorage.setItem("urue-mock-profile", JSON.stringify({ firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" }));
+    renderPage();
+
+    await userEvent.selectOptions(await screen.findByLabelText("Groupe (facultatif)"), "group-1");
+    await userEvent.click(screen.getByRole("button", { name: "M'inscrire comme pilote" }));
+
+    expect(await screen.findByText("Demande pour Groupe Algrange Centre : en attente")).toBeInTheDocument();
+  });
+
   it("signs up straight away with a phone number, then withdraws", async () => {
     localStorage.setItem("urue-mock-profile", JSON.stringify({ firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" }));
     renderPage();

@@ -3,20 +3,26 @@ package fr.fruityhedgeh0g.services;
 import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.DemandeDto;
+import fr.fruityhedgeh0g.dtos.eventDtos.MonGroupeDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RegistrationDto;
+import fr.fruityhedgeh0g.dtos.groupDtos.GroupRefDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterDto;
 import fr.fruityhedgeh0g.dtos.eventDtos.RosterEntryDto;
 import fr.fruityhedgeh0g.entities.EventEntity;
 import fr.fruityhedgeh0g.entities.EventRegistrationEntity;
+import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.enums.EventStatusEnum;
+import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.PhoneRequiredException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.EventRegistrationRepository;
 import fr.fruityhedgeh0g.repositories.EventRepository;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalSectorService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.EventMapper;
@@ -27,7 +33,11 @@ import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,6 +61,9 @@ public class EventServiceImpl implements EventService {
 
     @Inject
     InternalUserService internalUserService;
+
+    @Inject
+    InternalGroupService internalGroupService;
 
     @Override
     public List<EventDto> listAll(boolean seesPlanification) {
@@ -111,7 +124,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public RegistrationDto signUp(UUID eventId, UUID personId) {
+    public RegistrationDto signUp(UUID eventId, UUID personId, UUID groupId) {
         EventEntity event = lockedEventOrThrow(eventId);
         UserEntity person = internalUserService.doGetEntityById(personId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
@@ -128,7 +141,89 @@ public class EventServiceImpl implements EventService {
         EventRegistrationEntity registration = current == EventStatusEnum.OUVERT && placeLeft(event)
                 ? registrationRepository.persistConfirmed(event, person)
                 : registrationRepository.persistWaiting(event, person);
+        if (groupId != null) registration.requestGroup(groupOrThrow(groupId));
         return toDto(registration);
+    }
+
+    @Override
+    @Transactional
+    public RegistrationDto requestGroup(UUID eventId, UUID personId, UUID groupId) {
+        refuseOnArchived(eventOrThrow(eventId));
+        EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        registration.requestGroup(groupOrThrow(groupId));
+        return toDto(registration);
+    }
+
+    @Override
+    @Transactional
+    public RegistrationDto decideDemande(UUID eventId, UUID personId, Actor actor, boolean accept) {
+        refuseOnArchived(eventOrThrow(eventId));
+        EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        if (!registration.hasPendingDemande())
+            throw new InvalidResourceException("No pending Demande de groupe for " + personId);
+        requireLeaderOrBureau(actor, registration.getDemandeGroup());
+        if (accept) registration.acceptDemande();
+        else registration.refuseDemande();
+        return toDto(registration);
+    }
+
+    @Override
+    @Transactional
+    public RosterDto placeInGroup(UUID eventId, UUID personId, UUID groupId) {
+        EventEntity event = eventOrThrow(eventId);
+        refuseOnArchived(event);
+        EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        if (registration.isWaiting())
+            throw new InvalidResourceException("Only a Participant is placed in a Groupe.");
+        registration.placeIn(groupOrThrow(groupId));
+        return rosterOf(event);
+    }
+
+    @Override
+    @Transactional
+    public RegistrationDto takeOutOfGroup(UUID eventId, UUID personId, Actor actor) {
+        refuseOnArchived(eventOrThrow(eventId));
+        EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
+        requireLeaderOrBureau(actor, registration.getGroup());
+        registration.leaveGroup();
+        return toDto(registration);
+    }
+
+    @Override
+    public MonGroupeDto monGroupe(UUID chefId) {
+        Optional<GroupEntity> led = internalGroupService.doGetEntityLedBy(chefId);
+        if (led.isEmpty()) return new MonGroupeDto(null, List.of());
+
+        GroupEntity group = led.get();
+        Map<EventEntity, List<EventRegistrationEntity>> byEvent = registrationRepository.listByGroup(group.getGroupId()).stream()
+                .collect(Collectors.groupingBy(EventRegistrationEntity::getEvent, LinkedHashMap::new, Collectors.toList()));
+        // Every Event of the Groupe's Secteur a Chef prepares, even before anyone asks for the Groupe
+        if (group.getSector() != null)
+            eventRepository.list("sector.sectorId", group.getSector().getSectorId()).stream()
+                    .filter(e -> e.currentStatus().acceptsSignUps() || e.currentStatus() == EventStatusEnum.EN_COURS)
+                    .forEach(e -> byEvent.putIfAbsent(e, List.of()));
+
+        List<MonGroupeDto.EventRoster> events = byEvent.entrySet().stream()
+                .filter(e -> e.getKey().currentStatus() != EventStatusEnum.ARCHIVE)
+                .sorted(Comparator.comparing((Map.Entry<EventEntity, List<EventRegistrationEntity>> e) -> e.getKey().getStartDateTime()))
+                .map(e -> new MonGroupeDto.EventRoster(
+                        e.getKey().getEventId(), e.getKey().getName(), e.getKey().getStartDateTime(), e.getKey().currentStatus(),
+                        e.getValue().stream().filter(r -> group.equals(r.getGroup())).map(EventServiceImpl::toRosterEntry).toList(),
+                        e.getValue().stream().filter(EventRegistrationEntity::hasPendingDemande).map(EventServiceImpl::toRosterEntry).toList()))
+                .toList();
+        return new MonGroupeDto(GroupRefDto.of(group), events);
+    }
+
+    /** A Chef acts only on the Groupe they lead through their Affectation; the Bureau on any Groupe. */
+    private static void requireLeaderOrBureau(Actor actor, GroupEntity group) {
+        boolean leads = group != null && group.getChef() != null && group.getChef().getUserId().equals(actor.personId());
+        if (!actor.bureau() && !leads)
+            throw new ForbiddenActionException(actor.personId() + " does not lead this Groupe.");
+    }
+
+    private GroupEntity groupOrThrow(UUID groupId) {
+        return internalGroupService.doGetEntityById(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
     }
 
     @Override
@@ -188,7 +283,8 @@ public class EventServiceImpl implements EventService {
     private static RosterEntryDto toRosterEntry(EventRegistrationEntity registration) {
         UserEntity person = registration.getPerson();
         return new RosterEntryDto(person.getUserId(), person.getFirstName(), person.getLastName(), person.getPhone(),
-                registration.getMode(), registration.getSignedUpAt());
+                registration.getMode(), registration.getSignedUpAt(),
+                GroupRefDto.of(registration.getGroup()), DemandeDto.of(registration));
     }
 
     /** true when the Event has no maximum or is still under it. */
@@ -214,7 +310,8 @@ public class EventServiceImpl implements EventService {
     }
 
     private static RegistrationDto toDto(EventRegistrationEntity registration) {
-        return new RegistrationDto(registration.getEvent().getEventId(), registration.getMode(), registration.status(), registration.getSignedUpAt());
+        return new RegistrationDto(registration.getEvent().getEventId(), registration.getMode(), registration.status(),
+                registration.getSignedUpAt(), GroupRefDto.of(registration.getGroup()), DemandeDto.of(registration));
     }
 
     /** A maximum of 0 or less means no maximum. */

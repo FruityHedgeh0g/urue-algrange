@@ -1,7 +1,7 @@
 import React from "react";
 import { useEvents } from "../../features/events/useEvents";
 import { useMyRegistrations } from "../../features/events/useMyRegistrations";
-import { REGISTRATION_STATUS_LABELS } from "../../features/events/registrationsApi";
+import { DEMANDE_STATUS_LABELS, Registration, REGISTRATION_STATUS_LABELS } from "../../features/events/registrationsApi";
 import { EVENT_STATUS_LABELS } from "../../features/events/status";
 import { formatDateRange } from "../../lib/formatDate";
 import MediaCard from "../../components/molecules/MediaCard/MediaCard";
@@ -11,6 +11,13 @@ import Icon from "../../components/atoms/Icon/Icon";
 import ButtonLink from "../../components/atoms/ButtonLink/ButtonLink";
 import { placeholderImage } from "../../lib/placeholderImage";
 import styles from "./MyEventsPage.module.css";
+
+/** Où l'on en est côté Groupe : le Groupe rejoint, ou la dernière Demande et son état. */
+const groupLine = (registration: Registration) => {
+  if (registration.group) return `Groupe : ${registration.group.name}`;
+  if (registration.demande) return `Demande pour ${registration.demande.group.name} : ${DEMANDE_STATUS_LABELS[registration.demande.status]}`;
+  return undefined;
+};
 
 export const MyEventsPage: React.FC = () => {
   const { data: events, isLoading: eventsLoading } = useEvents();
@@ -44,7 +51,9 @@ export const MyEventsPage: React.FC = () => {
           imageSrc={event.imageUrl || placeholderImage(event.eventId, event.name)}
           imageAlt={event.name}
           title={event.name}
-          subtitle={`${EVENT_STATUS_LABELS[event.status]} · ${formatDateRange(event.startDateTime, event.endDateTime)}`}
+          subtitle={[EVENT_STATUS_LABELS[event.status], formatDateRange(event.startDateTime, event.endDateTime), groupLine(registration)]
+            .filter(Boolean)
+            .join(" · ")}
           badge={
             <Badge
               label={REGISTRATION_STATUS_LABELS[registration.status]}

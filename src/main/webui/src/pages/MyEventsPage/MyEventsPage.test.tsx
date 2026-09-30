@@ -20,7 +20,7 @@ describe("MyEventsPage", () => {
 
     const open = await events.createEvent({ ...base, name: "Test Balade" });
     await events.changeStatus(open.eventId, "ouvert");
-    await registrations.signUp(open.eventId, ME);
+    await registrations.signUp(open.eventId, ME, "group-1");
 
     const full = await events.createEvent({ ...base, name: "Test Loto" });
     await events.changeStatus(full.eventId, "ouvert");
@@ -44,6 +44,7 @@ describe("MyEventsPage", () => {
     );
 
     expect(await screen.findByRole("link", { name: /Test Balade/ })).toHaveTextContent("Participant");
+    expect(screen.getByRole("link", { name: /Test Balade/ })).toHaveTextContent("Demande pour Groupe Algrange Centre : en attente");
     expect(screen.getByRole("link", { name: /Test Loto/ })).toHaveTextContent("En attente");
   });
 });

@@ -95,6 +95,29 @@ describe("EventsAdminPage", () => {
     expect(screen.getByText("Personne en attente.")).toBeInTheDocument();
   });
 
+  it("lets the Bureau place a Participant in a Groupe, then take them out", async () => {
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+    const participants = await screen.findByRole("list", { name: "Participants" });
+    await userEvent.selectOptions(within(participants).getByLabelText("Groupe"), "group-1");
+
+    await waitFor(() => expect(within(participants).getByText(/Groupe Algrange Centre/)).toBeInTheDocument());
+    await userEvent.click(within(participants).getByRole("button", { name: "Sortir du groupe" }));
+    await waitFor(() => expect(within(participants).getByLabelText("Groupe")).toHaveValue(""));
+  });
+
+  it("lets the Bureau decide a pending Demande de groupe", async () => {
+    const eventId = (await createEventsApi().fetchEvents(true)).find((e) => e.name === "Test Ouvert")!.eventId;
+    await createRegistrationsApi().signUp(eventId, { userId: "p-3", firstName: "Test", lastName: "Meyer", phone: "06 00 00 00 00" }, "group-1");
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
+    const waiting = await screen.findByRole("list", { name: "Liste d'attente" });
+    const meyer = within(waiting).getByText(/Meyer/).closest("li") as HTMLElement;
+    expect(meyer).toHaveTextContent("Demande : Groupe Algrange Centre");
+    await userEvent.click(within(meyer).getByRole("button", { name: "Accepter" }));
+    await waitFor(() => expect(within(screen.getByRole("list", { name: "Liste d'attente" })).getByText(/Meyer/).closest("li")).toHaveTextContent("Groupe : Groupe Algrange Centre"));
+  });
+
   it("sets and clears the maximum number of Participants", async () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));
