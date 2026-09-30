@@ -113,10 +113,12 @@ public class RosterExportResourceTest {
         pilote(CLAIRE_ID, false);
         pilote(DENIS_ID, true);
         passager(EVE_ID, DENIS_ID);
+        SecteurFixtures.attachToSecteur(userRepository, sectorRepository, sector);
     }
 
     @AfterEach
     void cleanUp() {
+        SecteurFixtures.detachFromSecteur(userRepository, sectorRepository, sector);
         QuarkusTransaction.requiringNew().run(() -> {
             registrationRepository.delete("event.sector.sectorId = ?1 and pilote is not null", sector);
             registrationRepository.delete("event.sector.sectorId", sector);

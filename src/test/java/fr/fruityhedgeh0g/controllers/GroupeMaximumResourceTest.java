@@ -93,10 +93,12 @@ public class GroupeMaximumResourceTest {
             eventRepository.persist(e);
             event = e.getEventId();
         });
+        SecteurFixtures.attachToSecteur(userRepository, sectorRepository, sectors.get(0));
     }
 
     @AfterEach
     void cleanUp() {
+        SecteurFixtures.detachFromSecteur(userRepository, sectorRepository, sectors.get(0));
         QuarkusTransaction.requiringNew().run(() -> sectors.forEach(sector -> {
             registrationRepository.delete("event.sector.sectorId", sector);
             eventRepository.list("sector.sectorId", sector).forEach(eventRepository::delete);

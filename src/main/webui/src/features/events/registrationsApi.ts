@@ -111,6 +111,8 @@ export interface SigningUpPerson {
   firstName: string;
   lastName: string;
   phone?: string;
+  /** Secteur de la personne à partir de Membre : elle ne roule qu'aux Événements de ce Secteur (ADR 0004). */
+  sectorId?: string | null;
 }
 
 export const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
@@ -321,6 +323,8 @@ export function createRegistrationsApi(store: JsonStore = localJsonStore) {
 
       const event = await eventOrThrow(eventId);
       if (!acceptsSignUps(event.status)) throw new Error("Les inscriptions sont fermées pour cet événement.");
+      if (person.sectorId && person.sectorId !== event.sectorId)
+        throw new Error("Cet événement est réservé aux membres de son secteur et aux bénévoles.");
       if (!person.phone?.trim()) throw new PhoneRequiredError();
       if (groupId) await groupOrThrow(groupId);
 

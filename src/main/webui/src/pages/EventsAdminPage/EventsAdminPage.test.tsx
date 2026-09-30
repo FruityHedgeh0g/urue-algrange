@@ -164,6 +164,17 @@ describe("EventsAdminPage", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: /Test Ouvert/ })).not.toHaveTextContent("places"));
   });
 
+  it("shows the Bureau only its own Secteur's Events, and locks the Secteur of a new one", async () => {
+    await createEventsApi().createEvent({ name: "Test Thionville", description: "", sectorId: "sector-2", startDateTime: inDays(50, 9), endDateTime: inDays(50, 18) });
+    renderPage();
+    expect(await screen.findByRole("button", { name: /Test Ouvert/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Test Thionville/ })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "+ Nouvel événement" }));
+    expect(screen.getByLabelText("Secteur")).toBeDisabled();
+    expect(screen.getByLabelText("Secteur")).toHaveValue("sector-1");
+  });
+
   it("offers no delete: Events are cancelled instead", async () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Test Ouvert/ }));

@@ -87,10 +87,12 @@ public class PassagerResourceTest {
             nord = group.getGroupId();
         });
         event = persistEvent(null);
+        SecteurFixtures.attachToSecteur(userRepository, sectorRepository, sector);
     }
 
     @AfterEach
     void cleanUp() {
+        SecteurFixtures.detachFromSecteur(userRepository, sectorRepository, sector);
         QuarkusTransaction.requiringNew().run(() -> {
             // Passagers first: they point at their pilote's sign-up
             registrationRepository.delete("event.sector.sectorId = ?1 and pilote is not null", sector);

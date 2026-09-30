@@ -16,6 +16,7 @@ import Badge from "../../components/atoms/Badge/Badge";
 import Button from "../../components/atoms/Button/Button";
 import FormField from "../../components/molecules/FormField/FormField";
 import ButtonLink from "../../components/atoms/ButtonLink/ButtonLink";
+import { useSectors } from "../../features/sectors/useSector";
 import Icon from "../../components/atoms/Icon/Icon";
 import styles from "./EventDetailPage.module.css";
 
@@ -29,6 +30,7 @@ export const EventDetailPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const { data: event, isLoading, isError } = useEvent(eventId);
   const { isAuthenticated, user, updateProfile } = useAuth();
+  const { data: sectors } = useSectors();
   const { data: registrations } = useMyRegistrations();
   const { register, unregister, askGroup } = useEventRegistration();
   const { data: groups } = useGroups();
@@ -80,6 +82,8 @@ export const EventDetailPage: React.FC = () => {
   }
 
   const signUpsOpen = acceptsSignUps(event.status);
+  /** À partir de Membre, on ne roule qu'aux Événements de son Secteur (ADR 0004). */
+  const reservedToItsSecteur = Boolean(user?.sector) && user?.sector?.sectorId !== event.sectorId;
   /** Les Groupes du Secteur de l'Événement, pour la Demande de groupe. */
   const groupOptions = [
     { value: "", label: "Sans groupe" },
@@ -167,6 +171,8 @@ export const EventDetailPage: React.FC = () => {
                   />
                 )}
               </div>
+            ) : reservedToItsSecteur ? (
+              <p>Réservé aux membres de {sectors?.find((s) => s.sectorId === event.sectorId)?.name ?? "son secteur"} et aux bénévoles.</p>
             ) : (
               signUpsOpen &&
               registrationOpen && (

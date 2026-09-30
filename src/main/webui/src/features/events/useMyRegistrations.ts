@@ -32,7 +32,8 @@ export function useEventRegistration() {
     /** `piloteId` : s'inscrire comme passager de ce pilote (sans Demande de groupe). */
     mutationFn: (input: { eventId: string; phone?: string; groupId?: string; piloteId?: string }) => {
       if (!user) throw new Error("Connectez-vous pour vous inscrire.");
-      return signUp(input.eventId, { ...user, phone: input.phone ?? user.phone }, input.groupId || undefined, input.piloteId || undefined);
+      const person = { ...user, phone: input.phone ?? user.phone, sectorId: user.sector?.sectorId ?? null };
+      return signUp(input.eventId, person, input.groupId || undefined, input.piloteId || undefined);
     },
     onSuccess: invalidate,
   });

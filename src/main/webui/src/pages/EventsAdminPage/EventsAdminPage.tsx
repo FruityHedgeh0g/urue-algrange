@@ -3,7 +3,8 @@ import { useEventMutations, useEvents } from "../../features/events/useEvents";
 import { EventInput } from "../../features/events/eventsApi";
 import { allowedTransitions, EVENT_STATUS_LABELS, EventStatus } from "../../features/events/status";
 import { Event } from "../../features/events/types";
-import { useSectors } from "../../features/sectors/useSector";
+import { useIsSuperAdmin, useSectors } from "../../features/sectors/useSector";
+import { useAuth } from "../../auth/AuthContext";
 import { formatDateRange } from "../../lib/formatDate";
 import AdminCrudList from "../../components/organisms/AdminCrudList/AdminCrudList";
 import FormField from "../../components/molecules/FormField/FormField";
@@ -30,8 +31,12 @@ const toDraft = (event: Event): EventDraft => ({
   country: event.country ?? "France",
 });
 
+/** Le Bureau et les Admins gèrent les Événements de leur Secteur ; le Super admin ceux de tous (ADR 0004). */
 export const EventsAdminPage: React.FC = () => {
-  const { data: events, isLoading } = useEvents();
+  const isSuperAdmin = useIsSuperAdmin();
+  const ownSectorId = useAuth().user?.sector?.sectorId ?? "";
+  const { data: allEvents, isLoading } = useEvents();
+  const events = isSuperAdmin ? allEvents : allEvents?.filter((e) => e.sectorId === ownSectorId);
   const { data: sectors } = useSectors();
   const { update, create, moveTo } = useEventMutations();
 
@@ -41,7 +46,7 @@ export const EventsAdminPage: React.FC = () => {
     description: "",
     startDateTime: "",
     endDateTime: "",
-    sectorId: sectorOptions[0]?.value ?? "",
+    sectorId: isSuperAdmin ? sectorOptions[0]?.value ?? "" : ownSectorId,
     status: "planification",
     maxParticipants: "",
     imageUrl: "",
@@ -110,7 +115,13 @@ export const EventsAdminPage: React.FC = () => {
               onChange={(e) => onChange({ ...value, maxParticipants: e.target.value })}
             />
             {!event && (
-              <Select label="Secteur" value={value.sectorId} onChange={(sectorId) => onChange({ ...value, sectorId })} options={sectorOptions} />
+              <Select
+                label="Secteur"
+                value={value.sectorId}
+                onChange={(sectorId) => onChange({ ...value, sectorId })}
+                options={sectorOptions}
+                disabled={!isSuperAdmin}
+              />
             )}
             {event && transitions.length > 0 && (
               <Select

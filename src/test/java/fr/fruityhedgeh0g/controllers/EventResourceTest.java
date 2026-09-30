@@ -70,10 +70,12 @@ public class EventResourceTest {
             sectorRepository.persist(algrange);
             sector = algrange.getSectorId();
         });
+        SecteurFixtures.attachToSecteur(userRepository, sectorRepository, sector);
     }
 
     @AfterEach
     void cleanUp() {
+        SecteurFixtures.detachFromSecteur(userRepository, sectorRepository, sector);
         QuarkusTransaction.requiringNew().run(() -> {
             eventRepository.list("sector.sectorId", sector).forEach(eventRepository::delete);
             sectorRepository.deleteById(sector);

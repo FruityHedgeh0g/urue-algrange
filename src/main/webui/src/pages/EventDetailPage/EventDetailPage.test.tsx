@@ -78,6 +78,18 @@ describe("EventDetailPage sign-up", () => {
     expect(screen.queryByRole("button", { name: "Demander ce groupe" })).not.toBeInTheDocument();
   });
 
+  it("reserves another Secteur's Event to its Membres and to Bénévoles", async () => {
+    const events = createEventsApi();
+    const thionville = await events.createEvent({ name: "Test Thionville", description: "", sectorId: "sector-2", startDateTime: inDays(10), endDateTime: inDays(11) });
+    await events.changeStatus(thionville.eventId, "ouvert");
+    eventId = thionville.eventId;
+    localStorage.setItem("urue-mock-role", "membre");
+    renderPage();
+
+    expect(await screen.findByText(/Réservé aux membres de Secteur Thionville et aux bénévoles/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /M'inscrire/ })).not.toBeInTheDocument();
+  });
+
   it("signs up straight away with a phone number, then withdraws", async () => {
     localStorage.setItem("urue-mock-profile", JSON.stringify({ firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" }));
     renderPage();

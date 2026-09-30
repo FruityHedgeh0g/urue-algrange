@@ -93,10 +93,12 @@ public class DemandeResourceTest {
             eventRepository.persist(e);
             event = e.getEventId();
         });
+        SecteurFixtures.attachToSecteur(userRepository, sectorRepository, sector);
     }
 
     @AfterEach
     void cleanUp() {
+        SecteurFixtures.detachFromSecteur(userRepository, sectorRepository, sector);
         QuarkusTransaction.requiringNew().run(() -> {
             registrationRepository.delete("event.sector.sectorId", sector);
             eventRepository.delete("sector.sectorId", sector);

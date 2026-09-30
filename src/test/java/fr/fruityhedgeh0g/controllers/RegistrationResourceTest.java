@@ -70,10 +70,12 @@ public class RegistrationResourceTest {
             sectorRepository.persist(s);
             return s.getSectorId();
         });
+        SecteurFixtures.attachToSecteur(userRepository, sectorRepository, sector);
     }
 
     @AfterEach
     void cleanUp() {
+        SecteurFixtures.detachFromSecteur(userRepository, sectorRepository, sector);
         QuarkusTransaction.requiringNew().run(() -> {
             registrationRepository.delete("event.sector.sectorId", sector);
             eventRepository.list("sector.sectorId", sector).forEach(eventRepository::delete);

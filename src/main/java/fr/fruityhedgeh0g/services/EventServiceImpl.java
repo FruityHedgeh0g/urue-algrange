@@ -98,6 +98,8 @@ public class EventServiceImpl implements EventService {
             throw new InvalidResourceException("An Event belongs to a Secteur.");
         SectorEntity sector = internalSectorService.doGetEntityById(eventDto.getSectorId())
                 .orElseThrow(() -> new UnknownResourceException("Sector not found: " + eventDto.getSectorId()));
+        if (!viewer.scope().covers(sector))
+            throw new ForbiddenActionException("An Event is created in your own Secteur only.");
         if (sector.isClosed())
             throw new InvalidResourceException("A Secteur fermé gets no new Event.");
 
@@ -113,7 +115,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto update(EventDto eventDto) {
-        EventEntity event = eventOrThrow(eventDto.getEventId());
+        EventEntity event = managedEventOrThrow(eventDto.getEventId());
         refuseOnFinal(event);
         eventMapper.partialDtoToEntity(event, eventDto);
         normalizeMaximum(event);
@@ -124,7 +126,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto changeStatus(UUID eventId, EventStatusEnum status) {
-        EventEntity event = eventOrThrow(eventId);
+        EventEntity event = managedEventOrThrow(eventId);
         refuseInClosedSector(event);
         EventStatusEnum current = event.currentStatus();
         if (!current.canMoveTo(status))
@@ -207,7 +209,7 @@ public class EventServiceImpl implements EventService {
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         if (!registration.hasPendingDemande())
             throw new InvalidResourceException("No pending Demande de groupe for " + personId);
-        requireLeaderOrBureau(actor, registration.getDemandeGroup());
+        requireLeaderOrBureau(actor, registration.getDemandeGroup(), event);
         if (accept) {
             // Beyond the maximum the Demande stays pending, on the Groupe's Liste d'attente
             requireRoomIn(event, registration.getDemandeGroup(), registration.placesTaken());
@@ -220,6 +222,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public RosterDto placeInGroup(UUID eventId, UUID personId, UUID groupId) {
         EventEntity event = lockedEventOrThrow(eventId);
+        requireManaged(event);
         refuseOnArchived(event);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         requireNotPassager(registration);
@@ -235,6 +238,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public RosterDto setGroupMaximum(UUID eventId, UUID groupId, Integer maximum) {
         EventEntity event = lockedEventOrThrow(eventId);
+        requireManaged(event);
         refuseOnFinal(event);
         GroupEntity group = groupOrThrow(groupId);
         if (!event.isOfSectorOf(group))
@@ -247,9 +251,10 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public RegistrationDto takeOutOfGroup(UUID eventId, UUID personId, Actor actor) {
-        refuseOnArchived(eventOrThrow(eventId));
+        EventEntity event = eventOrThrow(eventId);
+        refuseOnArchived(event);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
-        requireLeaderOrBureau(actor, registration.getGroup());
+        requireLeaderOrBureau(actor, registration.getGroup(), event);
         requireNotPassager(registration);
         registration.leaveGroup();
         return toDto(registration);
@@ -282,10 +287,24 @@ public class EventServiceImpl implements EventService {
     }
 
     /** A Chef acts only on the Groupe they lead through their Affectation; the Bureau on any Groupe. */
-    private static void requireLeaderOrBureau(Actor actor, GroupEntity group) {
+    /** The Chef who leads the Groupe (by Affectation), or the Bureau of the Event's Secteur (ADR 0004). */
+    private void requireLeaderOrBureau(Actor actor, GroupEntity group, EventEntity event) {
         boolean leads = group != null && group.getChef() != null && group.getChef().getUserId().equals(actor.personId());
-        if (!actor.bureau() && !leads)
+        boolean managesSecteur = actor.bureau() && viewer.scope().covers(event.getSector());
+        if (!leads && !managesSecteur)
             throw new ForbiddenActionException(actor.personId() + " does not lead this Groupe.");
+    }
+
+    /** The Bureau and Admin manage only their own Secteur's Events; the Super admin all (ADR 0004). */
+    private void requireManaged(EventEntity event) {
+        if (!viewer.scope().covers(event.getSector()))
+            throw new ForbiddenActionException("The Event " + event.getEventId() + " is not of your Secteur.");
+    }
+
+    private EventEntity managedEventOrThrow(UUID eventId) {
+        EventEntity event = eventOrThrow(eventId);
+        requireManaged(event);
+        return event;
     }
 
     /** Refuses {@code needed} more riders in the Groupe beyond its maximum at the Event; no maximum means no limit. */
@@ -319,12 +338,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public RosterDto roster(UUID eventId) {
-        return rosterOf(eventOrThrow(eventId));
+        return rosterOf(managedEventOrThrow(eventId));
     }
 
     @Override
     public RosterExportDto exportRoster(UUID eventId) {
-        EventEntity event = eventOrThrow(eventId);
+        EventEntity event = managedEventOrThrow(eventId);
         return new RosterExportDto(RosterSpreadsheet.fileName(event.getName(), event.getStartDateTime().toLocalDate()),
                 RosterSpreadsheet.of(rosterOf(event)));
     }
@@ -333,6 +352,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public RosterDto promote(UUID eventId, UUID personId) {
         EventEntity event = lockedEventOrThrow(eventId);
+        requireManaged(event);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         refuseOnArchived(event);
         requireNotPassager(registration);
@@ -347,7 +367,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public RosterDto removeFromRoster(UUID eventId, UUID personId) {
-        EventEntity event = eventOrThrow(eventId);
+        EventEntity event = managedEventOrThrow(eventId);
         EventRegistrationEntity registration = registrationOrThrow(eventId, personId);
         refuseOnArchived(event);
         registrationRepository.delete(registration);
@@ -390,6 +410,9 @@ public class EventServiceImpl implements EventService {
     /** Sign-up is open while Ouvert or Complet, to someone with a phone number. */
     private static void requireSignUpOpenTo(EventEntity event, UserEntity person) {
         refuseInClosedSector(event);
+        // From Membre up, a person rides only at their own Secteur's Events (ADR 0004)
+        if (person.getSector() != null && !person.belongsTo(event.getSector()))
+            throw new InvalidResourceException("This Event is reserved to its Secteur's Membres and to Bénévoles.");
         EventStatusEnum current = event.currentStatus();
         if (!current.acceptsSignUps())
             throw new InvalidResourceException("Sign-up is closed for an Event in " + current.id());
