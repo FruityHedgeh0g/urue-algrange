@@ -1,6 +1,7 @@
 package fr.fruityhedgeh0g.services.interfaces.publics;
 
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
+import fr.fruityhedgeh0g.enums.PostStatusEnum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,10 +11,14 @@ import java.util.UUID;
 
 public interface PublicPostService {
 
-    List<PostDto> listAll();
-    PostDto getById(@NotNull UUID postId);
-    PostDto create(@NotNull @Valid PostDto postDto);
+    /** @param seesDrafts true for the Bureau and above; everyone else sees only Publié Posts */
+    List<PostDto> listAll(boolean seesDrafts);
+    PostDto getById(@NotNull UUID postId, boolean seesDrafts);
+    /** A new Post is Brouillon, with its creator as author. */
+    PostDto create(@NotNull @Valid PostDto postDto, @NotNull UUID authorId);
     PostDto update(@NotNull @Valid PostDto postDto);
+    /** Publishes or unpublishes. */
+    PostDto changeStatus(@NotNull UUID postId, @NotNull PostStatusEnum status);
     void delete(@NotNull UUID postId);
 
 //    Try<List<PostDto>> getAllPosts();

@@ -16,7 +16,12 @@ export const queryKeys = {
     all: ["members"] as const,
     list: ["members", "list"] as const,
   },
-  posts: { all: ["posts"] as const, detail: (postId: string | undefined) => ["posts", "detail", postId] as const },
+  posts: {
+    all: ["posts"] as const,
+    /** Brouillons compris, pour le Bureau. */
+    admin: ["posts", "admin"] as const,
+    detail: (postId: string | undefined) => ["posts", "detail", postId] as const,
+  },
   medias: { all: ["medias"] as const },
   carousel: { all: ["carousel-items"] as const, active: ["carousel-items", "active"] as const },
   configurations: { all: ["configurations"] as const },

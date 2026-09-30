@@ -23,6 +23,7 @@ import MonGroupePage from "../pages/MonGroupePage/MonGroupePage";
 import MembersAdminPage from "../pages/MembersAdminPage/MembersAdminPage";
 import SectorsAdminPage from "../pages/SectorsAdminPage/SectorsAdminPage";
 import GroupsAdminPage from "../pages/GroupsAdminPage/GroupsAdminPage";
+import PostsAdminPage from "../pages/PostsAdminPage/PostsAdminPage";
 import EventsAdminPage from "../pages/EventsAdminPage/EventsAdminPage";
 import FeatureRequestsPage from "../pages/FeatureRequestsPage/FeatureRequestsPage";
 import CarouselAdminPage from "../pages/CarouselAdminPage/CarouselAdminPage";
@@ -74,6 +75,7 @@ export const router = createBrowserRouter(
           route("adminSectors", <SectorsAdminPage />, "administration"),
           route("adminGroups", <GroupsAdminPage />, "administration"),
           route("adminEvents", <EventsAdminPage />, "administration"),
+          route("adminPosts", <PostsAdminPage />, "administration"),
           route("adminCarousel", <CarouselAdminPage />, "administration"),
           route("adminConfiguration", <ConfigurationPage />, "administration"),
           route("adminFeatureFlags", <FeatureFlagsPage />, "administration"),

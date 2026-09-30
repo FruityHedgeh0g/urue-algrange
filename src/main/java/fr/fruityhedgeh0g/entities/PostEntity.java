@@ -1,12 +1,14 @@
 package fr.fruityhedgeh0g.entities;
 
 import fr.fruityhedgeh0g.entities.medias.MediaEntity;
+import fr.fruityhedgeh0g.enums.PostStatusEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +34,24 @@ public class PostEntity extends AuditTemplate {
     @Column(name = "content", nullable = false)
     @NotNull
     private String content;
+
+    /**
+     * A new Post starts as Brouillon. The column default only fills Posts that existed before
+     * statuses did: they were already public, so they stay Publié.
+     */
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'PUBLIE'")
+    @Column(name = "status", nullable = false)
+    private PostStatusEnum status = PostStatusEnum.BROUILLON;
+
+    /** The Bureau member who created the Post; unknown for Posts older than authors. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "author_id")
+    private UserEntity author;
+
+    public boolean isPublished() {
+        return status == PostStatusEnum.PUBLIE;
+    }
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "media_id")
