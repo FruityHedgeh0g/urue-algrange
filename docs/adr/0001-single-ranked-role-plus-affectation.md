@@ -10,4 +10,4 @@ Each person holds exactly one Role on the ladder `visiteur < bénévole < membre
 ## Consequences
 
 - A Bureau member who holds the Chef de groupe title but leads no Groupe cannot be told apart from any other Bureau member. Accepted: every Bureau member is eligible for an Affectation anyway.
-- Roles, Bureau membership and Affectations are not yet scoped to a Secteur, since Algrange is the only one. When a second Secteur opens, Bureau and Admin will be scoped to their Secteur, with the Super admin above all Secteurs.
+- ~~Roles, Bureau membership and Affectations are not yet scoped to a Secteur, since Algrange is the only one. When a second Secteur opens, Bureau and Admin will be scoped to their Secteur, with the Super admin above all Secteurs.~~ Superseded by ADR 0004: from Membre up, a person belongs to one Secteur now.

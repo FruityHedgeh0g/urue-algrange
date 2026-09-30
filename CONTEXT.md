@@ -20,10 +20,10 @@ _Avoid_: feature flag (in UI copy: "fonctionnalité").
 
 **Visiteur**: anyone browsing the site without being registered.
 
-**Bénévole**: a Visiteur who has registered on the site. Has Mon espace and can sign up for Events.
+**Bénévole**: a Visiteur who has registered on the site. Has Mon espace and can sign up for Events. Belongs to no Secteur: the Bénévoles form one pool shared by every Secteur, riding at any Secteur's Events and promoted to Membre by the Bureau of a Secteur they rode with.
 _Avoid_: volunteer, inscrit, user
 
-**Membre**: a Bénévole who is part of the association, promoted by a Bureau member once their membership fee is settled (the fee itself is handled off-site).
+**Membre**: a Bénévole who is part of the association through one Secteur, promoted by a Bureau member once their membership fee is settled (the fee itself is handled off-site). Every Role from Membre up belongs to exactly one Secteur (the Super admin excepted) and rides only at that Secteur's Events. Nobody changes Secteur (except when the Super admin appoints them Admin of another one): a person goes back to Bénévole, losing their Secteur, and is promoted again in the other one.
 _Avoid_: adhérent
 
 **Chef de groupe**: a Membre holding the operational function of leading a Groupe, appointed by the Bureau. Keeps the title between Affectations.
@@ -36,7 +36,7 @@ _Avoid_: assignment, nomination
 
 **Président**: the one Bureau member who presides over the association. The only Bureau function the site records; grants no extra access yet.
 
-**Admin**: a person who manages the site itself and promotes Bureau members. Appointed by the Super admin.
+**Admin**: a person who manages the site for one Secteur and promotes its Bureau members. Appointed by the Super admin from all registered people, for a Secteur the Super admin chooses.
 
 **Super admin**: the person above every Admin, who appoints Admins and is the only one to open, rename, close (Fermé) or reopen a Secteur.
 
@@ -68,7 +68,7 @@ _Avoid_: waitlist, file d'attente
 
 ### Content
 
-**Post**: a news article written by the Bureau, either `Brouillon` or `Publié`.
+**Post**: a news article written by the Bureau of a Secteur, belonging to that Secteur, either `Brouillon` or `Publié`.
 _Avoid_: article, actualité
 
 **Media**: a picture or video shown by the site, used in Posts and in the photo gallery. A video may live on an external platform rather than on the site.
