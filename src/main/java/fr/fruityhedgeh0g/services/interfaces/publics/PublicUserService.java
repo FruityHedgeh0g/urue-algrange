@@ -15,7 +15,12 @@ public interface PublicUserService {
     UserDto getById(@NotNull UUID userId);
 
     /** Promotion chain: see {@link fr.fruityhedgeh0g.enums.RoleEnum#maySetRole}. The database Role applies even if the Keycloak mirror fails. */
-    UserDto changeRole(@NotNull UUID actorId, @NotNull UUID personId, @NotNull RoleEnum role);
+    /**
+     * Promotion chain, within the actor's Secteur (ADR 0004): a promoted Bénévole joins the actor's Secteur,
+     * a demoted one leaves it. The Super admin names the Secteur ({@code sectorId}) when appointing an Admin,
+     * the only case where a person changes Secteur, or when giving someone their first Secteur.
+     */
+    UserDto changeRole(@NotNull UUID actorId, @NotNull UUID personId, @NotNull RoleEnum role, UUID sectorId);
 
     /** A person edits their own first name, last name and phone number. */
     UserDto updateProfile(@NotNull UUID personId, @NotNull ProfileDto profile);

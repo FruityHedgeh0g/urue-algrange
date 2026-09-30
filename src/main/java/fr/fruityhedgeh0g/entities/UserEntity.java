@@ -43,6 +43,18 @@ public class UserEntity extends AuditTemplate{
     @Column(name = "president", nullable = false)
     private boolean president = false;
 
+    /**
+     * The Secteur this person belongs to, from Membre up (ADR 0004); none for a Bénévole
+     * (the pool shared by every Secteur) or the Super admin (above all Secteurs).
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sector_id")
+    private SectorEntity sector;
+
+    public boolean belongsTo(SectorEntity other) {
+        return sector != null && other != null && sector.getSectorId().equals(other.getSectorId());
+    }
+
     /** Changes the Role; only a Bureau member can stay Président. */
     public void changeRole(RoleEnum role) {
         this.role = role;

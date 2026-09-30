@@ -4,6 +4,7 @@ import fr.fruityhedgeh0g.utilities.logging.Logged;
 
 import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
@@ -15,6 +16,7 @@ import fr.fruityhedgeh0g.keycloak.KeycloakRoleMirror;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalSectorService;
 import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.logging.Log;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -46,6 +48,9 @@ public class UserServiceImpl implements UserService {
     @Inject
     InternalGroupService internalGroupService;
 
+    @Inject
+    InternalSectorService internalSectorService;
+
     //Using UUID to test the existence of the user is acceptable because it is based on an external system (Keycloak)
 
     @Override
@@ -66,12 +71,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto changeRole(UUID actorId, UUID personId, RoleEnum role) {
+    public UserDto changeRole(UUID actorId, UUID personId, RoleEnum role, UUID sectorId) {
         // Committed on its own before the Keycloak call, so a mirror failure cannot roll it back (ADR 0002)
         UserDto changed = QuarkusTransaction.requiringNew().call(() -> {
-            RoleEnum actorRole = userRepository.findByIdOptional(actorId)
-                    .map(UserEntity::getRole)
+            UserEntity actor = userRepository.findByIdOptional(actorId)
                     .orElseThrow(() -> new ForbiddenRoleChangeException("Unknown actor: " + actorId));
+            RoleEnum actorRole = actor.getRole();
             if (actorId.equals(personId))
                 throw new ForbiddenRoleChangeException("Nobody changes their own Role.");
 
@@ -80,8 +85,13 @@ public class UserServiceImpl implements UserService {
             if (!actorRole.maySetRole(person.getRole(), role))
                 throw new ForbiddenRoleChangeException(actorRole.id() + " cannot set " + person.getRole().id() + " to " + role.id());
 
+            SectorEntity sector = sectorAfter(actor, person, role, sectorId);
+            boolean changesSector = person.getSector() != null && !person.belongsTo(sector);
+
             person.changeRole(role);
-            if (!role.canLeadGroupe())
+            person.setSector(sector);
+            // A Chef's Affectation ends with the title, or when they leave their Groupe's Secteur
+            if (!role.canLeadGroupe() || changesSector)
                 internalGroupService.doEndAffectationOf(personId);
             return userMapper.toDto(person);
         });
@@ -93,6 +103,37 @@ public class UserServiceImpl implements UserService {
             Log.warnf(e, "Could not mirror Role %s of %s to Keycloak", role.id(), personId);
         }
         return changed;
+    }
+
+    /**
+     * The person's Secteur once their Role changes (ADR 0004). Below the Super admin, the actor acts only on
+     * Bénévoles and on their own Secteur's people, and gives their own Secteur. The Super admin names it when
+     * appointing an Admin or giving a first Secteur. A Bénévole belongs to none.
+     */
+    private SectorEntity sectorAfter(UserEntity actor, UserEntity person, RoleEnum role, UUID sectorId) {
+        if (actor.getRole() != RoleEnum.SUPER_ADMIN) {
+            if (sectorId != null)
+                throw new ForbiddenRoleChangeException("Only the Super admin names a Secteur.");
+            if (actor.getSector() == null)
+                throw new ForbiddenRoleChangeException(actor.getUserId() + " belongs to no Secteur.");
+            if (person.getSector() != null && !person.belongsTo(actor.getSector()))
+                throw new ForbiddenRoleChangeException(person.getUserId() + " belongs to another Secteur.");
+            return role.isAtLeast(RoleEnum.MEMBRE) ? actor.getSector() : null;
+        }
+        if (!role.isAtLeast(RoleEnum.MEMBRE)) return null;
+        boolean namesSector = role == RoleEnum.ADMIN || person.getSector() == null;
+        if (!namesSector) {
+            if (sectorId != null && !sectorId.equals(person.getSector().getSectorId()))
+                throw new InvalidResourceException("Only appointing an Admin changes a person's Secteur.");
+            return person.getSector();
+        }
+        if (sectorId == null)
+            throw new InvalidResourceException("Name the Secteur of " + person.getUserId() + ".");
+        SectorEntity sector = internalSectorService.doGetEntityById(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
+        if (sector.isClosed())
+            throw new InvalidResourceException("A Secteur fermé gets nobody: " + sectorId);
+        return sector;
     }
 
     @Override

@@ -63,7 +63,7 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("bureau")
     public @JsonView(Views.Detailed.class) UserDto changeRole(@PathParam("userId") UUID userId, @Valid @NotNull RoleChangeDto change){
-        return userService.changeRole(UUID.fromString(token.getSubject()), userId, change.role());
+        return userService.changeRole(UUID.fromString(token.getSubject()), userId, change.role(), change.sectorId());
     }
 
     @PUT

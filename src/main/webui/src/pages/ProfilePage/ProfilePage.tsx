@@ -35,6 +35,7 @@ export const ProfilePage: React.FC = () => {
         </p>
         <div className={styles.badges}>
           <Badge label={ROLE_LABELS[user.role]} />
+          {user.sector && <Badge label={user.sector.name} tone="muted" />}
         </div>
       </aside>
 

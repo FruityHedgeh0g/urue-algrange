@@ -3,6 +3,7 @@ import { Member } from "./types";
 export const mockMembers: Member[] = [
   {
     userId: "user-1",
+    sectorId: "sector-1",
     firstName: "Marc",
     lastName: "Weber",
     role: "chef_de_groupe",
@@ -30,6 +31,7 @@ export const mockMembers: Member[] = [
   },
   {
     userId: "user-4",
+    sectorId: "sector-1",
     firstName: "Camille",
     lastName: "Muller",
     role: "membre",
@@ -39,6 +41,7 @@ export const mockMembers: Member[] = [
   },
   {
     userId: "user-5",
+    sectorId: "sector-1",
     firstName: "Thomas",
     lastName: "Klein",
     role: "membre",
@@ -48,6 +51,7 @@ export const mockMembers: Member[] = [
   },
   {
     userId: "user-6",
+    sectorId: "sector-2",
     firstName: "Nathalie",
     lastName: "Roth",
     role: "chef_de_groupe",
@@ -66,6 +70,7 @@ export const mockMembers: Member[] = [
   },
   {
     userId: "user-8",
+    sectorId: "sector-2",
     firstName: "Claire",
     lastName: "Hoffmann",
     role: "bureau",
@@ -76,6 +81,7 @@ export const mockMembers: Member[] = [
   },
   {
     userId: "user-9",
+    sectorId: "sector-1",
     firstName: "Luc",
     lastName: "Schmitt",
     role: "bureau",

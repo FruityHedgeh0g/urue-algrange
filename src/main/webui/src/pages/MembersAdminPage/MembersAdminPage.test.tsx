@@ -58,6 +58,24 @@ describe("MembersAdminPage", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: /Sophie Kremer/ })).toHaveTextContent("Membre"));
   });
 
+  it("shows the Secteur of a new Membre, given by the promoting Bureau member", async () => {
+    renderAs("bureau");
+    await userEvent.click(await screen.findByRole("button", { name: /Sophie Kremer/ }));
+    await userEvent.selectOptions(screen.getByLabelText("Rôle"), "membre");
+    await userEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /Sophie Kremer/ })).toHaveTextContent("Secteur Algrange"));
+  });
+
+  it("asks the Super admin for the Secteur of a new Admin", async () => {
+    renderAs("super_admin");
+    await userEvent.click(await screen.findByRole("button", { name: /Sophie Kremer/ }));
+    expect(screen.queryByLabelText("Secteur")).not.toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByLabelText("Rôle"), "admin");
+    await userEvent.selectOptions(screen.getByLabelText("Secteur"), "sector-2");
+    await userEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /Sophie Kremer/ })).toHaveTextContent("Secteur Thionville"));
+  });
+
   it("shows the Président", async () => {
     renderAs("bureau");
     expect(await screen.findByRole("button", { name: /Claire Hoffmann/ })).toHaveTextContent("Président");

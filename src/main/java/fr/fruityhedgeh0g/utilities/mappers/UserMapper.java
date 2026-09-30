@@ -8,11 +8,12 @@ import fr.fruityhedgeh0g.entities.UserEntity;
 import io.vertx.core.json.Json;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "jakarta-cdi", uses = {EventMapper.class, GroupMapper.class})
+@Mapper(componentModel = "jakarta-cdi", uses = {EventMapper.class, GroupMapper.class, SectorMapper.class})
 public interface UserMapper {
     static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writer();
 
     @Mapping(target = "president", ignore = true)
+    @Mapping(target = "sector", ignore = true)
     UserEntity toEntity(UserDto dto);
 
     UserDto toDto(UserEntity entity);
@@ -21,6 +22,7 @@ public interface UserMapper {
 
     @Mapping(target = "role",ignore = true)
     @Mapping(target = "president",ignore = true)
+    @Mapping(target = "sector",ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     UserEntity partialDtoToEntity(@MappingTarget UserEntity userEntity, UserDto userDto);
 

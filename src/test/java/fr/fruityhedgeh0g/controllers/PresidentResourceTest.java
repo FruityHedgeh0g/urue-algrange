@@ -1,7 +1,9 @@
 package fr.fruityhedgeh0g.controllers;
 
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
+import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.security.DatabaseRoleAugmentor;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -39,10 +41,20 @@ public class PresidentResourceTest {
     @Inject
     UserRepository userRepository;
 
+    @Inject
+    SectorRepository sectorRepository;
+
     private final List<UUID> created = new ArrayList<>();
+    /** Everyone from Membre up belongs to this Secteur (ADR 0004); the Super admin to none. */
+    private UUID sector;
 
     @BeforeEach
     void seedActors() {
+        sector = QuarkusTransaction.requiringNew().call(() -> {
+            SectorEntity s = SectorEntity.builder().name("Test Secteur " + UUID.randomUUID()).build();
+            sectorRepository.persist(s);
+            return s.getSectorId();
+        });
         persist(UUID.fromString(BUREAU_ID), RoleEnum.BUREAU);
         persist(UUID.fromString(ADMIN_ID), RoleEnum.ADMIN);
         persist(UUID.fromString(SUPER_ADMIN_ID), RoleEnum.SUPER_ADMIN);
@@ -50,13 +62,18 @@ public class PresidentResourceTest {
 
     @AfterEach
     void removePersons() {
-        QuarkusTransaction.requiringNew().run(() -> created.forEach(userRepository::deleteById));
+        QuarkusTransaction.requiringNew().run(() -> {
+            created.forEach(userRepository::deleteById);
+            sectorRepository.deleteById(sector);
+        });
         created.clear();
     }
 
     private UUID persist(UUID id, RoleEnum role) {
         QuarkusTransaction.requiringNew().run(() -> userRepository.persist(
-                UserEntity.builder().userId(id).firstName("Test").lastName(role.name()).role(role).build()
+                UserEntity.builder().userId(id).firstName("Test").lastName(role.name()).role(role)
+                        .sector(role.isAtLeast(RoleEnum.MEMBRE) && role != RoleEnum.SUPER_ADMIN ? sectorRepository.findById(sector) : null)
+                        .build()
         ));
         created.add(id);
         return id;
@@ -151,7 +168,7 @@ public class PresidentResourceTest {
         UUID president = persistPerson(RoleEnum.BUREAU);
         appoint(president).statusCode(200);
 
-        given().contentType(ContentType.JSON).body(Map.of("role", "admin"))
+        given().contentType(ContentType.JSON).body(Map.of("role", "admin", "sectorId", sector.toString()))
                 .when().put("/{id}/role", president).then().statusCode(200);
 
         assertFalse(isPresident(president));

@@ -1,8 +1,10 @@
 package fr.fruityhedgeh0g.controllers;
 
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.keycloak.FakeKeycloakRoleMirror;
+import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.security.DatabaseRoleAugmentor;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -21,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,24 +58,39 @@ public class PromotionResourceTest {
     @Inject
     FakeKeycloakRoleMirror keycloak;
 
+    @Inject
+    SectorRepository sectorRepository;
+
     private final List<UUID> created = new ArrayList<>();
+    /** Everyone from Membre up belongs to this Secteur (ADR 0004); the Super admin to none. */
+    private UUID sector;
 
     @BeforeEach
     void seedActors() {
         keycloak.reset();
+        sector = QuarkusTransaction.requiringNew().call(() -> {
+            SectorEntity s = SectorEntity.builder().name("Test Secteur " + UUID.randomUUID()).build();
+            sectorRepository.persist(s);
+            return s.getSectorId();
+        });
         ACTORS.forEach((id, role) -> created.add(persist(UUID.fromString(id), role)));
     }
 
     @AfterEach
     void removePersons() {
-        QuarkusTransaction.requiringNew().run(() -> created.forEach(userRepository::deleteById));
+        QuarkusTransaction.requiringNew().run(() -> {
+            created.forEach(userRepository::deleteById);
+            sectorRepository.deleteById(sector);
+        });
         created.clear();
         keycloak.reset();
     }
 
     private UUID persist(UUID id, RoleEnum role) {
         QuarkusTransaction.requiringNew().run(() -> userRepository.persist(
-                UserEntity.builder().userId(id).firstName("Test").lastName(role.name()).role(role).build()
+                UserEntity.builder().userId(id).firstName("Test").lastName(role.name()).role(role)
+                        .sector(role.isAtLeast(RoleEnum.MEMBRE) && role != RoleEnum.SUPER_ADMIN ? sectorRepository.findById(sector) : null)
+                        .build()
         ));
         return id;
     }
@@ -87,8 +105,12 @@ public class PromotionResourceTest {
         return QuarkusTransaction.requiringNew().call(() -> userRepository.findById(id).getRole());
     }
 
+    /** An Admin is appointed for a Secteur, which the Super admin names. */
     private ValidatableResponse setRole(UUID personId, String role) {
-        return given().contentType(ContentType.JSON).body(Map.of("role", role))
+        Map<String, Object> body = new HashMap<>();
+        body.put("role", role);
+        if (role.equals("admin")) body.put("sectorId", sector.toString());
+        return given().contentType(ContentType.JSON).body(body)
                 .when().put("/{id}/role", personId).then();
     }
 

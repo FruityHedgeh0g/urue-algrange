@@ -3,6 +3,7 @@ package fr.fruityhedgeh0g.dtos.userDtos;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.fruityhedgeh0g.dtos.Views;
+import fr.fruityhedgeh0g.dtos.sectorDtos.NestedSectorDto;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +39,10 @@ public class UserDto {
 
     @JsonView(Views.Basic.class)
     Boolean president;
+
+    /** Read only: the Secteur a person from Membre up belongs to, set by their promotion (ADR 0004). */
+    @JsonView(Views.Basic.class)
+    NestedSectorDto sector;
 
     //INFO : Retrait des Sets au profit d'une méthode dans EventServiceImpl retournant ces infos pour un couple Utilisateur/EventType
 //    @JsonView(Views.Detailed.class)

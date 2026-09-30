@@ -1,9 +1,11 @@
 package fr.fruityhedgeh0g.controllers;
 
 import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
+import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.security.DatabaseRoleAugmentor;
 import io.quarkus.narayana.jta.QuarkusTransaction;
@@ -44,11 +46,21 @@ public class GroupResourceTest {
     @Inject
     GroupRepository groupRepository;
 
+    @Inject
+    SectorRepository sectorRepository;
+
     private final List<UUID> persons = new ArrayList<>();
     private final List<UUID> groups = new ArrayList<>();
+    /** Everyone from Membre up belongs to this Secteur (ADR 0004). */
+    private UUID sector;
 
     @BeforeEach
     void seedActors() {
+        sector = QuarkusTransaction.requiringNew().call(() -> {
+            SectorEntity s = SectorEntity.builder().name("Test Secteur " + UUID.randomUUID()).build();
+            sectorRepository.persist(s);
+            return s.getSectorId();
+        });
         persistPerson(UUID.fromString(MEMBRE_ID), RoleEnum.MEMBRE);
         persistPerson(UUID.fromString(BUREAU_ID), RoleEnum.BUREAU);
         persistPerson(UUID.fromString(ADMIN_ID), RoleEnum.ADMIN);
@@ -60,6 +72,7 @@ public class GroupResourceTest {
             groupRepository.list("name like 'Test %'").forEach(groupRepository::delete);
             groups.forEach(groupRepository::deleteById);
             persons.forEach(userRepository::deleteById);
+            sectorRepository.deleteById(sector);
         });
         groups.clear();
         persons.clear();
@@ -67,7 +80,8 @@ public class GroupResourceTest {
 
     private UUID persistPerson(UUID id, RoleEnum role) {
         QuarkusTransaction.requiringNew().run(() -> userRepository.persist(
-                UserEntity.builder().userId(id).firstName("Prénom").lastName(role.name()).role(role).build()
+                UserEntity.builder().userId(id).firstName("Prénom").lastName(role.name()).role(role)
+                        .sector(role.isAtLeast(RoleEnum.MEMBRE) ? sectorRepository.findById(sector) : null).build()
         ));
         persons.add(id);
         return id;

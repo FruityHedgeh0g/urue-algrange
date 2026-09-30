@@ -6,11 +6,19 @@ import { ROLE_HIERARCHY, RoleId, roleAtLeast } from "./roles";
  * connexion, le rôle courant est piloté localement (voir RoleSwitcher) pour
  * permettre de prévisualiser chaque espace pendant le développement.
  */
+/** Reflète NestedSectorDto : le Secteur d'une personne à partir de Membre (ADR 0004). */
+export interface UserSector {
+  sectorId: string;
+  name: string;
+}
+
 export interface MockUser {
   userId: string;
   firstName: string;
   lastName: string;
   role: RoleId;
+  /** Aucun pour un Bénévole (le vivier commun) ni pour le Super admin (au-dessus des Secteurs). */
+  sector: UserSector | null;
   /** Nécessaire pour s'inscrire à un Événement. */
   phone?: string;
 }
@@ -34,6 +42,10 @@ interface Profile {
 }
 
 const DEFAULT_PROFILE: Profile = { firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" };
+const DEFAULT_SECTOR: UserSector = { sectorId: "sector-1", name: "Secteur Algrange" };
+
+/** Le Secteur mocké : de Membre à Admin, le Secteur d'Algrange. */
+const sectorFor = (role: RoleId): UserSector | null => (roleAtLeast(role, "membre") && role !== "super_admin" ? DEFAULT_SECTOR : null);
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -79,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = useMemo<AuthContextValue>(() => {
     const user: MockUser | null =
-      role === "visiteur" ? null : { userId: "mock-user", role, ...profile };
+      role === "visiteur" ? null : { userId: "mock-user", role, sector: sectorFor(role), ...profile };
     return {
       user,
       role,
