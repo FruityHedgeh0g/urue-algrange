@@ -38,11 +38,14 @@ _Avoid_: assignment, nomination
 
 **Admin**: a person who manages the site itself and promotes Bureau members. Appointed by the Super admin.
 
-**Super admin**: the person above every Admin, who appoints Admins and will open new Secteurs.
+**Super admin**: the person above every Admin, who appoints Admins and is the only one to open, rename, close (Fermé) or reopen a Secteur.
 
 ### Organisation
 
-**Secteur**: a local branch of the national association (e.g. Algrange), subdivided into Groupes.
+**Secteur**: a local branch of the national association (e.g. Algrange), subdivided into Groupes. Opened, renamed and closed only by the Super admin; its description is kept up to date by the Bureau.
+
+**Secteur fermé**: a Secteur the Super admin has closed instead of deleting it, so that its lineage is kept: read-only, and seen with its Groupes and Events by the Super admin only. Closing ends its Groupes' Affectations (the Chefs keep their title), makes its unfinished Events Annulé (one En cours becomes Archivé) and keeps every sign-up as it was; the Super admin can reopen it.
+_Avoid_: supprimé, gelé, actif (for the other state: a Secteur is simply a Secteur), deleted, frozen
 _Avoid_: sector (in UI copy), zone
 
 **Groupe**: a lasting team of bikers covering its own part of a Secteur, led by a Chef de groupe. Always belongs to exactly one Secteur. Who rides with a Groupe is decided per Event (see Demande de groupe).

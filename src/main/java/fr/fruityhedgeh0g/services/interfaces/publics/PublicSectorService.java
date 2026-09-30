@@ -9,11 +9,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PublicSectorService {
+    /** A Secteur fermé is listed and read by the Super admin only. */
     List<SectorDto> listAll();
     SectorDto getById(@NotNull UUID sectorId);
     SectorDto create(@NotNull @Valid SectorDto sectorDto);
-    SectorDto update(@NotNull @Valid SectorDto sectorDto);
-    void delete(@NotNull UUID sectorId);
+    /** @param mayRename true for the Super admin; the Bureau only edits the description */
+    SectorDto update(@NotNull @Valid SectorDto sectorDto, boolean mayRename);
+    /** Closes the Secteur instead of deleting it: see Secteur fermé in CONTEXT.md and ADR 0003. */
+    SectorDto close(@NotNull UUID sectorId);
+    /** Reopens a Secteur fermé; its Groupes come back without a Chef, its Events keep their status. */
+    SectorDto reopen(@NotNull UUID sectorId);
     void assignGroup(@NotNull UUID sectorId, @NotNull UUID groupId);
     void unassignGroup(@NotNull UUID sectorId, @NotNull UUID groupId);
 

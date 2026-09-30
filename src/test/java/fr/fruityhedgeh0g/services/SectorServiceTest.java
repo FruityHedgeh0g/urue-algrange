@@ -146,7 +146,7 @@ public class SectorServiceTest {
                 .sectorId(sectorEntity.getSectorId())
                 .build();
 
-        Assertions.assertDoesNotThrow(() -> sectorService.update(updatedSectorDto));
+        Assertions.assertDoesNotThrow(() -> sectorService.update(updatedSectorDto, true));
 
         Assertions.assertTrue(sectorRepository.existsByName(sectorEntity.getName()));
 
@@ -161,14 +161,14 @@ public class SectorServiceTest {
                 .sectorId(UUID.randomUUID())
                 .build();
 
-        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.update(sectorDto));
+        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.update(sectorDto, true));
 
     }
 
     @Test
     @TestTransaction
     public void update_NullDto(){
-        Assertions.assertThrows(ConstraintViolationException.class, () -> sectorService.update(null));
+        Assertions.assertThrows(ConstraintViolationException.class, () -> sectorService.update(null, true));
     }
 
     @Test
@@ -188,47 +188,8 @@ public class SectorServiceTest {
 
         Assertions.assertThrows(
                 DuplicateResourceException.class,
-                () -> sectorService.update(updatedSectorDto)
+                () -> sectorService.update(updatedSectorDto, true)
         );
-    }
-
-    /** @see SectorServiceImpl#delete(UUID) () **/
-
-    @Test
-    @TestTransaction
-    public void delete_NullId(){
-        Assertions.assertThrows(ConstraintViolationException.class, () -> sectorService.delete(null));
-    }
-
-    @Test
-    @TestTransaction
-    public void delete_NotFound(){
-        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.delete(UUID.randomUUID()));
-    }
-
-    @Test
-    @TestTransaction
-    public void delete_GroupAssigned(){
-        SectorEntity sectorEntity = SectorEntity.builder().name("Test Sector").build();
-        sectorRepository.persist(sectorEntity);
-
-        GroupEntity groupEntity = GroupEntity.builder().name("Test Group").build();
-        groupRepository.persist(groupEntity);
-
-        sectorEntity.addGroup(groupEntity);
-
-        Assertions.assertThrows(InvalidResourceException.class, () -> sectorService.delete(sectorEntity.getSectorId()));
-    }
-
-    @Test
-    @TestTransaction
-    public void delete_Success(){
-
-        SectorEntity sectorEntity = SectorEntity.builder().name("Test sector").build();
-        sectorRepository.persist(sectorEntity);
-
-        Assertions.assertDoesNotThrow(() -> sectorService.delete(sectorEntity.getSectorId()));
-        Assertions.assertThrows(UnknownResourceException.class, () -> sectorService.getById(sectorEntity.getSectorId()));
     }
 
     /** @see SectorServiceImpl#assignGroup(UUID, UUID) () **/

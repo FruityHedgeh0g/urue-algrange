@@ -225,6 +225,14 @@ public class EventLogDecorator implements EventService{
     }
 
     @Override
+    public void doCloseEventsOfSector(UUID sectorId) {
+        logged(() -> {
+            eventService.doCloseEventsOfSector(sectorId);
+            return null;
+        }, "[INTERNAL] Closing the events of sector " + sectorId);
+    }
+
+    @Override
     public RosterDto setGroupMaximum(UUID eventId, UUID groupId, Integer maximum) {
         return logged(() -> eventService.setGroupMaximum(eventId, groupId, maximum),
                 "Maximum " + maximum + " for group " + groupId + " at event " + eventId);

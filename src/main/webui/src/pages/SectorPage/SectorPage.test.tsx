@@ -22,7 +22,10 @@ describe("SectorPage (Mon secteur)", () => {
   it("shows the Secteur and its Groupes with their Chef, without anyone's permanent Groupe", async () => {
     renderPage();
 
-    expect(await screen.findByLabelText("Nom du secteur")).toHaveValue("Secteur Algrange");
+    expect(await screen.findByRole("heading", { name: "Secteur Algrange" })).toBeInTheDocument();
+    // Only the Super admin renames a Secteur; the Bureau keeps its description
+    expect(screen.queryByLabelText("Nom du secteur")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Description")).toBeEnabled();
     const groupes = await screen.findByRole("list", { name: "Groupes du secteur" });
     expect(within(groupes).getByText("Groupe Algrange Centre")).toBeInTheDocument();
     expect(within(groupes).getByText(/Marc Weber/)).toBeInTheDocument();
@@ -33,7 +36,7 @@ describe("SectorPage (Mon secteur)", () => {
     renderPage();
     await userEvent.selectOptions(await screen.findByLabelText("Secteur"), "sector-2");
 
-    expect(await screen.findByLabelText("Nom du secteur")).toHaveValue("Secteur Thionville");
+    expect(await screen.findByRole("heading", { name: "Secteur Thionville" })).toBeInTheDocument();
     expect(within(screen.getByRole("list", { name: "Groupes du secteur" })).getByText("Groupe Thionville")).toBeInTheDocument();
   });
 });

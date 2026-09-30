@@ -2,6 +2,7 @@ package fr.fruityhedgeh0g.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -30,6 +31,12 @@ public class SectorEntity extends AuditTemplate {
 
     @OneToMany(mappedBy = "sector", fetch = FetchType.LAZY)
     private Set<GroupEntity> groups;
+
+    /** Fermé by the Super admin: read-only and seen, with its Groupes and Events, by the Super admin only. */
+    @Builder.Default
+    @ColumnDefault("false")
+    @Column(name = "closed", nullable = false)
+    private boolean closed = false;
 
     public void addGroup(GroupEntity group) {
         if (groups == null) groups = new HashSet<>();

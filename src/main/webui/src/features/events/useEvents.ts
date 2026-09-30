@@ -3,6 +3,7 @@ import { changeStatus, createEvent, EventInput, fetchEventById, fetchEvents, upd
 import { EventStatus } from "./status";
 import { queryKeys } from "../queryKeys";
 import { useAuth } from "../../auth/AuthContext";
+import { useIsSuperAdmin } from "../sectors/useSector";
 
 /** Seuls le Bureau et au-dessus voient les Événements en Planification. */
 function useSeesPlanification() {
@@ -11,17 +12,19 @@ function useSeesPlanification() {
 
 export function useEvents() {
   const seesPlanification = useSeesPlanification();
+  const seesClosed = useIsSuperAdmin();
   return useQuery({
-    queryKey: [...queryKeys.events.all, { seesPlanification }],
-    queryFn: () => fetchEvents(seesPlanification),
+    queryKey: [...queryKeys.events.all, { seesPlanification, seesClosed }],
+    queryFn: () => fetchEvents(seesPlanification, seesClosed),
   });
 }
 
 export function useEvent(eventId: string | undefined) {
   const seesPlanification = useSeesPlanification();
+  const seesClosed = useIsSuperAdmin();
   return useQuery({
-    queryKey: [...queryKeys.events.detail(eventId), { seesPlanification }],
-    queryFn: () => fetchEventById(eventId as string, seesPlanification),
+    queryKey: [...queryKeys.events.detail(eventId), { seesPlanification, seesClosed }],
+    queryFn: () => fetchEventById(eventId as string, seesPlanification, seesClosed),
     enabled: Boolean(eventId),
   });
 }

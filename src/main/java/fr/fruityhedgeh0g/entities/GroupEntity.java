@@ -38,6 +38,11 @@ public class GroupEntity extends AuditTemplate {
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
 
+    /** true while the Groupe's Secteur is fermé. */
+    public boolean isInClosedSector() {
+        return sector != null && sector.isClosed();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

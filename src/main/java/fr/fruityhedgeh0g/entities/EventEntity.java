@@ -101,6 +101,11 @@ public class EventEntity extends AuditTemplate {
     /** Dates are entered and read in the association's local time, whatever the server's zone. */
     public static final ZoneId ZONE = ZoneId.of("Europe/Paris");
 
+    /** true while the Event's Secteur is fermé. */
+    public boolean isInClosedSector() {
+        return sector != null && sector.isClosed();
+    }
+
     /** Status as of now: an Ouvert or Complet Event reads En cours, then Archivé, from its dates. */
     public EventStatusEnum currentStatus() {
         return status.at(startDateTime, endDateTime, LocalDateTime.now(ZONE));

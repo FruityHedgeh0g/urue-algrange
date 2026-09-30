@@ -25,6 +25,9 @@ describe("access map", () => {
     ["accountSector", "bureau", true],
     ["administration", "chef_de_groupe", false],
     ["administration", "bureau", true],
+    ["adminSectors", "bureau", false],
+    ["adminSectors", "admin", false],
+    ["adminSectors", "super_admin", true],
     ["adminPosts", "chef_de_groupe", false],
     ["adminPosts", "bureau", true],
     ["adminConfiguration", "bureau", false],
@@ -64,7 +67,6 @@ describe("access map", () => {
     expect(ids(navFor("admin", ctx("bureau")))).not.toContain("adminConfiguration");
     expect(ids(navFor("admin", ctx("admin")))).toEqual([
       "adminMembers",
-      "adminSectors",
       "adminGroups",
       "adminEvents",
       "adminPosts",

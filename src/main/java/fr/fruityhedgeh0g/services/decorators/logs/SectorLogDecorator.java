@@ -65,9 +65,9 @@ public class SectorLogDecorator implements SectorService {
     }
 
     @Override
-    public SectorDto update(SectorDto sectorDto) {
+    public SectorDto update(SectorDto sectorDto, boolean mayRename) {
         Log.debugf("Updating an existing sector: %s", sectorDto.toString());
-        return Try.of(() -> sectorService.update(sectorDto))
+        return Try.of(() -> sectorService.update(sectorDto, mayRename))
                 .onSuccess(sector -> Log.debugf("Sector updated."))
                 .onFailure(t -> {
                     switch(t){
@@ -80,11 +80,30 @@ public class SectorLogDecorator implements SectorService {
     }
 
     @Override
-    public void delete(UUID sectorId) {
-        Log.debugf("Deleting sector by id %s...",sectorId);
-        Try.run(() -> sectorService.delete(sectorId))
-                .onSuccess(v -> Log.debugf("Sector deleted."))
-                .onFailure(t -> Log.errorf(t,"An error occurred during sector deletion."))
+    public SectorDto close(UUID sectorId) {
+        Log.debugf("Closing sector %s...", sectorId);
+        return Try.of(() -> sectorService.close(sectorId))
+                .onSuccess(sector -> Log.infof("Sector %s closed.", sectorId))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.warnf("Sector %s not found.", sectorId);
+                        default -> Log.errorf(t,"An error occurred while closing sector %s.", sectorId);
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public SectorDto reopen(UUID sectorId) {
+        Log.debugf("Reopening sector %s...", sectorId);
+        return Try.of(() -> sectorService.reopen(sectorId))
+                .onSuccess(sector -> Log.infof("Sector %s reopened.", sectorId))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.warnf("Sector %s not found.", sectorId);
+                        default -> Log.errorf(t,"An error occurred while reopening sector %s.", sectorId);
+                    }
+                })
                 .get();
     }
 

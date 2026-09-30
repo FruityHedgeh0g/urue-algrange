@@ -8,10 +8,10 @@ import Spinner from "../../components/atoms/Spinner/Spinner";
 import styles from "./SectorPage.module.css";
 
 /**
- * Mon secteur (Bureau) : les informations du Secteur — le premier, ou celui
- * choisi s'il y en a plusieurs — et ses Groupes, avec leur Chef de groupe et la
- * partie du Secteur qu'ils couvrent. Qui roule avec un Groupe se décide à
- * chaque Événement, pas ici.
+ * Mon secteur (Bureau) : le Secteur — le premier, ou celui choisi s'il y en a
+ * plusieurs —, sa description, que le Bureau tient à jour (seul le Super admin
+ * le renomme), et ses Groupes, avec leur Chef de groupe et la partie du Secteur
+ * qu'ils couvrent. Qui roule avec un Groupe se décide à chaque Événement.
  */
 export const SectorPage: React.FC = () => {
   const { data: sectors, isLoading: sectorsLoading } = useSectors();
@@ -21,13 +21,11 @@ export const SectorPage: React.FC = () => {
   const { data: groups, isLoading: groupsLoading } = useGroups();
   const { update: updateSector } = useSectorMutations();
 
-  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (sector) {
-      setName(sector.name);
       setDescription(sector.description);
       setSaved(false);
     }
@@ -36,7 +34,7 @@ export const SectorPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!sectorId) return;
-    updateSector.mutate({ sectorId, name, description }, { onSuccess: () => setSaved(true) });
+    updateSector.mutate({ sectorId, name: sector?.name ?? "", description }, { onSuccess: () => setSaved(true) });
   };
 
   if (sectorsLoading || isLoading) return <Spinner label="Chargement du secteur..." />;
@@ -48,7 +46,7 @@ export const SectorPage: React.FC = () => {
   return (
     <div className={styles.wrapper}>
       <section className={styles.panel}>
-        <h2>Informations du secteur</h2>
+        <h2>{sector.name}</h2>
         {(sectors?.length ?? 0) > 1 && (
           <Select
             label="Secteur"
@@ -58,15 +56,6 @@ export const SectorPage: React.FC = () => {
           />
         )}
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          <FormField
-            label="Nom du secteur"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setSaved(false);
-            }}
-            required
-          />
           <FormField
             label="Description"
             multiline

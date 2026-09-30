@@ -24,6 +24,7 @@ import fr.fruityhedgeh0g.exceptions.PhoneRequiredException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.EventRegistrationRepository;
 import fr.fruityhedgeh0g.repositories.EventRepository;
+import fr.fruityhedgeh0g.security.Viewer;
 import fr.fruityhedgeh0g.services.interfaces.EventService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalSectorService;
@@ -69,18 +70,22 @@ public class EventServiceImpl implements EventService {
     @Inject
     InternalGroupService internalGroupService;
 
+    @Inject
+    Viewer viewer;
+
     @Override
     public List<EventDto> listAll(boolean seesPlanification) {
         List<EventEntity> events = seesPlanification
                 ? eventRepository.listAll()
                 : eventRepository.listOutsidePlanification();
-        return events.stream().map(eventMapper::toDto).toList();
+        return events.stream().filter(this::visible).map(eventMapper::toDto).toList();
     }
 
     @Override
     public EventDto getById(UUID eventId, boolean seesPlanification) {
         return eventMapper.toDto(
                 eventRepository.findByIdOptional(eventId)
+                        .filter(this::visible)
                         .filter(event -> seesPlanification || event.getStatus() != EventStatusEnum.PLANIFICATION)
                         .orElseThrow(() -> new UnknownResourceException("Event not found: " + eventId))
         );
@@ -93,6 +98,8 @@ public class EventServiceImpl implements EventService {
             throw new InvalidResourceException("An Event belongs to a Secteur.");
         SectorEntity sector = internalSectorService.doGetEntityById(eventDto.getSectorId())
                 .orElseThrow(() -> new UnknownResourceException("Sector not found: " + eventDto.getSectorId()));
+        if (sector.isClosed())
+            throw new InvalidResourceException("A Secteur fermé gets no new Event.");
 
         EventEntity event = eventMapper.toEntity(eventDto);
         event.setStatus(EventStatusEnum.PLANIFICATION);
@@ -118,6 +125,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto changeStatus(UUID eventId, EventStatusEnum status) {
         EventEntity event = eventOrThrow(eventId);
+        refuseInClosedSector(event);
         EventStatusEnum current = event.currentStatus();
         if (!current.canMoveTo(status))
             throw new InvalidResourceException("An Event cannot move from " + current.id() + " to " + status.id());
@@ -262,7 +270,7 @@ public class EventServiceImpl implements EventService {
                     .forEach(e -> byEvent.putIfAbsent(e, List.of()));
 
         List<MonGroupeDto.EventRoster> events = byEvent.entrySet().stream()
-                .filter(e -> e.getKey().currentStatus() != EventStatusEnum.ARCHIVE)
+                .filter(e -> e.getKey().currentStatus() != EventStatusEnum.ARCHIVE && !e.getKey().isInClosedSector())
                 .sorted(Comparator.comparing((Map.Entry<EventEntity, List<EventRegistrationEntity>> e) -> e.getKey().getStartDateTime()))
                 .map(e -> new MonGroupeDto.EventRoster(
                         e.getKey().getEventId(), e.getKey().getName(), e.getKey().getStartDateTime(), e.getKey().currentStatus(),
@@ -303,7 +311,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<RegistrationDto> registrationsOf(UUID personId) {
-        return registrationRepository.listByPerson(personId).stream().map(EventServiceImpl::toDto).toList();
+        return registrationRepository.listByPerson(personId).stream()
+                .filter(r -> visible(r.getEvent()))
+                .map(EventServiceImpl::toDto)
+                .toList();
     }
 
     @Override
@@ -378,6 +389,7 @@ public class EventServiceImpl implements EventService {
 
     /** Sign-up is open while Ouvert or Complet, to someone with a phone number. */
     private static void requireSignUpOpenTo(EventEntity event, UserEntity person) {
+        refuseInClosedSector(event);
         EventStatusEnum current = event.currentStatus();
         if (!current.acceptsSignUps())
             throw new InvalidResourceException("Sign-up is closed for an Event in " + current.id());
@@ -400,13 +412,38 @@ public class EventServiceImpl implements EventService {
     }
 
     private static void refuseOnFinal(EventEntity event) {
+        refuseInClosedSector(event);
         if (event.currentStatus().isFinal())
             throw new InvalidResourceException("An archived or cancelled Event is no longer edited.");
     }
 
     private void refuseOnArchived(EventEntity event) {
+        refuseInClosedSector(event);
         if (event.currentStatus() == EventStatusEnum.ARCHIVE)
             throw new InvalidResourceException("An archived Event keeps its roster.");
+    }
+
+    /** A Secteur fermé is read-only: its Events and their sign-ups are kept as they were. */
+    private static void refuseInClosedSector(EventEntity event) {
+        if (event.isInClosedSector())
+            throw new InvalidResourceException("The Event's Secteur is fermé: " + event.getEventId());
+    }
+
+    /** An Event of a Secteur fermé reads as not found for everyone but the Super admin. */
+    private boolean visible(EventEntity event) {
+        return !event.isInClosedSector() || viewer.seesClosedSecteurs();
+    }
+
+    @Override
+    @Transactional
+    public void doCloseEventsOfSector(UUID sectorId) {
+        eventRepository.list("sector.sectorId", sectorId).forEach(event -> {
+            EventStatusEnum current = event.currentStatus();
+            // An Event that took place (or is taking place) is Archivé; one that never happened is Annulé
+            event.setStatus(current == EventStatusEnum.EN_COURS || current == EventStatusEnum.ARCHIVE
+                    ? EventStatusEnum.ARCHIVE
+                    : EventStatusEnum.ANNULE);
+        });
     }
 
     private EventRegistrationEntity registrationOrThrow(UUID eventId, UUID personId) {
@@ -417,6 +454,7 @@ public class EventServiceImpl implements EventService {
     /** Locks the Event so concurrent sign-ups and moves up cannot both take the last place. */
     private EventEntity lockedEventOrThrow(UUID eventId) {
         return eventRepository.findByIdOptional(eventId, LockModeType.PESSIMISTIC_WRITE)
+                .filter(this::visible)
                 .orElseThrow(() -> new UnknownResourceException("Event not found: " + eventId));
     }
 
@@ -434,6 +472,7 @@ public class EventServiceImpl implements EventService {
     private EventEntity eventOrThrow(UUID eventId) {
         if (eventId == null) throw new InvalidResourceException("Missing event id.");
         return eventRepository.findByIdOptional(eventId)
+                .filter(this::visible)
                 .orElseThrow(() -> new UnknownResourceException("Event not found: " + eventId));
     }
 

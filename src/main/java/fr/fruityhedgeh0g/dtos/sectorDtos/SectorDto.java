@@ -29,5 +29,9 @@ public class SectorDto {
     @JsonView(Views.Detailed.class)
     Set<NestedGroupDto> groups;
 
+    /** Read only: changed through POST /api/sectors/{id}/close and /reopen. */
+    @JsonView(Views.Basic.class)
+    boolean closed;
+
 }
 

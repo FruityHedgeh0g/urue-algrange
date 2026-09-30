@@ -9,6 +9,7 @@ import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
+import fr.fruityhedgeh0g.security.Viewer;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
@@ -31,21 +32,37 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Inject GroupRepository groupRepository;
     @Inject InternalUserService internalUserService;
     @Inject GroupMapper groupMapper;
+    @Inject Viewer viewer;
 
     @Override
     public List<GroupDto> listAll() {
         return groupRepository.listAll()
                 .stream()
+                .filter(this::visible)
                 .map(groupMapper::toDto)
                 .toList();
     }
 
     @Override
     public GroupDto getById(UUID groupId) {
-        return groupMapper.toDto(
-                groupRepository.findByIdOptional(groupId)
-                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId))
-        );
+        return groupMapper.toDto(visibleGroupOrThrow(groupId));
+    }
+
+    /** A Groupe of a Secteur fermé is seen by the Super admin only. */
+    private boolean visible(GroupEntity group) {
+        return !group.isInClosedSector() || viewer.seesClosedSecteurs();
+    }
+
+    private GroupEntity visibleGroupOrThrow(UUID groupId) {
+        return groupRepository.findByIdOptional(groupId)
+                .filter(this::visible)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+    }
+
+    /** A Secteur fermé is read-only: no edit, no Affectation. */
+    private static void refuseInClosedSector(GroupEntity group) {
+        if (group.isInClosedSector())
+            throw new InvalidResourceException("The Groupe's Secteur is fermé: " + group.getGroupId());
     }
 
     @Override
@@ -63,8 +80,8 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Override
     @Transactional
     public GroupDto update(GroupDto groupDto) {
-        GroupEntity groupEntity = groupRepository.findByIdOptional(groupDto.getGroupId())
-                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupDto.getGroupId()));
+        GroupEntity groupEntity = visibleGroupOrThrow(groupDto.getGroupId());
+        refuseInClosedSector(groupEntity);
 
         if (!groupEntity.getName().equals(groupDto.getName()) && groupRepository.existsByName(groupDto.getName()))
             throw new DuplicateResourceException("A group with this name already exists in the system.");
@@ -91,7 +108,8 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Override
     @Transactional
     public GroupDto setChef(UUID groupId, UUID userId) {
-        GroupEntity groupEntity = groupOrThrow(groupId);
+        GroupEntity groupEntity = visibleGroupOrThrow(groupId);
+        refuseInClosedSector(groupEntity);
         UserEntity chef = internalUserService.doGetEntityById(userId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
 
@@ -113,7 +131,8 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Override
     @Transactional
     public GroupDto clearChef(UUID groupId) {
-        GroupEntity groupEntity = groupOrThrow(groupId);
+        GroupEntity groupEntity = visibleGroupOrThrow(groupId);
+        refuseInClosedSector(groupEntity);
         groupEntity.setChef(null);
         return groupMapper.toDto(groupEntity);
     }

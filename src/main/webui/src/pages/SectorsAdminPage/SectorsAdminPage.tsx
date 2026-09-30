@@ -3,33 +3,57 @@ import { useSectorMutations, useSectors } from "../../features/sectors/useSector
 import { SectorInput } from "../../features/sectors/sectorsApi";
 import AdminCrudList from "../../components/organisms/AdminCrudList/AdminCrudList";
 import FormField from "../../components/molecules/FormField/FormField";
+import Button from "../../components/atoms/Button/Button";
 import Spinner from "../../components/atoms/Spinner/Spinner";
 
 const emptyDraft: SectorInput = { name: "", description: "" };
 
+/**
+ * Secteurs (Super admin) : ouvrir, renommer, fermer et rouvrir. Un Secteur
+ * n'est jamais supprimé (ADR 0003) : fermé, il passe en lecture seule, ses
+ * Groupes perdent leur Chef et ses Événements non terminés sont Annulés.
+ */
 export const SectorsAdminPage: React.FC = () => {
   const { data: sectors, isLoading } = useSectors();
-  const { update, create, remove } = useSectorMutations();
+  const { update, create, close, reopen } = useSectorMutations();
+  const pending = close.isPending || reopen.isPending;
 
   if (isLoading) return <Spinner label="Chargement des secteurs..." />;
 
   return (
     <AdminCrudList
       title="Secteurs"
+      hint="Un secteur n'est jamais supprimé : fermé, il reste en lecture seule et n'est plus visible que du Super admin."
       items={sectors ?? []}
       idOf={(s) => s.sectorId}
-      display={(s) => ({ title: s.name, subtitle: `${s.groups.length} groupe(s)` })}
+      display={(s) => ({ title: s.name, subtitle: [s.closed && "Fermé", `${s.groups.length} groupe(s)`].filter(Boolean).join(" · ") })}
       toDraft={(s): SectorInput => ({ name: s.name, description: s.description })}
-      renderFields={(draft, setDraft) => (
+      renderFields={(draft, setDraft, sector) => (
         <>
-          <FormField label="Nom du secteur" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required />
+          <FormField
+            label="Nom du secteur"
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            disabled={sector?.closed}
+            required
+          />
           <FormField
             label="Description"
             multiline
             rows={3}
             value={draft.description}
             onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+            disabled={sector?.closed}
           />
+          {sector && (
+            <Button
+              type="button"
+              variant="outline"
+              label={sector.closed ? "Rouvrir le secteur" : "Fermer le secteur"}
+              disabled={pending}
+              onClick={() => (sector.closed ? reopen : close).mutate(sector.sectorId)}
+            />
+          )}
         </>
       )}
       onUpdate={(sectorId, draft) => update.mutateAsync({ sectorId, ...draft })}
@@ -38,11 +62,6 @@ export const SectorsAdminPage: React.FC = () => {
         submitLabel: "Créer le secteur",
         emptyDraft,
         onCreate: (draft) => create.mutateAsync(draft),
-      }}
-      remove={{
-        title: "Supprimer ce secteur ?",
-        message: (s) => `Le secteur « ${s.name} » et son rattachement aux groupes seront supprimés. Cette action est irréversible.`,
-        onRemove: (sectorId) => remove.mutateAsync(sectorId),
       }}
     />
   );
