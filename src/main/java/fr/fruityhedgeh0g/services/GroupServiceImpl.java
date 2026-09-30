@@ -5,11 +5,15 @@ import fr.fruityhedgeh0g.utilities.logging.Logged;
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
+import fr.fruityhedgeh0g.security.SecteurScope;
 import fr.fruityhedgeh0g.security.Viewer;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalSectorService;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
 import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
@@ -33,6 +37,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Inject InternalUserService internalUserService;
     @Inject GroupMapper groupMapper;
     @Inject Viewer viewer;
+    @Inject InternalSectorService internalSectorService;
 
     @Override
     public List<GroupDto> listAll() {
@@ -59,6 +64,27 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
                 .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
     }
 
+    /** The Bureau and Admin manage only their own Secteur's Groupes; the Super admin all (ADR 0004). */
+    private void requireManaged(GroupEntity group) {
+        if (!viewer.scope().covers(group.getSector()))
+            throw new ForbiddenActionException("The Groupe " + group.getGroupId() + " is not of your Secteur.");
+    }
+
+    /** The Super admin names the new Groupe's Secteur; below, it is always the creator's own. */
+    private SectorEntity sectorOfNewGroup(UUID requested) {
+        SecteurScope scope = viewer.scope();
+        UUID sectorId = scope.everySecteur() ? requested : scope.sectorId();
+        if (sectorId == null)
+            throw new InvalidResourceException("A Groupe belongs to a Secteur.");
+        if (!scope.covers(sectorId) || (requested != null && !requested.equals(sectorId)))
+            throw new ForbiddenActionException("A Groupe is created in your own Secteur only.");
+        SectorEntity sector = internalSectorService.doGetEntityById(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
+        if (sector.isClosed())
+            throw new InvalidResourceException("A Secteur fermé gets no new Groupe.");
+        return sector;
+    }
+
     /** A Secteur fermé is read-only: no edit, no Affectation. */
     private static void refuseInClosedSector(GroupEntity group) {
         if (group.isInClosedSector())
@@ -72,6 +98,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
             throw new DuplicateResourceException("This resource already exists in the system.");
 
         GroupEntity groupEntity = groupMapper.toEntity(groupDto);
+        groupEntity.setSector(sectorOfNewGroup(groupDto.getSectorId()));
         groupRepository.persist(groupEntity);
 
         return groupMapper.toDto(groupEntity);
@@ -81,6 +108,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Transactional
     public GroupDto update(GroupDto groupDto) {
         GroupEntity groupEntity = visibleGroupOrThrow(groupDto.getGroupId());
+        requireManaged(groupEntity);
         refuseInClosedSector(groupEntity);
 
         if (!groupEntity.getName().equals(groupDto.getName()) && groupRepository.existsByName(groupDto.getName()))
@@ -109,9 +137,12 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Transactional
     public GroupDto setChef(UUID groupId, UUID userId) {
         GroupEntity groupEntity = visibleGroupOrThrow(groupId);
+        requireManaged(groupEntity);
         refuseInClosedSector(groupEntity);
         UserEntity chef = internalUserService.doGetEntityById(userId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
+        if (!chef.belongsTo(groupEntity.getSector()))
+            throw new InvalidResourceException("A Groupe is led by a Chef de groupe of its own Secteur: "+userId);
 
         if (!chef.getRole().canLeadGroupe())
             throw new InvalidResourceException("Only a Chef de groupe or above can lead a Groupe: "+userId);
@@ -132,6 +163,7 @@ public class GroupServiceImpl implements GroupService, InternalGroupService {
     @Transactional
     public GroupDto clearChef(UUID groupId) {
         GroupEntity groupEntity = visibleGroupOrThrow(groupId);
+        requireManaged(groupEntity);
         refuseInClosedSector(groupEntity);
         groupEntity.setChef(null);
         return groupMapper.toDto(groupEntity);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useSector, useSectorMutations, useSectors } from "../../features/sectors/useSector";
+import { useIsSuperAdmin, useSector, useSectorMutations, useSectors } from "../../features/sectors/useSector";
+import { useAuth } from "../../auth/AuthContext";
 import { useGroups } from "../../features/groups/useGroups";
 import FormField from "../../components/molecules/FormField/FormField";
 import Select from "../../components/atoms/Select/Select";
@@ -8,15 +9,18 @@ import Spinner from "../../components/atoms/Spinner/Spinner";
 import styles from "./SectorPage.module.css";
 
 /**
- * Mon secteur (Bureau) : le Secteur — le premier, ou celui choisi s'il y en a
- * plusieurs —, sa description, que le Bureau tient à jour (seul le Super admin
- * le renomme), et ses Groupes, avec leur Chef de groupe et la partie du Secteur
- * qu'ils couvrent. Qui roule avec un Groupe se décide à chaque Événement.
+ * Mon secteur (Bureau) : le Secteur de la personne — au choix pour le Super
+ * admin, au-dessus des Secteurs (ADR 0004) —, sa description, que le Bureau
+ * tient à jour (seul le Super admin le renomme), et ses Groupes, avec leur Chef
+ * de groupe et la partie du Secteur qu'ils couvrent.
  */
 export const SectorPage: React.FC = () => {
+  const { user } = useAuth();
+  const isSuperAdmin = useIsSuperAdmin();
   const { data: sectors, isLoading: sectorsLoading } = useSectors();
   const [chosenId, setChosenId] = useState<string>();
-  const sectorId = chosenId ?? sectors?.[0]?.sectorId;
+  // Le Bureau et les Admins voient leur Secteur ; le Super admin choisit (ADR 0004)
+  const sectorId = isSuperAdmin ? chosenId ?? sectors?.[0]?.sectorId : user?.sector?.sectorId;
   const { data: sector, isLoading, isError } = useSector(sectorId);
   const { data: groups, isLoading: groupsLoading } = useGroups();
   const { update: updateSector } = useSectorMutations();
@@ -47,7 +51,7 @@ export const SectorPage: React.FC = () => {
     <div className={styles.wrapper}>
       <section className={styles.panel}>
         <h2>{sector.name}</h2>
-        {(sectors?.length ?? 0) > 1 && (
+        {isSuperAdmin && (sectors?.length ?? 0) > 1 && (
           <Select
             label="Secteur"
             value={sector.sectorId}

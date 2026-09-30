@@ -32,4 +32,8 @@ public class GroupDto {
     @JsonView(Views.Detailed.class)
     NestedSectorDto sector;
 
+    /** The Groupe's Secteur: named at creation by the Super admin; below, always the creator's own. */
+    @JsonView({Views.Basic.class,Views.Creation.class})
+    UUID sectorId;
+
 }

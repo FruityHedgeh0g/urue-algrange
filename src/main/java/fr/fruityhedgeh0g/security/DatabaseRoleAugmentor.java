@@ -54,7 +54,8 @@ public class DatabaseRoleAugmentor implements SecurityIdentityAugmentor {
         );
     }
 
-    private static Optional<UUID> subjectOf(SecurityIdentity identity) {
+    /** The person's id, from the token's subject. */
+    static Optional<UUID> subjectOf(SecurityIdentity identity) {
         if (!(identity.getPrincipal() instanceof JsonWebToken token) || token.getSubject() == null) {
             return Optional.empty();
         }

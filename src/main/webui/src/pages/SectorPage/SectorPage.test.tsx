@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../../auth/AuthContext";
 import SectorPage from "./SectorPage";
 
-const renderPage = () => {
-  localStorage.setItem("urue-mock-role", "bureau");
+const renderPage = (role = "bureau") => {
+  localStorage.setItem("urue-mock-role", role);
   render(
     <QueryClientProvider client={new QueryClient()}>
       <AuthProvider>
@@ -32,8 +32,14 @@ describe("SectorPage (Mon secteur)", () => {
     expect(screen.queryByText(/Inscrits de mon secteur/)).not.toBeInTheDocument();
   });
 
-  it("switches between Secteurs", async () => {
+  it("shows the Bureau its own Secteur only", async () => {
     renderPage();
+    expect(await screen.findByRole("heading", { name: "Secteur Algrange" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Secteur")).not.toBeInTheDocument();
+  });
+
+  it("lets the Super admin switch between Secteurs", async () => {
+    renderPage("super_admin");
     await userEvent.selectOptions(await screen.findByLabelText("Secteur"), "sector-2");
 
     expect(await screen.findByRole("heading", { name: "Secteur Thionville" })).toBeInTheDocument();

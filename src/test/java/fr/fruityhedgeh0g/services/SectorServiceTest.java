@@ -11,6 +11,7 @@ import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.utilities.mappers.SectorMapper;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
@@ -24,7 +25,9 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
+/** Run as the Super admin, who manages every Secteur (ADR 0004). */
 @QuarkusTest
+@TestSecurity(user = "super-admin", roles = "super_admin")
 public class SectorServiceTest {
 
     @Inject

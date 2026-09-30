@@ -4,6 +4,7 @@ import { GroupInput } from "../../features/groups/groupsApi";
 import { useSectors } from "../../features/sectors/useSector";
 import { useAllMembers } from "../../features/users/useMembers";
 import { canLeadGroupe } from "../../auth/roles";
+import { useAuth } from "../../auth/AuthContext";
 import AdminCrudList from "../../components/organisms/AdminCrudList/AdminCrudList";
 import FormField from "../../components/molecules/FormField/FormField";
 import Select from "../../components/atoms/Select/Select";
@@ -12,25 +13,40 @@ import Spinner from "../../components/atoms/Spinner/Spinner";
 /** `chefId` vide : le Groupe n'a pas de chef. */
 type GroupDraft = GroupInput & { chefId: string };
 
+/**
+ * Groupes : le Bureau et les Admins gèrent ceux de leur Secteur, dont le
+ * Secteur d'un nouveau Groupe est verrouillé ; le Super admin gère tous les
+ * Secteurs et choisit (ADR 0004). Un Groupe est mené par un Chef de son Secteur.
+ */
 export const GroupsAdminPage: React.FC = () => {
-  const { data: groups, isLoading } = useGroups();
+  const { user, hasAtLeastRole } = useAuth();
+  const isSuperAdmin = hasAtLeastRole("super_admin");
+  const ownSectorId = user?.sector?.sectorId ?? "";
+  const { data: allGroups, isLoading } = useGroups();
+  const groups = isSuperAdmin ? allGroups : allGroups?.filter((g) => g.sectorId === ownSectorId);
   const { data: sectors } = useSectors();
   const { data: members } = useAllMembers();
   const { create, update, affectation } = useGroupMutations();
 
   /** Seules les personnes au moins Chef de groupe (Bureau compris) peuvent mener un Groupe. */
-  const chefOptions = (groupId?: string) => [
+  const chefOptions = (groupId: string, sectorId: string) => [
     { value: "", label: "Aucun chef" },
     ...(members ?? [])
-      .filter((m) => canLeadGroupe(m.role))
+      .filter((m) => canLeadGroupe(m.role) && m.sectorId === sectorId)
       .map((m) => {
-        const led = groups?.find((g) => g.chef?.userId === m.userId && g.groupId !== groupId);
+        const led = allGroups?.find((g) => g.chef?.userId === m.userId && g.groupId !== groupId);
         return { value: m.userId, label: `${m.firstName} ${m.lastName}${led ? ` (mène ${led.name})` : ""}` };
       }),
   ];
 
   const sectorOptions = (sectors ?? []).map((s) => ({ value: s.sectorId, label: s.name }));
-  const emptyDraft: GroupDraft = { name: "", description: "", area: "", sectorId: sectorOptions[0]?.value ?? "", chefId: "" };
+  const emptyDraft: GroupDraft = {
+    name: "",
+    description: "",
+    area: "",
+    sectorId: isSuperAdmin ? sectorOptions[0]?.value ?? "" : ownSectorId,
+    chefId: "",
+  };
 
   const save = async (groupId: string, { chefId, ...input }: GroupDraft) => {
     await update.mutateAsync({ groupId, ...input });
@@ -72,13 +88,19 @@ export const GroupsAdminPage: React.FC = () => {
             onChange={(e) => setDraft({ ...draft, description: e.target.value })}
           />
           <FormField label="Zone couverte" value={draft.area} onChange={(e) => setDraft({ ...draft, area: e.target.value })} />
-          <Select label="Secteur" value={draft.sectorId} onChange={(sectorId) => setDraft({ ...draft, sectorId })} options={sectorOptions} />
+          <Select
+            label="Secteur"
+            value={draft.sectorId}
+            onChange={(sectorId) => setDraft({ ...draft, sectorId })}
+            options={sectorOptions}
+            disabled={!isSuperAdmin || Boolean(group)}
+          />
           {group && (
             <Select
               label="Chef de groupe"
               value={draft.chefId}
               onChange={(chefId) => setDraft({ ...draft, chefId })}
-              options={chefOptions(group.groupId)}
+              options={chefOptions(group.groupId, group.sectorId)}
             />
           )}
         </>

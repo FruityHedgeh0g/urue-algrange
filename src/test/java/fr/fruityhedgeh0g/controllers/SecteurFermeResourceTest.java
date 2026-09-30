@@ -85,6 +85,8 @@ public class SecteurFermeResourceTest {
             SectorEntity s = SectorEntity.builder().name("Test Secteur " + UUID.randomUUID()).description("Avant").build();
             sectorRepository.persist(s);
             sector = s.getSectorId();
+            // From Membre up, everyone belongs to this Secteur (ADR 0004)
+            List.of(ADMIN_ID, BUREAU_ID, CHEF_ID).forEach(id -> userRepository.findById(UUID.fromString(id)).setSector(s));
             GroupEntity group = GroupEntity.builder().name("Test Nord " + UUID.randomUUID()).sector(s)
                     .chef(userRepository.findById(UUID.fromString(CHEF_ID))).build();
             groupRepository.persist(group);
@@ -108,12 +110,11 @@ public class SecteurFermeResourceTest {
             registrationRepository.delete("event.sector.sectorId", sector);
             eventRepository.list("sector.sectorId", sector).forEach(eventRepository::delete);
             groupRepository.delete("sector.sectorId", sector);
-            // The bulk delete below does not flush the Event deletions first
+            List.of(SUPER_ADMIN_ID, ADMIN_ID, BUREAU_ID, CHEF_ID, PILOTE_ID).forEach(id -> userRepository.deleteById(UUID.fromString(id)));
+            // The bulk delete below does not flush the Event and person deletions first
             eventRepository.flush();
             sectorRepository.delete("sectorId = ?1 or name like ?2", sector, "Test Nouveau %");
         });
-        QuarkusTransaction.requiringNew().run(() ->
-                List.of(SUPER_ADMIN_ID, ADMIN_ID, BUREAU_ID, CHEF_ID, PILOTE_ID).forEach(id -> userRepository.deleteById(UUID.fromString(id))));
     }
 
     private void persistPerson(String id, RoleEnum role) {

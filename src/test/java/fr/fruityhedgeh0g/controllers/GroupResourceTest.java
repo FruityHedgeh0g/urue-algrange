@@ -71,6 +71,7 @@ public class GroupResourceTest {
         QuarkusTransaction.requiringNew().run(() -> {
             groupRepository.list("name like 'Test %'").forEach(groupRepository::delete);
             groups.forEach(groupRepository::deleteById);
+            groupRepository.delete("sector.sectorId", sector);
             persons.forEach(userRepository::deleteById);
             sectorRepository.deleteById(sector);
         });
@@ -93,7 +94,8 @@ public class GroupResourceTest {
 
     private UUID persistGroup(String name) {
         UUID id = QuarkusTransaction.requiringNew().call(() -> {
-            GroupEntity group = GroupEntity.builder().name(name).description("Desc").area("Nord").build();
+            GroupEntity group = GroupEntity.builder().name(name).description("Desc").area("Nord")
+                    .sector(sectorRepository.findById(sector)).build();
             groupRepository.persist(group);
             return group.getGroupId();
         });

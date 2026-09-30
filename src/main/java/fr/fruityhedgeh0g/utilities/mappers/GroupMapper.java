@@ -8,14 +8,17 @@ import org.mapstruct.*;
 @Mapper(componentModel = "jakarta-cdi", uses = {UserMapper.class,SectorMapper.class})
 public interface GroupMapper {
 
+    @Mapping(target = "sectorId", source = "sector.sectorId")
     GroupDto toDto(GroupEntity entity);
 
     NestedGroupDto toNestedDto(GroupEntity entity);
 
     @Mapping(target = "chef", ignore = true)
+    @Mapping(target = "sector", ignore = true)
     GroupEntity toEntity(GroupDto dto);
 
     @Mapping(target = "chef", ignore = true)
+    @Mapping(target = "sector", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     GroupEntity partialDtoToEntity(@MappingTarget GroupEntity groupEntity, GroupDto groupDto);
 

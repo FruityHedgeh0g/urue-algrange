@@ -70,6 +70,12 @@ public class SectorServiceImpl implements SectorService {
                 .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
     }
 
+    /** The Bureau and Admin act only on their own Secteur; the Super admin on all (ADR 0004). */
+    private void requireManaged(SectorEntity sector) {
+        if (!viewer.scope().covers(sector))
+            throw new ForbiddenActionException("The Secteur " + sector.getSectorId() + " is not yours.");
+    }
+
     private static void refuseWhenClosed(SectorEntity sector) {
         if (sector.isClosed())
             throw new InvalidResourceException("A Secteur fermé is read-only: " + sector.getSectorId());
@@ -91,6 +97,7 @@ public class SectorServiceImpl implements SectorService {
     @Transactional
     public SectorDto update(SectorDto sectorDto, boolean mayRename) {
         SectorEntity sectorEntity = sectorOrThrow(sectorDto.getSectorId());
+        requireManaged(sectorEntity);
         refuseWhenClosed(sectorEntity);
 
         boolean renamed = sectorDto.getName() != null && !sectorEntity.getName().equals(sectorDto.getName());
@@ -132,6 +139,7 @@ public class SectorServiceImpl implements SectorService {
                 .orElseThrow(() -> new UnknownResourceException("Group not found: " + groupId));
 
         SectorEntity sectorEntity = sectorOrThrow(sectorId);
+        requireManaged(sectorEntity);
         refuseWhenClosed(sectorEntity);
 
         if (groupEntity.getSector() != null) {
@@ -155,6 +163,7 @@ public class SectorServiceImpl implements SectorService {
         if (groupEntity.getSector() == null) return;
 
         SectorEntity sectorEntity = sectorOrThrow(sectorId);
+        requireManaged(sectorEntity);
         refuseWhenClosed(sectorEntity);
 
         if (!groupEntity.getSector().getSectorId().equals(sectorId))

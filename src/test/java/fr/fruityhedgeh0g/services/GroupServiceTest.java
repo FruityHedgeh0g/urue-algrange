@@ -11,6 +11,8 @@ import fr.fruityhedgeh0g.services.interfaces.GroupService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
+import fr.fruityhedgeh0g.repositories.SectorRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
@@ -22,8 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/** Run as the Super admin, who manages every Secteur's Groupes (ADR 0004). */
 @QuarkusTest
+@TestSecurity(user = "super-admin", roles = "super_admin")
 public class GroupServiceTest {
+    @Inject
+    SectorRepository sectorRepository;
+
     @Inject
     GroupServiceImpl groupService;
 
@@ -102,8 +109,10 @@ public class GroupServiceTest {
     @Test
     @TestTransaction
     public void create_Success(){
+        SectorEntity sector = SectorEntity.builder().name("Test Sector").build();
+        sectorRepository.persist(sector);
         GroupDto groupDto = groupService.create(
-                GroupDto.builder().name("Test Group").build()
+                GroupDto.builder().name("Test Group").sectorId(sector.getSectorId()).build()
         );
 
         GroupDto retrievedGroup = groupService.getById(groupDto.getGroupId());

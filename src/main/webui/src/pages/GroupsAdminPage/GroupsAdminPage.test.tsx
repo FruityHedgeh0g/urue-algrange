@@ -4,9 +4,10 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../../auth/AuthContext";
 import GroupsAdminPage from "./GroupsAdminPage";
+import { createGroupsApi } from "../../features/groups/groupsApi";
 
-const renderPage = () => {
-  localStorage.setItem("urue-mock-role", "bureau");
+const renderPage = (role = "bureau") => {
+  localStorage.setItem("urue-mock-role", role);
   render(
     <QueryClientProvider client={new QueryClient()}>
       <AuthProvider>
@@ -34,25 +35,41 @@ describe("GroupsAdminPage", () => {
   it("offers as Chef only people with Role at least chef_de_groupe", async () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Groupe Algrange Centre/ }));
-    expect(chefOptions()).toEqual([
-      "Aucun chef",
-      "Marc Weber",
-      "Nathalie Roth (mène Groupe Thionville)",
-      "Claire Hoffmann",
-      "Luc Schmitt",
-    ]);
+    // Only the Groupe's own Secteur's people lead it (ADR 0004)
+    expect(chefOptions()).toEqual(["Aucun chef", "Marc Weber", "Luc Schmitt"]);
   });
 
-  it("moves a Chef who already leads another Groupe", async () => {
+  it("moves a Chef who already leads another Groupe of the Secteur", async () => {
+    const groups = createGroupsApi();
+    await groups.createGroup({ name: "Groupe Algrange Nord", description: "", area: "", sectorId: "sector-1" });
+    const nord = (await groups.fetchGroups()).find((g) => g.name === "Groupe Algrange Nord")!.groupId;
+    await groups.setChef(nord, { userId: "user-9", firstName: "Luc", lastName: "Schmitt" });
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Groupe Algrange Centre/ }));
-    await userEvent.selectOptions(screen.getByLabelText("Chef de groupe"), "user-6");
+    await userEvent.selectOptions(screen.getByLabelText("Chef de groupe"), "user-9");
     await userEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /Groupe Algrange Centre/ })).toHaveTextContent("Chef : Nathalie Roth")
+      expect(screen.getByRole("button", { name: /Groupe Algrange Centre/ })).toHaveTextContent("Chef : Luc Schmitt")
     );
-    expect(screen.getByRole("button", { name: /Groupe Thionville/ })).toHaveTextContent("Sans chef");
+    expect(screen.getByRole("button", { name: /Groupe Algrange Nord/ })).toHaveTextContent("Sans chef");
+  });
+
+  it("shows the Bureau only its own Secteur's Groupes, and locks the Secteur of a new one", async () => {
+    renderPage();
+    expect(await screen.findByRole("button", { name: /Groupe Algrange Centre/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Groupe Thionville/ })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "+ Nouveau groupe" }));
+    expect(screen.getByLabelText("Secteur")).toBeDisabled();
+    expect(screen.getByLabelText("Secteur")).toHaveValue("sector-1");
+  });
+
+  it("lets the Super admin see every Groupe and choose the Secteur of a new one", async () => {
+    renderPage("super_admin");
+    expect(await screen.findByRole("button", { name: /Groupe Thionville/ })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "+ Nouveau groupe" }));
+    expect(screen.getByLabelText("Secteur")).toBeEnabled();
   });
 
   it("clears a Groupe's Chef", async () => {
