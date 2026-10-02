@@ -19,6 +19,12 @@ Lyfia is the software behind the site and member space of the association **Une 
 
 The dev profile stores data in a local H2 file under `data/`. The Dev UI is at <http://localhost:8080/q/dev/>.
 
+## Changing the schema
+
+Production runs on PostgreSQL with a schema owned by Flyway, and Hibernate only validates the entities against it (ADR 0005). Dev and tests run on H2, where Hibernate updates the schema itself, so they never notice a missing migration.
+
+When an entity changes, add `src/main/resources/db/migration/V<n>__<what>.sql` in PostgreSQL syntax. Never edit a migration that has already shipped.
+
 ## Tests
 
 ```shell
