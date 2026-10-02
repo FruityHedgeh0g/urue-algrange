@@ -51,11 +51,18 @@ public class UserServiceImpl implements UserService {
     @Inject
     InternalSectorService internalSectorService;
 
+    @Inject
+    fr.fruityhedgeh0g.security.Viewer viewer;
+
     //Using UUID to test the existence of the user is acceptable because it is based on an external system (Keycloak)
 
     @Override
     public List<UserDto> listAll() {
-        return userRepository.listAll()
+        // The Inscrits list: every person for the Super admin, a Secteur's Inscrits for its Bureau and Admin (ADR 0004)
+        var scope = viewer.scope();
+        List<UserEntity> persons = scope.everySecteur() ? userRepository.listAll()
+                : scope.sectorId() == null ? List.of() : userRepository.listInscritsOf(scope.sectorId());
+        return persons
                 .stream()
                 .map(userMapper::toDto)
                 .toList();
@@ -118,6 +125,10 @@ public class UserServiceImpl implements UserService {
                 throw new ForbiddenRoleChangeException(actor.getUserId() + " belongs to no Secteur.");
             if (person.getSector() != null && !person.belongsTo(actor.getSector()))
                 throw new ForbiddenRoleChangeException(person.getUserId() + " belongs to another Secteur.");
+            // A Bénévole of the pool joins a Secteur they rode with
+            if (person.getSector() == null && role.isAtLeast(RoleEnum.MEMBRE)
+                    && !userRepository.rodeWith(person.getUserId(), actor.getSector().getSectorId()))
+                throw new ForbiddenRoleChangeException(person.getUserId() + " has not ridden with your Secteur.");
             return role.isAtLeast(RoleEnum.MEMBRE) ? actor.getSector() : null;
         }
         if (!role.isAtLeast(RoleEnum.MEMBRE)) return null;
@@ -162,7 +173,10 @@ public class UserServiceImpl implements UserService {
         if (person.getRole() != RoleEnum.BUREAU)
             throw new InvalidResourceException("Only a Bureau member can be Président: " + personId);
 
-        userRepository.findPresidents().forEach(previous -> previous.setPresident(false));
+        if (!viewer.scope().covers(person.getSector()))
+            throw new fr.fruityhedgeh0g.exceptions.ForbiddenActionException(personId + " is not of your Secteur.");
+        // One Président per Secteur (ADR 0004)
+        userRepository.findPresidentsOf(person.getSector().getSectorId()).forEach(previous -> previous.setPresident(false));
         person.setPresident(true);
         return userMapper.toDto(person);
     }

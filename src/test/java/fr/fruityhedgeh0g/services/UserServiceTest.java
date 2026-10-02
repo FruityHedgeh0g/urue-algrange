@@ -18,6 +18,7 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.*;
 
 
 @QuarkusTest
+@TestSecurity(user = "super-admin", roles = "super_admin")
 @TestTransaction
 class UserServiceTest {
     @Inject
