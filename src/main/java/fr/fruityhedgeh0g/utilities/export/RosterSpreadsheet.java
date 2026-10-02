@@ -91,7 +91,7 @@ public final class RosterSpreadsheet {
     private static byte[] write(Map<String, List<RosterEntryDto>> tabs) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
-            Workbook workbook = new Workbook(out, "urue-algrange", "1.0");
+            Workbook workbook = new Workbook(out, "lyfia", "1.0");
             tabs.forEach((name, people) -> {
                 Worksheet sheet = workbook.newWorksheet(name);
                 for (int c = 0; c < HEADER.size(); c++) sheet.value(0, c, HEADER.get(c));

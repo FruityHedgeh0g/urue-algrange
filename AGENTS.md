@@ -4,7 +4,7 @@
 
 ### Issue tracker
 
-Issues live in GitHub Issues (FruityHedgeh0g/urue-algrange), managed with the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues (FruityHedgeh0g/lyfia), managed with the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
