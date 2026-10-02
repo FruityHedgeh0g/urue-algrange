@@ -1,5 +1,8 @@
+# The image is built from sources (see Dockerfile): send only what the build needs
 *
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+!mvnw
+!.mvn/
+!pom.xml
+!src/
+src/test/
+**/node_modules/

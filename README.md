@@ -38,3 +38,31 @@ When an entity changes, add `src/main/resources/db/migration/V<n>__<what>.sql` i
 ```
 
 This produces `target/quarkus-app/`, runnable with `java -jar target/quarkus-app/quarkus-run.jar`.
+
+## The image
+
+CI builds a native image and pushes it to `quay.io/fruityhedgehog/lyfia`:
+
+- `latest` and `sha-<short>` from `main`
+- `X.Y.Z` from a git tag `vX.Y.Z`
+
+Before pushing, CI starts the image against PostgreSQL 17 and RabbitMQ and checks that it answers. To build it locally (Docker only, no JDK needed):
+
+```shell
+docker build -t lyfia .
+```
+
+The image holds no configuration secret. Provide these as environment variables:
+
+| Variable | What |
+|---|---|
+| `QUARKUS_DATASOURCE_JDBC_URL` | `jdbc:postgresql://<host>:5432/<db>` |
+| `QUARKUS_DATASOURCE_USERNAME`, `QUARKUS_DATASOURCE_PASSWORD` | PostgreSQL account |
+| `QUARKUS_OIDC_AUTH_SERVER_URL` | `https://<keycloak>/realms/<realm>` |
+| `QUARKUS_OIDC_CLIENT_ID`, `QUARKUS_OIDC_CREDENTIALS_SECRET` | Keycloak client for logging in |
+| `QUARKUS_KEYCLOAK_ADMIN_CLIENT_SERVER_URL`, `QUARKUS_KEYCLOAK_ADMIN_CLIENT_REALM` | Keycloak admin API, for Role mirroring |
+| `QUARKUS_KEYCLOAK_ADMIN_CLIENT_CLIENT_ID`, `QUARKUS_KEYCLOAK_ADMIN_CLIENT_CLIENT_SECRET` | Keycloak client with realm-management rights |
+| `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_VIRTUAL_HOST` | RabbitMQ carrying Keycloak's user events |
+| `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD` | RabbitMQ account |
+
+The app listens on port 8080, and `/q/health` reports whether it can reach its database. It stops at startup if RabbitMQ cannot be reached.
