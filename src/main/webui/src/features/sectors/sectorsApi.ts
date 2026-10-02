@@ -1,74 +1,64 @@
 import { mockSectors } from "./fixtures";
 import { Sector } from "./types";
+import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
+import { createOverlayCollection } from "../../lib/storage/overlayCollection";
+import { createEventsApi } from "../events/eventsApi";
+import { createGroupsApi } from "../groups/groupsApi";
 
-const OVERRIDES_KEY = "urue-sector-overrides";
-const CREATED_KEY = "urue-sector-created";
-const DELETED_KEY = "urue-sector-deleted";
+export interface SectorInput {
+  name: string;
+  description: string;
+}
 
 /**
- * Client mocké — le backend a un SectorController mais les endpoints de
- * lecture par id, création et édition sont commentés côté Java. Les
- * modifications sont donc persistées en localStorage en attendant, avec les
- * mêmes signatures qu'un futur GET/POST/PATCH /api/sectors.
+ * Client mocké, mêmes contrats que SectorController : seul le Super admin
+ * ouvre (POST), renomme (PATCH avec `mayRename`), ferme et rouvre
+ * (POST /{sectorId}/close et /reopen) un Secteur ; le Bureau tient sa
+ * description. Un Secteur n'est jamais supprimé (ADR 0003) : fermé, il est en
+ * lecture seule et vu, avec ses Groupes et Événements, du seul Super admin
+ * (`seesClosed`).
  */
-function readJson<T>(key: string, fallback: T): T {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
-  } catch {
-    return fallback;
-  }
+export function createSectorsApi(store: JsonStore = localJsonStore) {
+  const sectors = createOverlayCollection<Sector>({ store, name: "sector", fixtures: mockSectors, idOf: (s) => s.sectorId });
+  const visible = (seesClosed: boolean) => (sector: Sector) => seesClosed || !sector.closed;
+
+  const sectorOrThrow = async (sectorId: string) => {
+    const sector = await sectors.get(sectorId);
+    if (!sector) throw new Error("Secteur introuvable.");
+    return sector;
+  };
+
+  return {
+    fetchSectors: async (seesClosed: boolean) => (await sectors.list()).filter(visible(seesClosed)),
+    fetchSectorById: async (sectorId: string, seesClosed: boolean) => {
+      const sector = await sectors.get(sectorId);
+      return sector && visible(seesClosed)(sector) ? sector : undefined;
+    },
+    updateSector: async (sectorId: string, patch: SectorInput, mayRename: boolean) => {
+      const sector = await sectorOrThrow(sectorId);
+      if (sector.closed) throw new Error("Ce secteur est fermé : il est en lecture seule.");
+      if (patch.name !== sector.name && !mayRename) throw new Error("Seul le Super admin renomme un secteur.");
+      await sectors.update(sectorId, patch);
+    },
+    createSector: async (input: SectorInput): Promise<Sector> => {
+      const sector: Sector = { sectorId: `sector-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, groups: [], closed: false, ...input };
+      await sectors.create(sector);
+      return sector;
+    },
+    /** Ferme au lieu de supprimer : les Affectations prennent fin, les Événements non terminés sont Annulés (En cours : Archivé). */
+    closeSector: async (sectorId: string) => {
+      const sector = await sectorOrThrow(sectorId);
+      if (sector.closed) return;
+      await createGroupsApi(store).endAffectationsOfSector(sectorId);
+      await createEventsApi(store).closeEventsOfSector(sectorId);
+      await sectors.update(sectorId, { closed: true });
+    },
+    /** Les Groupes reviennent sans Chef ; les Événements gardent leur statut. */
+    reopenSector: async (sectorId: string) => {
+      await sectorOrThrow(sectorId);
+      await sectors.update(sectorId, { closed: false });
+    },
+  };
 }
 
-function writeJson(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // stockage indisponible : la modification reste active pour la session
-  }
-}
-
-function readOverrides(): Record<string, Partial<Sector>> {
-  return readJson(OVERRIDES_KEY, {});
-}
-
-function readDeletedIds(): string[] {
-  return readJson<string[]>(DELETED_KEY, []);
-}
-
-async function fetchAllRaw(): Promise<Sector[]> {
-  const overrides = readOverrides();
-  const created = readJson<Sector[]>(CREATED_KEY, []);
-  const deleted = readDeletedIds();
-  const base = mockSectors.map((sector) => ({ ...sector, ...overrides[sector.sectorId] }));
-  return [...base, ...created].filter((sector) => !deleted.includes(sector.sectorId));
-}
-
-export async function fetchSectors(): Promise<Sector[]> {
-  return fetchAllRaw();
-}
-
-export async function fetchSectorById(sectorId: string): Promise<Sector | undefined> {
-  const all = await fetchAllRaw();
-  return all.find((s) => s.sectorId === sectorId);
-}
-
-export async function updateSector(sectorId: string, patch: { name: string; description: string }): Promise<void> {
-  const overrides = readOverrides();
-  overrides[sectorId] = { ...overrides[sectorId], ...patch };
-  writeJson(OVERRIDES_KEY, overrides);
-  return Promise.resolve();
-}
-
-export async function createSector(input: { name: string; description: string }): Promise<void> {
-  const created = readJson<Sector[]>(CREATED_KEY, []);
-  created.push({ sectorId: `sector-${Date.now()}`, groups: [], ...input });
-  writeJson(CREATED_KEY, created);
-  return Promise.resolve();
-}
-
-export async function deleteSector(sectorId: string): Promise<void> {
-  const deleted = readDeletedIds();
-  if (!deleted.includes(sectorId)) writeJson(DELETED_KEY, [...deleted, sectorId]);
-  return Promise.resolve();
-}
+export const { fetchSectors, fetchSectorById, updateSector, createSector, closeSector, reopenSector } = createSectorsApi();

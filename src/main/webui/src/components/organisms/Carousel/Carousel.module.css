@@ -2,121 +2,265 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--band-bg-deep);
+  color: var(--band-text);
 }
 
 .viewport {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 6;
-  min-height: 220px;
+  height: clamp(460px, 76vh, 760px);
 }
 
-.track {
-  display: flex;
-  height: 100%;
-  transition: transform 500ms ease;
-  will-change: transform;
+.viewport:focus-visible {
+  box-shadow: inset var(--focus-ring);
 }
 
 .slide {
-  position: relative;
-  flex: 0 0 100%;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .9s var(--ease-out), visibility 0s linear .9s;
 }
 
-.slide img {
+.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .9s var(--ease-out), visibility 0s;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: scale(1.08);
+  transition: transform 7s linear;
 }
 
-.caption {
-  position: absolute;
-  left: 20px;
-  bottom: 18px;
-  padding: 10px 14px;
-  background: color-mix(in oklab, var(--color-surface-elev) 70%, transparent);
-  color: var(--color-text);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  max-width: min(90%, 720px);
+.active .image {
+  transform: scale(1);
 }
 
-.arrow {
+/* Image non recadrée (logo) : posée à droite sur un fond marine */
+.contain {
+  background:
+    radial-gradient(90% 120% at 85% 50%, rgba(208, 23, 41, .35), transparent 60%),
+    linear-gradient(135deg, var(--band-bg) 0%, var(--band-bg-deep) 100%);
+}
+
+.contain .image {
+  inset: 12% 4% 18% auto;
+  width: min(46%, 560px);
+  height: auto;
+  max-height: 70%;
+  margin: auto 0;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, .45));
+}
+
+.overlay {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--color-border);
-  background: color-mix(in oklab, var(--color-surface-elev) 85%, transparent);
-  color: var(--color-text);
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(2, 30, 58, .92) 0%, rgba(2, 30, 58, .6) 45%, rgba(2, 30, 58, 0) 80%),
+    linear-gradient(0deg, rgba(2, 30, 58, .7) 0%, rgba(2, 30, 58, 0) 40%);
+}
+
+.contain .overlay {
+  background: none;
+}
+
+.content {
+  position: absolute;
+  left: max(24px, calc((100vw - 1200px) / 2 + 24px));
+  right: 24px;
+  bottom: 120px;
+  max-width: 640px;
+}
+
+.active .content > * {
+  animation: rise .8s var(--ease-out) both;
+}
+
+.active .content > :nth-child(2) { animation-delay: .1s; }
+.active .content > :nth-child(3) { animation-delay: .2s; }
+.active .content > :nth-child(4) { animation-delay: .3s; }
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #ff9aa4;
+}
+
+.kicker span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 4px 8px;
+  background: var(--brand-red);
+  color: #fff;
+  letter-spacing: .08em;
+}
+
+.title {
+  margin: 0;
+  color: #fff;
+  font-size: var(--text-3xl);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -.01em;
+  text-wrap: balance;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, .25);
+}
+
+.caption {
+  margin: 18px 0 0;
+  max-width: 48ch;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: rgba(255, 255, 255, .88);
+}
+
+.cta {
+  margin-top: 28px;
+}
+
+/* ── Commandes ─────────────────────────────────────────────────────── */
+.controls {
+  position: absolute;
+  left: max(24px, calc((100vw - 1200px) / 2 + 24px));
+  right: max(24px, calc((100vw - 1200px) / 2 + 24px));
+  bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  z-index: 2;
+}
+
+.counter {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: rgba(255, 255, 255, .7);
+  font-variant-numeric: tabular-nums;
+}
+
+.counter strong {
+  color: #fff;
+  font-weight: 800;
+}
+
+.bars {
+  display: flex;
+  flex: 1;
+  max-width: 360px;
+  gap: 8px;
+}
+
+.bar {
+  appearance: none;
+  flex: 1;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, .28);
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 3px;
+  width: 100%;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left;
+  background: var(--brand-red);
+}
+
+.barDone .progress {
+  transform: translateY(-50%) scaleX(1);
+  background: #fff;
+}
+
+.barActive .progress {
+  animation-name: progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.arrows {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.arrow {
+  appearance: none;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, .5);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out);
 }
 
 .arrow:hover {
-  background: var(--color-hover);
+  background: var(--brand-red);
+  border-color: var(--brand-red);
 }
 
-.left {
-  left: 12px;
-}
-.right {
-  right: 12px;
+@keyframes progress {
+  to { transform: translateY(-50%) scaleX(1); }
 }
 
-.dots {
-  position: absolute;
-  bottom: 14px;
-  right: 16px;
-  display: flex;
-  gap: 6px;
-  z-index: 5;
-}
-
-.dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.35);
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.dot.active {
-  background: var(--color-white);
-  border-color: var(--color-white);
-}
-
-.dot:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.6);
+@keyframes rise {
+  from { opacity: 0; transform: translateY(24px); }
 }
 
 @media (max-width: 720px) {
-  .viewport {
-    aspect-ratio: 16 / 9;
-    min-height: 180px;
+  .content {
+    bottom: 104px;
   }
-  .caption {
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-    padding: 8px 10px;
+
+  .contain .image {
+    inset: 8% 8% auto auto;
+    width: 46%;
+    opacity: .5;
   }
-  .arrow {
-    width: 36px;
-    height: 36px;
+
+  .arrows {
+    display: none;
+  }
+
+  .controls {
+    bottom: 32px;
   }
 }

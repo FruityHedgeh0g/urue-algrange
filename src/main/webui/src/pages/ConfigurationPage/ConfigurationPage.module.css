@@ -1,21 +1,3 @@
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 640px;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  text-align: left;
-  max-width: 420px;
-}
-
 .thumb {
   width: 72px;
   height: 45px;

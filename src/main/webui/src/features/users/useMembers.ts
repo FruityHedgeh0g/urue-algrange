@@ -1,22 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchAllMembers, fetchMembersByGroupIds, updateMember } from "./usersApi";
-
-export function useMembersByGroupIds(groupIds: string[]) {
-  return useQuery({
-    queryKey: ["members", ...groupIds],
-    queryFn: () => fetchMembersByGroupIds(groupIds),
-    enabled: groupIds.length > 0,
-  });
-}
+import { appointPresident, changeRole, fetchAllMembers, MemberInput, updateMember } from "./usersApi";
+import { useAuth } from "../../auth/AuthContext";
+import { RoleId } from "../../auth/roles";
+import { queryKeys } from "../queryKeys";
 
 export function useAllMembers() {
-  return useQuery({ queryKey: ["members", "all"], queryFn: fetchAllMembers });
+  return useQuery({ queryKey: queryKeys.members.list, queryFn: fetchAllMembers });
 }
 
 export function useUpdateMember() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { userId: string; firstName: string; lastName: string; groupId: string }) => updateMember(input.userId, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["members"] }),
+    mutationFn: (input: { userId: string } & MemberInput) => updateMember(input.userId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.members.all }),
+  });
+}
+
+export function useChangeRole() {
+  const queryClient = useQueryClient();
+  const { role, user } = useAuth();
+  return useMutation({
+    mutationFn: (input: { userId: string; role: RoleId; sectorId?: string }) =>
+      changeRole(input.userId, input.role, { role, sectorId: user?.sector?.sectorId ?? null }, input.sectorId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.members.all }),
+  });
+}
+
+export function useAppointPresident() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => appointPresident(userId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.members.all }),
   });
 }

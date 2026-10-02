@@ -1,0 +1,57 @@
+package fr.fruityhedgeh0g.enums;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * A person's single Role, declared from the lowest to the highest (ADR 0001).
+ * A Role grants everything the lower Roles grant.
+ */
+public enum RoleEnum {
+    VISITEUR,
+    BENEVOLE,
+    MEMBRE,
+    CHEF_DE_GROUPE,
+    BUREAU,
+    ADMIN,
+    SUPER_ADMIN;
+
+    /** Name used in the API and in {@code @RolesAllowed}, e.g. {@code chef_de_groupe}. */
+    @JsonValue
+    public String id() {
+        return name().toLowerCase();
+    }
+
+    public boolean isAtLeast(RoleEnum required) {
+        return compareTo(required) >= 0;
+    }
+
+    /**
+     * Promotion chain: from the Bureau up, a person moves any registered person
+     * below them between {@code benevole} and the Role just below their own. So
+     * the Bureau handles membre and chef_de_groupe, an Admin bureau, the Super admin admin.
+     */
+    public boolean maySetRole(RoleEnum current, RoleEnum next) {
+        return isAtLeast(BUREAU)
+                && current.isAtLeast(BENEVOLE)
+                && current.compareTo(this) < 0
+                && next.compareTo(this) < 0
+                && next.isAtLeast(BENEVOLE);
+    }
+
+    /** A Chef de groupe, or anyone above (Bureau included), can receive an Affectation. */
+    public boolean canLeadGroupe() {
+        return isAtLeast(CHEF_DE_GROUPE);
+    }
+
+    /** This Role and every Role below it, as {@code @RolesAllowed} names. */
+    public Set<String> grantedRoleIds() {
+        return Arrays.stream(values())
+                .filter(this::isAtLeast)
+                .map(RoleEnum::id)
+                .collect(Collectors.toSet());
+    }
+}

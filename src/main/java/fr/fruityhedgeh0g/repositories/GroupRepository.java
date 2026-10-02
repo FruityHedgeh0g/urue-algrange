@@ -22,8 +22,12 @@ public class GroupRepository implements PanacheRepositoryBase<GroupEntity, UUID>
                 .firstResult());
     }
 
-    public Optional<Set<GroupEntity>> findBySector(UUID sectorId){
-        return Optional.of(new HashSet<>(list("sector_id", sectorId)));
+    public Optional<GroupEntity> findByChef(UUID userId){
+        return find("chef.userId", userId).firstResultOptional();
+    }
+
+    public Set<GroupEntity> findBySector(UUID sectorId){
+        return new HashSet<>(list("sector_id", sectorId));
     }
 
 }

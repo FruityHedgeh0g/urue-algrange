@@ -8,7 +8,8 @@ import org.mapstruct.*;
 @Mapper(componentModel = "jakarta-cdi",uses = GroupMapper.class)
 public interface SectorMapper {
 
-//    @Mapping(target = "groups", qualifiedByName = "GroupDtoToNestedEntity")
+    /** Fermé only through closing, never from a request body. */
+    @Mapping(target = "closed", ignore = true)
     SectorEntity toEntity(SectorDto dto);
 
 //    @Mapping(target = "groups", qualifiedByName = "GroupEntityToNestedDto")
@@ -16,6 +17,7 @@ public interface SectorMapper {
 
     NestedSectorDto toNestedDto(SectorEntity entity);
 
+    @Mapping(target = "closed", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     SectorEntity partialDtoToEntity(@MappingTarget SectorEntity sectorEntity, SectorDto sectorDto);
 

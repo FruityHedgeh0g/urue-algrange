@@ -1,28 +1,65 @@
+/* Mosaïque : la première photo est mise à la une sur 2 × 2 cases */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-auto-rows: 220px;
+  grid-auto-flow: dense;
+  gap: 12px;
 }
 
 .item {
+  position: relative;
   margin: 0;
-  border-radius: var(--radius);
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-bg-soft);
+}
+
+@media (min-width: 720px) {
+  .item:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
 }
 
 .image {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform .7s var(--ease-out), filter .7s var(--ease-out);
+}
+
+.item:hover .image {
+  transform: scale(1.06);
 }
 
 .caption {
-  padding: 8px 10px;
-  font-size: 13px;
-  color: var(--color-muted);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 36px 16px 14px;
+  background: linear-gradient(0deg, rgba(2, 30, 58, .88), rgba(2, 30, 58, 0));
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transform: translateY(8px);
+  opacity: .92;
+  transition: transform var(--duration) var(--ease-out), opacity var(--duration) var(--ease-out);
+}
+
+.caption::before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 3px;
+  margin-bottom: 8px;
+  background: var(--brand-red);
+}
+
+.item:hover .caption {
+  transform: none;
+  opacity: 1;
 }
 
 .error {
@@ -30,5 +67,8 @@
 }
 
 .empty {
+  padding: 28px;
+  border: 2px dashed var(--color-border);
   color: var(--color-muted);
+  text-align: center;
 }

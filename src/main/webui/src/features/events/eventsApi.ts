@@ -1,83 +1,82 @@
 import { mockEvents } from "./fixtures";
-import { Event, EventOrganizer } from "./types";
-
-const OVERRIDES_KEY = "urue-event-overrides";
-const CREATED_KEY = "urue-event-created";
-const DELETED_KEY = "urue-event-deleted";
+import { Event } from "./types";
+import { allowedTransitions, currentStatus, EventStatus } from "./status";
+import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
+import { createOverlayCollection } from "../../lib/storage/overlayCollection";
+import { closedSectorIds, refuseInClosedSector } from "../sectors/closedSectors";
 
 /**
- * Client mocké — le EventController backend n'expose que GET /api/events
- * pour l'instant (création/édition commentées). Mêmes signatures qu'un futur
- * POST/PATCH réel.
+ * Client mocké, mêmes contrats que EventController : GET (sans Planification
+ * sous le Bureau), POST (démarre en Planification, Secteur requis), PATCH,
+ * PUT /api/events/{eventId}/status. Pas de suppression : on annule. Les
+ * Événements d'un Secteur fermé ne sont vus que du Super admin
+ * (`seesClosedSecteurs`) et ne changent plus.
  */
-function readJson<T>(key: string, fallback: T): T {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJson(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // stockage indisponible : la modification reste active pour la session
-  }
-}
-
-function readDeletedIds(): string[] {
-  return readJson<string[]>(DELETED_KEY, []);
-}
-
-async function fetchAllRaw(): Promise<Event[]> {
-  const overrides = readJson<Record<string, Partial<Event>>>(OVERRIDES_KEY, {});
-  const created = readJson<Event[]>(CREATED_KEY, []);
-  const deleted = readDeletedIds();
-  const base = mockEvents.map((event) => ({ ...event, ...overrides[event.eventId] }));
-  return [...base, ...created].filter((event) => !deleted.includes(event.eventId));
-}
-
-export async function fetchEvents(): Promise<Event[]> {
-  return fetchAllRaw();
-}
-
-export async function fetchEventById(eventId: string): Promise<Event | undefined> {
-  const all = await fetchAllRaw();
-  return all.find((e) => e.eventId === eventId);
-}
-
 export interface EventInput {
   name: string;
   description: string;
   startDateTime: string;
   endDateTime: string;
+  sectorId: string;
+  /** 0 retire le maximum, comme côté backend. */
+  maxParticipants?: number;
+  imageUrl?: string;
   address?: string;
   city?: string;
   postalCode?: string;
   country?: string;
 }
 
-export async function updateEvent(eventId: string, patch: EventInput): Promise<void> {
-  const overrides = readJson<Record<string, Partial<Event>>>(OVERRIDES_KEY, {});
-  overrides[eventId] = { ...overrides[eventId], ...patch };
-  writeJson(OVERRIDES_KEY, overrides);
-  return Promise.resolve();
+export function createEventsApi(store: JsonStore = localJsonStore) {
+  const events = createOverlayCollection<Event>({ store, name: "event", fixtures: mockEvents, idOf: (e) => e.eventId });
+  /** Le statut renvoyé est le statut courant, comme côté backend. */
+  const withCurrentStatus = (event: Event): Event => ({ ...event, status: currentStatus(event) });
+
+  const visible = async (seesPlanification: boolean, seesClosedSecteurs: boolean) => {
+    const closed = seesClosedSecteurs ? new Set<string>() : await closedSectorIds(store);
+    return (event: Event) => (seesPlanification || event.status !== "planification") && !closed.has(event.sectorId);
+  };
+  const refuseWhenClosed = async (eventId: string) => refuseInClosedSector(store, (await events.get(eventId))?.sectorId);
+
+  return {
+    fetchEvents: async (seesPlanification: boolean, seesClosedSecteurs = false) => {
+      const isVisible = await visible(seesPlanification, seesClosedSecteurs);
+      return (await events.list()).filter(isVisible).map(withCurrentStatus);
+    },
+    fetchEventById: async (eventId: string, seesPlanification: boolean, seesClosedSecteurs = false) => {
+      const event = await events.get(eventId);
+      return event && (await visible(seesPlanification, seesClosedSecteurs))(event) ? withCurrentStatus(event) : undefined;
+    },
+    updateEvent: async (eventId: string, patch: Omit<EventInput, "sectorId">) => {
+      await refuseWhenClosed(eventId);
+      await events.update(eventId, { ...patch, maxParticipants: patch.maxParticipants ? patch.maxParticipants : null });
+    },
+    /** À la fermeture d'un Secteur : Archivé s'il a eu (ou a) lieu, Annulé sinon ; les inscriptions restent. */
+    closeEventsOfSector: async (sectorId: string) => {
+      for (const event of (await events.list()).filter((e) => e.sectorId === sectorId)) {
+        const current = currentStatus(event);
+        await events.update(event.eventId, { status: current === "en_cours" || current === "archive" ? "archive" : "annule" });
+      }
+    },
+    createEvent: async (input: EventInput): Promise<Event> => {
+      await refuseInClosedSector(store, input.sectorId);
+      const event: Event = { eventId: `event-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, status: "planification", ...input };
+      await events.create(event);
+      return event;
+    },
+    changeStatus: async (eventId: string, status: EventStatus) => {
+      await refuseWhenClosed(eventId);
+      const event = await events.get(eventId);
+      if (!event || !allowedTransitions(currentStatus(event)).includes(status)) {
+        throw new Error("Transition de statut refusée");
+      }
+      await events.update(eventId, { status });
+      return withCurrentStatus({ ...event, status });
+    },
+  };
 }
 
-export async function createEvent(input: EventInput, creator: EventOrganizer): Promise<void> {
-  const created = readJson<Event[]>(CREATED_KEY, []);
-  created.push({ eventId: `event-${Date.now()}`, status: "PUBLISHED", creator, ...input });
-  writeJson(CREATED_KEY, created);
-  return Promise.resolve();
-}
-
-export async function deleteEvent(eventId: string): Promise<void> {
-  const deleted = readDeletedIds();
-  if (!deleted.includes(eventId)) writeJson(DELETED_KEY, [...deleted, eventId]);
-  return Promise.resolve();
-}
+export const { fetchEvents, fetchEventById, updateEvent, createEvent, changeStatus } = createEventsApi();
 
 export function isUpcoming(event: Event, now: Date = new Date()): boolean {
   return new Date(event.endDateTime) >= now;

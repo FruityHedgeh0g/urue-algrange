@@ -19,11 +19,12 @@
         <quarkus.quinoa.version>2.7.2</quarkus.quinoa.version>
         <quarkus.mockito.version>3.30.6</quarkus.mockito.version>
         <mockito.core.version>5.20.0</mockito.core.version>
-        <lombok.version>1.18.38</lombok.version>
+        <lombok.version>1.18.48</lombok.version>
         <quarkus.jdbc.version>3.28.3</quarkus.jdbc.version>
         <vavr.version>0.10.7</vavr.version>
         <lombok.mapstruct.version>0.2.0</lombok.mapstruct.version>
         <rabbitmq.version>5.31.0</rabbitmq.version>
+        <fastexcel.version>0.19.0</fastexcel.version>
     </properties>
 
     <dependencyManagement>
@@ -65,6 +66,11 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5-mockito</artifactId>
             <version>${quarkus.mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-test-security-oidc</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -117,6 +123,14 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-keycloak-authorization</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-keycloak-admin-rest-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
         <dependency>
@@ -129,6 +143,18 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Spreadsheet export of an Event's roster (.xlsx) -->
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel</artifactId>
+            <version>${fastexcel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel-reader</artifactId>
+            <version>${fastexcel.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -183,6 +209,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
+                    <!-- Vert.x thread-local reset needs java.lang opened on Java 24+ -->
+                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>

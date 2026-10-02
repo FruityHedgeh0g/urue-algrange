@@ -1,24 +1,53 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMyEventIds, registerForEvent, unregisterFromEvent } from "./registrationsApi";
+import { fetchMyRegistrations, fetchPilotes, requestGroup, signUp, withdraw } from "./registrationsApi";
+import { queryKeys } from "../queryKeys";
+import { useAuth } from "../../auth/AuthContext";
 
-const QUERY_KEY = ["my-event-registrations"];
-
-export function useMyEventIds() {
-  return useQuery({ queryKey: QUERY_KEY, queryFn: fetchMyEventIds });
+export function useMyRegistrations() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: [...queryKeys.myRegistrations.all, user?.userId],
+    queryFn: () => fetchMyRegistrations(user?.userId ?? ""),
+    enabled: Boolean(user),
+  });
 }
 
+/** Les pilotes inscrits à un Événement, parmi lesquels un passager choisit. */
+export function usePilotes(eventId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.myRegistrations.pilotes(eventId),
+    queryFn: () => fetchPilotes(eventId ?? ""),
+    enabled: Boolean(eventId),
+  });
+}
+
+/** Inscription comme pilote ou passager, et désinscription de la personne connectée. */
 export function useEventRegistration() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.myRegistrations.all });
 
   const register = useMutation({
-    mutationFn: registerForEvent,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    /** `phone` : numéro tout juste saisi, avant que le profil ne soit relu. */
+    /** `piloteId` : s'inscrire comme passager de ce pilote (sans Demande de groupe). */
+    mutationFn: (input: { eventId: string; phone?: string; groupId?: string; piloteId?: string }) => {
+      if (!user) throw new Error("Connectez-vous pour vous inscrire.");
+      const person = { ...user, phone: input.phone ?? user.phone, sectorId: user.sector?.sectorId ?? null };
+      return signUp(input.eventId, person, input.groupId || undefined, input.piloteId || undefined);
+    },
+    onSuccess: invalidate,
   });
 
   const unregister = useMutation({
-    mutationFn: unregisterFromEvent,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    mutationFn: (eventId: string) => withdraw(eventId, user?.userId ?? ""),
+    onSuccess: invalidate,
   });
 
-  return { register, unregister };
+  /** Nouvelle Demande de groupe, par exemple après un refus. */
+  const askGroup = useMutation({
+    mutationFn: (input: { eventId: string; groupId: string }) => requestGroup(input.eventId, user?.userId ?? "", input.groupId),
+    onSuccess: invalidate,
+  });
+
+  return { register, unregister, askGroup };
 }

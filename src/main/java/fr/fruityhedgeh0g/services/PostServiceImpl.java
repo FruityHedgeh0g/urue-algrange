@@ -1,10 +1,18 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
+import fr.fruityhedgeh0g.entities.PostEntity;
+import fr.fruityhedgeh0g.enums.PostStatusEnum;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
+import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.PostRepository;
 import fr.fruityhedgeh0g.services.interfaces.PostService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.PostMapper;
-import io.smallrye.common.annotation.Identifier;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -12,12 +20,11 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class PostServiceImpl implements PostService {
     @Inject
@@ -26,36 +33,71 @@ public class PostServiceImpl implements PostService {
     @Inject
     PostMapper postMapper;
 
+    @Inject
+    InternalUserService internalUserService;
+
     @Override
-    public List<PostDto> listAll() {
-        return postRepository.listAll()
-                .stream()
-                .map(postMapper::toDto)
-                .toList();
+    public List<PostDto> listAll(boolean seesDrafts) {
+        List<PostEntity> posts = seesDrafts ? postRepository.listAll() : postRepository.list("status", PostStatusEnum.PUBLIE);
+        return posts.stream().map(postMapper::toDto).toList();
     }
 
     @Override
-    public Optional<PostDto> getById(UUID postId) {
-        return postRepository.findByIdOptional(postId)
-                .map(postMapper::toDto);
+    public PostDto getById(UUID postId, boolean seesDrafts) {
+        return postMapper.toDto(
+                postRepository.findByIdOptional(postId)
+                        .filter(post -> seesDrafts || post.isPublished())
+                        .orElseThrow(() -> new UnknownResourceException("Post not found: "+postId))
+        );
     }
 
     @Override
     @Transactional
-    public PostDto create(PostDto postDto) {
-        return null;
+    public PostDto create(PostDto postDto, UUID authorId) {
+        PostEntity post = postMapper.toEntity(postDto);
+        post.setStatus(PostStatusEnum.BROUILLON);
+        post.setAuthor(internalUserService.doGetEntityById(authorId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: " + authorId)));
+        validate(post);
+        postRepository.persist(post);
+        return postMapper.toDto(post);
     }
 
     @Override
     @Transactional
     public PostDto update(PostDto postDto) {
-        return null;
+        if (postDto.getPostId() == null) throw new InvalidResourceException("Missing post id.");
+        PostEntity post = postOrThrow(postDto.getPostId());
+        postMapper.partialDtoToEntity(post, postDto);
+        validate(post);
+        return postMapper.toDto(post);
+    }
+
+    @Override
+    @Transactional
+    public PostDto changeStatus(UUID postId, PostStatusEnum status) {
+        PostEntity post = postOrThrow(postId);
+        post.setStatus(status);
+        return postMapper.toDto(post);
+    }
+
+    private PostEntity postOrThrow(UUID postId) {
+        return postRepository.findByIdOptional(postId)
+                .orElseThrow(() -> new UnknownResourceException("Post not found: " + postId));
+    }
+
+    /** A Post has a title and a content. */
+    private static void validate(PostEntity post) {
+        if (post.getTitle() == null || post.getTitle().isBlank())
+            throw new InvalidResourceException("A Post has a title.");
+        if (post.getContent() == null || post.getContent().isBlank())
+            throw new InvalidResourceException("A Post has a content.");
     }
 
     @Override
     @Transactional
     public void delete(UUID postId) {
-
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
 //    @Override

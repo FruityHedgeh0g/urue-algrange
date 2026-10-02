@@ -1,16 +1,15 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { RoleId, roleAtLeast } from "./roles";
+import { ROLE_HIERARCHY, RoleId, roleAtLeast } from "./roles";
 
 /**
  * Authentification mockée : tant que le backend n'expose pas de flux de
  * connexion, le rôle courant est piloté localement (voir RoleSwitcher) pour
  * permettre de prévisualiser chaque espace pendant le développement.
  */
-export interface MockUserGroup {
-  groupId: string;
-  name: string;
+/** Reflète NestedSectorDto : le Secteur d'une personne à partir de Membre (ADR 0004). */
+export interface UserSector {
   sectorId: string;
-  sectorName: string;
+  name: string;
 }
 
 export interface MockUser {
@@ -18,7 +17,10 @@ export interface MockUser {
   firstName: string;
   lastName: string;
   role: RoleId;
-  group: MockUserGroup;
+  /** Aucun pour un Bénévole (le vivier commun) ni pour le Super admin (au-dessus des Secteurs). */
+  sector: UserSector | null;
+  /** Nécessaire pour s'inscrire à un Événement. */
+  phone?: string;
 }
 
 interface AuthContextValue {
@@ -27,32 +29,36 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   setRole: (role: RoleId) => void;
   hasAtLeastRole: (required: RoleId) => boolean;
-  updateProfile: (profile: { firstName: string; lastName: string }) => void;
+  updateProfile: (profile: Profile) => void;
 }
 
 const ROLE_STORAGE_KEY = "urue-mock-role";
 const PROFILE_STORAGE_KEY = "urue-mock-profile";
 
-const DEFAULT_GROUP: MockUserGroup = {
-  groupId: "group-1",
-  name: "Groupe Algrange Centre",
-  sectorId: "sector-1",
-  sectorName: "Secteur Algrange",
-};
-const DEFAULT_PROFILE = { firstName: "Jean", lastName: "Dupont" };
+interface Profile {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}
+
+const DEFAULT_PROFILE: Profile = { firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" };
+const DEFAULT_SECTOR: UserSector = { sectorId: "sector-1", name: "Secteur Algrange" };
+
+/** Le Secteur mocké : de Membre à Admin, le Secteur d'Algrange. */
+const sectorFor = (role: RoleId): UserSector | null => (roleAtLeast(role, "membre") && role !== "super_admin" ? DEFAULT_SECTOR : null);
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 function readStoredRole(): RoleId {
   try {
     const saved = localStorage.getItem(ROLE_STORAGE_KEY);
-    return (saved as RoleId) ?? "visiteur";
+    return ROLE_HIERARCHY.find((r) => r === saved) ?? "visiteur";
   } catch {
     return "visiteur";
   }
 }
 
-function readStoredProfile(): { firstName: string; lastName: string } {
+function readStoredProfile(): Profile {
   try {
     const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
     return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
@@ -85,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = useMemo<AuthContextValue>(() => {
     const user: MockUser | null =
-      role === "visiteur" ? null : { userId: "mock-user", role, group: DEFAULT_GROUP, ...profile };
+      role === "visiteur" ? null : { userId: "mock-user", role, sector: sectorFor(role), ...profile };
     return {
       user,
       role,

@@ -3,8 +3,7 @@ package fr.fruityhedgeh0g.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "groups")
@@ -26,26 +25,33 @@ public class GroupEntity extends AuditTemplate {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "group",fetch = FetchType.EAGER)
-    private Set<UserEntity> members;
+    /** The part of the Secteur this Groupe covers. */
+    @Column(name = "area")
+    private String area;
+
+    /** Current Affectation: at most one Chef per Groupe, one Groupe per Chef. */
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "chef_id", unique = true)
+    private UserEntity chef;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
 
-    public void addMember(UserEntity member) {
-        members.add(member);
-        member.setGroup(this);
+    /** true while the Groupe's Secteur is fermé. */
+    public boolean isInClosedSector() {
+        return sector != null && sector.isClosed();
     }
 
-    public void removeMember(UserEntity member) {
-        members.remove(member);
-        member.setGroup(null);
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        GroupEntity that = (GroupEntity) o;
+        return Objects.equals(groupId, that.groupId) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(sector, that.sector);
     }
 
-    @PreRemove
-    private void preRemove() {
-        members.forEach(member -> member.setGroup(null));
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(groupId);
     }
-
 }

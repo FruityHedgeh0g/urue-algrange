@@ -1,21 +1,22 @@
+/* Placé dans la barre utilitaire marine du Header */
 .toggle {
   appearance: none;
+  width: 30px;
+  height: 30px;
   background: transparent;
-  border: 1px solid transparent;
-  color: var(--color-text);
-  padding: 8px 10px;
-  border-radius: var(--radius);
+  border: 1px solid var(--band-border);
+  border-radius: 50%;
+  color: var(--band-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: background var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out),
+    transform .4s var(--ease-out);
 }
 
 .toggle:hover {
-  background: var(--color-hover);
-}
-
-.icon {
-  font-size: 16px;
-  line-height: 1;
+  background: rgba(255, 255, 255, .12);
+  border-color: var(--band-text);
+  transform: rotate(20deg);
 }

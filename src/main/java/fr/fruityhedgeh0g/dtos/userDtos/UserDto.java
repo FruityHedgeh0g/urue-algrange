@@ -1,15 +1,15 @@
 package fr.fruityhedgeh0g.dtos.userDtos;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.groupDtos.NestedGroupDto;
-import fr.fruityhedgeh0g.dtos.roleDtos.NestedRoleDto;
 import fr.fruityhedgeh0g.dtos.Views;
+import fr.fruityhedgeh0g.dtos.sectorDtos.NestedSectorDto;
+import fr.fruityhedgeh0g.enums.RoleEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Value
@@ -18,21 +18,31 @@ public class UserDto {
 
     @NotNull
     @JsonView({Views.Minimal.class,Views.Creation.class,Views.Update.class})
+    @JsonAlias("user_id")
     UUID userId;
 
-    @NotBlank
+    @NotBlank(groups={Views.Creation.class})
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    @JsonAlias({"first_name","updated_first_name"})
     String firstName;
 
-    @NotBlank
+    @NotBlank(groups={Views.Creation.class})
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
+    @JsonAlias({"last_name","updated_last_name"})
     String lastName;
 
-    @JsonView(Views.Detailed.class)
-    Set<NestedRoleDto> roles;
+    @JsonView({Views.Detailed.class,Views.Update.class})
+    String phone;
 
-    @JsonView(Views.Detailed.class)
-    NestedGroupDto group;
+    @JsonView(Views.Basic.class)
+    RoleEnum role;
+
+    @JsonView(Views.Basic.class)
+    Boolean president;
+
+    /** Read only: the Secteur a person from Membre up belongs to, set by their promotion (ADR 0004). */
+    @JsonView(Views.Basic.class)
+    NestedSectorDto sector;
 
     //INFO : Retrait des Sets au profit d'une méthode dans EventServiceImpl retournant ces infos pour un couple Utilisateur/EventType
 //    @JsonView(Views.Detailed.class)

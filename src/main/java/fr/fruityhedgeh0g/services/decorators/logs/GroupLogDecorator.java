@@ -1,0 +1,159 @@
+package fr.fruityhedgeh0g.services.decorators.logs;
+
+import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
+import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
+import fr.fruityhedgeh0g.services.interfaces.GroupService;
+import io.quarkus.logging.Log;
+import io.vavr.control.Try;
+import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
+import jakarta.inject.Inject;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Priority(200)
+@Decorator
+public class GroupLogDecorator implements GroupService {
+
+    @Inject
+    @Delegate
+    GroupService groupService;
+
+
+    @Override
+    public List<GroupDto> listAll() {
+        Log.debugf("Retrieving all groups...");
+        return Try.of(groupService::listAll)
+                .onSuccess(groups -> Log.debugf("%d groups retrieved.",groups.size()))
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving groups."))
+                .get();
+    }
+
+    @Override
+    public GroupDto getById(UUID groupId) {
+        Log.debugf("Retrieving group by id %s...",groupId);
+        return Try.of(() -> groupService.getById(groupId))
+                .onSuccess(group -> {
+                    Log.debugf("Group retrieved: "+group.toString());
+                })
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Group with id %s not found.", groupId);
+                        default -> Log.errorf(t,"An error occurred while retrieving group.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public GroupDto create(GroupDto groupDto) {
+        Log.debugf("Creating new group: %s", groupDto.toString());
+        return Try.of(() -> groupService.create(groupDto))
+                .onSuccess(group -> Log.debugf("Group created."))
+                .onFailure(t -> {
+                    switch(t){
+                        case DuplicateResourceException ex -> Log.errorf(ex,"Group %s already existing.", groupDto.getGroupId());
+                        default -> Log.errorf(t,"An error occurred while creating group.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public GroupDto update(GroupDto groupDto) {
+        Log.debugf("Updating an existing group: %s", groupDto.toString());
+        return Try.of(() -> groupService.update(groupDto))
+                .onSuccess(group -> Log.debugf("Group updated."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Group %s not found.", groupDto.getGroupId());
+                        case DuplicateResourceException ex -> Log.errorf(ex, "A group already exists with this name [%s].", groupDto.getName());
+                        default -> Log.errorf(t,"An error occurred while updating group.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public void delete(UUID groupId) {
+        Log.debugf("Deleting group by id %s...",groupId);
+        Try.run(() -> groupService.delete(groupId))
+                .onSuccess(v -> Log.debugf("Group deleted."))
+                .onFailure(t -> Log.errorf(t,"An error occurred during group deletion."))
+                .get();
+    }
+
+    @Override
+    public GroupDto setChef(UUID groupId, UUID userId) {
+        Log.debugf("Affectation of %s to group %s...", userId, groupId);
+        return Try.of(() -> groupService.setChef(groupId, userId))
+                .onSuccess(group -> Log.infof("%s now leads group %s.", userId, groupId))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s or group %s not found.", userId, groupId);
+                        case InvalidResourceException ex -> Log.warnf("Affectation refused: %s", ex.getMessage());
+                        default -> Log.errorf(t,"An error occurred during the Affectation.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public GroupDto clearChef(UUID groupId) {
+        Log.debugf("Clearing the Chef of group %s...", groupId);
+        return Try.of(() -> groupService.clearChef(groupId))
+                .onSuccess(group -> Log.infof("Group %s has no Chef.", groupId))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"Group %s not found.", groupId);
+                        default -> Log.errorf(t,"An error occurred while clearing the Chef.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public void doEndAffectationOf(UUID userId) {
+        Log.debugf("[INTERNAL] Ending the Affectation of %s...", userId);
+        Try.run(() -> groupService.doEndAffectationOf(userId))
+                .onSuccess(v -> Log.debugf("Affectation of %s ended.", userId))
+                .onFailure(t -> Log.errorf(t,"An error occurred while ending the Affectation of %s.", userId))
+                .get();
+    }
+
+    @Override
+    public Optional<GroupEntity> doGetEntityLedBy(UUID userId) {
+        Log.debugf("[INTERNAL] Retrieving the group led by %s...", userId);
+        return Try.of(() -> groupService.doGetEntityLedBy(userId))
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving the group led by %s.", userId))
+                .get();
+    }
+
+    @Override
+    public List<GroupEntity> doListEntitiesOfSector(UUID sectorId) {
+        Log.debugf("[INTERNAL] Retrieving the groups of sector %s...", sectorId);
+        return Try.of(() -> groupService.doListEntitiesOfSector(sectorId))
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving the groups of sector %s.", sectorId))
+                .get();
+    }
+
+    @Override
+    public Optional<GroupEntity> doGetEntityById(UUID groupId) {
+        Log.debugf("[INTERNAL] Retrieving group by id %s...",groupId);
+        return Try.of(() -> groupService.doGetEntityById(groupId))
+                .onSuccess(group -> {
+                    if (group.isPresent())
+                        Log.debugf("Group retrieved.");
+                    else Log.debugf("Group %s not found.",groupId);
+                })
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving group."))
+                .get();
+    }
+
+}

@@ -1,31 +1,62 @@
-/* Design tokens — thème "Une Rose Un Espoir" (rouge-rose de la rose du logo, bleu du tracé moto) */
+/*
+ * Design tokens — charte "Une Rose Un Espoir" (uneroseunespoir.com)
+ * Rouge de la rose #d01729, bleu marine #04396b, Montserrat, angles francs,
+ * titres en capitales grasses et sur-titres marine.
+ */
 :root{
+  color-scheme: light;
+
   /* Marque */
-  --color-primary: #145d9e;            /* bleu moto du logo */
-  --color-primary-hover: #1a6fba;
-  --color-primary-dark: #0d3f6c;
-  --color-on-primary: #ffffff;         /* couleur de texte sur une surface --color-primary */
-  --color-accent: #d1391a;             /* rouge-orangé de la rose / typo (contraste AA sur fond blanc) */
-  --color-accent-hover: #ff5c3c;
-  --color-accent-dark: #b93a22;
-  --color-on-accent: #ffffff;          /* couleur de texte sur une surface --color-accent */
-  --color-accent-emphasis: var(--color-accent-dark); /* texte accent sur fond clair (ex : badge teinté) */
+  --brand-red: #d01729;
+  --brand-navy: #04396b;
+
+  --color-primary: var(--brand-navy);  /* structure : nav, sur-titres, liens, boutons secondaires */
+  --color-primary-hover: #0a4d8c;
+  --color-primary-dark: #022a50;
+  --color-on-primary: #ffffff;
+  --color-accent: var(--brand-red);    /* action : appels à l'action, filets, états actifs */
+  --color-accent-hover: #b31222;
+  --color-accent-dark: #8f0e1b;
+  --color-on-accent: #ffffff;
+  --color-accent-emphasis: #b31222;    /* texte rouge sur fond clair ou teinté */
+  --color-accent-soft: #fbe3e5;        /* lavis rose (badges, survols) */
+
+  /* Bandeaux marine (hero, pied de page, appel à l'action) — identiques dans les deux thèmes */
+  --band-bg: #04396b;
+  --band-bg-deep: #022a50;
+  --band-text: #ffffff;
+  --band-muted: rgba(255,255,255,.78);
+  --band-border: rgba(255,255,255,.16);
 
   /* Sémantique */
-  --color-danger: #dc3545;
-  --color-danger-hover: #bb2d3b;
-  --color-on-danger: #ffffff;          /* couleur de texte sur une surface --color-danger */
-  --color-success: #1f9d55;
+  --color-danger: #c82333;
+  --color-danger-hover: #a71d2a;
+  --color-on-danger: #ffffff;
+  --color-success: #5d7a00;            /* vert anis de la charte (#b9cd00), assombri pour le texte */
   --color-white: #ffffff;
 
   /* Surfaces & texte */
   --color-bg: #ffffff;
+  --color-bg-soft: #f8f9fa;
   --color-surface: #ffffff;
   --color-surface-elev: #ffffff;
-  --color-border: #e5e7eb;
-  --color-text: #1f2937;
-  --color-muted: #5f6773;
-  --color-hover: #fdeee9;              /* léger lavis rose au survol */
+  --color-border: #dee2e6;
+  --color-border-strong: #adb5bd;
+  --color-text: #212529;
+  --color-heading: var(--brand-navy);
+  --color-muted: #5c636a;
+  --color-hover: rgba(208,23,41,.06);
+
+  /* Typographie */
+  --font-sans: "Montserrat Variable", "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --text-xs: .75rem;
+  --text-sm: .875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: clamp(1.25rem, 1.1rem + .6vw, 1.5rem);
+  --text-2xl: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+  --text-3xl: clamp(2.1rem, 1.3rem + 3.2vw, 3.6rem);
+  --tracking-caps: .06em;
 
   /* Échelle d'espacement */
   --space-1: 4px;
@@ -36,106 +67,190 @@
   --space-6: 32px;
   --space-7: 48px;
   --space-8: 64px;
+  --space-9: 96px;
+  --section-y: clamp(56px, 4rem + 3vw, 112px);
 
-  /* Forme & élévation */
-  --radius: 10px;
-  --radius-sm: 6px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 6px 20px rgba(0,0,0,.08);
-  --focus-ring: 0 0 0 3px rgba(20,93,158,.25);
+  /* Forme & élévation : angles francs, comme les boutons de la charte */
+  --radius: 4px;
+  --radius-sm: 2px;
+  --shadow-sm: 0 1px 2px rgba(4,57,107,.06);
+  --shadow-md: 0 10px 30px -12px rgba(4,57,107,.28);
+  --shadow-lg: 0 24px 60px -20px rgba(4,57,107,.4);
+  --focus-ring: 0 0 0 3px rgba(208,23,41,.35);
+
+  /* Mouvement */
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --duration: .25s;
+
+  --header-h: 76px;
 }
 
-/* Mode nuit explicite */
+/* Mode nuit : fond marine profond, la marque reste identifiable */
 :root[data-theme="dark"]{
-  --color-primary: #5aa9e6;
-  --color-primary-hover: #7dbff0;
-  --color-primary-dark: #3e86c4;
-  --color-on-primary: #0b1220;         /* --color-primary est clair en mode nuit : texte sombre par-dessus */
-  --color-accent: #ff7a54;
-  --color-accent-hover: #ff9270;
-  --color-accent-dark: #e85f3a;
-  --color-on-accent: #0b1220;          /* --color-accent est clair en mode nuit : texte sombre par-dessus */
-  --color-accent-emphasis: var(--color-accent); /* accent clair déjà lisible sur fond teinté sombre */
+  color-scheme: dark;
+
+  --color-primary: #8cbcf0;
+  --color-primary-hover: #a9cef5;
+  --color-primary-dark: #6aa6e6;
+  --color-on-primary: #061526;
+  --color-accent: #d01729;
+  --color-accent-hover: #e02a3c;
+  --color-accent-dark: #a50e27;
+  --color-on-accent: #ffffff;
+  --color-accent-emphasis: #ff7d89;
+  --color-accent-soft: rgba(208,23,41,.18);
+
+  --band-bg: #0a2d52;
+  --band-bg-deep: #051a31;
 
   --color-danger: #ff6b7a;
-  --color-danger-hover: #ff5163;
-  --color-on-danger: #0b1220;          /* --color-danger est clair en mode nuit : texte sombre par-dessus */
-  --color-success: #3ddc84;
+  --color-danger-hover: #ff8591;
+  --color-on-danger: #061526;
+  --color-success: #c9dc3a;
 
-  --color-bg: #0b1220;
-  --color-surface: #111827;
-  --color-surface-elev: #0f172a;
-  --color-border: #243047;
-  --color-text: #e5e7eb;
-  --color-muted: #9aa3b2;
-  --color-hover: rgba(90,169,230,.14);
+  --color-bg: #061526;
+  --color-bg-soft: #0a1e36;
+  --color-surface: #0c2240;
+  --color-surface-elev: #102a4c;
+  --color-border: #1d3a60;
+  --color-border-strong: #3a5a82;
+  --color-text: #e6ecf3;
+  --color-heading: #ffffff;
+  --color-muted: #a3b3c6;
+  --color-hover: rgba(140,188,240,.1);
 
   --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
-  --shadow-md: 0 8px 24px rgba(0,0,0,.55);
-  --focus-ring: 0 0 0 3px rgba(90,169,230,.35);
+  --shadow-md: 0 12px 32px -12px rgba(0,0,0,.7);
+  --shadow-lg: 0 24px 60px -20px rgba(0,0,0,.8);
+  --focus-ring: 0 0 0 3px rgba(255,125,137,.45);
 }
 
-/* Respecte la préférence système tant qu'aucun choix explicite n'est enregistré */
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme]){
-    --color-primary: #5aa9e6;
-    --color-primary-hover: #7dbff0;
-    --color-primary-dark: #3e86c4;
-    --color-on-primary: #0b1220;
-    --color-accent: #ff7a54;
-    --color-accent-hover: #ff9270;
-    --color-accent-dark: #e85f3a;
-    --color-on-accent: #0b1220;
-    --color-accent-emphasis: var(--color-accent); /* accent clair déjà lisible sur fond teinté sombre */
-
-    --color-danger: #ff6b7a;
-    --color-danger-hover: #ff5163;
-    --color-on-danger: #0b1220;
-    --color-success: #3ddc84;
-
-    --color-bg: #0b1220;
-    --color-surface: #111827;
-    --color-surface-elev: #0f172a;
-    --color-border: #243047;
-    --color-text: #e5e7eb;
-    --color-muted: #9aa3b2;
-    --color-hover: rgba(90,169,230,.14);
-
-    --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
-    --shadow-md: 0 8px 24px rgba(0,0,0,.55);
-    --focus-ring: 0 0 0 3px rgba(90,169,230,.35);
-  }
+html{
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  -webkit-text-size-adjust: 100%;
 }
 
 html, body, #root{
-  height: 100%;
+  min-height: 100%;
+}
+
+/* Les éléments décoratifs (rubans, filigranes) débordent volontairement des sections */
+html, body{
+  overflow-x: clip;
+}
+
+*, *::before, *::after{
+  box-sizing: border-box;
 }
 
 body{
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-:where(button, a, [tabindex="0"], input, select, textarea):focus-visible{
+h1, h2, h3, h4{
+  color: var(--color-heading);
+  line-height: 1.15;
+  margin: 0 0 .6em;
+}
+
+h1{
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+}
+
+h2{
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+}
+
+h3{
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+p{
+  margin: 0 0 1em;
+}
+
+a{
+  color: var(--color-primary);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+a:hover{
+  color: var(--color-accent-emphasis);
+}
+
+img{
+  max-width: 100%;
+}
+
+::selection{
+  background: var(--brand-red);
+  color: #fff;
+}
+
+:where(button, a, [tabindex="0"], input, select, textarea, summary):focus-visible{
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-/* Utilitaires de mise en page partagés entre les pages */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Utilitaires de mise en page ─────────────────────────────────────── */
+
 .container{
-  max-width: 1080px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 56px 24px;
+  padding: var(--section-y) 24px;
 }
 
 .container-narrow{
-  max-width: 520px;
+  width: 100%;
+  max-width: 560px;
   margin: 0 auto;
-  padding: 56px 24px;
+  padding: var(--section-y) 24px;
+}
+
+/* Sur-titre de la charte : petites capitales marine précédées d'un filet rouge */
+.eyebrow{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.eyebrow::before{
+  content: "";
+  width: 28px;
+  height: 3px;
+  background: var(--color-accent);
 }
 
 /* Lien d'évitement, visible uniquement au focus clavier */
@@ -144,12 +259,13 @@ body{
   left: -9999px;
   top: 0;
   z-index: 1000;
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   padding: 10px 16px;
-  border-radius: 0 0 var(--radius) 0;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
 }
 
 .skip-link:focus{

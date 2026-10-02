@@ -8,22 +8,21 @@ import {
   updateCarouselItem,
 } from "./carouselApi";
 import { CarouselItemInput } from "./types";
-
-const QUERY_KEY = ["carousel-items"];
+import { queryKeys } from "../queryKeys";
 
 /** Tous les éléments (actifs et inactifs), pour l'écran d'administration. */
 export function useCarouselItems() {
-  return useQuery({ queryKey: QUERY_KEY, queryFn: fetchCarouselItems });
+  return useQuery({ queryKey: queryKeys.carousel.all, queryFn: fetchCarouselItems });
 }
 
 /** Éléments actifs uniquement, pour le carrousel public de l'accueil. */
 export function useActiveCarouselItems() {
-  return useQuery({ queryKey: [...QUERY_KEY, "active"], queryFn: fetchActiveCarouselItems });
+  return useQuery({ queryKey: queryKeys.carousel.active, queryFn: fetchActiveCarouselItems });
 }
 
 export function useCarouselMutations() {
   const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.carousel.all });
 
   const create = useMutation({
     mutationFn: createCarouselItem,

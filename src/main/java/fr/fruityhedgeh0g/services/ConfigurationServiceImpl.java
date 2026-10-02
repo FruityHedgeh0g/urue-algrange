@@ -1,13 +1,15 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.configurationDtos.ConfigurationDto;
 import fr.fruityhedgeh0g.entities.configurations.ConfigurationEntity;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.ConfigurationRepository;
 import fr.fruityhedgeh0g.services.interfaces.ConfigurationService;
 import fr.fruityhedgeh0g.utilities.mappers.ConfigurationMapper;
+import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -19,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class ConfigurationServiceImpl implements ConfigurationService {
 
@@ -39,16 +41,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public Optional<ConfigurationDto> getByName(String name) {
-        return configurationRepository.findByName(name)
-                .map(configurationMapper::toDto);
+    public ConfigurationDto getByName(String name) {
+        return configurationMapper.toDto(
+                configurationRepository.findByName(name)
+                        .orElseThrow(() -> new UnknownResourceException("Configuration not found: " + name))
+        );
+
     }
 
     @Override
     @Transactional
     public ConfigurationDto update(ConfigurationDto configurationDto) {
         ConfigurationEntity configurationEntity = configurationRepository.findByName(configurationDto.getName())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+                .orElseThrow(() -> new UnknownResourceException("Configuration not found: " + configurationDto.getName()));
 
         configurationEntity = configurationMapper.partialDtoToEntity(configurationEntity,configurationDto);
         configurationRepository.persist(configurationEntity);

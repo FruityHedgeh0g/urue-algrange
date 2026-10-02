@@ -1,0 +1,70 @@
+.roster {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.title {
+  margin: 8px 0 0;
+  font-size: var(--text-base);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--color-bg-soft);
+}
+
+.person {
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
+}
+
+.phone {
+  font-weight: 400;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.empty {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+}
+
+.queue {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  font-weight: 400;
+  font-size: var(--text-sm);
+}
+
+.export {
+  align-self: flex-start;
+}

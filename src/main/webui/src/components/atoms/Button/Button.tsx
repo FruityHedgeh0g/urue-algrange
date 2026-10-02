@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Button.module.css";
 
-export type ButtonVariant = "primary" | "accent" | "outline" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "accent" | "outline" | "ghost" | "danger" | "inverse";
 
 export interface ButtonProps {
   /** Texte du bouton */

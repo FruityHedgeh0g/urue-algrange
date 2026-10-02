@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Icon from "../../atoms/Icon/Icon";
 import styles from "./MediaCard.module.css";
 
 export interface MediaCardProps {
@@ -36,9 +37,17 @@ export const MediaCard: React.FC<MediaCardProps> = ({
         {badge && <div className={styles.badge}>{badge}</div>}
       </div>
       <div className={styles.body}>
-        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        {subtitle && (
+          <p className={styles.subtitle}>
+            <Icon name="calendar" size={14} strokeWidth={2.5} />
+            {subtitle}
+          </p>
+        )}
         <Heading className={styles.title}>{title}</Heading>
         {excerpt && <p className={styles.excerpt}>{excerpt}</p>}
+        <span className={styles.more} aria-hidden="true">
+          Découvrir <Icon name="arrowRight" size={16} strokeWidth={2.5} />
+        </span>
       </div>
     </Link>
   );

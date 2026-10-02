@@ -18,16 +18,16 @@ Design atomique strict, avec CSS Modules pour une atomicité réelle des styles 
 ```
 src/
   app/            routing (React Router), providers (TanStack Query, thème, auth)
-  auth/           contexte d'auth mocké, garde de route par rôle (RequireRole)
-  theme/          tokens CSS (couleurs, espacements, mode nuit) + contexte de thème
+  auth/           contexte d'auth mocké, carte d'accès (access.ts) et garde de route (RequireAccess)
+  theme/          tokens CSS (charte, typographie, espacements, mode nuit) + contexte de thème
   components/
-    atoms/        Button, Badge, Input, Spinner, Logo...
-    molecules/    FormField, MediaCard, DropdownMenu, AdminListItem...
-    organisms/    Header, Footer, Carousel, PostList, EventList, PhotoGrid...
-    templates/    PublicLayout, AccountLayout
+    atoms/        Button, ButtonLink, Badge, Icon, Input, Spinner, Logo...
+    molecules/    FormField, MediaCard, DropdownMenu, SectionHeading, AdminListItem...
+    organisms/    Header, Footer, Carousel, PageHero, SplitPanel, PostList, EventList...
+    templates/    PublicLayout, SpaceLayout (Mon espace / Administration)
   pages/          une page = une route
   features/       un dossier par domaine métier (events, posts, medias, sectors,
-                   groups, users, roles, configurations, featureFlags,
+                   groups, users, configurations, featureFlags,
                    featureRequests) : hooks TanStack Query + client API
   lib/            utilitaires partagés (dates, images de substitution)
 ```
@@ -66,17 +66,31 @@ En développement (`import.meta.env.DEV`), un sélecteur de rôle apparaît dans
 l'en-tête pour prévisualiser chaque espace sans repasser par un vrai formulaire.
 Il est absent du build de production.
 
-Les routes protégées utilisent `<RequireRole minRole="...">`, qui redirige
-vers l'accueil si le rôle courant est insuffisant.
+Chaque page protégée est déclarée une fois dans `auth/access.ts` (rôle minimal,
+fonctionnalité éventuelle). Le routeur l'enveloppe dans `<RequireAccess id="...">`,
+qui redirige vers l'accueil si l'accès est refusé ; le Header, le Footer et les
+onglets des espaces lisent la même carte.
 
-## Thème
+## Charte graphique
 
-`theme/tokens.css` définit la palette (bleu du tracé moto, rouge-orangé de la
-rose du logo) et un mode nuit complet, activé via `[data-theme="dark"]` sur
-`<html>` (bascule dans le header, persistée en `localStorage`).
+Inspirée de [uneroseunespoir.com](https://www.uneroseunespoir.com) :
+
+- couleurs : rouge de la rose `#d01729` (appels à l'action, filets) et bleu
+  marine `#04396b` (structure, sur-titres, bandeaux) ;
+- typographie : Montserrat, auto-hébergée via `@fontsource-variable/montserrat`
+  (aucune requête vers Google Fonts) ; titres en capitales grasses, sur-titres
+  marine précédés d'un filet rouge (classe globale `.eyebrow`) ;
+- formes : angles francs (boutons, champs, cartes), bande diagonale rouge en bas
+  des bandeaux (`PageHero`) ;
+- mouvement : transitions courtes, désactivées si `prefers-reduced-motion`.
+
+`theme/tokens.css` porte ces tokens et un mode nuit complet (fond marine
+profond), activé via `[data-theme="dark"]` sur `<html>` (bascule dans la barre
+utilitaire du header, persistée en `localStorage`).
 
 ## Tests
 
 `npm test` lance Vitest + Testing Library. Les tests couvrent la logique
-métier sensible (hiérarchie des rôles, garde de route) et quelques composants
-partagés (Button, FormField) — pas une couverture exhaustive de chaque écran.
+métier sensible (carte d'accès, garde de route, collections mockées) et quelques
+composants partagés (Button, FormField, Header, AdminCrudList) — pas une
+couverture exhaustive de chaque écran.

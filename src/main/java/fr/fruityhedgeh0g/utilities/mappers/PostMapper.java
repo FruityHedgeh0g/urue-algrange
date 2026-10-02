@@ -3,16 +3,26 @@ package fr.fruityhedgeh0g.utilities.mappers;
 import fr.fruityhedgeh0g.dtos.postDtos.NestedPostDto;
 import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.entities.PostEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "jakarta-cdi", uses = MediaMapper.class)
+@Mapper(componentModel = "jakarta-cdi", uses = {MediaMapper.class, UserMapper.class})
 public interface PostMapper {
+    /** Status and author are set by the service, never copied from a request body. */
     @Mapping(target = "attachments", ignore = true)
     @Mapping(target = "banner", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "author", ignore = true)
     PostEntity toEntity(PostDto dto);
 
     PostDto toDto(PostEntity entity);
 
     NestedPostDto toNestedDto(PostEntity entity);
+
+    @Mapping(target = "postId", ignore = true)
+    @Mapping(target = "attachments", ignore = true)
+    @Mapping(target = "banner", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "author", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    PostEntity partialDtoToEntity(@MappingTarget PostEntity postEntity, PostDto postDto);
 }

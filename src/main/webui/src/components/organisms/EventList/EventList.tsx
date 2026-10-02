@@ -1,5 +1,6 @@
 import React from "react";
 import { useEvents } from "../../../features/events/useEvents";
+import { EVENT_STATUS_LABELS, statusTone } from "../../../features/events/status";
 import { isUpcoming } from "../../../features/events/eventsApi";
 import { Event } from "../../../features/events/types";
 import MediaCard from "../../molecules/MediaCard/MediaCard";
@@ -20,12 +21,12 @@ function renderCard(event: Event, options: { headingLevel?: "h2" | "h3"; dimmed?
     <MediaCard
       key={event.eventId}
       to={`/evenements/${event.eventId}`}
-      imageSrc={placeholderImage(event.eventId, event.name)}
+      imageSrc={event.imageUrl || placeholderImage(event.eventId, event.name)}
       imageAlt={event.name}
       title={event.name}
       subtitle={formatDateRange(event.startDateTime, event.endDateTime)}
       excerpt={event.description}
-      badge={<Badge label={isUpcoming(event) ? "À venir" : "Terminé"} tone={isUpcoming(event) ? "accent" : "muted"} />}
+      badge={<Badge label={EVENT_STATUS_LABELS[event.status]} tone={statusTone(event.status)} />}
       headingLevel={options.headingLevel}
       dimmed={options.dimmed}
     />

@@ -15,8 +15,8 @@ import java.util.UUID;
 @Builder
 public class SectorDto {
 
-    @NotNull
-    @JsonView({Views.Minimal.class,Views.CreationResponse.class,Views.UpdateResponse.class})
+    @NotNull(groups = {Views.Update.class})
+    @JsonView({Views.Minimal.class,Views.CreationResponse.class,Views.Update.class})
     UUID sectorId;
 
     @NotBlank
@@ -28,6 +28,10 @@ public class SectorDto {
 
     @JsonView(Views.Detailed.class)
     Set<NestedGroupDto> groups;
+
+    /** Read only: changed through POST /api/sectors/{id}/close and /reopen. */
+    @JsonView(Views.Basic.class)
+    boolean closed;
 
 }
 

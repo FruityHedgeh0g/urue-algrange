@@ -1,10 +1,14 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.mediaDtos.MediaDto;
+import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.MediaRepository;
 import fr.fruityhedgeh0g.services.interfaces.MediaService;
 import fr.fruityhedgeh0g.utilities.mappers.MediaMapper;
-import io.smallrye.common.annotation.Identifier;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -12,12 +16,11 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
 public class MediaServiceImpl implements MediaService {
     @Inject
@@ -35,26 +38,31 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public Optional<MediaDto> getById(UUID mediaId) {
-        return mediaRepository.findByIdOptional(mediaId)
-                .map(mediaMapper::toDto);
+    public MediaDto getById(UUID mediaId) {
+        return mediaMapper.toDto(
+                mediaRepository.findByIdOptional(mediaId)
+                        .orElseThrow(() -> new UnknownResourceException("Media not found: "+mediaId))
+        );
+
     }
 
     @Override
     @Transactional
     public MediaDto create(MediaDto mediaDto) {
-        return null;
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
     @Override
     @Transactional
     public MediaDto update(MediaDto mediaDto) {
-        return null;
+
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
     @Override
     @Transactional
     public void delete(UUID mediaId) {
+        throw new NotImplementedYetException(this.getClass().getSimpleName());
     }
 
 //    @Transactional

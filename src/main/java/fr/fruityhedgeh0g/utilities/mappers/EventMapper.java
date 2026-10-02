@@ -2,44 +2,26 @@ package fr.fruityhedgeh0g.utilities.mappers;
 
 import fr.fruityhedgeh0g.dtos.eventDtos.EventDto;
 import fr.fruityhedgeh0g.entities.EventEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "jakarta-cdi", uses = UserMapper.class)
+@Mapper(componentModel = "jakarta-cdi", uses = {UserMapper.class, SectorMapper.class})
 public interface EventMapper {
 
-//    @Mappings({
-//            @Mapping(target = "creator", qualifiedByName = "UserDtoToNestedEntity"),
-//            @Mapping(target = "organizers", qualifiedByName = "UserDtoSetToNestedEntitySet"),
-//            @Mapping(target = "participants", qualifiedByName = "UserDtoSetToNestedEntitySet")
-//    })
-
-    @Mapping(target = "participants", ignore = true)
-    @Mapping(target = "organizers", ignore = true)
+    /** Status and Secteur are set by the service, never copied from a request body. */
+    @Mapping(target = "eventId", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "sector", ignore = true)
+    @Mapping(target = "groupMaximums", ignore = true)
     EventEntity toEntity(EventDto dto);
 
-//    @Mappings({
-//            @Mapping(target = "creator", qualifiedByName = "UserEntityToNestedDto"),
-//            @Mapping(target = "organizers", qualifiedByName = "UserEntitySetToNestedDtoSet"),
-//            @Mapping(target = "participants", qualifiedByName = "UserEntitySetToNestedDtoSet")
-//    })
+    @Mapping(target = "status", expression = "java(entity.currentStatus())")
+    @Mapping(target = "sectorId", source = "sector.sectorId")
     EventDto toDto(EventEntity entity);
 
-
-//    @Named("EventDtoToNestedEntity")
-//    @Mappings({
-//            @Mapping(target = "creator", ignore = true),
-//            @Mapping(target = "organizers", ignore = true),
-//            @Mapping(target = "participants", ignore = true)
-//    })
-//    EventEntity toNestedEntity(EventDto dto);
-//
-//    @Named("EventEntityToNestedDto")
-//    @Mappings({
-//            @Mapping(target = "creator", ignore = true),
-//            @Mapping(target = "organizers", ignore = true),
-//            @Mapping(target = "participants", ignore = true)
-//    })
-//    EventDto toNestedDto(EventEntity entity);
-
+    @Mapping(target = "eventId", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "sector", ignore = true)
+    @Mapping(target = "groupMaximums", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    EventEntity partialDtoToEntity(@MappingTarget EventEntity eventEntity, EventDto eventDto);
 }

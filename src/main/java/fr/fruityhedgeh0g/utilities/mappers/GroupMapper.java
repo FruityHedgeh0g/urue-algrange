@@ -8,36 +8,20 @@ import org.mapstruct.*;
 @Mapper(componentModel = "jakarta-cdi", uses = {UserMapper.class,SectorMapper.class})
 public interface GroupMapper {
 
-//    @Mappings({
-//            @Mapping(target = "members" ,qualifiedByName = "UserEntityToNestedDto"),
-//            @Mapping(target = "sector", qualifiedByName = "SectorEntityToNestedDto")
-//    })
+    @Mapping(target = "sectorId", source = "sector.sectorId")
     GroupDto toDto(GroupEntity entity);
 
     NestedGroupDto toNestedDto(GroupEntity entity);
 
-//    @Mappings({
-//            @Mapping(target = "members", qualifiedByName = "UserDtoToNestedEntity"),
-//            @Mapping(target = "sector", qualifiedByName = "SectorDtoToNestedEntity")
-//    })
+    @Mapping(target = "chef", ignore = true)
+    @Mapping(target = "sector", ignore = true)
     GroupEntity toEntity(GroupDto dto);
 
+    @Mapping(target = "chef", ignore = true)
+    @Mapping(target = "sector", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     GroupEntity partialDtoToEntity(@MappingTarget GroupEntity groupEntity, GroupDto groupDto);
 
-//    @Named("GroupDtoToNestedEntity")
-//    @Mappings({
-//            @Mapping(target = "members", ignore = true),
-//            @Mapping(target = "sector", ignore = true)
-//    })
-//    GroupEntity toNestedEntity(GroupDto dto);
-//
-//    @Named("GroupEntityToNestedDto")
-//    @Mappings({
-//            @Mapping(target = "members", ignore = true),
-//            @Mapping(target = "sector", ignore = true)
-//    })
-//    GroupDto toNestedDto(GroupEntity entity);
 
 
 }

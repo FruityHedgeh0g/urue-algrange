@@ -1,0 +1,150 @@
+package fr.fruityhedgeh0g.services.decorators.logs;
+
+import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
+import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.enums.RoleEnum;
+import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
+import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
+import fr.fruityhedgeh0g.services.interfaces.UserService;
+import io.quarkus.logging.Log;
+import io.vavr.control.Try;
+import jakarta.annotation.Priority;
+import jakarta.decorator.Decorator;
+import jakarta.decorator.Delegate;
+import jakarta.inject.Inject;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Priority(200)
+@Decorator
+public class UserLogDecorator implements UserService{
+    @Inject
+    @Delegate
+    UserService userService;
+
+    @Override
+    public List<UserDto> listAll() {
+        Log.debugf("Retrieving all users...");
+        return Try.of(userService::listAll)
+                .onSuccess(users -> Log.debugf("%d users retrieved.",users.size()))
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving users."))
+                .get();
+    }
+
+    @Override
+    public UserDto getById(UUID userId) {
+        Log.debugf("Retrieving user by id %s...",userId);
+        return Try.of(() -> userService.getById(userId))
+                .onSuccess(user -> {
+                        Log.debugf("User retrieved: "+user.toString());
+                })
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"User with id %s not found.", userId);
+                        default -> Log.errorf(t,"An error occurred while retrieving user.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto changeRole(UUID actorId, UUID personId, RoleEnum role, UUID sectorId) {
+        Log.debugf("User %s sets the Role of %s to %s...", actorId, personId, role.id());
+        return Try.of(() -> userService.changeRole(actorId, personId, role, sectorId))
+                .onSuccess(user -> Log.infof("Role of %s set to %s by %s.", personId, role.id(), actorId))
+                .onFailure(t -> {
+                    switch(t){
+                        case ForbiddenRoleChangeException ex -> Log.warnf("Role change refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
+                        default -> Log.errorf(t,"An error occurred while changing a Role.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto updateProfile(UUID personId, ProfileDto profile) {
+        Log.debugf("%s updates their profile...", personId);
+        return Try.of(() -> userService.updateProfile(personId, profile))
+                .onSuccess(user -> Log.debugf("Profile of %s updated.", personId))
+                .onFailure(t -> {
+                    switch(t){
+                        case InvalidResourceException ex -> Log.warnf("Profile refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
+                        default -> Log.errorf(t,"An error occurred while updating a profile.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto appointPresident(UUID personId) {
+        Log.debugf("Flagging %s as Président...", personId);
+        return Try.of(() -> userService.appointPresident(personId))
+                .onSuccess(user -> Log.infof("%s is now Président.", personId))
+                .onFailure(t -> {
+                    switch(t){
+                        case InvalidResourceException ex -> Log.warnf("Président refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
+                        default -> Log.errorf(t,"An error occurred while flagging the Président.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto doCreate(UserDto userDto) {
+        Log.debugf("Creating new user: %s", userDto.toString());
+        return Try.of(() -> userService.doCreate(userDto))
+                .onSuccess(user -> Log.debugf("User created."))
+                .onFailure(t -> {
+                    switch(t){
+                        case DuplicateResourceException ex -> Log.errorf(ex,"User %s already existing.", userDto.getUserId());
+                        default -> Log.errorf(t,"An error occurred while creating user.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto doUpdate(UserDto userDto) {
+        Log.debugf("Updating an existing user: %s", userDto.toString());
+        return Try.of(() -> userService.doUpdate(userDto))
+                .onSuccess(user -> Log.debugf("User updated."))
+                .onFailure(t -> {
+                    switch(t){
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", userDto.getUserId());
+                        default -> Log.errorf(t,"An error occurred while updating user.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public void doDelete(UUID userId) {
+
+        Log.debugf("Deleting user by id %s...",userId);
+        Try.run(() -> userService.doDelete(userId))
+                .onSuccess(v -> Log.debugf("User deleted."))
+                .onFailure(t -> Log.errorf(t,"An error occurred during user deletion."))
+                .get();
+    }
+
+    @Override
+    public Optional<UserEntity> doGetEntityById(UUID userId) {
+        Log.debugf("[INTERNAL] Retrieve user by id %s...",userId);
+        return Try.of(() -> userService.doGetEntityById(userId))
+                .onSuccess(user -> {
+                    if (user.isPresent())
+                        Log.debugf("User retrieved.");
+                    else Log.debugf("User %s not found.",userId);
+                })
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving user."))
+                .get();
+    }
+}

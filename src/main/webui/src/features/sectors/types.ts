@@ -9,4 +9,6 @@ export interface Sector {
   name: string;
   description: string;
   groups: SectorGroup[];
+  /** Fermé par le Super admin : en lecture seule, vu (avec ses Groupes et Événements) du seul Super admin. */
+  closed?: boolean;
 }

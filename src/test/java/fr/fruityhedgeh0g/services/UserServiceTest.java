@@ -1,410 +1,265 @@
 package fr.fruityhedgeh0g.services;
 
 
+import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
+import fr.fruityhedgeh0g.dtos.sectorDtos.SectorDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.entities.configurations.FeatureEntity;
-import fr.fruityhedgeh0g.entities.roles.LegalRoleEntity;
-import fr.fruityhedgeh0g.entities.roles.RoleEntity;
+import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.UserRepository;
-import fr.fruityhedgeh0g.services.interfaces.RoleService;
+import fr.fruityhedgeh0g.utilities.mappers.UserMapper;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
 
 @QuarkusTest
+@TestSecurity(user = "super-admin", roles = "super_admin")
 @TestTransaction
 class UserServiceTest {
-    @InjectMock
+    @Inject
     UserRepository userRepository;
-
-    @InjectMock
-    RoleService roleService;
 
     @Inject
     UserServiceImpl userService;
 
+    @Inject
+    UserMapper userMapper;
+
     @BeforeEach
     public void setUp() {
-        reset(userRepository);
-        reset(roleService);
+
     }
 
-    /** @see UserServiceImpl#internalGetUserById(UUID)   **/
+    /** @see UserServiceImpl#listAll() () **/
 
-//    @Test
-//    public void InternalGetUserById_Success(){
-//        UserEntity userEntity = UserEntity.builder().userId(UUID.randomUUID())
-//                .firstName("Platy").lastName("Pus").build();
-//
-//        when(userRepository.findByIdOptional(userEntity.getUserId())).thenReturn(Optional.of(userEntity));
-//        Assertions.assertEquals(
-//                userService.internalGetUserById(userEntity.getUserId()).get(),
-//                userEntity
-//        );
-//    }
-//
-//    @Test
-//    public void InternalGetUserById_Failure_ConstraintViolation(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.internalGetUserById(null)
-//        );
-//    }
-//
-//    @Test
-//    public void InternalGetUserById_Failure_NotManagedException(){
-//        UserEntity userEntity = UserEntity.builder().userId(UUID.randomUUID())
-//                .firstName("Platy").lastName("Pus").build();
-//
-//        when(userRepository.findByIdOptional(userEntity.getUserId())).thenThrow(new RuntimeException("Dummy exception"));
-//        Assertions.assertThrowsExactly(RuntimeException.class,
-//                () -> userService.internalGetUserById(userEntity.getUserId()).get()
-//        );
-//    }
-//
-//    /** @see UserServiceImpl#getUserById(UUID)  **/
-//
-//    @Test
-//    public void GetUserById_Success(){
-//        UserEntity userEntity = UserEntity.builder().userId(UUID.randomUUID())
-//                .firstName("Platy").lastName("Pus").build();
-//
-//        UserDto userDto = UserDto.builder().userId(userEntity.getUserId())
-//                .firstName(userEntity.getFirstName()).lastName(userEntity.getLastName())
-//                .build();
-//
-//        when(userRepository.findByIdOptional(userEntity.getUserId())).thenReturn(Optional.of(userEntity));
-//        Assertions.assertEquals(
-//                userService.getUserById(userEntity.getUserId()).get(),
-//                userDto
-//        );
-//    }
-//
-//    @Test
-//    public void GetUserById_Failure_UnknownResource(){
-//        UserEntity userEntity = UserEntity.builder().userId(UUID.randomUUID()).build();
-//
-//        Assertions.assertThrowsExactly(UnknownResourceException.class,
-//                () -> userService.getUserById(userEntity.getUserId()).get()
-//        );
-//    }
-//
-//    @Test
-//    public void GetUserById_Failure_ConstraintViolation(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.getUserById(null)
-//        );
-//    }
-//
-//    @Test
-//    public void GetUserById_Failure_NotManagedException(){
-//        UserEntity userEntity = UserEntity.builder().userId(UUID.randomUUID()).build();
-//
-//        when(userRepository.findByIdOptional(userEntity.getUserId())).thenThrow(new RuntimeException("Dummy exception"));
-//        Assertions.assertThrowsExactly(RuntimeException.class,
-//                () -> userService.getUserById(userEntity.getUserId()).get()
-//        );
-//    }
-//
-//    /** @see UserServiceImpl#getAllUsers()  **/
-//
-//    @Test
-//    public void GetAllUsers_Success(){
-//        UserEntity userEntity = UserEntity.builder().userId(UUID.randomUUID())
-//                .firstName("Platy").lastName("Pus").build();
-//
-//        UserDto userDto = UserDto.builder().userId(userEntity.getUserId())
-//                .firstName(userEntity.getFirstName()).lastName(userEntity.getLastName())
-//                .build();
-//
-//        UserEntity anotherUserEntity = UserEntity.builder().userId(UUID.randomUUID())
-//                .firstName("Hedge").lastName("Hog").build();
-//
-//        UserDto anotherUserDto = UserDto.builder().userId(anotherUserEntity.getUserId())
-//                .firstName(anotherUserEntity.getFirstName()).lastName(anotherUserEntity.getLastName())
-//                .build();
-//
-//        List<UserEntity> userEntities = List.of(userEntity, anotherUserEntity);
-//        List<UserDto> userDtos = List.of(userDto, anotherUserDto);
-//
-//        PanacheQuery<UserEntity> mockedPanacheQuery = mock(PanacheQuery.class);
-//        when(mockedPanacheQuery.page(any())).thenReturn(mockedPanacheQuery);
-//        when(mockedPanacheQuery.stream()).thenReturn(userEntities.stream());
-//        when(userRepository.findAll()).thenReturn(mockedPanacheQuery);
-//
-//        Assertions.assertEquals(userService.getAllUsers().get(),
-//                userDtos
-//        );
-//    }
-//
-//    @Test
-//    public void GetAllUsers_Failure_NotManagedException(){
-//        when(userRepository.findAll()).thenThrow(new RuntimeException("Dummy exception"));
-//        Assertions.assertThrowsExactly(RuntimeException.class,
-//                () -> userService.getAllUsers().get()
-//        );
-//    }
-//
-//    /** @see UserServiceImpl#createUser(UserDto) **/
-//    @Test
-//    public void CreateUser_Success(){
-//        UserDto userDto = UserDto.builder().userId(UUID.randomUUID())
-//                .firstName("Octo").lastName("Gon").build();
-//
-//        Assertions.assertEquals(userService.createUser(userDto).get(),
-//                userDto
-//        );
-//    }
-//
-//    @Test
-//    public void CreateUser_Failure_ConstraintViolation(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.createUser(null)
-//        );
-//    }
-//
-//    @Test
-//    public void CreateUser_Failure_ConstraintViolation_UserIdIsNull(){
-//        UserDto userDto = UserDto.builder().firstName("Octo").lastName("Gon").build();
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.createUser(userDto).get()
-//        );
-//
-//    }
-//
-//    @Test
-//    public void CreateUser_Failure_DuplicateResource(){
-//
-//    }
-//
-//    @Test
-//    public void CreateUser_Failure_NotManagedException(){
-//
-//    }
-//
-//
-//    /** @see UserServiceImpl#updateUser(UserDto) **/
-//
-//    @Test
-//    public void UpdateUser_Success(){
-//
-//    }
-//
-//    @Test
-//    public void UpdateUser_Failure_ConstraintViolation(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.updateUser(null)
-//        );
-//
-//    }
-//
-//    @Test
-//    public void UpdateUser_Failure_UnknownResource(){
-//
-//    }
-//
-//    @Test
-//    public void UpdateUser_Failure_NotManagedException(){
-//
-//    }
-//
-//    /** @see UserServiceImpl#internalGetAllUsersFilteredByRole(UUID) **/
-//
-//    @Test
-//    public void InternalGetAllUsersFilteredByRole_Success(){
-//        RoleEntity roleEntity = LegalRoleEntity.builder()
-//                .roleId(UUID.randomUUID())
-//                .name("Black_Templar")
-//                .build();
-//
-//        UserEntity userEntity = UserEntity.builder().userId(UUID.randomUUID())
-//                .firstName("Platy").lastName("Pus").build();
-//
-//        UserEntity anotherUserEntity = UserEntity.builder().userId(UUID.randomUUID())
-//                .firstName("Hedge").lastName("Hog").build();
-//
-//        List<UserEntity> userEntities = List.of(userEntity, anotherUserEntity);
-//
-//        when(userRepository.findByRole(roleEntity.getRoleId())).thenReturn(userEntities);
-//
-//        Assertions.assertEquals(
-//                userService.internalGetAllUsersFilteredByRole(roleEntity.getRoleId()).get(),
-//                userEntities
-//        );
-//
-//    }
-//
-//    @Test
-//    public void InternalGetAllUsersFilteredByRole_Failure_NotManagedException(){
-//
-//    }
-//
-//    @Test
-//    public void InternalGetAllUsersFilteredByRole_Failure_ConstraintViolation(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.internalGetAllUsersFilteredByRole(null)
-//        );
-//
-//    }
-//
-//    /** @see UserServiceImpl#internalExistsById **/
-//
-//    @Test
-//    public void InternalExistsById_Success_True(){
-//
-//    }
-//
-//    @Test
-//    public void InternalExistsById_Success_False(){
-//
-//    }
-//
-//
-//
-//    @Test
-//    public void InternalExistsById_Failure_NotManagedException(){
-//
-//    }
-//
-//    @Test
-//    public void InternalExistsById_Failure_ConstraintViolation(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.internalExistsById(null)
-//        );
-//
-//    }
-//
-//    /** @see UserServiceImpl#internalExistsByRole **/
-//
-//    @Test
-//    public void InternalExistsByRole_Success_True(){
-//
-//    }
-//
-//    @Test
-//    public void InternalExistsByRole_Success_False(){
-//
-//    }
-//
-//
-//    @Test
-//    public void InternalExistsByRole_Failure_NotManagedException(){
-//
-//    }
-//
-//    @Test
-//    public void InternalExistsByRole_Failure_ConstraintViolation(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.internalExistsByRole(null)
-//        );
-//
-//    }
-//
-//    /** @see UserServiceImpl#assignRoleToUser(UUID, UUID) **/
-//
-//    @Test
-//    public void AssignRoleToUser_Success(){
-//
-//    }
-//
-//    @Test
-//    public void AssignRoleToUser_Failure_ConstraintViolation_UserIdIsNull(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.assignRoleToUser(null, UUID.randomUUID()).get()
-//        );
-//
-//    }
-//
-//    @Test
-//    public void AssignRoleToUser_Failure_ConstraintViolation_RoleIdIsNull(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.assignRoleToUser(UUID.randomUUID(),null).get()
-//        );
-//
-//    }
-//
-//    @Test
-//    public void AssignRoleToUser_Failure_UnknownResource_UserId(){
-//
-//    }
-//
-//    @Test
-//    public void AssignRoleToUser_Failure_UnknownResource_RoleId(){
-//
-//    }
-//
-//    @Test
-//    public void AssignRoleToUser_Failure_NotManagedException(){
-//
-//    }
-//
-//    @Test
-//    public void AssignRoleToUser_Failure_DuplicateResource(){
-//
-//    }
-//
-//    /** @see UserServiceImpl#unassignRoleFromUser(UUID, UUID) **/
-//
-//    @Test
-//    public void UnassignRoleFromUser_Success(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignRoleFromUser_Failure_ConstraintViolation_UserIdIsNull(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.unassignRoleFromUser(null, UUID.randomUUID()).get()
-//        );
-//
-//    }
-//
-//    @Test
-//    public void UnassignRoleFromUser_Failure_ConstraintViolation_RoleIdIsNull(){
-//        Assertions.assertThrowsExactly(ConstraintViolationException.class,
-//                () -> userService.unassignRoleFromUser(UUID.randomUUID(),null).get()
-//        );
-//    }
-//
-//    @Test
-//    public void UnassignRoleFromUser_Failure_UnknownResource_UserId(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignRoleFromUser_Failure_UnknownResource_RoleNotFoundInUser(){
-//
-//    }
-//
-//    @Test
-//    public void UnassignRoleFromUser_Failure_NotManagedException(){
-//
-//    }
+    @Test
+    @TestTransaction
+    public void listAllUsers_Success(){
+        UserEntity firstUser = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(firstUser);
 
+        UserEntity secondUser = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Hedge")
+                .lastName("Hog")
+                .build();
+        userRepository.persist(secondUser);
 
+        List<UserEntity> comparativeUsers = List.of(firstUser,secondUser);
+        List<UserEntity> gatheredUsers = userService.listAll().stream().map(userMapper::toEntity).toList();
 
+        Assertions.assertEquals(comparativeUsers.size(), gatheredUsers.size());
+        Assertions.assertIterableEquals(comparativeUsers, gatheredUsers);
+    }
 
+    @Test
+    @TestTransaction
+    public void getAllUsers_NotFound(){
+        List<UserDto> users = new ArrayList<>();
+        List<UserDto> gatheredUsers = userService.listAll();
+        Assertions.assertEquals(0,gatheredUsers.size());
+        Assertions.assertEquals(users, gatheredUsers);
+    }
 
+    /** @see UserServiceImpl#getById(UUID) () **/
 
+    @Test
+    @TestTransaction
+    public void getById_Success(){
+        UserEntity user = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(user);
 
+        UserEntity retrievedUser = userMapper.toEntity(userService.getById(user.getUserId()));
+        Assertions.assertEquals(user, retrievedUser);
 
+    }
 
+    @Test
+    @TestTransaction
+    public void getById_NotFound(){
+        Assertions.assertThrows(UnknownResourceException.class, () -> userService.getById(UUID.randomUUID()));
+    }
+
+    @Test
+    @TestTransaction
+    public void getById_NullId(){
+        Assertions.assertThrows(ConstraintViolationException.class, () -> userService.getById(null));
+    }
+
+    /** @see UserServiceImpl#doCreate(UserDto) () **/
+
+    @Test
+    @TestTransaction
+    public void create_NullDto(){
+        Assertions.assertThrows(ConstraintViolationException.class, () -> userService.doCreate(null));
+    }
+
+    @Test
+    @TestTransaction
+    public void create_Success(){
+        UserDto userDto = userService.doCreate(
+                UserDto.builder()
+                        .userId(UUID.randomUUID())
+                        .firstName("Platy")
+                        .lastName("Pus")
+                        .build()
+                );
+
+        UserDto retrievedUser = userService.getById(userDto.getUserId());
+        Assertions.assertEquals(userDto,retrievedUser);
+    }
+
+    @Test
+    @TestTransaction
+    public void create_NewPersonIsBenevole(){
+        UserDto userDto = userService.doCreate(
+                UserDto.builder()
+                        .userId(UUID.randomUUID())
+                        .firstName("Platy")
+                        .lastName("Pus")
+                        .role(RoleEnum.ADMIN)
+                        .build()
+        );
+
+        Assertions.assertEquals(RoleEnum.BENEVOLE, userService.getById(userDto.getUserId()).getRole());
+    }
+
+    @Test
+    @TestTransaction
+    public void create_Duplicate(){
+        UserEntity user = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(user);
+
+        Assertions.assertTrue(userRepository.existsById(user.getUserId()));
+
+        Assertions.assertThrows(DuplicateResourceException.class,
+                () -> userService.doCreate(userMapper.toDto(user))
+        );
+
+    }
+
+    /** @see UserServiceImpl#doUpdate(UserDto) () **/
+
+    @Test
+    @TestTransaction
+    public void update_Success(){
+        UserEntity user = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(user);
+
+        Assertions.assertTrue(userRepository.existsById(user.getUserId()));
+
+        UserDto updatedUser = UserDto.builder()
+                .userId(user.getUserId())
+                .firstName("Hedge")
+                .lastName("Hog")
+                .build();
+
+        Assertions.assertDoesNotThrow(() -> userService.doUpdate(updatedUser));
+
+        Assertions.assertEquals(userRepository.findById(user.getUserId()).getFirstName(), updatedUser.getFirstName());
+
+    }
+
+    @Test
+    @TestTransaction
+    public void update_KeepsRole(){
+        UserEntity user = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .role(RoleEnum.MEMBRE)
+                .build();
+        userRepository.persist(user);
+
+        userService.doUpdate(UserDto.builder().userId(user.getUserId()).firstName("Hedge").role(RoleEnum.ADMIN).build());
+
+        Assertions.assertEquals(RoleEnum.MEMBRE, userRepository.findById(user.getUserId()).getRole());
+    }
+
+    @Test
+    @TestTransaction
+    public void update_NotFound(){
+        UserDto user = UserDto.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+
+        Assertions.assertThrows(UnknownResourceException.class, () -> userService.doUpdate(user));
+
+    }
+
+    @Test
+    @TestTransaction
+    public void update_NullDto(){
+        Assertions.assertThrows(ConstraintViolationException.class, () -> userService.doUpdate(null));
+    }
+
+    /** @see UserServiceImpl#doDelete(UUID) () **/
+
+    @Test
+    @TestTransaction
+    public void delete_NullId(){
+        Assertions.assertThrows(ConstraintViolationException.class, () -> userService.doDelete(null));
+    }
+
+    @Test
+    @TestTransaction
+    public void delete_NotFound(){
+        Assertions.assertThrows(UnknownResourceException.class, () -> userService.doDelete(UUID.randomUUID()));
+    }
+
+    @Test
+    @TestTransaction
+    public void delete_Success(){
+
+        UserEntity user = UserEntity.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Platy")
+                .lastName("Pus")
+                .build();
+        userRepository.persist(user);
+
+        Assertions.assertDoesNotThrow(() -> userService.doDelete(user.getUserId()));
+        Assertions.assertThrows(UnknownResourceException.class, () -> userService.getById(user.getUserId()));
+    }
 
 
 }

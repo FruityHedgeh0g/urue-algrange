@@ -1,26 +1,32 @@
 package fr.fruityhedgeh0g.utilities.mappers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import fr.fruityhedgeh0g.dtos.userDtos.NestedUserDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
+import io.vertx.core.json.Json;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "jakarta-cdi", uses = {RoleMapper.class, EventMapper.class, GroupMapper.class})
+@Mapper(componentModel = "jakarta-cdi", uses = {EventMapper.class, GroupMapper.class, SectorMapper.class})
 public interface UserMapper {
+    static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writer();
 
-    @Mapping(target = "roles",ignore = true)
+    @Mapping(target = "president", ignore = true)
+    @Mapping(target = "sector", ignore = true)
     UserEntity toEntity(UserDto dto);
 
     UserDto toDto(UserEntity entity);
 
     NestedUserDto toNestedDto(UserEntity entity);
 
-    @Mapping(target = "roles",ignore = true)
+    @Mapping(target = "role",ignore = true)
+    @Mapping(target = "president",ignore = true)
+    @Mapping(target = "sector",ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     UserEntity partialDtoToEntity(@MappingTarget UserEntity userEntity, UserDto userDto);
 
 //    @Mappings({
-//            @Mapping(target = "group", qualifiedByName = "GroupDtoToNestedEntity"),
 //            @Mapping(target = "organizedEvents", qualifiedByName = "EventDtoToNestedEntity"),
 //            @Mapping(target = "participatedEvents", qualifiedByName = "EventDtoToNestedEntity"),
 //            @Mapping(target = "createdEvents", qualifiedByName = "EventDtoToNestedEntity")
@@ -28,7 +34,6 @@ public interface UserMapper {
 
 
 //    @Mappings({
-//            @Mapping(target = "group", qualifiedByName = "GroupEntityToNestedDto"),
 //            @Mapping(target = "organizedEvents", qualifiedByName = "EventEntityToNestedDto"),
 //            @Mapping(target = "participatedEvents", qualifiedByName = "EventEntityToNestedDto"),
 //            @Mapping(target = "createdEvents", qualifiedByName = "EventEntityToNestedDto")
@@ -39,7 +44,6 @@ public interface UserMapper {
 
 //    @Named("UserEntityToNestedDto")
 //    @Mappings({
-//        @Mapping(target = "group", ignore = true),
 //        @Mapping(target = "organizedEvents", ignore = true),
 //        @Mapping(target = "participatedEvents", ignore = true),
 //        @Mapping(target = "createdEvents", ignore = true)
@@ -48,7 +52,6 @@ public interface UserMapper {
 //
 //    @Named("UserDtoToNestedEntity")
 //    @Mappings({
-//            @Mapping(target = "group", ignore = true),
 //            @Mapping(target = "organizedEvents", ignore = true),
 //            @Mapping(target = "participatedEvents", ignore = true),
 //            @Mapping(target = "createdEvents", ignore = true)

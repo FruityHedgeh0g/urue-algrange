@@ -1,65 +1,65 @@
 import React, { useEffect, useState } from "react";
+import { useIsSuperAdmin, useSector, useSectorMutations, useSectors } from "../../features/sectors/useSector";
 import { useAuth } from "../../auth/AuthContext";
-import { useSector, useUpdateSector } from "../../features/sectors/useSector";
-import { useMembersByGroupIds } from "../../features/users/useMembers";
-import { Member } from "../../features/users/types";
+import { useGroups } from "../../features/groups/useGroups";
 import FormField from "../../components/molecules/FormField/FormField";
+import Select from "../../components/atoms/Select/Select";
 import Button from "../../components/atoms/Button/Button";
 import Spinner from "../../components/atoms/Spinner/Spinner";
-import Modal from "../../components/molecules/Modal/Modal";
-import MemberDetails from "../../components/molecules/MemberDetails/MemberDetails";
 import styles from "./SectorPage.module.css";
 
+/**
+ * Mon secteur (Bureau) : le Secteur de la personne — au choix pour le Super
+ * admin, au-dessus des Secteurs (ADR 0004) —, sa description, que le Bureau
+ * tient à jour (seul le Super admin le renomme), et ses Groupes, avec leur Chef
+ * de groupe et la partie du Secteur qu'ils couvrent.
+ */
 export const SectorPage: React.FC = () => {
   const { user } = useAuth();
-  const sectorId = user?.group.sectorId;
+  const isSuperAdmin = useIsSuperAdmin();
+  const { data: sectors, isLoading: sectorsLoading } = useSectors();
+  const [chosenId, setChosenId] = useState<string>();
+  // Le Bureau et les Admins voient leur Secteur ; le Super admin choisit (ADR 0004)
+  const sectorId = isSuperAdmin ? chosenId ?? sectors?.[0]?.sectorId : user?.sector?.sectorId;
   const { data: sector, isLoading, isError } = useSector(sectorId);
-  const updateSector = useUpdateSector(sectorId);
+  const { data: groups, isLoading: groupsLoading } = useGroups();
+  const { update: updateSector } = useSectorMutations();
 
-  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saved, setSaved] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   useEffect(() => {
     if (sector) {
-      setName(sector.name);
       setDescription(sector.description);
+      setSaved(false);
     }
   }, [sector]);
 
-  const groupIds = sector?.groups.map((g) => g.groupId) ?? [];
-  const { data: members, isLoading: membersLoading } = useMembersByGroupIds(groupIds);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateSector.mutate(
-      { name, description },
-      {
-        onSuccess: () => setSaved(true),
-      }
-    );
+    if (!sectorId) return;
+    updateSector.mutate({ sectorId, name: sector?.name ?? "", description }, { onSuccess: () => setSaved(true) });
   };
 
-  if (isLoading) return <Spinner label="Chargement de votre secteur..." />;
-  if (isError || !sector) return <p className={styles.error}>Impossible de charger votre secteur.</p>;
+  if (sectorsLoading || isLoading) return <Spinner label="Chargement du secteur..." />;
+  if (!sectorId) return <p className={styles.empty}>Aucun secteur pour le moment.</p>;
+  if (isError || !sector) return <p className={styles.error}>Impossible de charger le secteur.</p>;
 
-  const selectedGroup = selectedMember ? sector.groups.find((g) => g.groupId === selectedMember.groupId) : undefined;
+  const sectorGroups = (groups ?? []).filter((g) => g.sectorId === sector.sectorId);
 
   return (
     <div className={styles.wrapper}>
-      <section>
-        <h2>Informations du secteur</h2>
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          <FormField
-            label="Nom du secteur"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setSaved(false);
-            }}
-            required
+      <section className={styles.panel}>
+        <h2>{sector.name}</h2>
+        {isSuperAdmin && (sectors?.length ?? 0) > 1 && (
+          <Select
+            label="Secteur"
+            value={sector.sectorId}
+            onChange={setChosenId}
+            options={(sectors ?? []).map((s) => ({ value: s.sectorId, label: s.name }))}
           />
+        )}
+        <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <FormField
             label="Description"
             multiline
@@ -75,43 +75,27 @@ export const SectorPage: React.FC = () => {
         </form>
       </section>
 
-      <section>
-        <h2>Inscrits de mon secteur</h2>
-        {membersLoading && <Spinner label="Chargement des inscrits..." />}
-        {!membersLoading && (!members || members.length === 0) && (
-          <p className={styles.empty}>Aucun inscrit dans ce secteur pour le moment.</p>
-        )}
-        {members && members.length > 0 && (
-          <ul className={styles.memberList}>
-            {members.map((member) => {
-              const group = sector.groups.find((g) => g.groupId === member.groupId);
-              return (
-                <li key={member.userId}>
-                  <button type="button" className={styles.member} onClick={() => setSelectedMember(member)}>
-                    <span>
-                      {member.firstName} {member.lastName}
-                    </span>
-                    <span className={styles.memberMeta}>
-                      {group && <span className={styles.memberGroup}>{group.name}</span>}
-                      <span className={styles.memberArrow} aria-hidden>
-                        ›
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+      <section className={styles.panel}>
+        <h2>Groupes du secteur</h2>
+        {groupsLoading ? (
+          <Spinner label="Chargement des groupes..." />
+        ) : sectorGroups.length === 0 ? (
+          <p className={styles.empty}>Aucun groupe dans ce secteur pour le moment.</p>
+        ) : (
+          <ul className={styles.groupList} aria-label="Groupes du secteur">
+            {sectorGroups.map((group) => (
+              <li key={group.groupId} className={styles.group}>
+                <span className={styles.groupName}>{group.name}</span>
+                <span className={styles.groupMeta}>
+                  {[group.area, group.chef ? `Chef : ${group.chef.firstName} ${group.chef.lastName}` : "Sans chef de groupe"]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </li>
+            ))}
           </ul>
         )}
       </section>
-
-      <Modal
-        isOpen={selectedMember !== null}
-        onClose={() => setSelectedMember(null)}
-        title={selectedMember ? `${selectedMember.firstName} ${selectedMember.lastName}` : ""}
-      >
-        {selectedMember && <MemberDetails member={selectedMember} groupName={selectedGroup?.name} sectorName={sector.name} />}
-      </Modal>
     </div>
   );
 };

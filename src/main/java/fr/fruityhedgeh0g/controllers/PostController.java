@@ -1,27 +1,83 @@
 package fr.fruityhedgeh0g.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
 import fr.fruityhedgeh0g.dtos.Views;
-import fr.fruityhedgeh0g.services.interfaces.PostService;
-import io.smallrye.common.annotation.Identifier;
+import fr.fruityhedgeh0g.dtos.postDtos.PostDto;
+import fr.fruityhedgeh0g.dtos.postDtos.PostStatusChangeDto;
+import fr.fruityhedgeh0g.services.interfaces.publics.PublicPostService;
+import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.List;
+import java.util.UUID;
 
+/**
+ * Reading Posts is open to anonymous Visiteurs (see quarkus.http.auth.permission.public-posts),
+ * who only ever see Publié Posts; the Bureau writes, publishes and unpublishes them.
+ */
 @Path("/api/posts")
 public class PostController {
 
     @Inject
-    PostService postService;
+    PublicPostService postService;
+
+    @Inject
+    SecurityIdentity identity;
+
+    @Inject
+    JsonWebToken token;
+
+    private UUID me() {
+        return UUID.fromString(token.getSubject());
+    }
+
+    private boolean seesDrafts() {
+        return identity.hasRole("bureau");
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public @JsonView(Views.Basic.class) List<PostDto> getAllPosts(){
-        return postService.listAll();
+        return postService.listAll(seesDrafts());
+    }
+
+    @GET
+    @Path("/{postId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public @JsonView(Views.Detailed.class) PostDto getPost(@PathParam("postId") UUID postId){
+        return postService.getById(postId, seesDrafts());
+    }
+
+    /** A new Post is Brouillon, with the current person as author. */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public @JsonView(Views.Detailed.class) PostDto addPost(@JsonView(Views.Creation.class) PostDto postDto){
+        return postService.create(postDto, me());
+    }
+
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public @JsonView(Views.Detailed.class) PostDto updatePost(@JsonView(Views.Update.class) PostDto postDto){
+        return postService.update(postDto);
+    }
+
+    /** {@code publie} publishes, {@code brouillon} unpublishes. */
+    @PUT
+    @Path("/{postId}/status")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("bureau")
+    public @JsonView(Views.Detailed.class) PostDto changeStatus(@PathParam("postId") UUID postId, @Valid @NotNull PostStatusChangeDto change){
+        return postService.changeStatus(postId, change.status());
     }
 }

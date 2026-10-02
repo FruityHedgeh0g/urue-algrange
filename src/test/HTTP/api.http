@@ -32,9 +32,18 @@ Accept: {{jsonType}}
   "description": "Grand évènement annuel",
   "startDateTime": "2026-04-24T12:00:00",
   "endDateTime": "2026-04-26T18:00:00",
-  "creator": {
-    "userId": "00000000-0000-0000-0000-000000000001"
-  }
+  "sectorId": "00000000-0000-0000-0000-000000000001"
+}
+
+###
+
+### Open an event (planification -> ouvert)
+PUT {{baseUrl}}/api/events/00000000-0000-0000-0000-000000000001/status
+Content-Type: {{jsonType}}
+Accept: {{jsonType}}
+
+{
+  "status": "ouvert"
 }
 
 ###############################################################################
@@ -72,33 +81,6 @@ Accept: {{jsonType}}
 ### Get all posts
 GET {{baseUrl}}/api/posts
 Accept: {{jsonType}}
-
-###############################################################################
-# ROLES
-###############################################################################
-
-### Get all roles
-GET {{baseUrl}}/api/roles
-Accept: {{jsonType}}
-
-###
-
-### Get role by ID
-GET {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
-Accept: {{jsonType}}
-
-###
-
-### Create role
-POST {{baseUrl}}/api/roles
-Content-Type: {{jsonType}}
-Accept: {{jsonType}}
-
-{
-  "name": "Président",
-  "description": "Rôle de président de l'association",
-  "roleType": "ORGANIZATIONAL"
-}
 
 ###############################################################################
 # SECTORS

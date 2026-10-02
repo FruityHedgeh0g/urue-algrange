@@ -1,0 +1,39 @@
+package fr.fruityhedgeh0g.services.interfaces.publics;
+
+import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
+import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
+import fr.fruityhedgeh0g.enums.RoleEnum;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface PublicUserService {
+    List<UserDto> listAll();
+    UserDto getById(@NotNull UUID userId);
+
+    /** Promotion chain: see {@link fr.fruityhedgeh0g.enums.RoleEnum#maySetRole}. The database Role applies even if the Keycloak mirror fails. */
+    /**
+     * Promotion chain, within the actor's Secteur (ADR 0004): a promoted Bénévole joins the actor's Secteur,
+     * a demoted one leaves it. The Super admin names the Secteur ({@code sectorId}) when appointing an Admin,
+     * the only case where a person changes Secteur, or when giving someone their first Secteur.
+     */
+    UserDto changeRole(@NotNull UUID actorId, @NotNull UUID personId, @NotNull RoleEnum role, UUID sectorId);
+
+    /** A person edits their own first name, last name and phone number. */
+    UserDto updateProfile(@NotNull UUID personId, @NotNull ProfileDto profile);
+
+    /** Flags a Bureau member as Président, clearing the previous one. */
+    UserDto appointPresident(@NotNull UUID personId);
+
+
+
+//    Try<UserDto> getUserById(@NotNull UUID userId);
+//    Try<List<UserDto>> getAllUsers();
+//    Try<UserDto> createUser(@NotNull @Valid UserDto userDto);
+//    Try<UserDto> updateUser(@NotNull @Valid UserDto userDto);
+//    Try<Boolean> internalExistsById(@NotNull UUID userId);
+//    Try<UserEntity> internalGetUserById(@NotNull UUID userId);
+}

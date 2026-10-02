@@ -1,10 +1,10 @@
 import { ReactNode } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 import PublicLayout from "../components/templates/PublicLayout/PublicLayout";
 import AccountLayout from "../components/templates/AccountLayout/AccountLayout";
 import AdminLayout from "../components/templates/AdminLayout/AdminLayout";
-import RequireRole from "../auth/RequireRole";
-import { RoleId } from "../auth/roles";
+import RequireAccess from "../auth/RequireAccess";
+import { AccessId, entry, relativePath } from "../auth/access";
 import HomePage from "../pages/HomePage/HomePage";
 import AboutPage from "../pages/AboutPage/AboutPage";
 import NewsPage from "../pages/NewsPage/NewsPage";
@@ -19,10 +19,12 @@ import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import MyEventsPage from "../pages/MyEventsPage/MyEventsPage";
 import SectorPage from "../pages/SectorPage/SectorPage";
+import MonGroupePage from "../pages/MonGroupePage/MonGroupePage";
 import MembersAdminPage from "../pages/MembersAdminPage/MembersAdminPage";
 import SectorsAdminPage from "../pages/SectorsAdminPage/SectorsAdminPage";
+import GroupsAdminPage from "../pages/GroupsAdminPage/GroupsAdminPage";
+import PostsAdminPage from "../pages/PostsAdminPage/PostsAdminPage";
 import EventsAdminPage from "../pages/EventsAdminPage/EventsAdminPage";
-import RolesAdminPage from "../pages/RolesAdminPage/RolesAdminPage";
 import FeatureRequestsPage from "../pages/FeatureRequestsPage/FeatureRequestsPage";
 import CarouselAdminPage from "../pages/CarouselAdminPage/CarouselAdminPage";
 import ConfigurationPage from "../pages/ConfigurationPage/ConfigurationPage";
@@ -33,8 +35,15 @@ import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 // internes et l'historique du navigateur restent cohérents avec le chemin de service.
 const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
 
-function guarded(minRole: RoleId, element: ReactNode) {
-  return <RequireRole minRole={minRole}>{element}</RequireRole>;
+/**
+ * Route gardée par la carte d'accès (auth/access.ts) : le chemin et les
+ * conditions d'accès viennent de l'entrée `id`, relativement à `parent`.
+ */
+function route(id: AccessId, element: ReactNode, parent: AccessId | null = null, children?: RouteObject[]): RouteObject {
+  const guarded = <RequireAccess id={id}>{element}</RequireAccess>;
+  const path = parent ? relativePath(id, parent) : entry(id).path.replace(/^\//, "");
+  if (path === "") return { index: true, element: guarded };
+  return { path, element: guarded, children };
 }
 
 export const router = createBrowserRouter(
@@ -44,44 +53,34 @@ export const router = createBrowserRouter(
       element: <PublicLayout />,
       children: [
         { index: true, element: <HomePage /> },
-        { path: "qui-sommes-nous", element: <AboutPage /> },
-        { path: "actualites", element: <NewsPage /> },
+        route("about", <AboutPage />),
+        route("news", <NewsPage />),
         { path: "actualites/:postId", element: <NewsDetailPage /> },
-        { path: "galerie", element: <GalleryPage /> },
-        { path: "evenements", element: <EventsPage /> },
+        route("gallery", <GalleryPage />),
+        route("events", <EventsPage />),
         { path: "evenements/:eventId", element: <EventDetailPage /> },
-        { path: "contact", element: <ContactPage /> },
-        { path: "don", element: <DonationPage /> },
+        route("contact", <ContactPage />),
+        route("donation", <DonationPage />),
         { path: "connexion", element: <LoginPage /> },
         { path: "inscription", element: <RegisterPage /> },
-        {
-          path: "mon-compte",
-          element: (
-            <RequireRole minRole="membre">
-              <AccountLayout />
-            </RequireRole>
-          ),
-          children: [
-            { index: true, element: <ProfilePage /> },
-            { path: "evenements", element: <MyEventsPage /> },
-            { path: "secteur", element: guarded("chef_de_groupe", <SectorPage />) },
-          ],
-        },
-        {
-          path: "administration",
-          element: guarded("bureau", <AdminLayout />),
-          children: [
-            { index: true, element: <Navigate to="membres" replace /> },
-            { path: "membres", element: <MembersAdminPage /> },
-            { path: "secteurs", element: <SectorsAdminPage /> },
-            { path: "evenements", element: <EventsAdminPage /> },
-            { path: "roles", element: <RolesAdminPage /> },
-            { path: "carrousel", element: <CarouselAdminPage /> },
-            { path: "configuration", element: guarded("admin", <ConfigurationPage />) },
-            { path: "fonctionnalites", element: guarded("admin", <FeatureFlagsPage />) },
-          ],
-        },
-        { path: "demandes-fonctionnalites", element: guarded("bureau", <FeatureRequestsPage />) },
+        route("account", <AccountLayout />, null, [
+          route("accountProfile", <ProfilePage />, "account"),
+          route("accountEvents", <MyEventsPage />, "account"),
+          route("accountGroup", <MonGroupePage />, "account"),
+          route("accountSector", <SectorPage />, "account"),
+        ]),
+        route("administration", <AdminLayout />, null, [
+          { index: true, element: <Navigate to={relativePath("adminMembers", "administration")} replace /> },
+          route("adminMembers", <MembersAdminPage />, "administration"),
+          route("adminSectors", <SectorsAdminPage />, "administration"),
+          route("adminGroups", <GroupsAdminPage />, "administration"),
+          route("adminEvents", <EventsAdminPage />, "administration"),
+          route("adminPosts", <PostsAdminPage />, "administration"),
+          route("adminCarousel", <CarouselAdminPage />, "administration"),
+          route("adminConfiguration", <ConfigurationPage />, "administration"),
+          route("adminFeatureFlags", <FeatureFlagsPage />, "administration"),
+        ]),
+        route("featureRequests", <FeatureRequestsPage />),
         { path: "*", element: <NotFoundPage /> },
       ],
     },

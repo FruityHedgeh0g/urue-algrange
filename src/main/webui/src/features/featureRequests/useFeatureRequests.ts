@@ -1,16 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFeatureRequest, fetchFeatureRequests } from "./featureRequestsApi";
-
-const QUERY_KEY = ["feature-requests"];
+import { queryKeys } from "../queryKeys";
 
 export function useFeatureRequests() {
-  return useQuery({ queryKey: QUERY_KEY, queryFn: fetchFeatureRequests });
+  return useQuery({ queryKey: queryKeys.featureRequests.all, queryFn: fetchFeatureRequests });
 }
 
 export function useCreateFeatureRequest() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createFeatureRequest,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.featureRequests.all }),
   });
 }

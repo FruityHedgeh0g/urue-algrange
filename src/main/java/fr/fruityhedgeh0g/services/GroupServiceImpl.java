@@ -1,46 +1,94 @@
 package fr.fruityhedgeh0g.services;
 
+import fr.fruityhedgeh0g.utilities.logging.Logged;
+
 import fr.fruityhedgeh0g.dtos.groupDtos.GroupDto;
 import fr.fruityhedgeh0g.entities.GroupEntity;
+import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
+import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
+import fr.fruityhedgeh0g.security.SecteurScope;
+import fr.fruityhedgeh0g.security.Viewer;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalSectorService;
 import fr.fruityhedgeh0g.services.interfaces.GroupService;
-import fr.fruityhedgeh0g.services.interfaces.UserService;
-import fr.fruityhedgeh0g.services.interfaces.internal.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalGroupService;
+import fr.fruityhedgeh0g.services.interfaces.internals.InternalUserService;
 import fr.fruityhedgeh0g.utilities.mappers.GroupMapper;
-import io.smallrye.common.annotation.Identifier;
+import io.quarkus.security.Authenticated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
 
 @AllArgsConstructor
+@Logged
 @ApplicationScoped
-@Identifier("serviceImpl")
 @Default
-public class GroupServiceImpl implements InternalGroupService, GroupService {
-    @Inject
-    GroupRepository groupRepository;
-
-    @Inject
-    GroupMapper groupMapper;
+public class GroupServiceImpl implements GroupService, InternalGroupService {
+    @Inject GroupRepository groupRepository;
+    @Inject InternalUserService internalUserService;
+    @Inject GroupMapper groupMapper;
+    @Inject Viewer viewer;
+    @Inject InternalSectorService internalSectorService;
 
     @Override
     public List<GroupDto> listAll() {
         return groupRepository.listAll()
                 .stream()
+                .filter(this::visible)
                 .map(groupMapper::toDto)
                 .toList();
     }
 
     @Override
-    public Optional<GroupDto> getById(UUID groupId) {
+    public GroupDto getById(UUID groupId) {
+        return groupMapper.toDto(visibleGroupOrThrow(groupId));
+    }
+
+    /** A Groupe of a Secteur fermé is seen by the Super admin only. */
+    private boolean visible(GroupEntity group) {
+        return !group.isInClosedSector() || viewer.seesClosedSecteurs();
+    }
+
+    private GroupEntity visibleGroupOrThrow(UUID groupId) {
         return groupRepository.findByIdOptional(groupId)
-                .map(groupMapper::toDto);
+                .filter(this::visible)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+    }
+
+    /** The Bureau and Admin manage only their own Secteur's Groupes; the Super admin all (ADR 0004). */
+    private void requireManaged(GroupEntity group) {
+        if (!viewer.scope().covers(group.getSector()))
+            throw new ForbiddenActionException("The Groupe " + group.getGroupId() + " is not of your Secteur.");
+    }
+
+    /** The Super admin names the new Groupe's Secteur; below, it is always the creator's own. */
+    private SectorEntity sectorOfNewGroup(UUID requested) {
+        SecteurScope scope = viewer.scope();
+        UUID sectorId = scope.everySecteur() ? requested : scope.sectorId();
+        if (sectorId == null)
+            throw new InvalidResourceException("A Groupe belongs to a Secteur.");
+        if (!scope.covers(sectorId) || (requested != null && !requested.equals(sectorId)))
+            throw new ForbiddenActionException("A Groupe is created in your own Secteur only.");
+        SectorEntity sector = internalSectorService.doGetEntityById(sectorId)
+                .orElseThrow(() -> new UnknownResourceException("Sector not found: " + sectorId));
+        if (sector.isClosed())
+            throw new InvalidResourceException("A Secteur fermé gets no new Groupe.");
+        return sector;
+    }
+
+    /** A Secteur fermé is read-only: no edit, no Affectation. */
+    private static void refuseInClosedSector(GroupEntity group) {
+        if (group.isInClosedSector())
+            throw new InvalidResourceException("The Groupe's Secteur is fermé: " + group.getGroupId());
     }
 
     @Override
@@ -50,6 +98,7 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
             throw new DuplicateResourceException("This resource already exists in the system.");
 
         GroupEntity groupEntity = groupMapper.toEntity(groupDto);
+        groupEntity.setSector(sectorOfNewGroup(groupDto.getSectorId()));
         groupRepository.persist(groupEntity);
 
         return groupMapper.toDto(groupEntity);
@@ -58,8 +107,9 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
     @Override
     @Transactional
     public GroupDto update(GroupDto groupDto) {
-        GroupEntity groupEntity = groupRepository.findByIdOptional(groupDto.getGroupId())
-                .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
+        GroupEntity groupEntity = visibleGroupOrThrow(groupDto.getGroupId());
+        requireManaged(groupEntity);
+        refuseInClosedSector(groupEntity);
 
         if (!groupEntity.getName().equals(groupDto.getName()) && groupRepository.existsByName(groupDto.getName()))
             throw new DuplicateResourceException("A group with this name already exists in the system.");
@@ -73,13 +123,76 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
     @Override
     @Transactional
     public void delete(UUID groupId) {
+        GroupEntity groupEntity = groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+
+        if (groupEntity.getSector() != null)
+            throw new InvalidResourceException("Group is assigned to a sector, cannot be deleted");
+
         //todo: développer la suppression.
         groupRepository.deleteById(groupId);
     }
 
     @Override
-    public Optional<GroupEntity> getInternalEntityById(UUID groupId) {
-        return Optional.empty();
+    @Transactional
+    public GroupDto setChef(UUID groupId, UUID userId) {
+        GroupEntity groupEntity = visibleGroupOrThrow(groupId);
+        requireManaged(groupEntity);
+        refuseInClosedSector(groupEntity);
+        UserEntity chef = internalUserService.doGetEntityById(userId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: "+userId));
+        if (!chef.belongsTo(groupEntity.getSector()))
+            throw new InvalidResourceException("A Groupe is led by a Chef de groupe of its own Secteur: "+userId);
+
+        if (!chef.getRole().canLeadGroupe())
+            throw new InvalidResourceException("Only a Chef de groupe or above can lead a Groupe: "+userId);
+
+        groupRepository.findByChef(userId)
+                .filter(previous -> !previous.getGroupId().equals(groupId))
+                .ifPresent(previous -> {
+                    previous.setChef(null);
+                    // Frees the unique chef_id before it is given to this Groupe
+                    groupRepository.flush();
+                });
+
+        groupEntity.setChef(chef);
+        return groupMapper.toDto(groupEntity);
+    }
+
+    @Override
+    @Transactional
+    public GroupDto clearChef(UUID groupId) {
+        GroupEntity groupEntity = visibleGroupOrThrow(groupId);
+        requireManaged(groupEntity);
+        refuseInClosedSector(groupEntity);
+        groupEntity.setChef(null);
+        return groupMapper.toDto(groupEntity);
+    }
+
+    @Override
+    @Transactional
+    public void doEndAffectationOf(UUID userId) {
+        groupRepository.findByChef(userId).ifPresent(group -> group.setChef(null));
+    }
+
+    @Override
+    public Optional<GroupEntity> doGetEntityLedBy(UUID userId) {
+        return groupRepository.findByChef(userId);
+    }
+
+    @Override
+    public List<GroupEntity> doListEntitiesOfSector(UUID sectorId) {
+        return groupRepository.list("sector.sectorId = ?1 order by name", sectorId);
+    }
+
+    private GroupEntity groupOrThrow(UUID groupId) {
+        return groupRepository.findByIdOptional(groupId)
+                .orElseThrow(() -> new UnknownResourceException("Group not found: "+groupId));
+    }
+
+    @Override
+    public Optional<GroupEntity> doGetEntityById(UUID groupId) {
+        return groupRepository.findByIdOptional(groupId);
     }
 
 
@@ -202,9 +315,6 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
 //            Log.debugf("Removing group from sector with id: %s" , group.getSector().getSectorId());
 //            group.getSector().removeGroup(group);
 //
-//            Log.debugf("Removing all members from group with id: %s" , groupId);
-//            group.getMembers().forEach(group::removeMember);
-//
 //            Log.debugf("Deleting group with id: %s" , groupId);
 //            groupRepository.delete(group);
 //        }).onFailure(ex -> {
@@ -216,58 +326,6 @@ public class GroupServiceImpl implements InternalGroupService, GroupService {
 //        });
 //    }
 //
-//    @Override
-//    @Transactional
-//    public Try<GroupDto> assignUserToGroup( UUID userId,  UUID groupId){
-//        Log.debugf("Assigning user with id: %s to group with id: %s" , userId, groupId);
-//        return Try.of(() -> {
-//                    Log.debugf("Checking if user with id: %s exists and retrieve it" , userId);
-//                    GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
-//
-//                    if (group.getMembers().stream().anyMatch(e -> e.getUserId().equals(userId)))
-//                        throw new DuplicateResourceException("User already belongs to this group");
-//
-//                    Log.debugf("Checking if user with id: %s exists and retrieve it" , userId);
-//                    UserEntity userEntity = userServiceImpl.internalGetUserById(userId).getOrElseThrow(ex -> ex);
-//
-//                    Log.debugf("Checking if user with id: %s is already assigned to a group" , userId);
-//                    if (userEntity.getGroup() != null)
-//                        throw new DuplicateResourceException("User already belongs to a group");
-//
-//                    group.addMember(userEntity);
-//                    return groupMapper.toDto(group);
-//                }).onFailure(ex -> {
-//                    if (ex instanceof UnknownResourceException e) {
-//                        Log.warn(ex.getMessage());
-//                    }else {
-//                        Log.error("Error assigning user to group with id: " + groupId, ex);
-//                    }
-//                });
-//    }
-//
-//    @Override
-//    @Transactional
-//    public Try<GroupDto> unassignUserFromGroup( UUID userId,  UUID groupId){
-//        Log.debugf("Unassigning user with id: %s from group with id: %s" , userId, groupId);
-//        return Try.of(() -> {
-//                    Log.debugf("Checking if group with id: %s exists and retrieve it" , groupId);
-//                    GroupEntity group = internalGetEntityById(groupId).getOrElseThrow(ex -> ex);
-//
-//                    Log.debugf("Checking if user with id: %s is assigned to this group and retrieve it" , userId);
-//                    UserEntity userEntity = group.getMembers().stream()
-//                            .filter(user -> user.getUserId().equals(userId)).findFirst()
-//                            .orElseThrow(() -> new UnknownResourceException("User is not assigned to this group"));
-//
-//                    group.removeMember(userEntity);
-//                    return groupMapper.toDto(group);
-//                }).onFailure(ex -> {
-//                    switch (ex) {
-//                        case UnknownResourceException e -> Log.warn(e.getMessage());
-//                        case InvalidInputException e -> Log.warn(e.getMessage());
-//                        default -> Log.error("Error unassigning user from group with id: " + groupId, ex);
-//                    }
-//                });
-//    }
 
 
 }
