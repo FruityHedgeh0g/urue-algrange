@@ -21,7 +21,7 @@ import java.util.UUID;
  * Reading Posts is open to anonymous Visiteurs (see quarkus.http.auth.permission.public-posts),
  * who only ever see Publié Posts; the Bureau writes, publishes and unpublishes them.
  */
-@Path("/api/posts")
+@Path("/posts")
 public class PostController {
 
     @Inject

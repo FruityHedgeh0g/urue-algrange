@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/api/configurations")
+@Path("/configurations")
 public class ConfigurationController {
 
     @Inject PublicConfigurationService configurationService;
