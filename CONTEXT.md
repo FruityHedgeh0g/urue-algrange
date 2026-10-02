@@ -1,4 +1,4 @@
-# Une Rose Un Espoir — Algrange
+# Une Rose Un Espoir
 
 Site and member space of the association: public pages, a member space ("Mon espace") and an administration space ("Administration").
 

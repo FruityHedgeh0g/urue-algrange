@@ -31,7 +31,7 @@ import ConfigurationPage from "../pages/ConfigurationPage/ConfigurationPage";
 import FeatureFlagsPage from "../pages/FeatureFlagsPage/FeatureFlagsPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
-// Aligné sur --base=/quinoa (quarkus.quinoa.ui-root-path) pour que les liens
+// Aligné sur la base de Vite (quarkus.quinoa.ui-root-path) pour que les liens
 // internes et l'historique du navigateur restent cohérents avec le chemin de service.
 const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
 

@@ -1,9 +1,14 @@
 package fr.fruityhedgeh0g.controllers;
 
+import fr.fruityhedgeh0g.entities.EventEntity;
+import fr.fruityhedgeh0g.entities.EventRegistrationEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.keycloak.FakeKeycloakRoleMirror;
+import fr.fruityhedgeh0g.repositories.EventRegistrationRepository;
+import fr.fruityhedgeh0g.repositories.EventRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.repositories.UserRepository;
 import fr.fruityhedgeh0g.security.DatabaseRoleAugmentor;
@@ -22,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +36,6 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Promotions from the "Inscrits" screen: PUT /api/users/{id}/role, mirrored to Keycloak. */
@@ -61,9 +66,17 @@ public class PromotionResourceTest {
     @Inject
     SectorRepository sectorRepository;
 
+    @Inject
+    EventRepository eventRepository;
+
+    @Inject
+    EventRegistrationRepository registrationRepository;
+
     private final List<UUID> created = new ArrayList<>();
     /** Everyone from Membre up belongs to this Secteur (ADR 0004); the Super admin to none. */
     private UUID sector;
+    /** An Event of that Secteur, which every Bénévole here rode, so its Bureau may promote them (ADR 0004). */
+    private UUID ride;
 
     @BeforeEach
     void seedActors() {
@@ -73,13 +86,26 @@ public class PromotionResourceTest {
             sectorRepository.persist(s);
             return s.getSectorId();
         });
+        ride = QuarkusTransaction.requiringNew().call(() -> {
+            EventEntity e = new EventEntity();
+            e.setName("Test Balade");
+            e.setStatus(EventStatusEnum.OUVERT);
+            e.setStartDateTime(LocalDateTime.now(EventEntity.ZONE).minusDays(10));
+            e.setEndDateTime(LocalDateTime.now(EventEntity.ZONE).minusDays(9));
+            e.setSector(sectorRepository.findById(sector));
+            eventRepository.persist(e);
+            return e.getEventId();
+        });
         ACTORS.forEach((id, role) -> created.add(persist(UUID.fromString(id), role)));
     }
 
     @AfterEach
     void removePersons() {
         QuarkusTransaction.requiringNew().run(() -> {
+            registrationRepository.delete("event.eventId", ride);
+            eventRepository.deleteById(ride);
             created.forEach(userRepository::deleteById);
+            eventRepository.flush();
             sectorRepository.deleteById(sector);
         });
         created.clear();
@@ -92,6 +118,9 @@ public class PromotionResourceTest {
                         .sector(role.isAtLeast(RoleEnum.MEMBRE) && role != RoleEnum.SUPER_ADMIN ? sectorRepository.findById(sector) : null)
                         .build()
         ));
+        if (role == RoleEnum.BENEVOLE)
+            QuarkusTransaction.requiringNew().run(() -> registrationRepository.persist(EventRegistrationEntity.pilote(
+                    eventRepository.findById(ride), userRepository.findById(id), false)));
         return id;
     }
 
@@ -232,7 +261,6 @@ public class PromotionResourceTest {
     void bureauListsPersonsWithTheirRole() {
         UUID target = persistPerson(RoleEnum.CHEF_DE_GROUPE);
         given().when().get("/").then().statusCode(200)
-                .body("find { it.userId == '" + target + "' }.role", equalTo("chef_de_groupe"))
-                .body("role", hasItem("super_admin"));
+                .body("find { it.userId == '" + target + "' }.role", equalTo("chef_de_groupe"));
     }
 }

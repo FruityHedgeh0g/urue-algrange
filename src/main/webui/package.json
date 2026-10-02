@@ -7,9 +7,9 @@
     "node": ">=20.19 <21 || >=22.12"
   },
   "scripts": {
-    "dev": "vite --base=/quinoa",
-    "build": "vite build --base=/quinoa",
-    "preview": "vite preview --base=/quinoa",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "vitest run"
   },
   "dependencies": {

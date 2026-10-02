@@ -1,10 +1,15 @@
 package fr.fruityhedgeh0g.controllers;
 
+import fr.fruityhedgeh0g.entities.EventEntity;
+import fr.fruityhedgeh0g.entities.EventRegistrationEntity;
 import fr.fruityhedgeh0g.entities.GroupEntity;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
+import fr.fruityhedgeh0g.enums.EventStatusEnum;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.keycloak.FakeKeycloakRoleMirror;
+import fr.fruityhedgeh0g.repositories.EventRegistrationRepository;
+import fr.fruityhedgeh0g.repositories.EventRepository;
 import fr.fruityhedgeh0g.repositories.GroupRepository;
 import fr.fruityhedgeh0g.repositories.SectorRepository;
 import fr.fruityhedgeh0g.repositories.UserRepository;
@@ -22,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +59,12 @@ public class SecteurMembershipResourceTest {
     GroupRepository groupRepository;
 
     @Inject
+    EventRepository eventRepository;
+
+    @Inject
+    EventRegistrationRepository registrationRepository;
+
+    @Inject
     FakeKeycloakRoleMirror keycloak;
 
     private final List<UUID> persons = new ArrayList<>();
@@ -72,8 +84,12 @@ public class SecteurMembershipResourceTest {
     @AfterEach
     void cleanUp() {
         QuarkusTransaction.requiringNew().run(() -> {
-            groupRepository.delete("sector.sectorId in ?1", List.of(algrange, thionville));
+            List<UUID> sectors = List.of(algrange, thionville);
+            groupRepository.delete("sector.sectorId in ?1", sectors);
+            registrationRepository.delete("event.sector.sectorId in ?1", sectors);
+            eventRepository.list("sector.sectorId in ?1", sectors).forEach(eventRepository::delete);
             persons.forEach(userRepository::deleteById);
+            eventRepository.flush();
             sectorRepository.deleteById(algrange);
             sectorRepository.deleteById(thionville);
         });
@@ -101,6 +117,20 @@ public class SecteurMembershipResourceTest {
         return persistPerson(UUID.randomUUID(), role, sectorId);
     }
 
+    /** Signs the person up for a past Event of the Secteur: riding with a Secteur once is enough. */
+    private void rodeWith(UUID personId, UUID sectorId) {
+        QuarkusTransaction.requiringNew().run(() -> {
+            EventEntity e = new EventEntity();
+            e.setName("Test Balade");
+            e.setStatus(EventStatusEnum.OUVERT);
+            e.setStartDateTime(LocalDateTime.now(EventEntity.ZONE).minusDays(10));
+            e.setEndDateTime(LocalDateTime.now(EventEntity.ZONE).minusDays(9));
+            e.setSector(sectorRepository.findById(sectorId));
+            eventRepository.persist(e);
+            registrationRepository.persist(EventRegistrationEntity.pilote(e, userRepository.findById(personId), false));
+        });
+    }
+
     private ValidatableResponse setRole(UUID personId, String role, UUID sectorId) {
         Map<String, Object> body = new HashMap<>();
         body.put("role", role);
@@ -122,6 +152,7 @@ public class SecteurMembershipResourceTest {
     @OidcSecurity(claims = @Claim(key = "sub", value = BUREAU_ID))
     void aNewMembreJoinsThePromotersSecteur() {
         UUID benevole = person(RoleEnum.BENEVOLE, null);
+        rodeWith(benevole, algrange);
         setRole(benevole, "membre", null).statusCode(200).body("sector.sectorId", equalTo(algrange.toString()));
         assertEquals(algrange, storedSector(benevole));
     }

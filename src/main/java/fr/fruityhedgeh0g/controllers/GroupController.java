@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.UUID;
 
-@Path("/api/groups")
+@Path("/groups")
 public class GroupController {
 
     @Inject

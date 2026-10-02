@@ -21,7 +21,7 @@ import java.util.UUID;
  * Only the Super admin opens, renames, closes and reopens a Secteur; the Bureau keeps its description
  * and places Groupes in it. A Secteur is closed (fermé), never deleted: see ADR 0003.
  */
-@Path("/api/sectors")
+@Path("/sectors")
 public class SectorController {
     @Inject
     PublicSectorService sectorService;

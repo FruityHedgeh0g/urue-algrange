@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 /** Reading Events is open to anonymous Visiteurs (see quarkus.http.auth.permission.public-events); Events are never deleted. */
-@Path("/api/events")
+@Path("/events")
 public class EventController {
 
     @Inject

@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/api/medias")
+@Path("/medias")
 public class MediaController {
 
     @Inject
