@@ -1,4 +1,4 @@
-import { Sector } from "./types";
+import { Sector } from "../../features/sectors/types";
 
 export const mockSectors: Sector[] = [
   {

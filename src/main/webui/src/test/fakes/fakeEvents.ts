@@ -1,8 +1,8 @@
 import { mockEvents } from "./eventFixtures";
 import { Event } from "../../features/events/types";
 import { allowedTransitions, currentStatus, EventStatus } from "../../features/events/status";
-import { JsonStore } from "../../lib/storage/jsonStore";
-import { createOverlayCollection } from "../../lib/storage/overlayCollection";
+import { JsonStore } from "./jsonStore";
+import { createOverlayCollection } from "./overlayCollection";
 
 /**
  * Le comportement d'EventController, en mémoire, derrière le faux backend (test/fakeApi) : l'ancien client

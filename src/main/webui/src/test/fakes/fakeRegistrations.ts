@@ -1,4 +1,4 @@
-import { JsonStore } from "../../lib/storage/jsonStore";
+import { JsonStore } from "./jsonStore";
 import { createEventsApi } from "./fakeEvents";
 import { Group } from "../../features/groups/types";
 import { acceptsSignUps, EventStatus } from "../../features/events/status";

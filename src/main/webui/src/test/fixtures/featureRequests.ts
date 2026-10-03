@@ -1,4 +1,4 @@
-import { FeatureRequest } from "./types";
+import { FeatureRequest } from "../../features/featureRequests/types";
 
 export const mockFeatureRequests: FeatureRequest[] = [
   {

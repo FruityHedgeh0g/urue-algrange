@@ -16,7 +16,7 @@ export const FeatureRequestsPage: React.FC = () => {
     e.preventDefault();
     if (!title.trim() || !description.trim() || !user) return;
     createRequest.mutate(
-      { title, description, requestedBy: `${user.firstName} ${user.lastName}` },
+      { title, description },
       {
         onSuccess: () => {
           setTitle("");

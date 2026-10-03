@@ -1,23 +1,27 @@
 import { vi } from "vitest";
-import { mockSectors } from "../features/sectors/fixtures";
+import { mockSectors } from "./fixtures/sectors";
 import { Sector } from "../features/sectors/types";
-import { mockGroups } from "../features/groups/fixtures";
+import { mockGroups } from "./fixtures/groups";
 import { Group } from "../features/groups/types";
-import { mockMembers } from "../features/users/fixtures";
+import { mockMembers } from "./fixtures/users";
 import { Member } from "../features/users/types";
 import { assignableRoles, canLeadGroupe, RoleId, roleAtLeast } from "../auth/roles";
-import { createMemoryJsonStore, JsonStore } from "../lib/storage/jsonStore";
+import { createMemoryJsonStore, JsonStore } from "./fakes/jsonStore";
 import { createEventsApi as fakeEventsOn } from "./fakes/fakeEvents";
 import { createRegistrationsApi as fakeRegistrationsOn } from "./fakes/fakeRegistrations";
 import { PhoneRequiredError } from "../features/events/registrationsApi";
-import { mockPosts } from "../features/posts/fixtures";
+import { mockPosts } from "./fixtures/posts";
 import { Post } from "../features/posts/types";
-import { mockConfigurations } from "../features/configurations/fixtures";
+import { mockConfigurations } from "./fixtures/configurations";
 import { Configuration } from "../features/configurations/types";
-import { mockMedias } from "../features/medias/fixtures";
+import { mockMedias } from "./fixtures/medias";
 import { Media } from "../features/medias/types";
-import { mockCarouselItems } from "../features/carousel/fixtures";
+import { mockCarouselItems } from "./fixtures/carousel";
 import { CarouselItem } from "../features/carousel/types";
+import { mockFeatureFlags } from "./fixtures/featureFlags";
+import { FeatureFlag } from "../features/featureFlags/types";
+import { mockFeatureRequests } from "./fixtures/featureRequests";
+import { FeatureRequest } from "../features/featureRequests/types";
 
 /**
  * Un backend en mémoire derrière `fetch`, pour les tests de pages : chaque client passé de ses fixtures à
@@ -44,6 +48,8 @@ interface State {
   configurations: Configuration[];
   medias: Media[];
   carousel: CarouselItem[];
+  features: FeatureFlag[];
+  featureRequests: FeatureRequest[];
 }
 
 let state: State;
@@ -64,6 +70,8 @@ export function resetFakeApi() {
     configurations: structuredClone(mockConfigurations),
     medias: structuredClone(mockMedias),
     carousel: structuredClone(mockCarouselItems),
+    features: structuredClone(mockFeatureFlags),
+    featureRequests: structuredClone(mockFeatureRequests),
   };
   vi.stubGlobal("fetch", vi.fn(handle));
 }
@@ -93,6 +101,8 @@ async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise
   if (parts[0] === "api" && parts[1] === "sectors") return sectors(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "groups") return groups(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "users") return users(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "features") return features(method, parts[2], body);
+  if (parts[0] === "api" && parts[1] === "feature-requests") return featureRequests(method, body);
   if (parts[0] === "api" && parts[1] === "medias") return medias(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "carousel") return carousel(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "configurations") return configurations(method, parts[2], body);
@@ -411,4 +421,36 @@ function carousel(method: string, [id, action, direction]: string[], body: any):
     return json(ordered());
   }
   return empty(405);
+}
+
+/** Une Fonctionnalité, telle qu'un test la veut avant de rendre une page. */
+export function setFakeFeature(name: FeatureFlag["name"], isActive: boolean) {
+  const feature = state.features.find((f) => f.name === name);
+  if (feature) feature.isActive = isActive;
+}
+
+function features(method: string, name: string | undefined, body: any): Response {
+  if (!name) return method === "GET" ? json(state.features) : empty(405);
+  if (method !== "PUT") return empty(405);
+  if (!isSuperAdmin()) return empty(403);
+  const feature = state.features.find((f) => f.name === name);
+  if (!feature) return empty(404);
+  feature.isActive = body.isActive;
+  return json(feature);
+}
+
+function featureRequests(method: string, body: any): Response {
+  if (!roleAtLeast(state.viewer.role, "bureau")) return empty(403);
+  if (method === "GET") return json(state.featureRequests);
+  if (method !== "POST") return empty(405);
+  if (!body.title?.trim() || !body.description?.trim()) return empty(400);
+  const request: FeatureRequest = {
+    id: `fr-new-${state.featureRequests.length + 1}`,
+    title: body.title,
+    description: body.description,
+    createdAt: new Date().toISOString(),
+    requestedBy: `${state.viewer.firstName} ${state.viewer.lastName}`,
+  };
+  state.featureRequests.unshift(request);
+  return json(request);
 }

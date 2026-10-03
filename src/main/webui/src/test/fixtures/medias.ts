@@ -1,5 +1,5 @@
 import { placeholderImage } from "../../lib/placeholderImage";
-import { Media } from "./types";
+import { Media } from "../../features/medias/types";
 
 const captions = [
   "Collecte 2025 - Départ du convoi",

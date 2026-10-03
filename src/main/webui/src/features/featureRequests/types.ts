@@ -1,7 +1,4 @@
-/**
- * Suggestion d'évolution du site, remontée par le Bureau (cas d'usage
- * "Créer des demandes de feature"). Non modélisée côté backend actuellement.
- */
+/** Suggestion d'évolution du site, remontée par le Bureau : reflète FeatureRequestDto. `requestedBy` : le nom de son auteur. */
 export interface FeatureRequest {
   id: string;
   title: string;

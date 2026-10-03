@@ -1,5 +1,5 @@
 import { placeholderImage } from "../../lib/placeholderImage";
-import { Post, PostAuthor } from "./types";
+import { Post, PostAuthor } from "../../features/posts/types";
 
 const BUREAU: PostAuthor = { userId: "user-3", firstName: "Claire", lastName: "Hoffmann" };
 

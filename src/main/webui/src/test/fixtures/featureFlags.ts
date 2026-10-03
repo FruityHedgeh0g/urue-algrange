@@ -1,4 +1,4 @@
-import { FeatureFlag } from "./types";
+import { FeatureFlag } from "../../features/featureFlags/types";
 
 export const mockFeatureFlags: FeatureFlag[] = [
   { name: "dons-en-ligne", description: "Afficher le module de don en ligne sur le site public.", isActive: false },

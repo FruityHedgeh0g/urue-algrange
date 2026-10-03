@@ -1,17 +1,8 @@
-import { mockFeatureRequests } from "./fixtures";
 import { FeatureRequest } from "./types";
-import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
+import { apiFetch } from "../../lib/http";
 
-const CREATED_KEY = "urue-feature-requests-created";
+/** Les demandes de fonctionnalités, sur FeatureRequestController : écrites et lues par le Bureau ; l'API en signe l'auteur. */
+export const fetchFeatureRequests = () => apiFetch<FeatureRequest[]>("/api/feature-requests");
 
-export function createFeatureRequestsApi(store: JsonStore = localJsonStore) {
-  const readCreated = () => store.read<FeatureRequest[]>(CREATED_KEY, []);
-  return {
-    fetchFeatureRequests: async (): Promise<FeatureRequest[]> => [...readCreated(), ...mockFeatureRequests],
-    createFeatureRequest: async (input: { title: string; description: string; requestedBy: string }): Promise<void> => {
-      store.write(CREATED_KEY, [{ id: `fr-${Date.now()}`, createdAt: new Date().toISOString(), ...input }, ...readCreated()]);
-    },
-  };
-}
-
-export const { fetchFeatureRequests, createFeatureRequest } = createFeatureRequestsApi();
+export const createFeatureRequest = (input: { title: string; description: string }) =>
+  apiFetch<FeatureRequest>("/api/feature-requests", { method: "POST", body: JSON.stringify(input) });

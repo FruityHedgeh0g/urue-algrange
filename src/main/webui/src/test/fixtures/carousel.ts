@@ -1,4 +1,4 @@
-import { CarouselItem } from "./types";
+import { CarouselItem } from "../../features/carousel/types";
 
 export const mockCarouselItems: CarouselItem[] = [
   {

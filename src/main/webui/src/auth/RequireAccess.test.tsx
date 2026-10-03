@@ -6,6 +6,7 @@ import { AuthProvider } from "./AuthContext";
 import RequireAccess from "./RequireAccess";
 import { AccessId } from "./access";
 import { testUser } from "../test/testUser";
+import { setFakeFeature } from "../test/fakeApi";
 
 const renderProtected = (id: AccessId, role = "benevole") =>
   render(
@@ -45,7 +46,7 @@ describe("RequireAccess", () => {
   });
 
   it("redirects once the entry's feature is known to be inactive", async () => {
-    localStorage.setItem("urue-feature-flag-overrides", JSON.stringify({ "galerie-photos": false }));
+    setFakeFeature("galerie-photos", false);
     renderProtected("gallery");
     expect(await screen.findByText("Accueil")).toBeInTheDocument();
   });

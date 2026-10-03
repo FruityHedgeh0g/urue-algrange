@@ -1,4 +1,4 @@
-import { Member } from "./types";
+import { Member } from "../../features/users/types";
 
 export const mockMembers: Member[] = [
   {

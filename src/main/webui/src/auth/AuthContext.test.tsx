@@ -17,6 +17,10 @@ const ME = {
   sector: { sectorId: "s-1", name: "Algrange" },
 };
 
+/** /api/users/me answers `me`; the other calls (the Fonctionnalités) an empty list. */
+const backend = (me: Response) =>
+  vi.fn(async (url: string) => (url === "/api/users/me" ? me : json(200, [])));
+
 const Who = () => {
   const { user, role, isLoading } = useAuth();
   if (isLoading) return <p>Chargement</p>;
@@ -41,36 +45,36 @@ describe("AuthProvider (session)", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("reads the logged-in person from /api/users/me, without being redirected to Keycloak", async () => {
-    const fetch = vi.fn().mockResolvedValue(json(200, ME));
+    const fetch = backend(json(200, ME));
     vi.stubGlobal("fetch", fetch);
     renderAt("/");
 
     expect(await screen.findByText("Camille Martin (membre, Algrange)")).toBeInTheDocument();
-    const [url, init] = fetch.mock.calls[0];
+    const [url, init] = fetch.mock.calls.find(([called]) => called === "/api/users/me")!;
     expect(url).toBe("/api/users/me");
     expect(new Headers(init.headers).get("X-Requested-With")).toBe("JavaScript");
   });
 
   it.each([401, 499])("treats a %i as a Visiteur", async (status) => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status })));
+    vi.stubGlobal("fetch", backend(new Response(null, { status })));
     renderAt("/");
     expect(await screen.findByText("Visiteur (visiteur)")).toBeInTheDocument();
   });
 
   it("treats a site without backend (index.html for every path) as a Visiteur", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("<!doctype html>", { status: 200, headers: { "Content-Type": "text/html" } })));
+    vi.stubGlobal("fetch", backend(new Response("<!doctype html>", { status: 200, headers: { "Content-Type": "text/html" } })));
     renderAt("/");
     expect(await screen.findByText("Visiteur (visiteur)")).toBeInTheDocument();
   });
 
   it("opens a protected deep link once the person is known, instead of sending them home", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json(200, ME)));
+    vi.stubGlobal("fetch", backend(json(200, ME)));
     renderAt("/mon-espace");
     expect(await screen.findByText("Mon espace")).toBeInTheDocument();
   });
 
   it("sends a Visiteur home from a protected deep link", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 499 })));
+    vi.stubGlobal("fetch", backend(new Response(null, { status: 499 })));
     renderAt("/mon-espace");
     expect(await screen.findByText("Visiteur (visiteur)")).toBeInTheDocument();
   });

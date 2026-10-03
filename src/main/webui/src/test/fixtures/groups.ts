@@ -1,4 +1,4 @@
-import { Group } from "./types";
+import { Group } from "../../features/groups/types";
 
 export const mockGroups: Group[] = [
   {

@@ -1,4 +1,4 @@
-import { Configuration } from "./types";
+import { Configuration } from "../../features/configurations/types";
 
 export const mockConfigurations: Configuration[] = [
   { name: "site.title", value: "Une Rose Un Espoir - Algrange" },
