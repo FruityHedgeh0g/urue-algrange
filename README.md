@@ -64,5 +64,6 @@ The image holds no configuration secret. Provide these as environment variables:
 | `QUARKUS_KEYCLOAK_ADMIN_CLIENT_CLIENT_ID`, `QUARKUS_KEYCLOAK_ADMIN_CLIENT_CLIENT_SECRET` | Keycloak client with realm-management rights |
 | `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_VIRTUAL_HOST` | RabbitMQ carrying Keycloak's user events |
 | `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD` | RabbitMQ account |
+| `LYFIA_SUPER_ADMIN` | Keycloak username of the Super admin, made so at every startup (ADR 0006). Optional |
 
 The app listens on port 8080, and `/q/health` reports whether it can reach its database. It stops at startup if RabbitMQ cannot be reached.
