@@ -6,14 +6,29 @@ import { Group } from "../features/groups/types";
 import { mockMembers } from "../features/users/fixtures";
 import { Member } from "../features/users/types";
 import { assignableRoles, canLeadGroupe, RoleId, roleAtLeast } from "../auth/roles";
+import { createMemoryJsonStore, JsonStore } from "../lib/storage/jsonStore";
+import { createEventsApi as fakeEventsOn } from "./fakes/fakeEvents";
+import { createRegistrationsApi as fakeRegistrationsOn } from "./fakes/fakeRegistrations";
+import { PhoneRequiredError } from "../features/events/registrationsApi";
 
 /**
  * Un backend en mémoire derrière `fetch`, pour les tests de pages : chaque client passé de ses fixtures à
  * l'API (frontend: replace the mocked clients, #32) y ajoute ses routes. Remis à zéro avant chaque test
  * (test/setup.ts). Il ne refait que ce que les pages observent ; les règles elles-mêmes sont testées côté Java.
  */
+interface Viewer {
+  role: RoleId;
+  sectorId: string | null;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+}
+
 interface State {
-  viewer: { role: RoleId; sectorId: string | null };
+  viewer: Viewer;
+  /** Événements, inscriptions et maximums des Groupes, tenus par test/fakes/fakeEvents et fakeRegistrations. */
+  store: JsonStore;
   sectors: Sector[];
   groups: Group[];
   members: Member[];
@@ -22,13 +37,14 @@ interface State {
 let state: State;
 
 /** Qui l'API croit connecté, et son Secteur ; test/testUser le règle. */
-export function setFakeViewer(role: RoleId, sectorId: string | null = null) {
-  state.viewer = { role, sectorId };
+export function setFakeViewer(role: RoleId, sectorId: string | null = null, person: Partial<Viewer> = {}) {
+  state.viewer = { ...state.viewer, ...person, role, sectorId };
 }
 
 export function resetFakeApi() {
   state = {
-    viewer: { role: "visiteur", sectorId: null },
+    viewer: { role: "visiteur", sectorId: null, userId: "", firstName: "", lastName: "", phone: "" },
+    store: createMemoryJsonStore(),
     sectors: structuredClone(mockSectors).map((s) => ({ ...s, closed: s.closed ?? false })),
     groups: structuredClone(mockGroups),
     members: structuredClone(mockMembers),
@@ -61,6 +77,7 @@ async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise
   if (parts[0] === "api" && parts[1] === "sectors") return sectors(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "groups") return groups(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "users") return users(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "events") return events(method, parts.slice(2), body, url.searchParams);
   return empty(404);
 }
 
@@ -165,6 +182,11 @@ function sectorAfter(member: Member, role: RoleId, sectorId: string | null): str
 
 function users(method: string, [userId, action]: string[], body: any): Response {
   if (!userId) return method === "GET" ? json(state.members.map(userDto)) : empty(405);
+  if (userId === "me" && method === "PATCH") {
+    state.viewer.phone = body.phone ?? "";
+    const { userId: id, firstName, lastName, phone, role } = state.viewer;
+    return json({ userId: id, firstName, lastName, phone, role, sector: state.viewer.sectorId ? { sectorId: state.viewer.sectorId, name: "" } : null });
+  }
   const member = state.members.find((m) => m.userId === userId);
   if (!member) return empty(404);
 
@@ -192,5 +214,81 @@ function users(method: string, [userId, action]: string[], body: any): Response 
     member.president = true;
     return json(userDto(member));
   }
+  return empty(405);
+}
+
+const closedSectorIds = () => new Set(state.sectors.filter((s) => s.closed).map((s) => s.sectorId));
+
+/** Les Événements du faux backend, pour préparer un test (sans les règles d'accès de l'API). */
+export const createEventsApi = () => fakeEventsOn(state.store, closedSectorIds);
+
+/** Les inscriptions du faux backend, pour préparer un test. */
+export const createRegistrationsApi = () => fakeRegistrationsOn(state.store, createEventsApi(), () => state.groups);
+
+const me = () => ({
+  userId: state.viewer.userId,
+  firstName: state.viewer.firstName,
+  lastName: state.viewer.lastName,
+  phone: state.viewer.phone,
+  sectorId: state.viewer.sectorId,
+});
+
+/** Les erreurs des règles mockées, en statuts HTTP comme le backend. */
+async function answer(call: () => Promise<unknown>): Promise<Response> {
+  try {
+    const result = await call();
+    return result === undefined ? empty(204) : json(result);
+  } catch (error) {
+    if (error instanceof PhoneRequiredError) return json({ error: "phone-required" }, 422);
+    return empty(400);
+  }
+}
+
+async function events(method: string, [eventId, ...rest]: string[], body: any, query: URLSearchParams): Promise<Response> {
+  const seesPlanification = roleAtLeast(state.viewer.role, "bureau");
+  const ev = createEventsApi();
+  const reg = createRegistrationsApi();
+  const actor = { personId: state.viewer.userId, bureau: seesPlanification };
+  const path = rest.join("/");
+
+  if (!eventId) {
+    if (method === "GET") return json(await ev.fetchEvents(seesPlanification, isSuperAdmin()));
+    if (!seesPlanification) return empty(403);
+    if (method === "POST") {
+      const sectorId = isSuperAdmin() ? body.sectorId : state.viewer.sectorId;
+      return answer(() => ev.createEvent({ ...body, sectorId }));
+    }
+    if (method === "PATCH") {
+      return answer(async () => {
+        await ev.updateEvent(body.eventId, body);
+        return ev.fetchEventById(body.eventId, true, true);
+      });
+    }
+    return empty(405);
+  }
+  if (eventId === "registrations" && method === "GET") return answer(() => reg.fetchMyRegistrations(state.viewer.userId));
+  if (eventId === "mon-groupe" && method === "GET") return answer(() => reg.fetchMonGroupe(state.viewer.userId));
+
+  const event = await ev.fetchEventById(eventId, seesPlanification, isSuperAdmin());
+  if (!event) return empty(404);
+  if (!path && method === "GET") return json(event);
+  if (path === "status" && method === "PUT") return answer(() => ev.changeStatus(eventId, body.status));
+  if (path === "registration" && method === "PUT") {
+    const groupId = query.get("groupId") ?? undefined;
+    const piloteId = query.get("piloteId") ?? undefined;
+    return answer(() => reg.signUp(eventId, me(), groupId, piloteId));
+  }
+  if (path === "registration" && method === "DELETE") return answer(() => reg.withdraw(eventId, state.viewer.userId));
+  if (path === "registration/demande" && method === "PUT") return answer(() => reg.requestGroup(eventId, state.viewer.userId, body.groupId));
+  if (path === "pilotes" && method === "GET") return answer(() => reg.fetchPilotes(eventId));
+  if (path === "roster" && method === "GET") return answer(() => reg.fetchRoster(eventId));
+
+  const [kind, personId, action, groupId] = rest;
+  if (kind === "demandes" && method === "POST") return answer(() => reg.decideDemande(eventId, personId, actor, action === "accept"));
+  if (kind === "groups" && action === "maximum" && method === "PUT") return answer(() => reg.setGroupMaximum(eventId, personId, body.maximum || null));
+  if (kind === "roster" && action === "group" && groupId && method === "PUT") return answer(() => reg.placeInGroup(eventId, personId, groupId));
+  if (kind === "roster" && action === "group" && method === "DELETE") return answer(() => reg.takeOutOfGroup(eventId, personId, actor));
+  if (kind === "roster" && action === "promote" && method === "POST") return answer(() => reg.promote(eventId, personId));
+  if (kind === "roster" && !action && method === "DELETE") return answer(() => reg.remove(eventId, personId));
   return empty(405);
 }

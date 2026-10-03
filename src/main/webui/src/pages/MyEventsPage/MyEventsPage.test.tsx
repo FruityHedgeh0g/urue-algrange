@@ -3,8 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../../auth/AuthContext";
-import { createEventsApi } from "../../features/events/eventsApi";
-import { createRegistrationsApi } from "../../features/events/registrationsApi";
+import { createEventsApi, createRegistrationsApi } from "../../test/fakeApi";
 import MyEventsPage from "./MyEventsPage";
 import { testUser } from "../../test/testUser";
 

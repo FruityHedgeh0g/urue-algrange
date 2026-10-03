@@ -15,7 +15,7 @@ export function useEvents() {
   const seesClosed = useIsSuperAdmin();
   return useQuery({
     queryKey: [...queryKeys.events.all, { seesPlanification, seesClosed }],
-    queryFn: () => fetchEvents(seesPlanification, seesClosed),
+    queryFn: fetchEvents,
   });
 }
 
@@ -24,7 +24,7 @@ export function useEvent(eventId: string | undefined) {
   const seesClosed = useIsSuperAdmin();
   return useQuery({
     queryKey: [...queryKeys.events.detail(eventId), { seesPlanification, seesClosed }],
-    queryFn: () => fetchEventById(eventId as string, seesPlanification, seesClosed),
+    queryFn: () => fetchEventById(eventId as string),
     enabled: Boolean(eventId),
   });
 }

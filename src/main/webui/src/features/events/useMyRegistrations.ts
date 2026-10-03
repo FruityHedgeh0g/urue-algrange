@@ -7,7 +7,7 @@ export function useMyRegistrations() {
   const { user } = useAuth();
   return useQuery({
     queryKey: [...queryKeys.myRegistrations.all, user?.userId],
-    queryFn: () => fetchMyRegistrations(user?.userId ?? ""),
+    queryFn: fetchMyRegistrations,
     enabled: Boolean(user),
   });
 }
@@ -28,24 +28,22 @@ export function useEventRegistration() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.myRegistrations.all });
 
   const register = useMutation({
-    /** `phone` : numéro tout juste saisi, avant que le profil ne soit relu. */
-    /** `piloteId` : s'inscrire comme passager de ce pilote (sans Demande de groupe). */
+    /** `piloteId` : s'inscrire comme passager de ce pilote (sans Demande de groupe). L'API lit le téléphone au profil. */
     mutationFn: (input: { eventId: string; phone?: string; groupId?: string; piloteId?: string }) => {
       if (!user) throw new Error("Connectez-vous pour vous inscrire.");
-      const person = { ...user, phone: input.phone ?? user.phone, sectorId: user.sector?.sectorId ?? null };
-      return signUp(input.eventId, person, input.groupId || undefined, input.piloteId || undefined);
+      return signUp(input.eventId, { groupId: input.groupId || undefined, piloteId: input.piloteId || undefined });
     },
     onSuccess: invalidate,
   });
 
   const unregister = useMutation({
-    mutationFn: (eventId: string) => withdraw(eventId, user?.userId ?? ""),
+    mutationFn: (eventId: string) => withdraw(eventId),
     onSuccess: invalidate,
   });
 
   /** Nouvelle Demande de groupe, par exemple après un refus. */
   const askGroup = useMutation({
-    mutationFn: (input: { eventId: string; groupId: string }) => requestGroup(input.eventId, user?.userId ?? "", input.groupId),
+    mutationFn: (input: { eventId: string; groupId: string }) => requestGroup(input.eventId, input.groupId),
     onSuccess: invalidate,
   });
 

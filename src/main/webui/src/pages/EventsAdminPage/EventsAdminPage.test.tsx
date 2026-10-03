@@ -4,8 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../../auth/AuthContext";
 import { testUser } from "../../test/testUser";
-import { createEventsApi } from "../../features/events/eventsApi";
-import { createRegistrationsApi } from "../../features/events/registrationsApi";
+import { createEventsApi, createRegistrationsApi } from "../../test/fakeApi";
 import EventsAdminPage from "./EventsAdminPage";
 
 const inDays = (days: number, hour: number) => {

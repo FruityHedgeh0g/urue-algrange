@@ -1,17 +1,7 @@
-import { mockEvents } from "./fixtures";
 import { Event } from "./types";
-import { allowedTransitions, currentStatus, EventStatus } from "./status";
-import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
-import { createOverlayCollection } from "../../lib/storage/overlayCollection";
-import { closedSectorIds, refuseInClosedSector } from "../sectors/closedSectors";
+import { EventStatus } from "./status";
+import { apiFetch, HttpError } from "../../lib/http";
 
-/**
- * Client mocké, mêmes contrats que EventController : GET (sans Planification
- * sous le Bureau), POST (démarre en Planification, Secteur requis), PATCH,
- * PUT /api/events/{eventId}/status. Pas de suppression : on annule. Les
- * Événements d'un Secteur fermé ne sont vus que du Super admin
- * (`seesClosedSecteurs`) et ne changent plus.
- */
 export interface EventInput {
   name: string;
   description: string;
@@ -27,56 +17,48 @@ export interface EventInput {
   country?: string;
 }
 
-export function createEventsApi(store: JsonStore = localJsonStore) {
-  const events = createOverlayCollection<Event>({ store, name: "event", fixtures: mockEvents, idOf: (e) => e.eventId });
-  /** Le statut renvoyé est le statut courant, comme côté backend. */
-  const withCurrentStatus = (event: Event): Event => ({ ...event, status: currentStatus(event) });
+/** EventDto : le Secteur y est aussi imbriqué ; le statut est le statut courant, calculé par l'API. */
+type EventDto = Event & { sector?: { sectorId: string; name: string } | null };
 
-  const visible = async (seesPlanification: boolean, seesClosedSecteurs: boolean) => {
-    const closed = seesClosedSecteurs ? new Set<string>() : await closedSectorIds(store);
-    return (event: Event) => (seesPlanification || event.status !== "planification") && !closed.has(event.sectorId);
-  };
-  const refuseWhenClosed = async (eventId: string) => refuseInClosedSector(store, (await events.get(eventId))?.sectorId);
+const toEvent = ({ sector, ...dto }: EventDto): Event => ({
+  ...dto,
+  sectorId: dto.sectorId ?? sector?.sectorId,
+  description: dto.description ?? "",
+});
 
-  return {
-    fetchEvents: async (seesPlanification: boolean, seesClosedSecteurs = false) => {
-      const isVisible = await visible(seesPlanification, seesClosedSecteurs);
-      return (await events.list()).filter(isVisible).map(withCurrentStatus);
-    },
-    fetchEventById: async (eventId: string, seesPlanification: boolean, seesClosedSecteurs = false) => {
-      const event = await events.get(eventId);
-      return event && (await visible(seesPlanification, seesClosedSecteurs))(event) ? withCurrentStatus(event) : undefined;
-    },
-    updateEvent: async (eventId: string, patch: Omit<EventInput, "sectorId">) => {
-      await refuseWhenClosed(eventId);
-      await events.update(eventId, { ...patch, maxParticipants: patch.maxParticipants ? patch.maxParticipants : null });
-    },
-    /** À la fermeture d'un Secteur : Archivé s'il a eu (ou a) lieu, Annulé sinon ; les inscriptions restent. */
-    closeEventsOfSector: async (sectorId: string) => {
-      for (const event of (await events.list()).filter((e) => e.sectorId === sectorId)) {
-        const current = currentStatus(event);
-        await events.update(event.eventId, { status: current === "en_cours" || current === "archive" ? "archive" : "annule" });
-      }
-    },
-    createEvent: async (input: EventInput): Promise<Event> => {
-      await refuseInClosedSector(store, input.sectorId);
-      const event: Event = { eventId: `event-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, status: "planification", ...input };
-      await events.create(event);
-      return event;
-    },
-    changeStatus: async (eventId: string, status: EventStatus) => {
-      await refuseWhenClosed(eventId);
-      const event = await events.get(eventId);
-      if (!event || !allowedTransitions(currentStatus(event)).includes(status)) {
-        throw new Error("Transition de statut refusée");
-      }
-      await events.update(eventId, { status });
-      return withCurrentStatus({ ...event, status });
-    },
-  };
+const base = (eventId: string) => `/api/events/${encodeURIComponent(eventId)}`;
+
+/**
+ * Les Événements, sur EventController. L'API ne montre la Planification qu'au Bureau, et les Événements
+ * d'un Secteur fermé qu'au Super admin ; ils ne changent plus. Pas de suppression : on annule. Lire les
+ * Événements ne demande pas d'être connecté.
+ */
+export async function fetchEvents(): Promise<Event[]> {
+  return (await apiFetch<EventDto[]>("/api/events")).map(toEvent);
 }
 
-export const { fetchEvents, fetchEventById, updateEvent, createEvent, changeStatus } = createEventsApi();
+/** undefined pour un Événement inconnu ou que la personne ne voit pas. */
+export async function fetchEventById(eventId: string): Promise<Event | undefined> {
+  try {
+    return toEvent(await apiFetch<EventDto>(base(eventId)));
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return undefined;
+    throw error;
+  }
+}
+
+export async function updateEvent(eventId: string, patch: Omit<EventInput, "sectorId">): Promise<Event> {
+  return toEvent(await apiFetch<EventDto>("/api/events", { method: "PATCH", body: JSON.stringify({ eventId, ...patch, maxParticipants: patch.maxParticipants ?? 0 }) }));
+}
+
+/** Démarre en Planification ; le Bureau crée dans son propre Secteur, seul le Super admin le choisit. */
+export async function createEvent(input: EventInput): Promise<Event> {
+  return toEvent(await apiFetch<EventDto>("/api/events", { method: "POST", body: JSON.stringify(input) }));
+}
+
+export async function changeStatus(eventId: string, status: EventStatus): Promise<Event> {
+  return toEvent(await apiFetch<EventDto>(`${base(eventId)}/status`, { method: "PUT", body: JSON.stringify({ status }) }));
+}
 
 export function isUpcoming(event: Event, now: Date = new Date()): boolean {
   return new Date(event.endDateTime) >= now;

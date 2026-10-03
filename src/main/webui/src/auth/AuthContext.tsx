@@ -64,12 +64,13 @@ const SessionAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-/** Une personne donnée d'avance, sans backend : pour les tests. */
+/** Une personne donnée d'avance, sans attendre /api/users/me : pour les tests (test/testUser). */
 const FixedAuthProvider: React.FC<{ children: React.ReactNode; user: CurrentUser | null }> = ({ children, user }) => {
   const [current, setCurrent] = useState(user);
   const value = useMemo(
     () =>
       contextValue(current, false, async (profile) => {
+        await updateMe(profile);
         setCurrent((prev) => (prev ? { ...prev, ...profile } : prev));
       }),
     [current]

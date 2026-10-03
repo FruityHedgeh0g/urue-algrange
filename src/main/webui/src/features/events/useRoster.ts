@@ -3,25 +3,18 @@ import { decideDemande, fetchMonGroupe, fetchRoster, placeInGroup, promote, remo
 import { queryKeys } from "../queryKeys";
 import { useAuth } from "../../auth/AuthContext";
 
-/** Qui agit : un Chef n'agit que sur le Groupe qu'il mène, le Bureau sur tous. */
-function useActor() {
-  const { user, hasAtLeastRole } = useAuth();
-  return { personId: user?.userId ?? "", bureau: hasAtLeastRole("bureau") };
-}
-
-/** Actions sur le Groupe d'une personne à un Événement, pour le Bureau et le Chef de groupe. */
+/** Actions sur le Groupe d'une personne à un Événement : le Chef sur le Groupe qu'il mène, le Bureau sur tous (l'API en juge). */
 export function useGroupActions() {
   const queryClient = useQueryClient();
-  const actor = useActor();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.myRegistrations.all });
 
   const decide = useMutation({
     mutationFn: (input: { eventId: string; personId: string; accept: boolean }) =>
-      decideDemande(input.eventId, input.personId, actor, input.accept),
+      decideDemande(input.eventId, input.personId, input.accept),
     onSuccess: invalidate,
   });
   const takeOut = useMutation({
-    mutationFn: (input: { eventId: string; personId: string }) => takeOutOfGroup(input.eventId, input.personId, actor),
+    mutationFn: (input: { eventId: string; personId: string }) => takeOutOfGroup(input.eventId, input.personId),
     onSuccess: invalidate,
   });
 
@@ -53,7 +46,7 @@ export function useMonGroupe() {
   const { user } = useAuth();
   return useQuery({
     queryKey: [...queryKeys.myRegistrations.all, "mon-groupe", user?.userId],
-    queryFn: () => fetchMonGroupe(user?.userId ?? ""),
+    queryFn: fetchMonGroupe,
     enabled: Boolean(user),
   });
 }

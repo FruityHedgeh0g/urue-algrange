@@ -4,8 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../../auth/AuthContext";
-import { createEventsApi } from "../../features/events/eventsApi";
-import { createRegistrationsApi } from "../../features/events/registrationsApi";
+import { createEventsApi, createRegistrationsApi } from "../../test/fakeApi";
 import EventDetailPage from "./EventDetailPage";
 import { testUser } from "../../test/testUser";
 
