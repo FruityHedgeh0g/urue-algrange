@@ -13,8 +13,13 @@ import static org.hamcrest.Matchers.empty;
 public class SectorResourceTest {
 
     @Test
-    void anonymousVisiteurIsRefusedByTheApi() {
-        given().when().get("/").then().statusCode(401);
+    void anonymousVisiteurListsSecteurs() {
+        given().when().get("/").then().statusCode(200);
+    }
+
+    @Test
+    void anonymousVisiteurCannotOpenASecteur() {
+        given().contentType("application/json").body("{\"name\":\"Test\"}").when().post("/").then().statusCode(401);
     }
 
     @Test

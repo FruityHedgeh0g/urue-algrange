@@ -32,7 +32,7 @@ public class SectorController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/")
-    public @JsonView(Views.Basic.class) List<SectorDto> getAllSectors(){
+    public @JsonView(Views.Detailed.class) List<SectorDto> getAllSectors(){
         return sectorService.listAll();
     }
 

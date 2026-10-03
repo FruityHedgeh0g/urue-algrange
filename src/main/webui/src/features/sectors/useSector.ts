@@ -8,16 +8,17 @@ export function useIsSuperAdmin() {
   return useAuth().hasAtLeastRole("super_admin");
 }
 
+/** L'API ne montre un Secteur fermé qu'au Super admin : la réponse dépend de qui est connecté. */
 export function useSectors() {
   const seesClosed = useIsSuperAdmin();
-  return useQuery({ queryKey: [...queryKeys.sectors.all, { seesClosed }], queryFn: () => fetchSectors(seesClosed) });
+  return useQuery({ queryKey: [...queryKeys.sectors.all, { seesClosed }], queryFn: fetchSectors });
 }
 
 export function useSector(sectorId: string | undefined) {
   const seesClosed = useIsSuperAdmin();
   return useQuery({
     queryKey: [...queryKeys.sectors.detail(sectorId), { seesClosed }],
-    queryFn: () => fetchSectorById(sectorId as string, seesClosed),
+    queryFn: () => fetchSectorById(sectorId as string),
     enabled: Boolean(sectorId),
   });
 }
@@ -25,7 +26,6 @@ export function useSector(sectorId: string | undefined) {
 /** Mutations sur les secteurs ; fermer et rouvrir rafraîchissent aussi Groupes et Événements. */
 export function useSectorMutations() {
   const queryClient = useQueryClient();
-  const mayRename = useIsSuperAdmin();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.sectors.all });
   const invalidateAll = () =>
     Promise.all([
@@ -36,7 +36,7 @@ export function useSectorMutations() {
 
   const update = useMutation({
     mutationFn: (input: { sectorId: string } & SectorInput) =>
-      updateSector(input.sectorId, { name: input.name, description: input.description }, mayRename),
+      updateSector(input.sectorId, { name: input.name, description: input.description }),
     onSuccess: invalidate,
   });
   const create = useMutation({ mutationFn: createSector, onSuccess: invalidate });

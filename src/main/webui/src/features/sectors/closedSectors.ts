@@ -4,9 +4,9 @@ import { JsonStore } from "../../lib/storage/jsonStore";
 import { createOverlayCollection } from "../../lib/storage/overlayCollection";
 
 /**
- * Les Secteurs fermés, lus dans le même stockage que sectorsApi. Séparé de
- * sectorsApi pour que les Groupes et Événements puissent masquer ce qui leur
- * appartient sans dépendre de lui (sectorsApi, lui, les ferme).
+ * Les Secteurs fermés selon les fixtures, pour les clients encore mockés des Groupes et Événements.
+ * Les Secteurs eux-mêmes viennent de l'API (sectorsApi) : à supprimer quand ces deux clients y passent
+ * à leur tour (#35, #37).
  */
 export async function closedSectorIds(store: JsonStore): Promise<Set<string>> {
   const sectors = createOverlayCollection<Sector>({ store, name: "sector", fixtures: mockSectors, idOf: (s) => s.sectorId });

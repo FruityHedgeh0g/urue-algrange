@@ -252,6 +252,8 @@ public class SecteurFermeResourceTest {
         closedInDatabase();
         given().basePath("/api/groups").when().get().then().statusCode(200).body("groupId", not(hasItem(nord.toString())));
         given().basePath("/api/events").when().get().then().statusCode(200).body("eventId", not(hasItem(past.toString())));
+        given().basePath("/api/sectors").when().get().then().statusCode(200).body("sectorId", not(hasItem(sector.toString())));
+        given().basePath("/api/sectors").when().get("/" + sector).then().statusCode(404);
     }
 
     @Test
