@@ -41,12 +41,12 @@ This produces `target/quarkus-app/`, runnable with `java -jar target/quarkus-app
 
 ## The image
 
-CI builds a native image and pushes it to `quay.io/fruityhedgehog/lyfia`:
+CI builds a native image for `amd64` and `arm64` and pushes both under the same tags to `quay.io/fruityhedgehog/lyfia`, so `docker pull` picks the one matching the host:
 
 - `latest` and `sha-<short>` from `main`
 - `X.Y.Z` from a git tag `vX.Y.Z`
 
-Before pushing, CI starts the image against PostgreSQL 17 and RabbitMQ and checks that it answers. To build it locally (Docker only, no JDK needed):
+Before pushing, CI starts each image against PostgreSQL 17 and RabbitMQ and checks that it answers. To build it locally for your own architecture (Docker only, no JDK needed):
 
 ```shell
 docker build -t lyfia .

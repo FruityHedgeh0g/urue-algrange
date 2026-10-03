@@ -1,8 +1,10 @@
 name: CI
 
-# test:  every push and PR to develop and main.
-# image: builds the native image and smoke-tests it on PRs to main, on main and on v* tags;
-#        pushes it to Quay only from main (latest, sha-<short>) and from tags vX.Y.Z (X.Y.Z).
+# test:    every push and PR to develop and main.
+# image:   builds the native image for amd64 and arm64, each on a runner of its own architecture,
+#          and smoke-tests it, on PRs to main, on main and on v* tags.
+# publish: from main (latest, sha-<short>) and tags vX.Y.Z (X.Y.Z), joins both into one
+#          multi-arch tag on Quay.
 on:
   push:
     branches: [ develop, main ]
@@ -41,7 +43,15 @@ jobs:
     if: >-
       (github.event_name == 'pull_request' && github.base_ref == 'main')
       || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
-    runs-on: ubuntu-latest
+    # A native image is machine code: each architecture is built natively, never emulated
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
 
     # What the image talks to in production, for the smoke test
     services:
@@ -65,34 +75,26 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      - name: Image tags
+      - name: Image labels
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE }}
-          flavor: latest=false
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
-            type=ref,event=pr
 
       - name: Build the native image
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64
+          platforms: linux/${{ matrix.arch }}
           load: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: lyfia:smoke
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,scope=${{ matrix.arch }},mode=max
 
       # Starts the image as in production: Flyway migrates PostgreSQL, Hibernate validates the
       # entities against it, the RabbitMQ listener connects. OIDC and Keycloak are never reached.
       - name: Smoke test
-        env:
-          TAG: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
         run: |
           docker run -d --name lyfia --network host \
             -e QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://localhost:5432/lyfia \
@@ -110,7 +112,7 @@ jobs:
             -e QUARKUS_KEYCLOAK_ADMIN_CLIENT_REALM=smoke \
             -e QUARKUS_KEYCLOAK_ADMIN_CLIENT_CLIENT_ID=smoke \
             -e QUARKUS_KEYCLOAK_ADMIN_CLIENT_CLIENT_SECRET=smoke \
-            "$TAG"
+            lyfia:smoke
 
           for i in $(seq 30); do
             curl -fsS http://localhost:8080/q/health && break
@@ -137,6 +139,69 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: Push
+      # Untagged: the publish job tags both architectures together. Same build, so all from cache.
+      - name: Push by digest
+        id: push
         if: github.event_name == 'push'
-        run: docker push --all-tags "$IMAGE"
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.arch }}
+
+      - name: Export the digest
+        if: github.event_name == 'push'
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/digests"
+          touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: image
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+
+      - name: Log in to Quay
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Tag both architectures
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf "$IMAGE@sha256:%s " *)
+          docker buildx imagetools inspect "$IMAGE:$DOCKER_METADATA_OUTPUT_VERSION"
