@@ -9,7 +9,8 @@ import { setFakeViewer } from "./fakeApi";
  */
 export function testUser(role: RoleId | string, profile: Partial<Profile> = {}): CurrentUser | null {
   const r = role as RoleId;
-  setFakeViewer(r);
+  const sector = roleAtLeast(r, "membre") && r !== "super_admin" ? { sectorId: "sector-1", name: "Secteur Algrange" } : null;
+  setFakeViewer(r, sector?.sectorId ?? null);
   if (r === "visiteur") return null;
   return {
     userId: "mock-user",
@@ -18,6 +19,6 @@ export function testUser(role: RoleId | string, profile: Partial<Profile> = {}):
     phone: "06 12 34 56 78",
     ...profile,
     role: r,
-    sector: roleAtLeast(r, "membre") && r !== "super_admin" ? { sectorId: "sector-1", name: "Secteur Algrange" } : null,
+    sector,
   };
 }

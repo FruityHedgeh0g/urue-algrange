@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createEventsApi } from "./eventsApi";
 import { createRegistrationsApi } from "./registrationsApi";
-import { createGroupsApi } from "../groups/groupsApi";
+import { seedGroup } from "../../test/fakeApi";
 
 const person = (userId: string) => ({ userId, firstName: "Test", lastName: userId, phone: "06 12 34 56 78" });
 const CHEF = { personId: "chef-nord", bureau: false };
@@ -19,10 +19,7 @@ const setMaximum = async (maxParticipants: number) => {
 describe("registrationsApi: passagers", () => {
   beforeEach(async () => {
     const events = createEventsApi();
-    const groups = createGroupsApi();
-    await groups.createGroup({ name: "Test Nord", description: "", area: "", sectorId: "sector-1" });
-    nord = (await groups.fetchGroups()).find((g) => g.name === "Test Nord")!.groupId;
-    await groups.setChef(nord, { userId: "chef-nord", firstName: "Chef", lastName: "Nord" });
+    nord = seedGroup({ name: "Test Nord", sectorId: "sector-1", chef: { userId: "chef-nord", firstName: "Chef", lastName: "Nord" } });
 
     const event = await events.createEvent({ name: "Test Balade", description: "", sectorId: "sector-1", startDateTime: inDays(10), endDateTime: inDays(11) });
     await events.changeStatus(event.eventId, "ouvert");

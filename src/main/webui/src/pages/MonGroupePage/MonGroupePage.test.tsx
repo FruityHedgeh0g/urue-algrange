@@ -6,7 +6,7 @@ import { AuthProvider } from "../../auth/AuthContext";
 import { testUser } from "../../test/testUser";
 import { createEventsApi } from "../../features/events/eventsApi";
 import { createRegistrationsApi } from "../../features/events/registrationsApi";
-import { createGroupsApi } from "../../features/groups/groupsApi";
+import { seedGroup } from "../../test/fakeApi";
 import MonGroupePage from "./MonGroupePage";
 
 const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 19);
@@ -22,17 +22,15 @@ const renderPage = () => {
   );
 };
 
-/** Donne au Chef mocké ("mock-user") un Groupe, et inscrit Sophie avec une Demande pour ce Groupe. */
+/** Donne au Chef ("mock-user") un Groupe, et inscrit Sophie avec une Demande pour ce Groupe ; renvoie le Groupe. */
 const seedLedGroupe = async () => {
-  const groups = createGroupsApi();
-  await groups.createGroup({ name: "Test Nord", description: "", area: "", sectorId: "sector-1" });
-  const nord = (await groups.fetchGroups()).find((g) => g.name === "Test Nord")!.groupId;
-  await groups.setChef(nord, { userId: "mock-user", firstName: "Jean", lastName: "Dupont" });
+  const nord = seedGroup({ name: "Test Nord", sectorId: "sector-1", chef: { userId: "mock-user", firstName: "Jean", lastName: "Dupont" } });
 
   const events = createEventsApi();
   const event = await events.createEvent({ name: "Test Balade", description: "", sectorId: "sector-1", startDateTime: inDays(10), endDateTime: inDays(11) });
   await events.changeStatus(event.eventId, "ouvert");
   await createRegistrationsApi().signUp(event.eventId, { userId: "p-1", firstName: "Sophie", lastName: "Kremer", phone: "06 00 00 00 00" }, nord);
+  return nord;
 };
 
 describe("MonGroupePage", () => {
@@ -56,9 +54,8 @@ describe("MonGroupePage", () => {
   });
 
   it("shows the Groupe's maximum and, once reached, keeps Demandes waiting in sign-up order", async () => {
-    await seedLedGroupe();
+    const nord = await seedLedGroupe();
     const eventId = (await createEventsApi().fetchEvents(true)).find((e) => e.name === "Test Balade")!.eventId;
-    const nord = (await createGroupsApi().fetchGroups()).find((g) => g.name === "Test Nord")!.groupId;
     const api = createRegistrationsApi();
     await api.setGroupMaximum(eventId, nord, 1);
     await api.signUp(eventId, { userId: "p-2", firstName: "Marc", lastName: "Weber", phone: "06 00 00 00 00" }, nord);

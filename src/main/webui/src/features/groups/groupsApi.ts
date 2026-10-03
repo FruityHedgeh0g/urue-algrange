@@ -1,14 +1,6 @@
-import { mockGroups } from "./fixtures";
 import { Group, GroupChef } from "./types";
-import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
-import { createOverlayCollection } from "../../lib/storage/overlayCollection";
-import { closedSectorIds, refuseInClosedSector } from "../sectors/closedSectors";
+import { apiFetch } from "../../lib/http";
 
-/**
- * Client mocké, mêmes contrats que GroupController : GET/POST/PATCH /api/groups,
- * PUT /api/groups/{groupId}/chef/{userId} et DELETE /api/groups/{groupId}/chef.
- * Les Groupes d'un Secteur fermé ne sont vus que du Super admin et ne changent plus.
- */
 export interface GroupInput {
   name: string;
   description: string;
@@ -16,43 +8,50 @@ export interface GroupInput {
   sectorId: string;
 }
 
-export function createGroupsApi(store: JsonStore = localJsonStore) {
-  const groups = createOverlayCollection<Group>({ store, name: "group", fixtures: mockGroups, idOf: (g) => g.groupId });
-  const refuseWhenClosed = async (groupId: string) => refuseInClosedSector(store, (await groups.get(groupId))?.sectorId);
-
-  return {
-    /** Tous les Groupes, pour les références internes (inscriptions, Affectations). */
-    fetchGroups: () => groups.list(),
-    /** Ce que voit la personne : sans les Groupes d'un Secteur fermé, sauf pour le Super admin. */
-    fetchVisibleGroups: async (seesClosedSecteurs: boolean) => {
-      const closed = seesClosedSecteurs ? new Set<string>() : await closedSectorIds(store);
-      return (await groups.list()).filter((g) => !closed.has(g.sectorId));
-    },
-    createGroup: async (input: GroupInput) => {
-      await refuseInClosedSector(store, input.sectorId);
-      await groups.create({ groupId: `group-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, ...input });
-    },
-    updateGroup: async (groupId: string, patch: GroupInput) => {
-      await refuseWhenClosed(groupId);
-      await groups.update(groupId, patch);
-    },
-    /** À la fermeture d'un Secteur : ses Groupes n'ont plus de Chef (qui garde son titre). */
-    endAffectationsOfSector: async (sectorId: string) => {
-      for (const group of (await groups.list()).filter((g) => g.sectorId === sectorId)) await groups.update(group.groupId, { chef: null });
-    },
-    /** Affectation : le Chef quitte le Groupe qu'il menait éventuellement. */
-    setChef: async (groupId: string, chef: GroupChef) => {
-      await refuseWhenClosed(groupId);
-      for (const previous of (await groups.list()).filter((g) => g.chef?.userId === chef.userId && g.groupId !== groupId)) {
-        await groups.update(previous.groupId, { chef: null });
-      }
-      await groups.update(groupId, { chef });
-    },
-    clearChef: async (groupId: string) => {
-      await refuseWhenClosed(groupId);
-      await groups.update(groupId, { chef: null });
-    },
-  };
+/** GroupDto (vue Basic) ; `chef` manque dans la réponse à une création. */
+interface GroupDto {
+  groupId: string;
+  name: string;
+  description?: string | null;
+  area?: string | null;
+  sectorId: string;
+  chef?: GroupChef | null;
 }
 
-export const { fetchGroups, fetchVisibleGroups, createGroup, updateGroup, setChef, clearChef } = createGroupsApi();
+const toGroup = (dto: GroupDto): Group => ({
+  groupId: dto.groupId,
+  name: dto.name,
+  description: dto.description ?? "",
+  area: dto.area ?? "",
+  sectorId: dto.sectorId,
+  chef: dto.chef ?? null,
+});
+
+const path = (groupId: string) => `/api/groups/${encodeURIComponent(groupId)}`;
+
+/**
+ * Les Groupes, sur GroupController. L'API ne montre les Groupes d'un Secteur fermé qu'au Super admin, et
+ * ils ne changent plus. Le Bureau crée un Groupe dans son propre Secteur ; seul le Super admin le choisit.
+ * Lire les Groupes ne demande pas d'être connecté.
+ */
+export async function fetchGroups(): Promise<Group[]> {
+  return (await apiFetch<GroupDto[]>("/api/groups")).map(toGroup);
+}
+
+export async function createGroup(input: GroupInput): Promise<Group> {
+  return toGroup(await apiFetch<GroupDto>("/api/groups", { method: "POST", body: JSON.stringify(input) }));
+}
+
+export async function updateGroup(groupId: string, patch: GroupInput): Promise<Group> {
+  const { name, description, area } = patch;
+  return toGroup(await apiFetch<GroupDto>("/api/groups", { method: "PATCH", body: JSON.stringify({ groupId, name, description, area }) }));
+}
+
+/** Affectation : le Chef quitte le Groupe qu'il menait éventuellement. */
+export async function setChef(groupId: string, chef: Pick<GroupChef, "userId">): Promise<Group> {
+  return toGroup(await apiFetch<GroupDto>(`${path(groupId)}/chef/${encodeURIComponent(chef.userId)}`, { method: "PUT" }));
+}
+
+export async function clearChef(groupId: string): Promise<Group> {
+  return toGroup(await apiFetch<GroupDto>(`${path(groupId)}/chef`, { method: "DELETE" }));
+}

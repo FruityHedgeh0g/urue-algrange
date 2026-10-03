@@ -1,6 +1,9 @@
 import { vi } from "vitest";
 import { mockSectors } from "../features/sectors/fixtures";
 import { Sector } from "../features/sectors/types";
+import { mockGroups } from "../features/groups/fixtures";
+import { Group } from "../features/groups/types";
+import { mockMembers } from "../features/users/fixtures";
 import { RoleId } from "../auth/roles";
 
 /**
@@ -9,27 +12,41 @@ import { RoleId } from "../auth/roles";
  * (test/setup.ts). Il ne refait que ce que les pages observent ; les règles elles-mêmes sont testées côté Java.
  */
 interface State {
-  viewer: RoleId;
+  viewer: { role: RoleId; sectorId: string | null };
   sectors: Sector[];
+  groups: Group[];
 }
 
 let state: State;
 
-/** Qui l'API croit connecté ; test/testUser le règle. */
-export function setFakeViewer(role: RoleId) {
-  state.viewer = role;
+/** Qui l'API croit connecté, et son Secteur ; test/testUser le règle. */
+export function setFakeViewer(role: RoleId, sectorId: string | null = null) {
+  state.viewer = { role, sectorId };
 }
 
 export function resetFakeApi() {
-  state = { viewer: "visiteur", sectors: structuredClone(mockSectors).map((s) => ({ ...s, closed: s.closed ?? false })) };
+  state = {
+    viewer: { role: "visiteur", sectorId: null },
+    sectors: structuredClone(mockSectors).map((s) => ({ ...s, closed: s.closed ?? false })),
+    groups: structuredClone(mockGroups),
+  };
   vi.stubGlobal("fetch", vi.fn(handle));
+}
+
+let seeded = 0;
+
+/** Ajoute un Groupe tel quel, sans les règles de l'API ; renvoie son id. */
+export function seedGroup(group: Partial<Group> & Pick<Group, "name" | "sectorId">): string {
+  const groupId = group.groupId ?? `group-seed-${++seeded}`;
+  state.groups.push({ description: "", area: "", chef: null, ...group, groupId });
+  return groupId;
 }
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 const empty = (status: number) => new Response(null, { status });
 
-const isSuperAdmin = () => state.viewer === "super_admin";
+const isSuperAdmin = () => state.viewer.role === "super_admin";
 const visibleSector = (s: Sector) => !s.closed || isSuperAdmin();
 
 async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
@@ -39,6 +56,7 @@ async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise
   const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);
 
   if (parts[0] === "api" && parts[1] === "sectors") return sectors(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "groups") return groups(method, parts.slice(2), body);
   return empty(404);
 }
 
@@ -70,6 +88,50 @@ function sectors(method: string, [sectorId, action]: string[], body: any): Respo
     if (!isSuperAdmin()) return empty(403);
     sector.closed = action === "close";
     return json(sector);
+  }
+  return empty(405);
+}
+
+const sectorOf = (sectorId: string) => state.sectors.find((s) => s.sectorId === sectorId);
+const visibleGroup = (g: Group) => !sectorOf(g.sectorId)?.closed || isSuperAdmin();
+
+function groups(method: string, [groupId, action, userId]: string[], body: any): Response {
+  if (!groupId) {
+    if (method === "GET") return json(state.groups.filter(visibleGroup));
+    if (method === "POST") {
+      const sectorId = isSuperAdmin() ? body.sectorId : state.viewer.sectorId;
+      if (!sectorId || (!isSuperAdmin() && body.sectorId && body.sectorId !== sectorId)) return empty(403);
+      if (sectorOf(sectorId)?.closed) return empty(400);
+      if (state.groups.some((g) => g.name === body.name)) return empty(409);
+      const groupId = seedGroup({ name: body.name, description: body.description, area: body.area, sectorId });
+      const { chef: _chef, ...created } = state.groups.find((g) => g.groupId === groupId)!;
+      return json(created);
+    }
+    if (method === "PATCH") {
+      const group = state.groups.find((g) => g.groupId === body.groupId && visibleGroup(g));
+      if (!group) return empty(404);
+      if (sectorOf(group.sectorId)?.closed) return empty(400);
+      Object.assign(group, { name: body.name, description: body.description, area: body.area });
+      return json(group);
+    }
+    return empty(405);
+  }
+
+  const group = state.groups.find((g) => g.groupId === groupId && visibleGroup(g));
+  if (!group) return empty(404);
+  if (action !== "chef") return empty(405);
+  if (sectorOf(group.sectorId)?.closed) return empty(400);
+  if (method === "DELETE") {
+    group.chef = null;
+    return json(group);
+  }
+  if (method === "PUT" && userId) {
+    const member = mockMembers.find((m) => m.userId === userId);
+    if (!member) return empty(404);
+    // Le Chef quitte le Groupe qu'il menait
+    state.groups.filter((g) => g.chef?.userId === userId).forEach((g) => (g.chef = null));
+    group.chef = { userId, firstName: member.firstName, lastName: member.lastName };
+    return json(group);
   }
   return empty(405);
 }

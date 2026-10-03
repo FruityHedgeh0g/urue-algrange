@@ -5,10 +5,7 @@ export interface GroupChef {
   lastName: string;
 }
 
-/**
- * Reflète GroupDto côté backend (vue Basic). `sectorId` est un ajout du mock :
- * côté backend, le rattachement se fait par PUT /api/sectors/{sectorId}/group/{groupId}.
- */
+/** Reflète GroupDto côté backend (vue Basic). */
 export interface Group {
   groupId: string;
   name: string;

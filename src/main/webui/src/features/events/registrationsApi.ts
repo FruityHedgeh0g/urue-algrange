@@ -1,6 +1,6 @@
 import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
 import { createEventsApi } from "./eventsApi";
-import { createGroupsApi } from "../groups/groupsApi";
+import { fetchGroups } from "../groups/groupsApi";
 import { Group } from "../groups/types";
 import { acceptsSignUps, EventStatus } from "./status";
 
@@ -172,7 +172,8 @@ interface StoredEntry {
  */
 export function createRegistrationsApi(store: JsonStore = localJsonStore) {
   const events = createEventsApi(store);
-  const groups = createGroupsApi(store);
+  // Les Groupes viennent de l'API, même pour ce client encore mocké (#37)
+  const groups = { fetchGroups };
   const readAll = () => store.read<Record<string, StoredEntry[]>>(ROSTERS_KEY, {});
   const read = (eventId: string) => readAll()[eventId] ?? [];
   const write = (eventId: string, entries: StoredEntry[]) => store.write(ROSTERS_KEY, { ...readAll(), [eventId]: entries });

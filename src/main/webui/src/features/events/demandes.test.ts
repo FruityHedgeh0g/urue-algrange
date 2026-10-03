@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createEventsApi } from "./eventsApi";
 import { createRegistrationsApi } from "./registrationsApi";
-import { createGroupsApi } from "../groups/groupsApi";
+import { seedGroup } from "../../test/fakeApi";
 
 const person = (userId: string) => ({ userId, firstName: "Test", lastName: userId, phone: "06 12 34 56 78" });
 const CHEF = { personId: "chef-nord", bureau: false };
@@ -18,15 +18,8 @@ const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOS
 describe("registrationsApi: Demande de groupe", () => {
   beforeEach(async () => {
     const events = createEventsApi();
-    const groups = createGroupsApi();
-    const base = { description: "", area: "", sectorId: "sector-1" };
-    await groups.createGroup({ ...base, name: "Test Nord" });
-    await groups.createGroup({ ...base, name: "Test Sud" });
-    const all = await groups.fetchGroups();
-    nord = all.find((g) => g.name === "Test Nord")!.groupId;
-    sud = all.find((g) => g.name === "Test Sud")!.groupId;
-    await groups.setChef(nord, { userId: "chef-nord", firstName: "Chef", lastName: "Nord" });
-    await groups.setChef(sud, { userId: "chef-sud", firstName: "Chef", lastName: "Sud" });
+    nord = seedGroup({ name: "Test Nord", sectorId: "sector-1", chef: { userId: "chef-nord", firstName: "Chef", lastName: "Nord" } });
+    sud = seedGroup({ name: "Test Sud", sectorId: "sector-1", chef: { userId: "chef-sud", firstName: "Chef", lastName: "Sud" } });
 
     const event = await events.createEvent({ name: "Test Balade", description: "", sectorId: "sector-1", startDateTime: inDays(10), endDateTime: inDays(11) });
     await events.changeStatus(event.eventId, "ouvert");
@@ -90,13 +83,8 @@ describe("registrationsApi: Demande de groupe", () => {
 describe("registrationsApi: Groupe maximum and the Groupe's Liste d'attente", () => {
   beforeEach(async () => {
     const events = createEventsApi();
-    const groups = createGroupsApi();
-    await groups.createGroup({ name: "Test Nord", description: "", area: "", sectorId: "sector-1" });
-    await groups.createGroup({ name: "Test Ailleurs", description: "", area: "", sectorId: "sector-2" });
-    const all = await groups.fetchGroups();
-    nord = all.find((g) => g.name === "Test Nord")!.groupId;
-    elsewhere = all.find((g) => g.name === "Test Ailleurs")!.groupId;
-    await groups.setChef(nord, { userId: "chef-nord", firstName: "Chef", lastName: "Nord" });
+    nord = seedGroup({ name: "Test Nord", sectorId: "sector-1", chef: { userId: "chef-nord", firstName: "Chef", lastName: "Nord" } });
+    elsewhere = seedGroup({ name: "Test Ailleurs", sectorId: "sector-2" });
 
     const event = await events.createEvent({ name: "Test Balade", description: "", sectorId: "sector-1", startDateTime: inDays(10), endDateTime: inDays(11) });
     await events.changeStatus(event.eventId, "ouvert");

@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { clearChef, createGroup, fetchVisibleGroups, GroupInput, setChef, updateGroup } from "./groupsApi";
+import { clearChef, createGroup, fetchGroups, GroupInput, setChef, updateGroup } from "./groupsApi";
 import { GroupChef } from "./types";
 import { queryKeys } from "../queryKeys";
 import { useIsSuperAdmin } from "../sectors/useSector";
 
-/** Les Groupes visibles : ceux d'un Secteur fermé pour le seul Super admin. */
+/** Les Groupes visibles : l'API ne montre ceux d'un Secteur fermé qu'au Super admin. */
 export function useGroups() {
   const seesClosed = useIsSuperAdmin();
-  return useQuery({ queryKey: [...queryKeys.groups.all, { seesClosed }], queryFn: () => fetchVisibleGroups(seesClosed) });
+  return useQuery({ queryKey: [...queryKeys.groups.all, { seesClosed }], queryFn: fetchGroups });
 }
 
 /** Mutations sur les Groupes ; chacune rafraîchit la liste. */

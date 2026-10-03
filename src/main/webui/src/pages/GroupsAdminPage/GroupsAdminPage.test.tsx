@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../../auth/AuthContext";
 import { testUser } from "../../test/testUser";
 import GroupsAdminPage from "./GroupsAdminPage";
-import { createGroupsApi } from "../../features/groups/groupsApi";
+import { seedGroup } from "../../test/fakeApi";
 
 const renderPage = (role = "bureau") => {
   const user = testUser(role);
@@ -41,10 +41,7 @@ describe("GroupsAdminPage", () => {
   });
 
   it("moves a Chef who already leads another Groupe of the Secteur", async () => {
-    const groups = createGroupsApi();
-    await groups.createGroup({ name: "Groupe Algrange Nord", description: "", area: "", sectorId: "sector-1" });
-    const nord = (await groups.fetchGroups()).find((g) => g.name === "Groupe Algrange Nord")!.groupId;
-    await groups.setChef(nord, { userId: "user-9", firstName: "Luc", lastName: "Schmitt" });
+    seedGroup({ name: "Groupe Algrange Nord", sectorId: "sector-1", chef: { userId: "user-9", firstName: "Luc", lastName: "Schmitt" } });
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Groupe Algrange Centre/ }));
     await userEvent.selectOptions(screen.getByLabelText("Chef de groupe"), "user-9");
