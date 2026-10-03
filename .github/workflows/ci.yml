@@ -123,6 +123,11 @@ jobs:
           # The site, at the root and through a deep link
           curl -fsS -o /dev/null http://localhost:8080/
           curl -fsS -o /dev/null http://localhost:8080/connexion
+          # The bundles index.html loads: a missing one comes back as index.html, a blank page
+          for asset in $(curl -fsS http://localhost:8080/ | grep -oE '/assets/[^"]+\.(js|css)'); do
+            echo "$asset: $(curl -fsS -o /dev/null -w '%{http_code} %{content_type}' "http://localhost:8080$asset")"
+            curl -fsS -o /dev/null -w '%{content_type}' "http://localhost:8080$asset" | grep -qvi html
+          done
           # Public endpoints read the database through Hibernate and Jackson in native mode
           curl -fsS -o /dev/null http://localhost:8080/api/groups
           curl -fsS -o /dev/null http://localhost:8080/api/events
