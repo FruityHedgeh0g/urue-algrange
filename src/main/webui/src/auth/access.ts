@@ -60,7 +60,7 @@ export const ACCESS = {
   adminEvents: { path: "/administration/evenements", label: "Gestion événements", minRole: "bureau", section: "admin" },
   adminPosts: { path: "/administration/actualites", label: "Actualités", minRole: "bureau", section: "admin" },
   adminCarousel: { path: "/administration/carrousel", label: "Carrousel", minRole: "bureau", section: "admin" },
-  adminConfiguration: { path: "/administration/configuration", label: "Configuration", minRole: "admin", section: "admin" },
+  adminConfiguration: { path: "/administration/configuration", label: "Configuration", minRole: "super_admin", section: "admin" },
   adminFeatureFlags: { path: "/administration/fonctionnalites", label: "Fonctionnalités", minRole: "admin", section: "admin" },
 } satisfies Record<string, AccessEntry>;
 

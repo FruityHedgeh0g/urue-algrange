@@ -31,7 +31,7 @@ describe("access map", () => {
     ["adminPosts", "chef_de_groupe", false],
     ["adminPosts", "bureau", true],
     ["adminConfiguration", "bureau", false],
-    ["adminConfiguration", "admin", true],
+    ["adminConfiguration", "admin", false],
     ["adminConfiguration", "super_admin", true],
     ["featureRequests", "bureau", true],
     ["featureRequests", "admin", true],
@@ -71,7 +71,6 @@ describe("access map", () => {
       "adminEvents",
       "adminPosts",
       "adminCarousel",
-      "adminConfiguration",
       "adminFeatureFlags",
     ]);
   });

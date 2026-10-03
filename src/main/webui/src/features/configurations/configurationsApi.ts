@@ -1,24 +1,11 @@
-import { mockConfigurations } from "./fixtures";
 import { Configuration } from "./types";
-import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
-
-const OVERRIDES_KEY = "urue-configuration-overrides";
+import { apiFetch } from "../../lib/http";
 
 /**
- * Client mocké — le ConfigurationController backend n'expose que GET
- * /api/configurations (l'accès par nom et l'édition sont commentés / absents).
+ * Les réglages du site, sur ConfigurationController : lus par tous (le site public affiche le titre et le
+ * logo), changés par le seul Super admin, qui gère ce qui est commun à tous les Secteurs (ADR 0004).
  */
-export function createConfigurationsApi(store: JsonStore = localJsonStore) {
-  const readOverrides = () => store.read<Record<string, string>>(OVERRIDES_KEY, {});
-  return {
-    fetchConfigurations: async (): Promise<Configuration[]> => {
-      const overrides = readOverrides();
-      return mockConfigurations.map((c) => ({ ...c, value: overrides[c.name] ?? c.value }));
-    },
-    updateConfiguration: async (name: string, value: string): Promise<void> => {
-      store.write(OVERRIDES_KEY, { ...readOverrides(), [name]: value });
-    },
-  };
-}
+export const fetchConfigurations = () => apiFetch<Configuration[]>("/api/configurations");
 
-export const { fetchConfigurations, updateConfiguration } = createConfigurationsApi();
+export const updateConfiguration = (name: string, value: string) =>
+  apiFetch<Configuration>(`/api/configurations/${encodeURIComponent(name)}`, { method: "PUT", body: JSON.stringify({ value }) });

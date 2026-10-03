@@ -12,6 +12,8 @@ import { createRegistrationsApi as fakeRegistrationsOn } from "./fakes/fakeRegis
 import { PhoneRequiredError } from "../features/events/registrationsApi";
 import { mockPosts } from "../features/posts/fixtures";
 import { Post } from "../features/posts/types";
+import { mockConfigurations } from "../features/configurations/fixtures";
+import { Configuration } from "../features/configurations/types";
 
 /**
  * Un backend en mémoire derrière `fetch`, pour les tests de pages : chaque client passé de ses fixtures à
@@ -35,6 +37,7 @@ interface State {
   groups: Group[];
   members: Member[];
   posts: Post[];
+  configurations: Configuration[];
 }
 
 let state: State;
@@ -52,6 +55,7 @@ export function resetFakeApi() {
     groups: structuredClone(mockGroups),
     members: structuredClone(mockMembers),
     posts: structuredClone(mockPosts),
+    configurations: structuredClone(mockConfigurations),
   };
   vi.stubGlobal("fetch", vi.fn(handle));
 }
@@ -81,6 +85,7 @@ async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise
   if (parts[0] === "api" && parts[1] === "sectors") return sectors(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "groups") return groups(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "users") return users(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "configurations") return configurations(method, parts[2], body);
   if (parts[0] === "api" && parts[1] === "posts") return posts(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "events") return events(method, parts.slice(2), body, url.searchParams);
   return empty(404);
@@ -324,4 +329,14 @@ function posts(method: string, [postId, action]: string[], body: any): Response 
     return json(post);
   }
   return empty(405);
+}
+
+function configurations(method: string, name: string | undefined, body: any): Response {
+  if (!name) return method === "GET" ? json(state.configurations) : empty(405);
+  if (method !== "PUT") return empty(405);
+  if (!isSuperAdmin()) return empty(403);
+  const setting = state.configurations.find((c) => c.name === name);
+  if (!setting) return empty(404);
+  setting.value = body.value;
+  return json(setting);
 }
