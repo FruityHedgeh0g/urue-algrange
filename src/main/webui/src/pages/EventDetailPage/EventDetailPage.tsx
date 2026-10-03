@@ -60,8 +60,9 @@ export const EventDetailPage: React.FC = () => {
   const savePhoneAndSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !phone.trim()) return;
-    updateProfile({ firstName: user.firstName, lastName: user.lastName, phone: phone.trim() });
-    signUp(phone.trim());
+    const withPhone = phone.trim();
+    // Inscrit même si le profil n'a pas pu être mis à jour : le téléphone accompagne l'inscription
+    updateProfile({ firstName: user.firstName, lastName: user.lastName, phone: withPhone }).finally(() => signUp(withPhone));
   };
 
   const back = (

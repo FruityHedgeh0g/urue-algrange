@@ -6,8 +6,9 @@ import { AuthProvider } from "../../auth/AuthContext";
 import { createEventsApi } from "../../features/events/eventsApi";
 import { createRegistrationsApi } from "../../features/events/registrationsApi";
 import MyEventsPage from "./MyEventsPage";
+import { testUser } from "../../test/testUser";
 
-/** Utilisateur de l'authentification mockée (AuthContext). */
+/** La personne connectée (test/testUser). */
 const ME = { userId: "mock-user", firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" };
 
 const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 19);
@@ -26,8 +27,6 @@ describe("MyEventsPage", () => {
     await events.changeStatus(full.eventId, "ouvert");
     await events.changeStatus(full.eventId, "complet");
     await registrations.signUp(full.eventId, ME);
-
-    localStorage.setItem("urue-mock-role", "benevole");
   });
 
   afterEach(() => localStorage.clear());
@@ -36,7 +35,7 @@ describe("MyEventsPage", () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter>
-          <AuthProvider>
+          <AuthProvider user={testUser("benevole")}>
             <MyEventsPage />
           </AuthProvider>
         </MemoryRouter>

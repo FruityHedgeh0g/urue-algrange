@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../../auth/AuthContext";
+import { testUser } from "../../test/testUser";
 import { createEventsApi } from "../../features/events/eventsApi";
 import { createRegistrationsApi } from "../../features/events/registrationsApi";
 import EventsAdminPage from "./EventsAdminPage";
@@ -28,10 +29,10 @@ const seed = async () => {
 };
 
 const renderPage = () => {
-  localStorage.setItem("urue-mock-role", "bureau");
+  const user = testUser("bureau");
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <AuthProvider>
+      <AuthProvider user={user}>
         <EventsAdminPage />
       </AuthProvider>
     </QueryClientProvider>

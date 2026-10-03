@@ -1,109 +1,84 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { ROLE_HIERARCHY, RoleId, roleAtLeast } from "./roles";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { RoleId, roleAtLeast } from "./roles";
+import { CurrentUser, fetchMe, loginUrl, LOGOUT_URL, Profile, updateMe } from "./session";
 
-/**
- * Authentification mockée : tant que le backend n'expose pas de flux de
- * connexion, le rôle courant est piloté localement (voir RoleSwitcher) pour
- * permettre de prévisualiser chaque espace pendant le développement.
- */
-/** Reflète NestedSectorDto : le Secteur d'une personne à partir de Membre (ADR 0004). */
-export interface UserSector {
-  sectorId: string;
-  name: string;
-}
-
-export interface MockUser {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  role: RoleId;
-  /** Aucun pour un Bénévole (le vivier commun) ni pour le Super admin (au-dessus des Secteurs). */
-  sector: UserSector | null;
-  /** Nécessaire pour s'inscrire à un Événement. */
-  phone?: string;
-}
+export type { CurrentUser, Profile, UserSector } from "./session";
 
 interface AuthContextValue {
-  user: MockUser | null;
+  user: CurrentUser | null;
   role: RoleId;
   isAuthenticated: boolean;
-  setRole: (role: RoleId) => void;
+  /** true tant que l'on ne sait pas encore qui est connecté. */
+  isLoading: boolean;
   hasAtLeastRole: (required: RoleId) => boolean;
-  updateProfile: (profile: Profile) => void;
+  updateProfile: (profile: Profile) => Promise<void>;
+  /** Part vers Keycloak, puis revient sur `redirect` (la page courante par défaut). */
+  login: (redirect?: string) => void;
+  /** Part vers le formulaire d'inscription de Keycloak. */
+  register: () => void;
+  logout: () => void;
 }
 
-const ROLE_STORAGE_KEY = "urue-mock-role";
-const PROFILE_STORAGE_KEY = "urue-mock-profile";
-
-interface Profile {
-  firstName: string;
-  lastName: string;
-  phone?: string;
-}
-
-const DEFAULT_PROFILE: Profile = { firstName: "Jean", lastName: "Dupont", phone: "06 12 34 56 78" };
-const DEFAULT_SECTOR: UserSector = { sectorId: "sector-1", name: "Secteur Algrange" };
-
-/** Le Secteur mocké : de Membre à Admin, le Secteur d'Algrange. */
-const sectorFor = (role: RoleId): UserSector | null => (roleAtLeast(role, "membre") && role !== "super_admin" ? DEFAULT_SECTOR : null);
+const ME_KEY = ["me"] as const;
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function readStoredRole(): RoleId {
-  try {
-    const saved = localStorage.getItem(ROLE_STORAGE_KEY);
-    return ROLE_HIERARCHY.find((r) => r === saved) ?? "visiteur";
-  } catch {
-    return "visiteur";
-  }
+const currentPath = () => `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+function navigateTo(url: string) {
+  window.location.assign(url);
 }
 
-function readStoredProfile(): Profile {
-  try {
-    const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
-  } catch {
-    return DEFAULT_PROFILE;
-  }
+function contextValue(
+  user: CurrentUser | null,
+  isLoading: boolean,
+  updateProfile: AuthContextValue["updateProfile"]
+): AuthContextValue {
+  const role: RoleId = user?.role ?? "visiteur";
+  return {
+    user,
+    role,
+    isAuthenticated: user !== null,
+    isLoading,
+    hasAtLeastRole: (required) => roleAtLeast(role, required),
+    updateProfile,
+    login: (redirect = currentPath()) => navigateTo(loginUrl(redirect)),
+    register: () => navigateTo(loginUrl("/", true)),
+    logout: () => navigateTo(LOGOUT_URL),
+  };
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRoleState] = useState<RoleId>(() => readStoredRole());
-  const [profile, setProfile] = useState(() => readStoredProfile());
+/** La personne connectée, lue sur GET /api/users/me ; un Visiteur n'a pas de session. */
+const SessionAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const queryClient = useQueryClient();
+  const me = useQuery({ queryKey: ME_KEY, queryFn: fetchMe, staleTime: Infinity, retry: false });
 
-  const setRole = (next: RoleId) => {
-    setRoleState(next);
-    try {
-      localStorage.setItem(ROLE_STORAGE_KEY, next);
-    } catch {
-      // stockage indisponible : le rôle reste actif pour la session
-    }
-  };
-
-  const updateProfile: AuthContextValue["updateProfile"] = (next) => {
-    setProfile(next);
-    try {
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // stockage indisponible : le profil reste actif pour la session
-    }
-  };
-
-  const value = useMemo<AuthContextValue>(() => {
-    const user: MockUser | null =
-      role === "visiteur" ? null : { userId: "mock-user", role, sector: sectorFor(role), ...profile };
-    return {
-      user,
-      role,
-      isAuthenticated: user !== null,
-      setRole,
-      hasAtLeastRole: (required) => roleAtLeast(role, required),
-      updateProfile,
-    };
-  }, [role, profile]);
-
+  const value = useMemo(
+    () =>
+      contextValue(me.data ?? null, me.isPending, async (profile) => {
+        queryClient.setQueryData(ME_KEY, await updateMe(profile));
+      }),
+    [me.data, me.isPending, queryClient]
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+/** Une personne donnée d'avance, sans backend : pour les tests. */
+const FixedAuthProvider: React.FC<{ children: React.ReactNode; user: CurrentUser | null }> = ({ children, user }) => {
+  const [current, setCurrent] = useState(user);
+  const value = useMemo(
+    () =>
+      contextValue(current, false, async (profile) => {
+        setCurrent((prev) => (prev ? { ...prev, ...profile } : prev));
+      }),
+    [current]
+  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode; user?: CurrentUser | null }> = ({ children, user }) =>
+  user === undefined ? <SessionAuthProvider>{children}</SessionAuthProvider> : <FixedAuthProvider user={user}>{children}</FixedAuthProvider>;
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import Logo from "../../atoms/Logo/Logo";
 import Icon from "../../atoms/Icon/Icon";
 import ButtonLink from "../../atoms/ButtonLink/ButtonLink";
 import DropdownMenu from "../../molecules/DropdownMenu/DropdownMenu";
 import ThemeToggle from "../../molecules/ThemeToggle/ThemeToggle";
-import RoleSwitcher from "../../molecules/RoleSwitcher/RoleSwitcher";
 import { useAuth } from "../../../auth/AuthContext";
 import { useAccess } from "../../../auth/useAccess";
 import { entry } from "../../../auth/access";
@@ -16,9 +15,8 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) => `${styles.navLink}
 export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { isAuthenticated, setRole } = useAuth();
+  const { isAuthenticated, login, logout } = useAuth();
   const { mainNav, canAccess } = useAccess();
-  const navigate = useNavigate();
   const location = useLocation();
   const groups = mainNav();
 
@@ -50,14 +48,7 @@ export const Header: React.FC = () => {
     };
   }, [menuOpen]);
 
-  const handleAuthClick = () => {
-    if (isAuthenticated) {
-      setRole("visiteur");
-      navigate("/");
-    } else {
-      navigate("/connexion");
-    }
-  };
+  const handleAuthClick = () => (isAuthenticated ? logout() : login());
 
   return (
     <header className={`${styles.header}${scrolled ? ` ${styles.scrolled}` : ""}`}>
@@ -68,7 +59,6 @@ export const Header: React.FC = () => {
             Tous unis contre le cancer
           </p>
           <div className={styles.utils}>
-            {import.meta.env.DEV && <RoleSwitcher />}
             <button
               type="button"
               className={styles.loginBtn}

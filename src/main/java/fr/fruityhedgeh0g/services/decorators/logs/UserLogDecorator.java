@@ -53,6 +53,14 @@ public class UserLogDecorator implements UserService{
     }
 
     @Override
+    public UserDto getOrJoin(UUID personId, String firstName, String lastName) {
+        Log.debugf("Retrieving the logged-in person %s...", personId);
+        return Try.of(() -> userService.getOrJoin(personId, firstName, lastName))
+                .onFailure(t -> Log.errorf(t,"An error occurred while retrieving the logged-in person %s.", personId))
+                .get();
+    }
+
+    @Override
     public UserDto changeRole(UUID actorId, UUID personId, RoleEnum role, UUID sectorId) {
         Log.debugf("User %s sets the Role of %s to %s...", actorId, personId, role.id());
         return Try.of(() -> userService.changeRole(actorId, personId, role, sectorId))

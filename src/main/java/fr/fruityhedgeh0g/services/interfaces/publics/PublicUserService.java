@@ -14,6 +14,12 @@ public interface PublicUserService {
     List<UserDto> listAll();
     UserDto getById(@NotNull UUID userId);
 
+    /**
+     * The logged-in person. Someone registered in Keycloak before the application was deployed never produced
+     * a "user created" event: they join as a Bénévole, with the names from their token.
+     */
+    UserDto getOrJoin(@NotNull UUID personId, String firstName, String lastName);
+
     /** Promotion chain: see {@link fr.fruityhedgeh0g.enums.RoleEnum#maySetRole}. The database Role applies even if the Keycloak mirror fails. */
     /**
      * Promotion chain, within the actor's Secteur (ADR 0004): a promoted Bénévole joins the actor's Secteur,

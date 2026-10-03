@@ -3,13 +3,14 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../../auth/AuthContext";
+import { testUser } from "../../test/testUser";
 import SectorsAdminPage from "./SectorsAdminPage";
 
 const renderPage = () => {
-  localStorage.setItem("urue-mock-role", "super_admin");
+  const user = testUser("super_admin");
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <AuthProvider>
+      <AuthProvider user={user}>
         <SectorsAdminPage />
       </AuthProvider>
     </QueryClientProvider>

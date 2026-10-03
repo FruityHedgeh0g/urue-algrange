@@ -6,13 +6,14 @@ import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "../../../theme/ThemeContext";
 import { AuthProvider } from "../../../auth/AuthContext";
 import Header from "./Header";
+import { testUser } from "../../../test/testUser";
 
-const renderHeader = () =>
+const renderHeader = (role = "visiteur") =>
   render(
     <QueryClientProvider client={new QueryClient()}>
       <MemoryRouter>
         <ThemeProvider>
-          <AuthProvider>
+          <AuthProvider user={testUser(role)}>
             <Header />
           </AuthProvider>
         </ThemeProvider>
@@ -38,8 +39,7 @@ describe("Header", () => {
   });
 
   it("shows the administration entry and a logout button to a bureau member", async () => {
-    localStorage.setItem("urue-mock-role", "bureau");
-    renderHeader();
+    renderHeader("bureau");
     expect(screen.getAllByRole("link", { name: "Administration" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeInTheDocument();
   });

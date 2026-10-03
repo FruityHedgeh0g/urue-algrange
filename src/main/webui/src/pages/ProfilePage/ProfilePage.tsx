@@ -13,13 +13,17 @@ export const ProfilePage: React.FC = () => {
   const [lastName, setLastName] = useState(user?.lastName ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   if (!user) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({ firstName, lastName, phone: phone.trim() });
-    setSaved(true);
+    setSaveError(false);
+    updateProfile({ firstName, lastName, phone: phone.trim() }).then(
+      () => setSaved(true),
+      () => setSaveError(true)
+    );
   };
 
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
@@ -81,6 +85,7 @@ export const ProfilePage: React.FC = () => {
                 Vos informations ont été mises à jour.
               </p>
             )}
+            {saveError && <p role="alert">Vos informations n'ont pas pu être enregistrées. Réessayez.</p>}
           </div>
         </form>
       </section>

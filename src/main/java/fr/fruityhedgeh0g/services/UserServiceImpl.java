@@ -78,6 +78,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public UserDto getOrJoin(UUID personId, String firstName, String lastName) {
+        UserEntity person = userRepository.findByIdOptional(personId).orElseGet(() -> {
+            UserEntity joined = UserEntity.builder()
+                    .userId(personId)
+                    .firstName(isBlank(firstName) ? "" : firstName.trim())
+                    .lastName(isBlank(lastName) ? "" : lastName.trim())
+                    .role(RoleEnum.BENEVOLE)
+                    .build();
+            userRepository.persist(joined);
+            return joined;
+        });
+        return userMapper.toDto(person);
+    }
+
+    @Override
     public UserDto changeRole(UUID actorId, UUID personId, RoleEnum role, UUID sectorId) {
         // Committed on its own before the Keycloak call, so a mirror failure cannot roll it back (ADR 0002)
         UserDto changed = QuarkusTransaction.requiringNew().call(() -> {

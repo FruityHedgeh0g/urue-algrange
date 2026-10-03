@@ -5,12 +5,13 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./AuthContext";
 import RequireAccess from "./RequireAccess";
 import { AccessId } from "./access";
+import { testUser } from "../test/testUser";
 
-const renderProtected = (id: AccessId) =>
+const renderProtected = (id: AccessId, role = "benevole") =>
   render(
     <QueryClientProvider client={new QueryClient()}>
       <MemoryRouter initialEntries={["/protected"]}>
-        <AuthProvider>
+        <AuthProvider user={testUser(role)}>
           <Routes>
             <Route path="/" element={<p>Accueil</p>} />
             <Route
@@ -33,22 +34,14 @@ describe("RequireAccess", () => {
   });
 
   it("redirects to the home page when the role is insufficient", () => {
-    localStorage.setItem("urue-mock-role", "visiteur");
-    renderProtected("account");
+    renderProtected("account", "visiteur");
     expect(screen.getByText("Accueil")).toBeInTheDocument();
     expect(screen.queryByText("Contenu protégé")).not.toBeInTheDocument();
   });
 
   it("renders the children when the role is sufficient", () => {
-    localStorage.setItem("urue-mock-role", "benevole");
-    renderProtected("account");
+    renderProtected("account", "benevole");
     expect(screen.getByText("Contenu protégé")).toBeInTheDocument();
-  });
-
-  it("treats an unknown stored role as a visitor", () => {
-    localStorage.setItem("urue-mock-role", "super-admin");
-    renderProtected("account");
-    expect(screen.getByText("Accueil")).toBeInTheDocument();
   });
 
   it("redirects once the entry's feature is known to be inactive", async () => {

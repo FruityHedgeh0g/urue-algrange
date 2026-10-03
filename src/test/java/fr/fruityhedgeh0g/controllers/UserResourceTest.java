@@ -32,6 +32,8 @@ public class UserResourceTest {
     static final String BUREAU_ID = "00000000-0000-0000-0000-000000000005";
     static final String ADMIN_ID = "00000000-0000-0000-0000-000000000006";
     static final String UNKNOWN_ID = "00000000-0000-0000-0000-0000000000ff";
+    /** Registered in Keycloak before the application was deployed: no row until their first visit. */
+    static final String NEWCOMER_ID = "00000000-0000-0000-0000-0000000000fe";
 
     @Inject
     UserRepository userRepository;
@@ -49,7 +51,7 @@ public class UserResourceTest {
     @AfterEach
     void removePersons() {
         QuarkusTransaction.requiringNew().run(() ->
-                Stream.of(BENEVOLE_ID, MEMBRE_ID, BUREAU_ID, ADMIN_ID).map(UUID::fromString).forEach(userRepository::deleteById)
+                Stream.of(BENEVOLE_ID, MEMBRE_ID, BUREAU_ID, ADMIN_ID, NEWCOMER_ID).map(UUID::fromString).forEach(userRepository::deleteById)
         );
     }
 
@@ -75,6 +77,34 @@ public class UserResourceTest {
     @Test
     void anonymousVisiteurCannotListPersons() {
         given().when().get("/").then().statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "newcomer", augmentors = DatabaseRoleAugmentor.class)
+    @OidcSecurity(claims = {
+            @Claim(key = "sub", value = NEWCOMER_ID),
+            @Claim(key = "given_name", value = "Camille"),
+            @Claim(key = "family_name", value = "Martin")
+    })
+    void aPersonKeycloakNeverAnnouncedJoinsAsBenevoleOnTheirFirstVisit() {
+        given().when().get("/me").then().statusCode(200)
+                .body("firstName", equalTo("Camille"))
+                .body("lastName", equalTo("Martin"))
+                .body("role", equalTo("benevole"));
+        // Kept: the next visit finds the same person
+        given().when().get("/me").then().statusCode(200).body("firstName", equalTo("Camille"));
+    }
+
+    @Test
+    @TestSecurity(user = "benevole", augmentors = DatabaseRoleAugmentor.class)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = BENEVOLE_ID), @Claim(key = "given_name", value = "Other")})
+    void aKnownPersonKeepsTheirNamesWhateverTheToken() {
+        given().when().get("/me").then().statusCode(200).body("firstName", equalTo("Test"));
+    }
+
+    @Test
+    void anonymousVisiteurHasNoCurrentPerson() {
+        given().when().get("/me").then().statusCode(401);
     }
 
     @Test
