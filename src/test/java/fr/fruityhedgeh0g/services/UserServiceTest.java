@@ -194,7 +194,8 @@ class UserServiceTest {
 
         Assertions.assertDoesNotThrow(() -> userService.doUpdate(updatedUser));
 
-        Assertions.assertEquals(userRepository.findById(user.getUserId()).getFirstName(), updatedUser.getFirstName());
+        // Names belong to the database once set (ADR 0007): Keycloak does not overwrite them
+        Assertions.assertEquals("Platy", userRepository.findById(user.getUserId()).getFirstName());
 
     }
 

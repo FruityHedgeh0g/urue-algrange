@@ -300,18 +300,8 @@ public class RegistrationResourceTest {
         given().basePath("/api/users").contentType(ContentType.JSON)
                 .body(Map.of("firstName", "Sophie", "lastName", "Kremer", "phone", "06 23 45 67 89"))
                 .when().patch("/me").then().statusCode(200)
-                .body("firstName", equalTo("Sophie"))
                 .body("phone", equalTo("06 23 45 67 89"));
 
         signUp(futureEvent(EventStatusEnum.OUVERT, null)).statusCode(200).body("status", equalTo("participant"));
-    }
-
-    @Test
-    @TestSecurity(user = "me", augmentors = DatabaseRoleAugmentor.class)
-    @OidcSecurity(claims = @Claim(key = "sub", value = ME))
-    void aProfileNeedsAFirstAndLastName() {
-        given().basePath("/api/users").contentType(ContentType.JSON)
-                .body(Map.of("firstName", " ", "lastName", "Kremer", "phone", "06 23 45 67 89"))
-                .when().patch("/me").then().statusCode(400);
     }
 }
