@@ -4,7 +4,8 @@ import { Sector } from "../features/sectors/types";
 import { mockGroups } from "../features/groups/fixtures";
 import { Group } from "../features/groups/types";
 import { mockMembers } from "../features/users/fixtures";
-import { RoleId } from "../auth/roles";
+import { Member } from "../features/users/types";
+import { assignableRoles, canLeadGroupe, RoleId, roleAtLeast } from "../auth/roles";
 
 /**
  * Un backend en mémoire derrière `fetch`, pour les tests de pages : chaque client passé de ses fixtures à
@@ -15,6 +16,7 @@ interface State {
   viewer: { role: RoleId; sectorId: string | null };
   sectors: Sector[];
   groups: Group[];
+  members: Member[];
 }
 
 let state: State;
@@ -29,6 +31,7 @@ export function resetFakeApi() {
     viewer: { role: "visiteur", sectorId: null },
     sectors: structuredClone(mockSectors).map((s) => ({ ...s, closed: s.closed ?? false })),
     groups: structuredClone(mockGroups),
+    members: structuredClone(mockMembers),
   };
   vi.stubGlobal("fetch", vi.fn(handle));
 }
@@ -57,6 +60,7 @@ async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise
 
   if (parts[0] === "api" && parts[1] === "sectors") return sectors(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "groups") return groups(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "users") return users(method, parts.slice(2), body);
   return empty(404);
 }
 
@@ -126,12 +130,67 @@ function groups(method: string, [groupId, action, userId]: string[], body: any):
     return json(group);
   }
   if (method === "PUT" && userId) {
-    const member = mockMembers.find((m) => m.userId === userId);
+    const member = state.members.find((m) => m.userId === userId);
     if (!member) return empty(404);
     // Le Chef quitte le Groupe qu'il menait
     state.groups.filter((g) => g.chef?.userId === userId).forEach((g) => (g.chef = null));
     group.chef = { userId, firstName: member.firstName, lastName: member.lastName };
     return json(group);
+  }
+  return empty(405);
+}
+
+/** UserDto (vue Basic) : le Secteur imbriqué. */
+const userDto = (m: Member) => ({
+  userId: m.userId,
+  firstName: m.firstName,
+  lastName: m.lastName,
+  role: m.role,
+  president: Boolean(m.president),
+  sector: m.sectorId ? { sectorId: m.sectorId, name: sectorOf(m.sectorId)?.name ?? "" } : null,
+});
+
+/** Secteur après un changement de Rôle (ADR 0004), comme UserServiceImpl.sectorAfter. */
+function sectorAfter(member: Member, role: RoleId, sectorId: string | null): string | null | Response {
+  const current = member.sectorId ?? null;
+  if (!isSuperAdmin()) {
+    if (sectorId || !state.viewer.sectorId) return empty(403);
+    if (current && current !== state.viewer.sectorId) return empty(403);
+    return roleAtLeast(role, "membre") ? state.viewer.sectorId : null;
+  }
+  if (!roleAtLeast(role, "membre")) return null;
+  if (role !== "admin" && current) return sectorId && sectorId !== current ? empty(400) : current;
+  return sectorId ?? empty(400);
+}
+
+function users(method: string, [userId, action]: string[], body: any): Response {
+  if (!userId) return method === "GET" ? json(state.members.map(userDto)) : empty(405);
+  const member = state.members.find((m) => m.userId === userId);
+  if (!member) return empty(404);
+
+  if (method === "PATCH" && !action) {
+    if (!roleAtLeast(state.viewer.role, "admin")) return empty(403);
+    if (!body.firstName?.trim() || !body.lastName?.trim()) return empty(400);
+    Object.assign(member, { firstName: body.firstName.trim(), lastName: body.lastName.trim() });
+    return json(userDto(member));
+  }
+  if (method === "PUT" && action === "role") {
+    const role = body.role as RoleId;
+    if (!assignableRoles(state.viewer.role, member.role).includes(role)) return empty(403);
+    const sectorId = sectorAfter(member, role, body.sectorId ?? null);
+    if (sectorId instanceof Response) return sectorId;
+    const changesSector = Boolean(member.sectorId) && member.sectorId !== sectorId;
+    Object.assign(member, { role, sectorId, president: role === "bureau" ? member.president : false });
+    // Perdre le titre de Chef de groupe, ou quitter son Secteur, met fin à l'Affectation
+    if (!canLeadGroupe(role) || changesSector) state.groups.filter((g) => g.chef?.userId === userId).forEach((g) => (g.chef = null));
+    return json(userDto(member));
+  }
+  if (method === "PUT" && action === "president") {
+    if (!roleAtLeast(state.viewer.role, "admin")) return empty(403);
+    if (member.role !== "bureau") return empty(400);
+    state.members.forEach((m) => (m.president = false));
+    member.president = true;
+    return json(userDto(member));
   }
   return empty(405);
 }

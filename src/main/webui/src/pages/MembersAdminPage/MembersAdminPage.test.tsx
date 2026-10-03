@@ -97,4 +97,19 @@ describe("MembersAdminPage", () => {
     await userEvent.click(await screen.findByRole("button", { name: /Luc Schmitt/ }));
     expect(screen.queryByLabelText("Président")).not.toBeInTheDocument();
   });
+
+  it("lets only an Admin correct someone's names", async () => {
+    renderAs("bureau");
+    await userEvent.click(await screen.findByRole("button", { name: /Sophie Kremer/ }));
+    expect(screen.getByLabelText("Prénom")).toBeDisabled();
+  });
+
+  it("lets an Admin correct someone's names", async () => {
+    renderAs("admin");
+    await userEvent.click(await screen.findByRole("button", { name: /Sophie Kremer/ }));
+    await userEvent.clear(screen.getByLabelText("Prénom"));
+    await userEvent.type(screen.getByLabelText("Prénom"), "Sophia");
+    await userEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    expect(await screen.findByRole("button", { name: /Sophia Kremer/ })).toBeInTheDocument();
+  });
 });

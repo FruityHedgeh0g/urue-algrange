@@ -2,12 +2,14 @@ package fr.fruityhedgeh0g.services;
 
 import fr.fruityhedgeh0g.utilities.logging.Logged;
 
+import fr.fruityhedgeh0g.dtos.userDtos.NamesDto;
 import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.SectorEntity;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
 import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.NotImplementedYetException;
@@ -168,13 +170,34 @@ public class UserServiceImpl implements UserService {
     public UserDto updateProfile(UUID personId, ProfileDto profile) {
         UserEntity person = userRepository.findByIdOptional(personId)
                 .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
-        if (isBlank(profile.firstName()) || isBlank(profile.lastName()))
-            throw new InvalidResourceException("A profile has a first and a last name.");
-
-        person.setFirstName(profile.firstName().trim());
-        person.setLastName(profile.lastName().trim());
         person.setPhone(isBlank(profile.phone()) ? null : profile.phone().trim());
         return userMapper.toDto(person);
+    }
+
+    @Override
+    @Transactional
+    public UserDto rename(UUID actorId, UUID personId, NamesDto names) {
+        if (actorId.equals(personId))
+            throw new ForbiddenActionException("Nobody renames themselves.");
+        if (isBlank(names.firstName()) || isBlank(names.lastName()))
+            throw new InvalidResourceException("A person has a first and a last name.");
+        UserEntity actor = userRepository.findByIdOptional(actorId)
+                .orElseThrow(() -> new ForbiddenActionException("Unknown actor: " + actorId));
+        UserEntity person = userRepository.findByIdOptional(personId)
+                .orElseThrow(() -> new UnknownResourceException("User not found: " + personId));
+        if (actor.getRole() != RoleEnum.SUPER_ADMIN && !isInscritOf(person, actor.getSector()))
+            throw new ForbiddenActionException(personId + " is not an Inscrit of the Admin's Secteur.");
+
+        person.setFirstName(names.firstName().trim());
+        person.setLastName(names.lastName().trim());
+        return userMapper.toDto(person);
+    }
+
+    /** A Secteur's Inscrits: its people, and the Bénévoles who signed up for one of its Events (ADR 0004). */
+    private boolean isInscritOf(UserEntity person, SectorEntity sector) {
+        if (sector == null) return false;
+        return person.belongsTo(sector)
+                || (person.getRole() == RoleEnum.BENEVOLE && userRepository.rodeWith(person.getUserId(), sector.getSectorId()));
     }
 
     private static boolean isBlank(String value) {
@@ -216,8 +239,11 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByIdOptional(userDto.getUserId())
                 .orElseThrow(() -> new UnknownResourceException("This resource is unknown in the system and cannot be updated."));
 
-        userEntity = userMapper.partialDtoToEntity(userEntity,userDto);
-        userRepository.persist(userEntity);
+        // Names belong to the database once set (ADR 0007): Keycloak only fills those still missing
+        if (isBlank(userEntity.getFirstName()) && !isBlank(userDto.getFirstName()))
+            userEntity.setFirstName(userDto.getFirstName().trim());
+        if (isBlank(userEntity.getLastName()) && !isBlank(userDto.getLastName()))
+            userEntity.setLastName(userDto.getLastName().trim());
         return userMapper.toDto(userEntity);
     }
 

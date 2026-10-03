@@ -1,11 +1,13 @@
 package fr.fruityhedgeh0g.services.decorators.logs;
 
+import fr.fruityhedgeh0g.dtos.userDtos.NamesDto;
 import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.entities.UserEntity;
 import fr.fruityhedgeh0g.enums.RoleEnum;
 import fr.fruityhedgeh0g.exceptions.DuplicateResourceException;
 import fr.fruityhedgeh0g.exceptions.ForbiddenRoleChangeException;
+import fr.fruityhedgeh0g.exceptions.ForbiddenActionException;
 import fr.fruityhedgeh0g.exceptions.InvalidResourceException;
 import fr.fruityhedgeh0g.exceptions.UnknownResourceException;
 import fr.fruityhedgeh0g.services.interfaces.UserService;
@@ -85,6 +87,22 @@ public class UserLogDecorator implements UserService{
                         case InvalidResourceException ex -> Log.warnf("Profile refused: %s", ex.getMessage());
                         case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
                         default -> Log.errorf(t,"An error occurred while updating a profile.");
+                    }
+                })
+                .get();
+    }
+
+    @Override
+    public UserDto rename(UUID actorId, UUID personId, NamesDto names) {
+        Log.debugf("%s renames %s...", actorId, personId);
+        return Try.of(() -> userService.rename(actorId, personId, names))
+                .onSuccess(user -> Log.infof("%s renamed by %s.", personId, actorId))
+                .onFailure(t -> {
+                    switch(t){
+                        case ForbiddenActionException ex -> Log.warnf("Rename refused: %s", ex.getMessage());
+                        case InvalidResourceException ex -> Log.warnf("Rename refused: %s", ex.getMessage());
+                        case UnknownResourceException ex -> Log.errorf(ex,"User %s not found.", personId);
+                        default -> Log.errorf(t,"An error occurred while renaming a person.");
                     }
                 })
                 .get();

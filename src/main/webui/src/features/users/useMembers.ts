@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { appointPresident, changeRole, fetchAllMembers, MemberInput, updateMember } from "./usersApi";
-import { useAuth } from "../../auth/AuthContext";
 import { RoleId } from "../../auth/roles";
 import { queryKeys } from "../queryKeys";
 
@@ -18,10 +17,8 @@ export function useUpdateMember() {
 
 export function useChangeRole() {
   const queryClient = useQueryClient();
-  const { role, user } = useAuth();
   return useMutation({
-    mutationFn: (input: { userId: string; role: RoleId; sectorId?: string }) =>
-      changeRole(input.userId, input.role, { role, sectorId: user?.sector?.sectorId ?? null }, input.sectorId),
+    mutationFn: (input: { userId: string; role: RoleId; sectorId?: string }) => changeRole(input.userId, input.role, input.sectorId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.members.all }),
   });
 }

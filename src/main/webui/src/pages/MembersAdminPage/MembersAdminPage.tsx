@@ -32,13 +32,17 @@ export const MembersAdminPage: React.FC = () => {
   /** Rôles proposés pour une personne : aucun sur soi-même (chaîne de promotion). */
   const rolesFor = (userId: string, current: RoleId) => (userId === user?.userId ? [] : assignableRoles(viewerRole, current));
 
+  /** Seul un Admin corrige les noms d'une personne, jamais les siens (ADR 0007). */
+  const renames = (userId: string) => roleAtLeast(viewerRole, "admin") && userId !== user?.userId;
+
   /** Seul un Admin désigne le Président, parmi les membres du Bureau qui ne le sont pas déjà. */
   const canAppointPresident = (member: { role: RoleId; president?: boolean }) =>
     roleAtLeast(viewerRole, "admin") && member.role === "bureau" && !member.president;
 
-  const save = async (userId: string, { role, president, sectorId, ...profile }: MemberDraft) => {
-    await updateMember.mutateAsync({ userId, ...profile });
+  const save = async (userId: string, { role, president, sectorId, ...names }: MemberDraft) => {
     const currentMember = members?.find((m) => m.userId === userId);
+    const renamed = names.firstName !== currentMember?.firstName || names.lastName !== currentMember?.lastName;
+    if (renamed && renames(userId)) await updateMember.mutateAsync({ userId, ...names });
     // Un changement de rôle fait quitter le Bureau : le titre de Président ne s'applique plus
     if (role !== currentMember?.role) await changeRole.mutateAsync({ userId, role, sectorId: sectorId || undefined });
     else if (president && !currentMember?.president) await appointPresident.mutateAsync(userId);
@@ -65,8 +69,20 @@ export const MembersAdminPage: React.FC = () => {
         const roles = member ? rolesFor(member.userId, member.role) : [];
         return (
           <>
-            <FormField label="Prénom" value={draft.firstName} onChange={(e) => setDraft({ ...draft, firstName: e.target.value })} required />
-            <FormField label="Nom" value={draft.lastName} onChange={(e) => setDraft({ ...draft, lastName: e.target.value })} required />
+            <FormField
+              label="Prénom"
+              value={draft.firstName}
+              onChange={(e) => setDraft({ ...draft, firstName: e.target.value })}
+              disabled={!member || !renames(member.userId)}
+              required
+            />
+            <FormField
+              label="Nom"
+              value={draft.lastName}
+              onChange={(e) => setDraft({ ...draft, lastName: e.target.value })}
+              disabled={!member || !renames(member.userId)}
+              required
+            />
             {roles.length > 0 && (
               <Select
                 label="Rôle"

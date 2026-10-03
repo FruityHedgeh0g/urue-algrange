@@ -1,5 +1,6 @@
 package fr.fruityhedgeh0g.services.interfaces.publics;
 
+import fr.fruityhedgeh0g.dtos.userDtos.NamesDto;
 import fr.fruityhedgeh0g.dtos.userDtos.ProfileDto;
 import fr.fruityhedgeh0g.dtos.userDtos.UserDto;
 import fr.fruityhedgeh0g.enums.RoleEnum;
@@ -28,8 +29,14 @@ public interface PublicUserService {
      */
     UserDto changeRole(@NotNull UUID actorId, @NotNull UUID personId, @NotNull RoleEnum role, UUID sectorId);
 
-    /** A person edits their own first name, last name and phone number. */
+    /** A person edits their own phone number; their names are an Admin's (ADR 0007). */
     UserDto updateProfile(@NotNull UUID personId, @NotNull ProfileDto profile);
+
+    /**
+     * An Admin corrects the names of one of their Secteur's Inscrits; the Super admin, anyone's.
+     * Nobody renames themselves (ADR 0007).
+     */
+    UserDto rename(@NotNull UUID actorId, @NotNull UUID personId, @NotNull NamesDto names);
 
     /** Flags a Bureau member as Président, clearing the previous one. */
     UserDto appointPresident(@NotNull UUID personId);

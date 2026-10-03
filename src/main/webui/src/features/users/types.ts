@@ -1,11 +1,6 @@
 import { RoleId } from "../../auth/roles";
 
-/**
- * Reflète NestedUserDto côté backend, complété d'informations de fiche
- * (rôle, contact, ancienneté). Ces derniers champs n'existent pas encore dans
- * UserDto côté backend (l'identité/contact viendrait de Keycloak) et restent
- * mockés en attendant.
- */
+/** Une personne de la liste des Inscrits : reflète UserDto côté backend (vue Basic). */
 export interface Member {
   userId: string;
   firstName: string;
@@ -15,7 +10,4 @@ export interface Member {
   sectorId?: string | null;
   /** Le membre du Bureau qui préside l'association (un seul à la fois). */
   president?: boolean;
-  email: string;
-  phone: string;
-  memberSince: string; // date ISO
 }

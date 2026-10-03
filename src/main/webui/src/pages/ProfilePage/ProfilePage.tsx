@@ -9,8 +9,6 @@ import styles from "./ProfilePage.module.css";
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
-  const [firstName, setFirstName] = useState(user?.firstName ?? "");
-  const [lastName, setLastName] = useState(user?.lastName ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -20,7 +18,7 @@ export const ProfilePage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSaveError(false);
-    updateProfile({ firstName, lastName, phone: phone.trim() }).then(
+    updateProfile({ phone: phone.trim() }).then(
       () => setSaved(true),
       () => setSaveError(true)
     );
@@ -47,24 +45,8 @@ export const ProfilePage: React.FC = () => {
         <p className="eyebrow">Informations personnelles</p>
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <div className={styles.row}>
-            <FormField
-              label="Prénom"
-              value={firstName}
-              onChange={(e) => {
-                setFirstName(e.target.value);
-                setSaved(false);
-              }}
-              required
-            />
-            <FormField
-              label="Nom"
-              value={lastName}
-              onChange={(e) => {
-                setLastName(e.target.value);
-                setSaved(false);
-              }}
-              required
-            />
+            <FormField label="Prénom" value={user.firstName} disabled readOnly />
+            <FormField label="Nom" value={user.lastName} disabled readOnly />
           </div>
           <FormField
             label="Téléphone"
@@ -77,6 +59,7 @@ export const ProfilePage: React.FC = () => {
             }}
           />
           <p className={styles.hint}>Nécessaire pour vous inscrire à un événement.</p>
+          <p className={styles.hint}>Une erreur dans votre nom ? L'administrateur de votre secteur peut la corriger.</p>
           <div className={styles.actions}>
             <Button type="submit" label="Enregistrer" />
             {saved && (

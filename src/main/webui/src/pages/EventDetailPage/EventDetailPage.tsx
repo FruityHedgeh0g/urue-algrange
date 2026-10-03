@@ -62,7 +62,7 @@ export const EventDetailPage: React.FC = () => {
     if (!user || !phone.trim()) return;
     const withPhone = phone.trim();
     // Inscrit même si le profil n'a pas pu être mis à jour : le téléphone accompagne l'inscription
-    updateProfile({ firstName: user.firstName, lastName: user.lastName, phone: withPhone }).finally(() => signUp(withPhone));
+    updateProfile({ phone: withPhone }).finally(() => signUp(withPhone));
   };
 
   const back = (

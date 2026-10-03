@@ -19,10 +19,8 @@ export interface CurrentUser {
   phone?: string;
 }
 
-/** Ce qu'une personne modifie d'elle-même dans Mon espace (PATCH /api/users/me). */
+/** Ce qu'une personne modifie d'elle-même dans Mon espace (PATCH /api/users/me) : son téléphone ; ses noms, seul un Admin les corrige (ADR 0007). */
 export interface Profile {
-  firstName: string;
-  lastName: string;
   phone?: string;
 }
 
