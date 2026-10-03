@@ -10,6 +10,8 @@ import { createMemoryJsonStore, JsonStore } from "../lib/storage/jsonStore";
 import { createEventsApi as fakeEventsOn } from "./fakes/fakeEvents";
 import { createRegistrationsApi as fakeRegistrationsOn } from "./fakes/fakeRegistrations";
 import { PhoneRequiredError } from "../features/events/registrationsApi";
+import { mockPosts } from "../features/posts/fixtures";
+import { Post } from "../features/posts/types";
 
 /**
  * Un backend en mémoire derrière `fetch`, pour les tests de pages : chaque client passé de ses fixtures à
@@ -32,6 +34,7 @@ interface State {
   sectors: Sector[];
   groups: Group[];
   members: Member[];
+  posts: Post[];
 }
 
 let state: State;
@@ -48,6 +51,7 @@ export function resetFakeApi() {
     sectors: structuredClone(mockSectors).map((s) => ({ ...s, closed: s.closed ?? false })),
     groups: structuredClone(mockGroups),
     members: structuredClone(mockMembers),
+    posts: structuredClone(mockPosts),
   };
   vi.stubGlobal("fetch", vi.fn(handle));
 }
@@ -77,6 +81,7 @@ async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise
   if (parts[0] === "api" && parts[1] === "sectors") return sectors(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "groups") return groups(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "users") return users(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "posts") return posts(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "events") return events(method, parts.slice(2), body, url.searchParams);
   return empty(404);
 }
@@ -290,5 +295,33 @@ async function events(method: string, [eventId, ...rest]: string[], body: any, q
   if (kind === "roster" && action === "group" && method === "DELETE") return answer(() => reg.takeOutOfGroup(eventId, personId, actor));
   if (kind === "roster" && action === "promote" && method === "POST") return answer(() => reg.promote(eventId, personId));
   if (kind === "roster" && !action && method === "DELETE") return answer(() => reg.remove(eventId, personId));
+  return empty(405);
+}
+
+function posts(method: string, [postId, action]: string[], body: any): Response {
+  const isBureau = roleAtLeast(state.viewer.role, "bureau");
+  const visiblePost = (p: Post) => isBureau || p.status === "publie";
+  if (!postId) {
+    if (method === "GET") return json(state.posts.filter(visiblePost));
+    if (!isBureau) return empty(403);
+    if (!body.title?.trim() || !body.content?.trim()) return empty(400);
+    if (method === "POST") {
+      const { userId, firstName, lastName } = state.viewer;
+      const post: Post = { postId: `post-new-${state.posts.length + 1}`, title: body.title, content: body.content, status: "brouillon", author: { userId, firstName, lastName } };
+      state.posts.unshift(post);
+      return json(post);
+    }
+    const post = state.posts.find((p) => p.postId === body.postId);
+    if (method !== "PATCH" || !post) return empty(method === "PATCH" ? 404 : 405);
+    Object.assign(post, { title: body.title, content: body.content });
+    return json(post);
+  }
+  const post = state.posts.find((p) => p.postId === postId && visiblePost(p));
+  if (!post) return empty(404);
+  if (method === "GET" && !action) return json(post);
+  if (method === "PUT" && action === "status" && isBureau) {
+    post.status = body.status;
+    return json(post);
+  }
   return empty(405);
 }

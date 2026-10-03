@@ -1,7 +1,5 @@
-import { mockPosts } from "./fixtures";
-import { Post, PostAuthor, PostStatus } from "./types";
-import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
-import { createOverlayCollection } from "../../lib/storage/overlayCollection";
+import { Post, PostStatus } from "./types";
+import { apiFetch, HttpError } from "../../lib/http";
 
 /** Ce que le Bureau écrit ; statut et auteur sont fixés par l'API. */
 export interface PostInput {
@@ -9,39 +7,39 @@ export interface PostInput {
   content: string;
 }
 
-/**
- * Client mocké, mêmes contrats que PostController : GET /api/posts (+ /{postId})
- * ne renvoie les Brouillons qu'au Bureau (`seesDrafts`), POST crée un Brouillon
- * signé par la personne connectée, PATCH modifie, PUT /{postId}/status publie
- * (`publie`) ou repasse en brouillon (`brouillon`).
- */
-export function createPostsApi(store: JsonStore = localJsonStore) {
-  const posts = createOverlayCollection<Post>({ store, name: "post", fixtures: mockPosts, idOf: (p) => p.postId });
-  const visible = (seesDrafts: boolean) => (post: Post) => seesDrafts || post.status === "publie";
-  /** Un Post a un titre et un contenu. */
-  const validate = ({ title, content }: PostInput) => {
-    if (!title.trim()) throw new Error("Une actualité a un titre.");
-    if (!content.trim()) throw new Error("Une actualité a un contenu.");
-  };
+type PostDto = Omit<Post, "content" | "author"> & { content?: string | null; author?: Post["author"] };
 
-  return {
-    fetchPosts: async (seesDrafts: boolean): Promise<Post[]> => (await posts.list()).filter(visible(seesDrafts)),
-    fetchPostById: async (postId: string, seesDrafts: boolean): Promise<Post | undefined> => {
-      const post = await posts.get(postId);
-      return post && visible(seesDrafts)(post) ? post : undefined;
-    },
-    createPost: async (input: PostInput, author: PostAuthor): Promise<Post> => {
-      validate(input);
-      const post: Post = { postId: `post-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, ...input, status: "brouillon", author };
-      await posts.create(post);
-      return post;
-    },
-    updatePost: async (postId: string, patch: PostInput) => {
-      validate(patch);
-      await posts.update(postId, patch);
-    },
-    changePostStatus: (postId: string, status: PostStatus) => posts.update(postId, { status }),
-  };
+const toPost = (dto: PostDto): Post => ({ ...dto, content: dto.content ?? "", author: dto.author ?? null });
+
+const base = (postId: string) => `/api/posts/${encodeURIComponent(postId)}`;
+
+/**
+ * Les actualités, sur PostController. L'API ne renvoie les Brouillons qu'au Bureau ; un nouveau Post est un
+ * Brouillon signé par la personne connectée, puis publié (`publie`) ou repassé en brouillon (`brouillon`).
+ * Lire les actualités publiées ne demande pas d'être connecté.
+ */
+export async function fetchPosts(): Promise<Post[]> {
+  return (await apiFetch<PostDto[]>("/api/posts")).map(toPost);
 }
 
-export const { fetchPosts, fetchPostById, createPost, updatePost, changePostStatus } = createPostsApi();
+/** undefined pour un Post inconnu, ou un Brouillon quand on n'est pas du Bureau. */
+export async function fetchPostById(postId: string): Promise<Post | undefined> {
+  try {
+    return toPost(await apiFetch<PostDto>(base(postId)));
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return undefined;
+    throw error;
+  }
+}
+
+export async function createPost(input: PostInput): Promise<Post> {
+  return toPost(await apiFetch<PostDto>("/api/posts", { method: "POST", body: JSON.stringify(input) }));
+}
+
+export async function updatePost(postId: string, patch: PostInput): Promise<Post> {
+  return toPost(await apiFetch<PostDto>("/api/posts", { method: "PATCH", body: JSON.stringify({ postId, ...patch }) }));
+}
+
+export async function changePostStatus(postId: string, status: PostStatus): Promise<Post> {
+  return toPost(await apiFetch<PostDto>(`${base(postId)}/status`, { method: "PUT", body: JSON.stringify({ status }) }));
+}

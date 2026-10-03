@@ -38,7 +38,7 @@ public class EventEntity extends AuditTemplate {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
     @Column(name = "startDateTime", nullable = false)

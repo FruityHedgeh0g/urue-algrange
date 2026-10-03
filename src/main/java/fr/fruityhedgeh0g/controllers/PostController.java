@@ -43,7 +43,8 @@ public class PostController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public @JsonView(Views.Basic.class) List<PostDto> getAllPosts(){
+    // Detailed: the list shows an excerpt of each Post's content
+    public @JsonView(Views.Detailed.class) List<PostDto> getAllPosts(){
         return postService.listAll(seesDrafts());
     }
 

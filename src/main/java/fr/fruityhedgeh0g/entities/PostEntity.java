@@ -31,7 +31,8 @@ public class PostEntity extends AuditTemplate {
     @NotNull
     private String  title;
 
-    @Column(name = "content", nullable = false)
+    /** An article: unbounded, unlike a varchar(255) (V2 migration). */
+    @Column(name = "content", nullable = false, columnDefinition = "text")
     @NotNull
     private String content;
 
