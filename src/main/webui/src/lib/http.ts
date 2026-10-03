@@ -15,7 +15,8 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   const headers = new Headers(init.headers);
   headers.set("X-Requested-With", "JavaScript");
   headers.set("Accept", "application/json");
-  if (init.body !== undefined && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  // Un FormData fixe lui-même son Content-Type, avec la frontière entre ses parties
+  if (init.body !== undefined && !(init.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
 
   const response = await fetch(path, { ...init, headers, credentials: "same-origin" });
   if (!response.ok) throw new HttpError(response.status, `${init.method ?? "GET"} ${path} : ${response.status}`);

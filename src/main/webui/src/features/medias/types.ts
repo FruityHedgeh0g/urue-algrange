@@ -1,14 +1,12 @@
-/**
- * Reflète MediaDto/NestedMediaDto côté backend, complété d'une `url`
- * d'affichage : le backend n'expose pas encore d'endpoint de contenu pour les
- * médias, cette URL est donc dérivée côté mock en attendant.
- */
+/** Reflète MediaDto côté backend, avec l'`url` de son fichier (GET /api/medias/{mediaId}/content). */
 export interface Media {
   mediaId: string;
   fileKey: string;
   originalFilename: string;
+  /** Type du fichier (image/jpeg...). */
   contentType: string;
   fileSize: number;
   url: string;
+  /** Ce que montre l'image ; à défaut, le nom du fichier. */
   alt: string;
 }

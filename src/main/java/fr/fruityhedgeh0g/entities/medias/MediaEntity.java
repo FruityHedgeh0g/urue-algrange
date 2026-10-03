@@ -40,4 +40,12 @@ public abstract class MediaEntity extends AuditTemplate {
 
     @Column(name = "file_size", nullable = false)
     private long fileSize;
+
+    /** The file's own type (image/jpeg...); content_type is the kind of media (PHOTO, VIDEO). */
+    @Column(name = "mime_type")
+    private String mimeType;
+
+    /** What the image shows, for screen readers. */
+    @Column(name = "alt")
+    private String alt;
 }

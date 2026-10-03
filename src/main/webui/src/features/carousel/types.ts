@@ -1,8 +1,4 @@
-/**
- * Élément du carrousel d'accueil. Aucune contrepartie backend actuelle (pas
- * de contrôleur REST) : entièrement mocké en attendant, avec une forme
- * pensée pour se rapprocher d'un futur CarouselItemDto.
- */
+/** Élément du carrousel d'accueil : reflète CarouselItemDto côté backend. */
 export interface CarouselItem {
   id: string;
   title: string;

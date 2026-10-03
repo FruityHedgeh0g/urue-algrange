@@ -1,56 +1,24 @@
-import { mockCarouselItems } from "./fixtures";
 import { CarouselItem, CarouselItemInput } from "./types";
-import { JsonStore, localJsonStore } from "../../lib/storage/jsonStore";
+import { apiFetch } from "../../lib/http";
 
-const STORAGE_KEY = "urue-carousel-items";
-
-function sorted(items: CarouselItem[]): CarouselItem[] {
-  return [...items].sort((a, b) => a.order - b.order);
-}
+const base = (id: string) => `/api/carousel/${encodeURIComponent(id)}`;
 
 /**
- * Client mocké — aucun endpoint /api/carousel n'existe côté backend.
- * Toute la liste (ordre inclus) est persistée en un seul bloc, ce qui
- * simplifie la réorganisation par rapport à la collection superposée
- * (lib/storage/overlayCollection) utilisée pour les autres listes.
+ * Le carrousel d'accueil, sur CarouselController : les Visiteurs n'en reçoivent que les slides actifs, le
+ * Bureau les reçoit tous, dans l'ordre, et les écrit, les réordonne ou les met de côté.
  */
-export function createCarouselApi(store: JsonStore = localJsonStore) {
-  const readItems = () => store.read<CarouselItem[]>(STORAGE_KEY, mockCarouselItems);
-  const writeItems = (items: CarouselItem[]) => store.write(STORAGE_KEY, items);
+export const fetchCarouselItems = () => apiFetch<CarouselItem[]>("/api/carousel");
 
-  return {
-    fetchCarouselItems: async () => sorted(readItems()),
-    fetchActiveCarouselItems: async () => sorted(readItems().filter((item) => item.active)),
-    createCarouselItem: async (input: CarouselItemInput): Promise<void> => {
-      const items = readItems();
-      const nextOrder = items.reduce((max, item) => Math.max(max, item.order), 0) + 1;
-      writeItems([...items, { id: `carousel-${Date.now()}`, order: nextOrder, ...input }]);
-    },
-    updateCarouselItem: async (id: string, patch: CarouselItemInput): Promise<void> => {
-      writeItems(readItems().map((item) => (item.id === id ? { ...item, ...patch } : item)));
-    },
-    deleteCarouselItem: async (id: string): Promise<void> => {
-      writeItems(readItems().filter((item) => item.id !== id));
-    },
-    moveCarouselItem: async (id: string, direction: "up" | "down"): Promise<void> => {
-      const items = sorted(readItems());
-      const index = items.findIndex((item) => item.id === id);
-      const swapWith = direction === "up" ? index - 1 : index + 1;
-      if (index === -1 || swapWith < 0 || swapWith >= items.length) return;
-      const a = items[index];
-      const b = items[swapWith];
-      items[index] = { ...a, order: b.order };
-      items[swapWith] = { ...b, order: a.order };
-      writeItems(items);
-    },
-  };
-}
+/** Les slides affichés : même le Bureau ne voit pas sur l'accueil ceux mis de côté. */
+export const fetchActiveCarouselItems = async () => (await fetchCarouselItems()).filter((item) => item.active);
 
-export const {
-  fetchCarouselItems,
-  fetchActiveCarouselItems,
-  createCarouselItem,
-  updateCarouselItem,
-  deleteCarouselItem,
-  moveCarouselItem,
-} = createCarouselApi();
+export const createCarouselItem = (input: CarouselItemInput) =>
+  apiFetch<CarouselItem>("/api/carousel", { method: "POST", body: JSON.stringify(input) });
+
+export const updateCarouselItem = (id: string, patch: CarouselItemInput) =>
+  apiFetch<CarouselItem>(base(id), { method: "PUT", body: JSON.stringify(patch) });
+
+export const deleteCarouselItem = (id: string) => apiFetch<void>(base(id), { method: "DELETE" });
+
+export const moveCarouselItem = (id: string, direction: "up" | "down") =>
+  apiFetch<CarouselItem[]>(`${base(id)}/move/${direction}`, { method: "POST" });

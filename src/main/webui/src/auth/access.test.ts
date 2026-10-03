@@ -71,6 +71,7 @@ describe("access map", () => {
       "adminEvents",
       "adminPosts",
       "adminCarousel",
+      "adminMedias",
       "adminFeatureFlags",
     ]);
   });

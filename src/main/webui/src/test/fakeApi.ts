@@ -14,6 +14,10 @@ import { mockPosts } from "../features/posts/fixtures";
 import { Post } from "../features/posts/types";
 import { mockConfigurations } from "../features/configurations/fixtures";
 import { Configuration } from "../features/configurations/types";
+import { mockMedias } from "../features/medias/fixtures";
+import { Media } from "../features/medias/types";
+import { mockCarouselItems } from "../features/carousel/fixtures";
+import { CarouselItem } from "../features/carousel/types";
 
 /**
  * Un backend en mémoire derrière `fetch`, pour les tests de pages : chaque client passé de ses fixtures à
@@ -38,6 +42,8 @@ interface State {
   members: Member[];
   posts: Post[];
   configurations: Configuration[];
+  medias: Media[];
+  carousel: CarouselItem[];
 }
 
 let state: State;
@@ -56,6 +62,8 @@ export function resetFakeApi() {
     members: structuredClone(mockMembers),
     posts: structuredClone(mockPosts),
     configurations: structuredClone(mockConfigurations),
+    medias: structuredClone(mockMedias),
+    carousel: structuredClone(mockCarouselItems),
   };
   vi.stubGlobal("fetch", vi.fn(handle));
 }
@@ -79,12 +87,14 @@ const visibleSector = (s: Sector) => !s.closed || isSuperAdmin();
 async function handle(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
   const url = new URL(typeof input === "string" ? input : input.toString(), "http://localhost");
   const method = (init.method ?? "GET").toUpperCase();
-  const body = typeof init.body === "string" ? JSON.parse(init.body) : undefined;
+  const body = typeof init.body === "string" ? JSON.parse(init.body) : init.body;
   const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);
 
   if (parts[0] === "api" && parts[1] === "sectors") return sectors(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "groups") return groups(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "users") return users(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "medias") return medias(method, parts.slice(2), body);
+  if (parts[0] === "api" && parts[1] === "carousel") return carousel(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "configurations") return configurations(method, parts[2], body);
   if (parts[0] === "api" && parts[1] === "posts") return posts(method, parts.slice(2), body);
   if (parts[0] === "api" && parts[1] === "events") return events(method, parts.slice(2), body, url.searchParams);
@@ -339,4 +349,66 @@ function configurations(method: string, name: string | undefined, body: any): Re
   if (!setting) return empty(404);
   setting.value = body.value;
   return json(setting);
+}
+
+/** MediaDto : le type du fichier dans `mimeType`. */
+const mediaDto = ({ url: _url, contentType, ...m }: Media) => ({ ...m, mimeType: contentType });
+
+function medias(method: string, [mediaId]: string[], body: any): Response {
+  const isBureau = roleAtLeast(state.viewer.role, "bureau");
+  if (!mediaId) {
+    if (method === "GET") return json(state.medias.map(mediaDto));
+    if (method !== "POST") return empty(405);
+    if (!isBureau) return empty(403);
+    const file = (body as FormData).get("file") as File;
+    const media: Media = {
+      mediaId: `media-new-${state.medias.length + 1}`,
+      fileKey: "database",
+      originalFilename: file.name,
+      contentType: file.type,
+      fileSize: file.size,
+      url: "",
+      alt: String((body as FormData).get("alt") ?? ""),
+    };
+    state.medias.push(media);
+    return json(mediaDto(media));
+  }
+  const media = state.medias.find((m) => m.mediaId === mediaId);
+  if (!media) return empty(404);
+  if (method !== "PATCH") return empty(405);
+  if (!isBureau) return empty(403);
+  media.alt = body.alt;
+  return json(mediaDto(media));
+}
+
+function carousel(method: string, [id, action, direction]: string[], body: any): Response {
+  const isBureau = roleAtLeast(state.viewer.role, "bureau");
+  const ordered = () => [...state.carousel].sort((a, b) => a.order - b.order);
+  if (!id) {
+    if (method === "GET") return json(ordered().filter((item) => isBureau || item.active));
+    if (method !== "POST") return empty(405);
+    if (!isBureau) return empty(403);
+    const item: CarouselItem = { id: `carousel-new-${state.carousel.length + 1}`, order: Math.max(0, ...state.carousel.map((i) => i.order)) + 1, ...body };
+    state.carousel.push(item);
+    return json(item);
+  }
+  if (!isBureau) return empty(403);
+  const item = state.carousel.find((i) => i.id === id);
+  if (!item) return empty(404);
+  if (method === "PUT" && !action) {
+    Object.assign(item, body);
+    return json(item);
+  }
+  if (method === "DELETE" && !action) {
+    state.carousel = state.carousel.filter((i) => i.id !== id);
+    return empty(204);
+  }
+  if (method === "POST" && action === "move") {
+    const items = ordered();
+    const index = items.indexOf(item);
+    const other = items[direction === "up" ? index - 1 : index + 1];
+    if (other) [item.order, other.order] = [other.order, item.order];
+    return json(ordered());
+  }
+  return empty(405);
 }

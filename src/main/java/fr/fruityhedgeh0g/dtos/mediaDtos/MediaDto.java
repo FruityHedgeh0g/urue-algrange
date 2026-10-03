@@ -18,6 +18,12 @@ public class MediaDto {
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
     String originalFilename;
 
+    @JsonView(Views.Basic.class)
+    String mimeType;
+
+    @JsonView({Views.Basic.class,Views.Update.class})
+    String alt;
+
     @JsonView({Views.Basic.class,Views.Creation.class,Views.Update.class})
     String contentType;
 

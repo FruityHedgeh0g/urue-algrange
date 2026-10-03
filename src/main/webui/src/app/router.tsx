@@ -27,6 +27,7 @@ import PostsAdminPage from "../pages/PostsAdminPage/PostsAdminPage";
 import EventsAdminPage from "../pages/EventsAdminPage/EventsAdminPage";
 import FeatureRequestsPage from "../pages/FeatureRequestsPage/FeatureRequestsPage";
 import CarouselAdminPage from "../pages/CarouselAdminPage/CarouselAdminPage";
+import MediasAdminPage from "../pages/MediasAdminPage/MediasAdminPage";
 import ConfigurationPage from "../pages/ConfigurationPage/ConfigurationPage";
 import FeatureFlagsPage from "../pages/FeatureFlagsPage/FeatureFlagsPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
@@ -77,6 +78,7 @@ export const router = createBrowserRouter(
           route("adminEvents", <EventsAdminPage />, "administration"),
           route("adminPosts", <PostsAdminPage />, "administration"),
           route("adminCarousel", <CarouselAdminPage />, "administration"),
+          route("adminMedias", <MediasAdminPage />, "administration"),
           route("adminConfiguration", <ConfigurationPage />, "administration"),
           route("adminFeatureFlags", <FeatureFlagsPage />, "administration"),
         ]),
